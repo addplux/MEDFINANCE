@@ -76,6 +76,7 @@ function App() {
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
 
             {/* Protected Routes */}
             <Route

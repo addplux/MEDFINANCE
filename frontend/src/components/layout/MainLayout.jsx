@@ -64,7 +64,7 @@ const MainLayout = ({ children }) => {
                 <div className="h-14 px-4 flex items-center justify-between border-b border-border-color">
                     {!sidebarCollapsed && (
                         <div className="flex items-center gap-2">
-                            <span className="text-lg font-bold text-text-primary tracking-tight">SUNO</span>
+                            <span className="text-lg font-bold text-text-primary tracking-tight">MEDFINANCE</span>
                         </div>
                     )}
                     <button
