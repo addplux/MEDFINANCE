@@ -158,9 +158,9 @@ const LandingPage = () => {
                     {features.map((feature, index) => (
                         <div
                             key={index}
-                            className="glass p-8 rounded-2xl hover:bg-white/5 transition-all duration-300 group border border-white/5 hover:border-primary-500/30"
+                            className="glass p-5 md:p-8 rounded-2xl hover:bg-white/5 transition-all duration-300 group border border-white/5 hover:border-primary-500/30"
                         >
-                            <div className="w-14 h-14 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-xl flex items-center justify-center mb-6 text-primary-400 group-hover:scale-110 group-hover:text-primary-300 transition-all duration-300">
+                            <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-xl flex items-center justify-center mb-4 md:mb-6 text-primary-400 group-hover:scale-110 group-hover:text-primary-300 transition-all duration-300">
                                 {feature.icon}
                             </div>
                             <h4 className="text-xl font-bold mb-3 font-serif">{feature.title}</h4>
