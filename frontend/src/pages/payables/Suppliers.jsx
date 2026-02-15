@@ -83,7 +83,8 @@ const Suppliers = () => {
 
             {/* Suppliers Table */}
             <div className="card overflow-hidden">
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="table">
                         <thead>
                             <tr>
@@ -146,6 +147,65 @@ const Suppliers = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                    {filteredSuppliers.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                            {loading ? 'Loading...' : 'No suppliers found'}
+                        </div>
+                    ) : (
+                        filteredSuppliers.map((supplier) => (
+                            <div key={supplier.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className="font-medium text-gray-900">{supplier.supplierName}</div>
+                                        <div className="text-sm text-gray-500">{supplier.supplierCode}</div>
+                                    </div>
+                                    <span className={`badge ${getStatusBadge(supplier.status)}`}>
+                                        {supplier.status}
+                                    </span>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <div className="text-sm">
+                                        <span className="text-gray-500">Contact:</span>{' '}
+                                        <span className="font-medium">{supplier.contactPerson || '-'}</span>
+                                    </div>
+                                    <div className="text-sm">
+                                        <span className="text-gray-500">Phone:</span>{' '}
+                                        <span className="font-medium">{supplier.phone || '-'}</span>
+                                    </div>
+                                    <div className="text-sm">
+                                        <span className="text-gray-500">Email:</span>{' '}
+                                        <span className="font-medium">{supplier.email || '-'}</span>
+                                    </div>
+                                </div>
+
+                                <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
+                                    <button
+                                        onClick={() => navigate(`/app/payables/suppliers/${supplier.id}`)}
+                                        className="btn btn-sm btn-secondary flex-1 justify-center"
+                                    >
+                                        <Eye className="w-4 h-4 mr-1" /> View
+                                    </button>
+                                    <button
+                                        onClick={() => navigate(`/app/payables/suppliers/${supplier.id}/edit`)}
+                                        className="btn btn-sm btn-secondary flex-1 justify-center"
+                                    >
+                                        <Edit className="w-4 h-4 mr-1" /> Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(supplier.id)}
+                                        className="btn btn-sm btn-danger flex-1 justify-center"
+                                    >
+                                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
 
                 {/* Pagination */}

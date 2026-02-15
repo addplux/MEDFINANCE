@@ -123,154 +123,278 @@ const Setup = () => {
                 </div>
 
                 {/* Content */}
-                <div className="overflow-x-auto">
-                    {activeTab === 'services' && (
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Service Code</th>
-                                    <th>Service Name</th>
-                                    <th>Category</th>
-                                    <th>Department</th>
-                                    <th>Price</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {services.filter(s =>
-                                    s.serviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                    s.serviceCode?.toLowerCase().includes(searchTerm.toLowerCase())
-                                ).map((service) => (
-                                    <tr key={service.id}>
-                                        <td className="font-medium">{service.serviceCode}</td>
-                                        <td>{service.serviceName}</td>
-                                        <td className="capitalize">{service.category}</td>
-                                        <td>{service.department}</td>
-                                        <td className="font-semibold">K {service.price?.toLocaleString()}</td>
-                                        <td>
-                                            <span className={`badge ${service.isActive ? 'badge-success' : 'badge-danger'}`}>
-                                                {service.isActive ? 'Active' : 'Inactive'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => navigate(`/app/setup/services/${service.id}/edit`)}
-                                                    className="btn btn-sm btn-secondary"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(service.id)}
-                                                    className="btn btn-sm btn-danger"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
+                {/* Services Tab */}
+                {activeTab === 'services' && (
+                    <>
+                        <div className="hidden md:block">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Service Code</th>
+                                        <th>Service Name</th>
+                                        <th>Category</th>
+                                        <th>Department</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
+                                </thead>
+                                <tbody>
+                                    {services.filter(s =>
+                                        s.serviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                        s.serviceCode?.toLowerCase().includes(searchTerm.toLowerCase())
+                                    ).map((service) => (
+                                        <tr key={service.id}>
+                                            <td className="font-medium">{service.serviceCode}</td>
+                                            <td>{service.serviceName}</td>
+                                            <td className="capitalize">{service.category}</td>
+                                            <td>{service.department}</td>
+                                            <td className="font-semibold">K {service.price?.toLocaleString()}</td>
+                                            <td>
+                                                <span className={`badge ${service.isActive ? 'badge-success' : 'badge-danger'}`}>
+                                                    {service.isActive ? 'Active' : 'Inactive'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => navigate(`/app/setup/services/${service.id}/edit`)}
+                                                        className="btn btn-sm btn-secondary"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(service.id)}
+                                                        className="btn btn-sm btn-danger"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
 
-                    {activeTab === 'users' && (
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users.filter(u =>
-                                    u.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                    u.email?.toLowerCase().includes(searchTerm.toLowerCase())
-                                ).map((user) => (
-                                    <tr key={user.id}>
-                                        <td className="font-medium">{user.username}</td>
-                                        <td>{user.firstName} {user.lastName}</td>
-                                        <td>{user.email}</td>
-                                        <td className="capitalize">{user.role?.replace('_', ' ')}</td>
-                                        <td>
-                                            <span className={`badge ${user.isActive ? 'badge-success' : 'badge-danger'}`}>
-                                                {user.isActive ? 'Active' : 'Inactive'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => navigate(`/app/setup/users/${user.id}/edit`)}
-                                                    className="btn btn-sm btn-secondary"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(user.id)}
-                                                    className="btn btn-sm btn-danger"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
+                        {/* Mobile Services Cards */}
+                        <div className="grid grid-cols-1 gap-4 md:hidden">
+                            {services.filter(s =>
+                                s.serviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                s.serviceCode?.toLowerCase().includes(searchTerm.toLowerCase())
+                            ).map((service) => (
+                                <div key={service.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="font-medium text-gray-900">{service.serviceName}</div>
+                                            <div className="text-sm text-gray-500">{service.serviceCode}</div>
+                                        </div>
+                                        <span className={`badge ${service.isActive ? 'badge-success' : 'badge-danger'}`}>
+                                            {service.isActive ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </div>
+                                    <div className="text-sm space-y-1">
+                                        <div><span className="text-gray-500">Category:</span> <span className="capitalize">{service.category}</span></div>
+                                        <div><span className="text-gray-500">Price:</span> <span className="font-semibold">K {service.price?.toLocaleString()}</span></div>
+                                    </div>
+                                    <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
+                                        <button
+                                            onClick={() => navigate(`/app/setup/services/${service.id}/edit`)}
+                                            className="btn btn-sm btn-secondary flex-1 justify-center"
+                                        >
+                                            <Edit className="w-4 h-4 mr-1" /> Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(service.id)}
+                                            className="btn btn-sm btn-danger flex-1 justify-center"
+                                        >
+                                            <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
 
-                    {activeTab === 'departments' && (
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Department Code</th>
-                                    <th>Department Name</th>
-                                    <th>Description</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {departments.filter(d =>
-                                    d.departmentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                    d.departmentCode?.toLowerCase().includes(searchTerm.toLowerCase())
-                                ).map((dept) => (
-                                    <tr key={dept.id}>
-                                        <td className="font-medium">{dept.departmentCode}</td>
-                                        <td>{dept.departmentName}</td>
-                                        <td>{dept.description || '-'}</td>
-                                        <td>
-                                            <span className={`badge ${dept.status === 'active' ? 'badge-success' : 'badge-danger'}`}>
-                                                {dept.status}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => navigate(`/app/setup/departments/${dept.id}/edit`)}
-                                                    className="btn btn-sm btn-secondary"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(dept.id)}
-                                                    className="btn btn-sm btn-danger"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
+                {/* Users Tab */}
+                {activeTab === 'users' && (
+                    <>
+                        <div className="hidden md:block">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
+                                </thead>
+                                <tbody>
+                                    {users.filter(u =>
+                                        u.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                        u.email?.toLowerCase().includes(searchTerm.toLowerCase())
+                                    ).map((user) => (
+                                        <tr key={user.id}>
+                                            <td className="font-medium">{user.username}</td>
+                                            <td>{user.firstName} {user.lastName}</td>
+                                            <td>{user.email}</td>
+                                            <td className="capitalize">{user.role?.replace('_', ' ')}</td>
+                                            <td>
+                                                <span className={`badge ${user.isActive ? 'badge-success' : 'badge-danger'}`}>
+                                                    {user.isActive ? 'Active' : 'Inactive'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => navigate(`/app/setup/users/${user.id}/edit`)}
+                                                        className="btn btn-sm btn-secondary"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(user.id)}
+                                                        className="btn btn-sm btn-danger"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile Users Cards */}
+                        <div className="grid grid-cols-1 gap-4 md:hidden">
+                            {users.filter(u =>
+                                u.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                u.email?.toLowerCase().includes(searchTerm.toLowerCase())
+                            ).map((user) => (
+                                <div key={user.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="font-medium text-gray-900">{user.firstName} {user.lastName}</div>
+                                            <div className="text-sm text-gray-500">@{user.username}</div>
+                                        </div>
+                                        <span className={`badge ${user.isActive ? 'badge-success' : 'badge-danger'}`}>
+                                            {user.isActive ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </div>
+                                    <div className="text-sm space-y-1">
+                                        <div><span className="text-gray-500">Role:</span> <span className="capitalize">{user.role?.replace('_', ' ')}</span></div>
+                                        <div><span className="text-gray-500">Email:</span> {user.email}</div>
+                                    </div>
+                                    <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
+                                        <button
+                                            onClick={() => navigate(`/app/setup/users/${user.id}/edit`)}
+                                            className="btn btn-sm btn-secondary flex-1 justify-center"
+                                        >
+                                            <Edit className="w-4 h-4 mr-1" /> Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(user.id)}
+                                            className="btn btn-sm btn-danger flex-1 justify-center"
+                                        >
+                                            <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
+
+                {/* Departments Tab */}
+                {activeTab === 'departments' && (
+                    <>
+                        <div className="hidden md:block">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Department Code</th>
+                                        <th>Department Name</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {departments.filter(d =>
+                                        d.departmentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                        d.departmentCode?.toLowerCase().includes(searchTerm.toLowerCase())
+                                    ).map((dept) => (
+                                        <tr key={dept.id}>
+                                            <td className="font-medium">{dept.departmentCode}</td>
+                                            <td>{dept.departmentName}</td>
+                                            <td>{dept.description || '-'}</td>
+                                            <td>
+                                                <span className={`badge ${dept.status === 'active' ? 'badge-success' : 'badge-danger'}`}>
+                                                    {dept.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => navigate(`/app/setup/departments/${dept.id}/edit`)}
+                                                        className="btn btn-sm btn-secondary"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(dept.id)}
+                                                        className="btn btn-sm btn-danger"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile Departments Cards */}
+                        <div className="grid grid-cols-1 gap-4 md:hidden">
+                            {departments.filter(d =>
+                                d.departmentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                d.departmentCode?.toLowerCase().includes(searchTerm.toLowerCase())
+                            ).map((dept) => (
+                                <div key={dept.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="font-medium text-gray-900">{dept.departmentName}</div>
+                                            <div className="text-sm text-gray-500">{dept.departmentCode}</div>
+                                        </div>
+                                        <span className={`badge ${dept.status === 'active' ? 'badge-success' : 'badge-danger'}`}>
+                                            {dept.status}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-gray-500">{dept.description || 'No description'}</p>
+                                    <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
+                                        <button
+                                            onClick={() => navigate(`/app/setup/departments/${dept.id}/edit`)}
+                                            className="btn btn-sm btn-secondary flex-1 justify-center"
+                                        >
+                                            <Edit className="w-4 h-4 mr-1" /> Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(dept.id)}
+                                            className="btn btn-sm btn-danger flex-1 justify-center"
+                                        >
+                                            <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );

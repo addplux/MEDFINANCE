@@ -107,7 +107,8 @@ const Budgets = () => {
 
             {/* Budgets Table */}
             <div className="card overflow-hidden">
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="table">
                         <thead>
                             <tr>
@@ -132,7 +133,7 @@ const Budgets = () => {
                                     const { variance, percentage } = calculateVariance(budget);
                                     return (
                                         <tr key={budget.id}>
-                                            <td className="font-medium">{budget.department?.departmentName}</td>
+                                            <td className="font-medium">{budget.department?.departmentName || '-'}</td>
                                             <td>{budget.fiscalYear}</td>
                                             <td className="font-semibold">K {budget.budgetAmount?.toLocaleString()}</td>
                                             <td className="font-semibold text-orange-600">
@@ -180,6 +181,72 @@ const Budgets = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                    {filteredBudgets.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                            {loading ? 'Loading...' : 'No budgets found'}
+                        </div>
+                    ) : (
+                        filteredBudgets.map((budget) => {
+                            const { variance, percentage } = calculateVariance(budget);
+                            return (
+                                <div key={budget.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="font-medium text-gray-900">
+                                                {budget.department?.departmentName || '-'}
+                                            </div>
+                                            <div className="text-sm text-gray-500">FY {budget.fiscalYear}</div>
+                                        </div>
+                                        <span className={getStatusBadge(budget.status)}>
+                                            {budget.status}
+                                        </span>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <div className="text-sm flex justify-between">
+                                            <span className="text-gray-500">Budget:</span>
+                                            <span className="font-semibold">K {budget.budgetAmount?.toLocaleString()}</span>
+                                        </div>
+                                        <div className="text-sm flex justify-between">
+                                            <span className="text-gray-500">Spent:</span>
+                                            <span className="text-orange-600 font-semibold">K {budget.actualSpent?.toLocaleString() || '0.00'}</span>
+                                        </div>
+                                        <div className="text-sm flex justify-between">
+                                            <span className="text-gray-500">Variance:</span>
+                                            <span className={`font-semibold ${variance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                K {variance.toLocaleString()} ({percentage}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
+                                        <button
+                                            onClick={() => navigate(`/app/budgets/${budget.id}`)}
+                                            className="btn btn-sm btn-secondary flex-1 justify-center"
+                                        >
+                                            <Eye className="w-4 h-4 mr-1" /> View
+                                        </button>
+                                        <button
+                                            onClick={() => navigate(`/app/budgets/${budget.id}/edit`)}
+                                            className="btn btn-sm btn-secondary flex-1 justify-center"
+                                        >
+                                            <Edit className="w-4 h-4 mr-1" /> Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(budget.id)}
+                                            className="btn btn-sm btn-danger flex-1 justify-center"
+                                        >
+                                            <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
             </div>
         </div>

@@ -88,7 +88,8 @@ const Payments = () => {
 
             {/* Payments Table */}
             <div className="card overflow-hidden">
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="table">
                         <thead>
                             <tr>
@@ -128,19 +129,19 @@ const Payments = () => {
                                         <td>
                                             <div className="flex items-center gap-2">
                                                 <button
-                                                    onClick={() => navigate(`/ app / cash / payments / ${payment.id} `)}
+                                                    onClick={() => navigate(`/app/cash/payments/${payment.id}`)}
                                                     className="btn btn-sm btn-secondary"
                                                     title="View"
                                                 >
                                                     <Eye className="w-4 h-4" />
                                                 </button>
                                                 <button
-                                                    onClick={() => navigate(`/ app / cash / payments / ${payment.id}/edit`)}
+                                                    onClick={() => navigate(`/app/cash/payments/${payment.id}/edit`)}
                                                     className="btn btn-sm btn-secondary"
                                                     title="Edit"
                                                 >
                                                     <Edit className="w-4 h-4" />
-                                                </button >
+                                                </button>
                                                 <button
                                                     onClick={() => handleDelete(payment.id)}
                                                     className="btn btn-sm btn-danger"
@@ -148,14 +149,75 @@ const Payments = () => {
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
-                                            </div >
-                                        </td >
-                                    </tr >
+                                            </div>
+                                        </td>
+                                    </tr>
                                 ))
                             )}
-                        </tbody >
-                    </table >
-                </div >
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                    {filteredPayments.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                            {loading ? 'Loading...' : 'No payments found'}
+                        </div>
+                    ) : (
+                        filteredPayments.map((payment) => (
+                            <div key={payment.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className="font-medium text-gray-900">
+                                            {payment.patient?.firstName} {payment.patient?.lastName}
+                                        </div>
+                                        <div className="text-sm text-gray-500">#{payment.receiptNumber}</div>
+                                    </div>
+                                    <span className={getMethodBadge(payment.paymentMethod)}>
+                                        {payment.paymentMethod?.replace('_', ' ')}
+                                    </span>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <div className="text-sm flex justify-between">
+                                        <span className="text-gray-500">Amount:</span>
+                                        <span className="font-semibold text-green-600">K {payment.amount?.toLocaleString()}</span>
+                                    </div>
+                                    <div className="text-sm flex justify-between">
+                                        <span className="text-gray-500">Bill Type:</span>
+                                        <span className="capitalize">{payment.billType || '-'}</span>
+                                    </div>
+                                    <div className="text-sm flex justify-between">
+                                        <span className="text-gray-500">Date:</span>
+                                        <span>{new Date(payment.paymentDate).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+
+                                <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
+                                    <button
+                                        onClick={() => navigate(`/app/cash/payments/${payment.id}`)}
+                                        className="btn btn-sm btn-secondary flex-1 justify-center"
+                                    >
+                                        <Eye className="w-4 h-4 mr-1" /> View
+                                    </button>
+                                    <button
+                                        onClick={() => navigate(`/app/cash/payments/${payment.id}/edit`)}
+                                        className="btn btn-sm btn-secondary flex-1 justify-center"
+                                    >
+                                        <Edit className="w-4 h-4 mr-1" /> Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(payment.id)}
+                                        className="btn btn-sm btn-danger flex-1 justify-center"
+                                    >
+                                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
 
                 {/* Pagination */}
                 {

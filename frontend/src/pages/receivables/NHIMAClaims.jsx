@@ -118,7 +118,8 @@ const NHIMAClaims = () => {
 
             {/* Claims Table */}
             <div className="card overflow-hidden">
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="table">
                         <thead>
                             <tr>
@@ -187,6 +188,73 @@ const NHIMAClaims = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                    {filteredClaims.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                            No claims found
+                        </div>
+                    ) : (
+                        filteredClaims.map((claim) => (
+                            <div key={claim.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className="font-medium text-gray-900">
+                                            {claim.patient?.firstName} {claim.patient?.lastName}
+                                        </div>
+                                        <div className="text-sm text-gray-500">#{claim.claimNumber}</div>
+                                    </div>
+                                    <span className={getStatusBadge(claim.status)}>
+                                        {claim.status}
+                                    </span>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <div className="text-sm flex justify-between">
+                                        <span className="text-gray-500">NHIMA:</span>
+                                        <span className="font-medium">{claim.nhimaNumber}</span>
+                                    </div>
+                                    <div className="text-sm flex justify-between">
+                                        <span className="text-gray-500">Claim Amount:</span>
+                                        <span className="font-semibold">K {claim.claimAmount?.toLocaleString()}</span>
+                                    </div>
+                                    <div className="text-sm flex justify-between">
+                                        <span className="text-gray-500">Approved:</span>
+                                        <span className="font-semibold text-green-600">
+                                            {claim.approvedAmount ? `K ${claim.approvedAmount.toLocaleString()}` : '-'}
+                                        </span>
+                                    </div>
+                                    <div className="text-sm flex justify-between">
+                                        <span className="text-gray-500">Date:</span>
+                                        <span>{new Date(claim.submissionDate).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+
+                                <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
+                                    <button
+                                        onClick={() => navigate(`/app/receivables/nhima/${claim.id}`)}
+                                        className="btn btn-sm btn-secondary flex-1 justify-center"
+                                    >
+                                        <Eye className="w-4 h-4 mr-1" /> View
+                                    </button>
+                                    <button
+                                        onClick={() => navigate(`/app/receivables/nhima/${claim.id}/edit`)}
+                                        className="btn btn-sm btn-secondary flex-1 justify-center"
+                                    >
+                                        <Edit className="w-4 h-4 mr-1" /> Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(claim.id)}
+                                        className="btn btn-sm btn-danger flex-1 justify-center"
+                                    >
+                                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
 
                 {/* Pagination */}
