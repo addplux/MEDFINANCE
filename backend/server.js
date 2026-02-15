@@ -7,8 +7,19 @@ const { sequelize, testConnection } = require('./config/database');
 const app = express();
 
 // Middleware
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5180',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5180'
+];
+
+if (process.env.CORS_ORIGIN) {
+    allowedOrigins.push(process.env.CORS_ORIGIN);
+}
+
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:5180', 'http://127.0.0.1:5173', 'http://127.0.0.1:5180'],
+    origin: allowedOrigins,
     credentials: true
 }));
 app.use(express.json());
