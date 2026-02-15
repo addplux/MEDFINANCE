@@ -1,4 +1,10 @@
+/**
+ * Author: Lubuto Chabusha
+ * Developed: 2026
+ */
+
 const { ChartOfAccounts, JournalEntry, JournalLine, sequelize } = require('../models');
+const logAudit = require('../utils/auditLogger');
 
 // ========== Chart of Accounts ==========
 
@@ -147,6 +153,17 @@ const createJournalEntry = async (req, res) => {
             createdBy: req.user.id
         }, { transaction: t });
 
+        // Audit Log
+        await logAudit({
+            userId: req.user.id,
+            action: 'create',
+            tableName: 'journal_entries',
+            recordId: entry.id,
+            changes: { description, totalDebit, totalCredit, reference },
+            req,
+            transaction: t
+        });
+
         // Create journal lines
         for (const line of lines) {
             await JournalLine.create({
@@ -222,6 +239,17 @@ const postJournalEntry = async (req, res) => {
             postedBy: req.user.id,
             postedAt: new Date()
         }, { transaction: t });
+
+        // Audit Log
+        await logAudit({
+            userId: req.user.id,
+            action: 'update',
+            tableName: 'journal_entries',
+            recordId: entry.id,
+            changes: { status: 'posted', postedAt: new Date() },
+            req,
+            transaction: t
+        });
 
         await t.commit();
 

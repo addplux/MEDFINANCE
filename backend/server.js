@@ -1,3 +1,8 @@
+/**
+ * Author: Lubuto Chabusha
+ * Developed: 2026
+ */
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');

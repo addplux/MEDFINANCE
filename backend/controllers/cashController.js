@@ -1,4 +1,10 @@
+/**
+ * Author: Lubuto Chabusha
+ * Developed: 2026
+ */
+
 const { Payment, BankAccount, PettyCash, Patient, User, sequelize } = require('../models');
+const logAudit = require('../utils/auditLogger');
 
 // ========== Payments ==========
 
@@ -36,6 +42,10 @@ const getAllPayments = async (req, res) => {
 
 // Create payment
 const createPayment = async (req, res) => {
+    // Note: Payment creation might span multiple tables in a real scenario (updating bill status), 
+    // but here it's a single insert. We can wrap in transaction if we expand logic.
+    const t = await sequelize.transaction();
+
     try {
         const { patientId, amount, paymentMethod, referenceNumber, paymentDate, billType, billId, notes } = req.body;
 
@@ -58,7 +68,20 @@ const createPayment = async (req, res) => {
             billId,
             notes,
             receivedBy: req.user.id
+        }, { transaction: t });
+
+        // Audit Log
+        await logAudit({
+            userId: req.user.id,
+            action: 'create',
+            tableName: 'payments',
+            recordId: payment.id,
+            changes: { amount, paymentMethod, billType, billId },
+            req,
+            transaction: t
         });
+
+        await t.commit();
 
         const createdPayment = await Payment.findByPk(payment.id, {
             include: [
@@ -67,8 +90,10 @@ const createPayment = async (req, res) => {
             ]
         });
 
+
         res.status(201).json(createdPayment);
     } catch (error) {
+        await t.rollback();
         console.error('Create payment error:', error);
         res.status(500).json({ error: 'Failed to create payment' });
     }
@@ -213,6 +238,16 @@ const approvePettyCash = async (req, res) => {
         await transaction.update({
             status: 'approved',
             approvedBy: req.user.id
+        });
+
+        // Audit Log
+        await logAudit({
+            userId: req.user.id,
+            action: 'update',
+            tableName: 'petty_cash',
+            recordId: transaction.id,
+            changes: { status: 'approved' },
+            req
         });
 
         const approvedTransaction = await PettyCash.findByPk(transaction.id, {

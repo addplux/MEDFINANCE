@@ -1,3 +1,6 @@
+> **Author:** Lubuto Chabusha  
+> **Developed:** 2026
+
 # MEDFINANCE360 - Quick Start with Supabase
 
 ## 🚀 Quick Setup (5 minutes)

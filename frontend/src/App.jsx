@@ -1,3 +1,8 @@
+/**
+ * Author: Lubuto Chabusha
+ * Developed: 2026
+ */
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
