@@ -189,7 +189,8 @@ export const setupAPI = {
 };
 
 // Dashboard
-getOverview: () => api.get('/dashboard/overview'),
+export const dashboardAPI = {
+    getOverview: () => api.get('/dashboard/overview'),
     getRecentActivities: () => api.get('/dashboard/recent-activities'),
-        getRevenueChart: () => api.get('/dashboard/revenue-chart'),
+    getRevenueChart: () => api.get('/dashboard/revenue-chart'),
 };
