@@ -1,0 +1,46 @@
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
+
+const Service = sequelize.define('Service', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    serviceCode: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        unique: true
+    },
+    serviceName: {
+        type: DataTypes.STRING(100),
+        allowNull: false
+    },
+    category: {
+        type: DataTypes.ENUM('opd', 'ipd', 'pharmacy', 'laboratory', 'radiology', 'other'),
+        allowNull: false
+    },
+    department: {
+        type: DataTypes.STRING(50),
+        allowNull: true
+    },
+    price: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0.00
+    },
+    description: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    isActive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    }
+}, {
+    tableName: 'services',
+    timestamps: true,
+    underscored: true
+});
+
+module.exports = Service;
