@@ -129,19 +129,31 @@ const Dashboard = () => {
                     </div>
                     <div className="card-body">
                         <div className="space-y-3">
-                            <button className="w-full btn btn-primary justify-between group">
+                            <button
+                                onClick={() => window.location.href = '/app/billing/opd/new'}
+                                className="w-full btn btn-primary justify-between group"
+                            >
                                 <span>New Bill</span>
                                 <ArrowUpRight className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
                             </button>
-                            <button className="w-full btn btn-secondary justify-between group">
+                            <button
+                                onClick={() => window.location.href = '/app/cash/payments'}
+                                className="w-full btn btn-secondary justify-between group"
+                            >
                                 <span>Receive Payment</span>
                                 <ArrowUpRight className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
                             </button>
-                            <button className="w-full btn btn-secondary justify-between group">
+                            <button
+                                onClick={() => window.location.href = '/app/patients/new'}
+                                className="w-full btn btn-secondary justify-between group"
+                            >
                                 <span>New Patient</span>
                                 <ArrowUpRight className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
                             </button>
-                            <button className="w-full btn btn-secondary justify-between group">
+                            <button
+                                onClick={() => window.location.href = '/app/reports'}
+                                className="w-full btn btn-secondary justify-between group"
+                            >
                                 <span>View Reports</span>
                                 <ArrowUpRight className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
                             </button>
