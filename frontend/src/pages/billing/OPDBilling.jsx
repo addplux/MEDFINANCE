@@ -119,7 +119,8 @@ const OPDBilling = () => {
 
             {/* Bills Table */}
             <div className="card overflow-hidden">
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="table">
                         <thead>
                             <tr>
@@ -157,19 +158,19 @@ const OPDBilling = () => {
                                         <td>
                                             <div className="flex items-center gap-2">
                                                 <button
-                                                    onClick={() => navigate(`/ app / billing / opd / ${bill.id} `)}
+                                                    onClick={() => navigate(`/app/billing/opd/${bill.id}`)}
                                                     className="btn btn-sm btn-secondary"
                                                     title="View"
                                                 >
                                                     <Eye className="w-4 h-4" />
                                                 </button>
                                                 <button
-                                                    onClick={() => navigate(`/ app / billing / opd / ${bill.id}/edit`)}
+                                                    onClick={() => navigate(`/app/billing/opd/${bill.id}/edit`)}
                                                     className="btn btn-sm btn-secondary"
                                                     title="Edit"
                                                 >
                                                     <Edit className="w-4 h-4" />
-                                                </button >
+                                                </button>
                                                 <button
                                                     onClick={() => handleDelete(bill.id)}
                                                     className="btn btn-sm btn-danger"
@@ -177,14 +178,73 @@ const OPDBilling = () => {
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
-                                            </div >
-                                        </td >
-                                    </tr >
+                                            </div>
+                                        </td>
+                                    </tr>
                                 ))
                             )}
-                        </tbody >
-                    </table >
-                </div >
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                    {filteredBills.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                            No bills found
+                        </div>
+                    ) : (
+                        filteredBills.map((bill) => (
+                            <div key={bill.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className="font-medium text-gray-900">{bill.billNumber}</div>
+                                        <div className="text-sm text-gray-500">{new Date(bill.billDate).toLocaleDateString()}</div>
+                                    </div>
+                                    <span className={getStatusBadge(bill.status)}>
+                                        {bill.status}
+                                    </span>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <div className="text-sm">
+                                        <span className="text-gray-500">Patient:</span>{' '}
+                                        <span className="font-medium">{bill.patient?.firstName} {bill.patient?.lastName}</span>
+                                    </div>
+                                    <div className="text-sm">
+                                        <span className="text-gray-500">Service:</span>{' '}
+                                        <span className="font-medium">{bill.service?.serviceName}</span>
+                                    </div>
+                                    <div className="text-sm">
+                                        <span className="text-gray-500">Amount:</span>{' '}
+                                        <span className="font-bold text-primary-600">K {bill.netAmount?.toLocaleString()}</span>
+                                    </div>
+                                </div>
+
+                                <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
+                                    <button
+                                        onClick={() => navigate(`/app/billing/opd/${bill.id}`)}
+                                        className="btn btn-sm btn-secondary flex-1 justify-center"
+                                    >
+                                        <Eye className="w-4 h-4 mr-1" /> View
+                                    </button>
+                                    <button
+                                        onClick={() => navigate(`/app/billing/opd/${bill.id}/edit`)}
+                                        className="btn btn-sm btn-secondary flex-1 justify-center"
+                                    >
+                                        <Edit className="w-4 h-4 mr-1" /> Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(bill.id)}
+                                        className="btn btn-sm btn-danger flex-1 justify-center"
+                                    >
+                                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
 
                 {/* Pagination */}
                 {
