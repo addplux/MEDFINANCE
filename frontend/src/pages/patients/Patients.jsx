@@ -86,7 +86,8 @@ const Patients = () => {
 
             {/* Patients Table */}
             <div className="card overflow-hidden">
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="table">
                         <thead>
                             <tr>
@@ -143,6 +144,61 @@ const Patients = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                    {patients.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                            No patients found
+                        </div>
+                    ) : (
+                        patients.map((patient) => (
+                            <div key={patient.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className="font-medium text-gray-900">{patient.firstName} {patient.lastName}</div>
+                                        <div className="text-sm text-gray-500">{patient.patientNumber}</div>
+                                    </div>
+                                    <span className="badge badge-info capitalize">
+                                        {patient.gender}
+                                    </span>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <div className="text-sm">
+                                        <span className="text-gray-500">Phone:</span>{' '}
+                                        <span className="font-medium">{patient.phone}</span>
+                                    </div>
+                                    <div className="text-sm">
+                                        <span className="text-gray-500">NHIMA:</span>{' '}
+                                        <span className="font-medium">{patient.nhimaNumber || '-'}</span>
+                                    </div>
+                                </div>
+
+                                <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
+                                    <button
+                                        onClick={() => navigate(`/app/patients/${patient.id}`)}
+                                        className="btn btn-sm btn-secondary flex-1 justify-center"
+                                    >
+                                        <Eye className="w-4 h-4 mr-1" /> View
+                                    </button>
+                                    <button
+                                        onClick={() => navigate(`/app/patients/${patient.id}/edit`)}
+                                        className="btn btn-sm btn-secondary flex-1 justify-center"
+                                    >
+                                        <Edit className="w-4 h-4 mr-1" /> Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(patient.id)}
+                                        className="btn btn-sm btn-danger flex-1 justify-center"
+                                    >
+                                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
 
                 {/* Pagination */}

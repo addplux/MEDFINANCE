@@ -106,7 +106,8 @@ const ChartOfAccounts = () => {
 
             {/* Accounts Table */}
             <div className="card overflow-hidden">
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="table">
                         <thead>
                             <tr>
@@ -146,19 +147,19 @@ const ChartOfAccounts = () => {
                                         <td>
                                             <div className="flex items-center gap-2">
                                                 <button
-                                                    onClick={() => navigate(`/ app / ledger / accounts / ${account.id} `)}
+                                                    onClick={() => navigate(`/app/ledger/accounts/${account.id}`)}
                                                     className="btn btn-sm btn-secondary"
                                                     title="View"
                                                 >
                                                     <Eye className="w-4 h-4" />
                                                 </button>
                                                 <button
-                                                    onClick={() => navigate(`/ app / ledger / accounts / ${account.id}/edit`)}
+                                                    onClick={() => navigate(`/app/ledger/accounts/${account.id}/edit`)}
                                                     className="btn btn-sm btn-secondary"
                                                     title="Edit"
                                                 >
                                                     <Edit className="w-4 h-4" />
-                                                </button >
+                                                </button>
                                                 <button
                                                     onClick={() => handleDelete(account.id)}
                                                     className="btn btn-sm btn-danger"
@@ -166,14 +167,71 @@ const ChartOfAccounts = () => {
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
-                                            </div >
-                                        </td >
-                                    </tr >
+                                            </div>
+                                        </td>
+                                    </tr>
                                 ))
                             )}
-                        </tbody >
-                    </table >
-                </div >
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                    {filteredAccounts.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                            {loading ? 'Loading...' : 'No accounts found'}
+                        </div>
+                    ) : (
+                        filteredAccounts.map((account) => (
+                            <div key={account.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className="font-medium text-gray-900">{account.accountName}</div>
+                                        <div className="text-sm text-gray-500">{account.accountCode}</div>
+                                    </div>
+                                    <span className={getTypeBadge(account.accountType)}>
+                                        {account.accountType}
+                                    </span>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <div className="text-sm">
+                                        <span className="text-gray-500">Balance:</span>{' '}
+                                        <span className="font-semibold">K {account.balance?.toLocaleString() || '0.00'}</span>
+                                    </div>
+                                    <div className="text-sm">
+                                        <span className="text-gray-500">Status:</span>{' '}
+                                        <span className={`badge ${account.isActive ? 'badge-success' : 'badge-danger'} scale-90 origin-left`}>
+                                            {account.isActive ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
+                                    <button
+                                        onClick={() => navigate(`/app/ledger/accounts/${account.id}`)}
+                                        className="btn btn-sm btn-secondary flex-1 justify-center"
+                                    >
+                                        <Eye className="w-4 h-4 mr-1" /> View
+                                    </button>
+                                    <button
+                                        onClick={() => navigate(`/app/ledger/accounts/${account.id}/edit`)}
+                                        className="btn btn-sm btn-secondary flex-1 justify-center"
+                                    >
+                                        <Edit className="w-4 h-4 mr-1" /> Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(account.id)}
+                                        className="btn btn-sm btn-danger flex-1 justify-center"
+                                    >
+                                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div >
         </div >
     );
