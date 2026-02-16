@@ -161,6 +161,7 @@ const CreatePatient = () => {
                             <option value="nhima">NHIMA</option>
                             <option value="corporate">Corporate Account</option>
                             <option value="scheme">Insurance Scheme</option>
+                            <option value="staff">Staff</option>
                         </select>
                     </div>
 
