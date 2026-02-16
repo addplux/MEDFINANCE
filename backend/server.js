@@ -124,7 +124,12 @@ const startServer = async () => {
         await testConnection();
 
         // Sync database models (create tables if they don't exist)
-        await syncDatabase({ alter: true }); // Enable alter to sync schema changes
+        try {
+            await syncDatabase({ alter: true });
+            console.log('✅ Database synchronized successfully');
+        } catch (syncError) {
+            console.error('⚠️ Database synchronization failed, but starting server anyway:', syncError);
+        }
 
         // Start listening
         app.listen(PORT, () => {
@@ -133,8 +138,11 @@ const startServer = async () => {
             console.log(`🔗 API: http://localhost:${PORT}/api`);
         });
     } catch (error) {
-        console.error('Failed to start server:', error);
-        process.exit(1);
+        console.error('Failed to start server process:', error);
+        // Still try to start the app so we can see error pages/logs through HTTP
+        app.listen(PORT, () => {
+            console.log(`🚀 Server emergency started on port ${PORT} despite startup errors`);
+        });
     }
 };
 

@@ -19,7 +19,7 @@ const Budgets = () => {
             setLoading(true);
             const params = { status: statusFilter || undefined };
             const response = await budgetAPI.getAll(params);
-            setBudgets(response.data);
+            setBudgets(response.data.data || []);
         } catch (error) {
             console.error('Failed to load budgets:', error);
         } finally {

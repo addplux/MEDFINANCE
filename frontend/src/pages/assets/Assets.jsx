@@ -19,7 +19,7 @@ const Assets = () => {
             setLoading(true);
             const params = { category: categoryFilter || undefined };
             const response = await assetAPI.getAll(params);
-            setAssets(response.data);
+            setAssets(response.data.data || []);
         } catch (error) {
             console.error('Failed to load assets:', error);
         } finally {
