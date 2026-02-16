@@ -145,6 +145,19 @@ export const budgetAPI = {
     variance: (id) => api.get(`/budgets/${id}/variance`),
 };
 
+// Funds
+export const fundAPI = {
+    getAll: (params) => api.get('/funds', { params }),
+    getById: (id) => api.get(`/funds/${id}`),
+    create: (data) => api.post('/funds', data),
+    update: (id, data) => api.put(`/funds/${id}`, data),
+    delete: (id) => api.delete(`/funds/${id}`),
+    transactions: {
+        getAll: (id, params) => api.get(`/funds/${id}/transactions`, { params }),
+        create: (id, data) => api.post(`/funds/${id}/transactions`, data)
+    }
+};
+
 // Assets
 export const assetAPI = {
     getAll: (params) => api.get('/assets', { params }),
