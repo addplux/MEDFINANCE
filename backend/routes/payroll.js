@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const payrollController = require('../controllers/payrollController');
-const { authMiddleware, authorize } = require('../middleware/authMiddleware');
+const { authMiddleware, authorize } = require('../middleware/auth');
 
 // Get all deductions (Admin only or authorized roles)
 router.get('/deductions', authMiddleware, authorize('admin', 'accountant', 'hr'), payrollController.getDeductions);
