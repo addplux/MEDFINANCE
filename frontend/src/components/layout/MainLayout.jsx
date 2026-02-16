@@ -142,6 +142,7 @@ const MainLayout = ({ children }) => {
                 className={`
           fixed top-0 left-0 h-full glass-panel border-r border-border-color z-40
           transform transition-all duration-300 lg:translate-x-0
+          flex flex-col
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${sidebarCollapsed ? 'w-16' : 'w-56'}
         `}
