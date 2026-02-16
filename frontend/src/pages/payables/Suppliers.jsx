@@ -56,10 +56,10 @@ const Suppliers = () => {
             <div className="page-header">
                 <div>
                     <h1 className="page-title">Suppliers</h1>
-                    <p className="page-subtitle">Manage supplier accounts and payment terms</p>
+                    <p className="page-subtitle">Manage supplier accounts</p>
                 </div>
                 <button
-                    onClick={() => navigate('/app/payables/suppliers/new')}
+                    onClick={() => navigate('new')}
                     className="btn btn-primary"
                 >
                     <Plus className="w-4 h-4 mr-2" />

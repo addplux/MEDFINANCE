@@ -112,34 +112,34 @@ function App() {
                   <MainLayout>
                     <Routes>
                       <Route path="/" element={<Dashboard />} />
-                      <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/billing/opd" element={<OPDBilling />} />
-                      <Route path="/billing/opd/new" element={<CreateOPDBill />} />
-                      <Route path="/patients" element={<Patients />} />
-                      <Route path="/patients/new" element={<CreatePatient />} />
-                      <Route path="/nhima/eligibility" element={<EligibilityCheck />} />
-                      <Route path="/nhima/submission" element={<ClaimsSubmission />} />
-                      <Route path="/nhima/tracking" element={<ClaimsTracking />} />
-                      <Route path="/nhima/reconciliation" element={<Reconciliation />} />
-                      <Route path="/receivables/nhima" element={<NHIMAClaims />} />
-                      <Route path="/receivables/corporate" element={<CorporateAccounts />} />
-                      <Route path="/receivables/schemes" element={<Schemes />} />
-                      <Route path="/payables/suppliers" element={<Suppliers />} />
-                      <Route path="/payables/suppliers/new" element={<SupplierForm />} />
-                      <Route path="/payables/suppliers/:id/edit" element={<SupplierForm />} />
-                      <Route path="/ledger/accounts" element={<ChartOfAccounts />} />
-                      <Route path="/cash/payments" element={<Payments />} />
-                      <Route path="/budgets" element={<Budgets />} />
-                      <Route path="/budgets/new" element={<BudgetForm />} />
-                      <Route path="/budgets/:id/edit" element={<BudgetForm />} />
-                      <Route path="/funds" element={<Funds />} />
-                      <Route path="/funds/new" element={<FundForm />} />
-                      <Route path="/funds/:id/edit" element={<FundForm />} />
-                      <Route path="/funds/:id" element={<Funds />} />
-                      <Route path="/assets" element={<Assets />} />
-                      <Route path="/assets/new" element={<AssetForm />} />
-                      <Route path="/assets/:id/edit" element={<AssetForm />} />
-                      <Route path="/reports" element={<Reports />} />
+                      <Route path="dashboard" element={<Dashboard />} />
+                      <Route path="billing/opd" element={<OPDBilling />} />
+                      <Route path="billing/opd/new" element={<CreateOPDBill />} />
+                      <Route path="patients" element={<Patients />} />
+                      <Route path="patients/new" element={<CreatePatient />} />
+                      <Route path="nhima/eligibility" element={<EligibilityCheck />} />
+                      <Route path="nhima/submission" element={<ClaimsSubmission />} />
+                      <Route path="nhima/tracking" element={<ClaimsTracking />} />
+                      <Route path="nhima/reconciliation" element={<Reconciliation />} />
+                      <Route path="receivables/nhima" element={<NHIMAClaims />} />
+                      <Route path="receivables/corporate" element={<CorporateAccounts />} />
+                      <Route path="receivables/schemes" element={<Schemes />} />
+                      <Route path="payables/suppliers" element={<Suppliers />} />
+                      <Route path="payables/suppliers/new" element={<SupplierForm />} />
+                      <Route path="payables/suppliers/:id/edit" element={<SupplierForm />} />
+                      <Route path="ledger/accounts" element={<ChartOfAccounts />} />
+                      <Route path="cash/payments" element={<Payments />} />
+                      <Route path="budgets" element={<Budgets />} />
+                      <Route path="budgets/new" element={<BudgetForm />} />
+                      <Route path="budgets/:id/edit" element={<BudgetForm />} />
+                      <Route path="funds" element={<Funds />} />
+                      <Route path="funds/new" element={<FundForm />} />
+                      <Route path="funds/:id/edit" element={<FundForm />} />
+                      <Route path="funds/:id" element={<Funds />} />
+                      <Route path="assets" element={<Assets />} />
+                      <Route path="assets/new" element={<AssetForm />} />
+                      <Route path="assets/:id/edit" element={<AssetForm />} />
+                      <Route path="reports" element={<Reports />} />
                       <Route path="setup/services/new" element={<ServiceForm />} />
                       <Route path="setup/services/:id/edit" element={<ServiceForm />} />
                       <Route path="setup/users/new" element={<UserForm />} />
@@ -148,7 +148,7 @@ function App() {
                       <Route path="setup/departments/:id/edit" element={<DepartmentForm />} />
                       <Route path="payroll/medical" element={<PayrollMedical />} />
                       <Route path="setup" element={<Setup />} />
-                      {/* More routes will be added in next phases */}
+                      <Route path="*" element={<Navigate to="dashboard" replace />} />
                     </Routes>
                   </MainLayout>
                 </ProtectedRoute>
