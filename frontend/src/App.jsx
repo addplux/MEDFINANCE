@@ -25,6 +25,12 @@ import CreatePatient from './pages/patients/CreatePatient';
 // Receivables
 import NHIMAClaims from './pages/receivables/NHIMAClaims';
 
+// NHIMA
+import EligibilityCheck from './pages/nhima/EligibilityCheck';
+import ClaimsSubmission from './pages/nhima/ClaimsSubmission';
+import ClaimsTracking from './pages/nhima/ClaimsTracking';
+import Reconciliation from './pages/nhima/Reconciliation';
+
 // Payables
 import Suppliers from './pages/payables/Suppliers';
 
@@ -100,6 +106,10 @@ function App() {
                       <Route path="/billing/opd/new" element={<CreateOPDBill />} />
                       <Route path="/patients" element={<Patients />} />
                       <Route path="/patients/new" element={<CreatePatient />} />
+                      <Route path="/nhima/eligibility" element={<EligibilityCheck />} />
+                      <Route path="/nhima/submission" element={<ClaimsSubmission />} />
+                      <Route path="/nhima/tracking" element={<ClaimsTracking />} />
+                      <Route path="/nhima/reconciliation" element={<Reconciliation />} />
                       <Route path="/receivables/nhima" element={<NHIMAClaims />} />
                       <Route path="/payables/suppliers" element={<Suppliers />} />
                       <Route path="/ledger/accounts" element={<ChartOfAccounts />} />

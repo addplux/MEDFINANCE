@@ -18,7 +18,13 @@ import {
     Menu,
     X,
     ChevronLeft,
-    Stethoscope
+    ChevronDown,
+    ChevronRight,
+    Stethoscope,
+    ClipboardList,
+    FileCheck,
+    Activity,
+    Calculator
 } from 'lucide-react';
 
 const MainLayout = ({ children }) => {
@@ -28,6 +34,7 @@ const MainLayout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
     const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
     const [orgName, setOrgName] = React.useState('MEDFINANCE360');
+    const [expandedMenus, setExpandedMenus] = React.useState({});
 
     React.useEffect(() => {
         const fetchOrgProfile = async () => {
@@ -51,11 +58,51 @@ const MainLayout = ({ children }) => {
         };
     }, []);
 
+    // Auto-expand menus based on current path
+    React.useEffect(() => {
+        const path = location.pathname;
+        const newExpanded = { ...expandedMenus };
+
+        if (path.includes('/billing/') || path.includes('/invoice/')) {
+            newExpanded['billing'] = true;
+        }
+        if (path.includes('/nhima/')) {
+            newExpanded['nhima'] = true;
+        }
+
+        setExpandedMenus(newExpanded);
+    }, [location.pathname]);
+
+    const toggleMenu = (menuId) => {
+        setExpandedMenus(prev => ({
+            ...prev,
+            [menuId]: !prev[menuId]
+        }));
+    };
+
     const menuItems = [
         { path: '/app/dashboard', icon: LayoutDashboard, label: 'Home' },
-        { path: '/app/billing/opd', icon: FileText, label: 'Billing' },
+        {
+            id: 'billing',
+            icon: FileText,
+            label: 'Patient Billing',
+            submenu: [
+                { path: '/app/billing/opd/new', label: 'New Bill' },
+                { path: '/app/billing/opd', label: 'Invoice List' }
+            ]
+        },
         { path: '/app/patients', icon: Users, label: 'Patients' },
-        { path: '/app/receivables/nhima', icon: DollarSign, label: 'Receivables' },
+        {
+            id: 'nhima',
+            icon: DollarSign,
+            label: 'NHIMA',
+            submenu: [
+                { path: '/app/nhima/eligibility', label: 'Eligibility Check' },
+                { path: '/app/nhima/submission', label: 'Claims Submission' },
+                { path: '/app/nhima/tracking', label: 'Claims Tracking' },
+                { path: '/app/nhima/reconciliation', label: 'Reconciliation' }
+            ]
+        },
         { path: '/app/payables/suppliers', icon: CreditCard, label: 'Payables' },
         { path: '/app/ledger/accounts', icon: BookOpen, label: 'Ledger' },
         { path: '/app/cash/payments', icon: Wallet, label: 'Cash & Bank' },
@@ -133,6 +180,72 @@ const MainLayout = ({ children }) => {
                     <div className="space-y-0.5">
                         {menuItems.map((item) => {
                             const Icon = item.icon;
+
+                            // Parent menu with submenu
+                            if (item.submenu) {
+                                const isExpanded = expandedMenus[item.id];
+                                const hasActiveChild = item.submenu.some(sub => location.pathname.startsWith(sub.path));
+
+                                return (
+                                    <div key={item.id}>
+                                        <button
+                                            onClick={() => toggleMenu(item.id)}
+                                            className={`
+                                                w-full flex items-center gap-3 px-3 py-2 rounded-md
+                                                transition-all duration-200 text-sm
+                                                ${hasActiveChild
+                                                    ? 'bg-bg-tertiary text-text-primary font-medium'
+                                                    : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
+                                                }
+                                                ${sidebarCollapsed ? 'justify-center' : ''}
+                                            `}
+                                            title={sidebarCollapsed ? item.label : ''}
+                                        >
+                                            <Icon className="w-4 h-4 flex-shrink-0" />
+                                            {!sidebarCollapsed && (
+                                                <>
+                                                    <span className="flex-1 text-left">{item.label}</span>
+                                                    {isExpanded ? (
+                                                        <ChevronDown className="w-4 h-4" />
+                                                    ) : (
+                                                        <ChevronRight className="w-4 h-4" />
+                                                    )}
+                                                </>
+                                            )}
+                                        </button>
+
+                                        {/* Submenu items */}
+                                        {isExpanded && !sidebarCollapsed && (
+                                            <div className="ml-7 mt-1 space-y-0.5">
+                                                {item.submenu.map((subItem) => {
+                                                    const isActive = location.pathname === subItem.path;
+                                                    return (
+                                                        <button
+                                                            key={subItem.path}
+                                                            onClick={() => {
+                                                                navigate(subItem.path);
+                                                                setSidebarOpen(false);
+                                                            }}
+                                                            className={`
+                                                                w-full flex items-center px-3 py-1.5 rounded-md
+                                                                transition-all duration-200 text-sm
+                                                                ${isActive
+                                                                    ? 'bg-primary-50 text-primary-600 font-medium'
+                                                                    : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
+                                                                }
+                                                            `}
+                                                        >
+                                                            {subItem.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            }
+
+                            // Regular menu item
                             const active = isActive(item.path);
                             return (
                                 <button
@@ -142,14 +255,14 @@ const MainLayout = ({ children }) => {
                                         setSidebarOpen(false);
                                     }}
                                     className={`
-                      w-full flex items-center gap-3 px-3 py-2 rounded-md
-                      transition-all duration-200 text-sm
-                      ${active
+                                        w-full flex items-center gap-3 px-3 py-2 rounded-md
+                                        transition-all duration-200 text-sm
+                                        ${active
                                             ? 'bg-bg-tertiary text-text-primary font-medium'
                                             : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
                                         }
-                      ${sidebarCollapsed ? 'justify-center' : ''}
-                    `}
+                                        ${sidebarCollapsed ? 'justify-center' : ''}
+                                    `}
                                     title={sidebarCollapsed ? item.label : ''}
                                 >
                                     <Icon className="w-4 h-4 flex-shrink-0" />
