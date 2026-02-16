@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const labController = require('../controllers/labController');
-const { authenticateToken, authorize } = require('../middleware/auth');
+const { authMiddleware: authenticateToken, authorize } = require('../middleware/auth');
 
 // Test Management
 router.get('/tests', authenticateToken, labController.getAllTests);

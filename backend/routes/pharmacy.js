@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pharmacyController = require('../controllers/pharmacyController');
-const { authenticateToken, authorize } = require('../middleware/auth');
+const { authMiddleware: authenticateToken, authorize } = require('../middleware/auth');
 
 // Inventory Management
 router.get('/', authenticateToken, pharmacyController.getAllMedications);
