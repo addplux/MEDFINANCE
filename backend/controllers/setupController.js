@@ -277,14 +277,38 @@ const updateDepartment = async (req, res) => {
 
         await department.update(req.body);
 
-        const updatedDepartment = await Department.findByPk(department.id, {
-            include: [{ association: 'manager', attributes: ['id', 'firstName', 'lastName'] }]
-        });
-
         res.json(updatedDepartment);
     } catch (error) {
         console.error('Update department error:', error);
         res.status(500).json({ error: 'Failed to update department' });
+    }
+};
+
+// Delete department
+const deleteDepartment = async (req, res) => {
+    try {
+        const department = await Department.findByPk(req.params.id);
+
+        if (!department) {
+            return res.status(404).json({ error: 'Department not found' });
+        }
+
+        try {
+            await department.destroy();
+            res.status(204).send();
+        } catch (destroyError) {
+            // Check for foreign key constraint violation
+            if (destroyError.name === 'SequelizeForeignKeyConstraintError') {
+                return res.status(400).json({
+                    error: 'Cannot delete department',
+                    details: 'This department is in use by Users, Budgets, or Assets. Please reassign or delete dependent records first.'
+                });
+            }
+            throw destroyError;
+        }
+    } catch (error) {
+        console.error('Delete department error:', error);
+        res.status(500).json({ error: 'Failed to delete department' });
     }
 };
 
@@ -317,5 +341,6 @@ module.exports = {
     getAllDepartments,
     createDepartment,
     updateDepartment,
+    deleteDepartment,
     getDepartment
 };
