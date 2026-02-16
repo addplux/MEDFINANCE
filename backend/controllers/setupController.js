@@ -28,19 +28,21 @@ const createService = async (req, res) => {
     try {
         const { serviceName, category, department, price, description } = req.body;
 
-        if (!serviceName || !category || !price) {
+        if (!serviceName || !category || price === undefined || price === null) {
             return res.status(400).json({ error: 'Service name, category, and price are required' });
         }
 
+        const normalizedCategory = category.toLowerCase();
+
         // Generate service code
-        const serviceCount = await Service.count({ where: { category } });
-        const categoryPrefix = category.substring(0, 3).toUpperCase();
+        const serviceCount = await Service.count({ where: { category: normalizedCategory } });
+        const categoryPrefix = normalizedCategory.substring(0, 3).toUpperCase();
         const serviceCode = `${categoryPrefix}${String(serviceCount + 1).padStart(3, '0')}`;
 
         const service = await Service.create({
             serviceCode,
             serviceName,
-            category,
+            category: normalizedCategory,
             department,
             price,
             description
