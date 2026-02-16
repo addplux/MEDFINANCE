@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authAPI } from '../../services/apiService';
-import { Activity, Mail, Lock, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Activity, Mail, Lock, AlertCircle, ArrowLeft, Building, ChevronDown } from 'lucide-react';
 
 const Login = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
-        password: ''
+        password: '',
+        hospitalType: ''
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -134,6 +135,27 @@ const Login = () => {
                         )}
 
                         <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+                            {/* Hospital Type Selection */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-300">Institution Type</label>
+                                <div className="relative">
+                                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+                                    <select
+                                        name="hospitalType"
+                                        value={formData.hospitalType}
+                                        onChange={handleChange}
+                                        className="w-full bg-black/40 border border-white/10 rounded-lg pl-11 pr-10 py-3 text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all hover:bg-black/60 appearance-none"
+                                        required
+                                    >
+                                        <option value="" className="bg-gray-900 text-gray-400">Select Organization Type</option>
+                                        <option value="Government" className="bg-gray-900">Government Hospital</option>
+                                        <option value="Mission / NGO" className="bg-gray-900">Mission / NGO</option>
+                                        <option value="Private Hospital" className="bg-gray-900">Private Hospital</option>
+                                    </select>
+                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+                                </div>
+                            </div>
+
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-300">Email Address</label>
                                 <div className="relative">
