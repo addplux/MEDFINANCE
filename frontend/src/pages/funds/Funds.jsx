@@ -68,8 +68,8 @@ const Funds = () => {
                     <h1 className="page-title">Fund Accounting</h1>
                     <p className="page-subtitle">Manage designated funds and track balances</p>
                 </div>
-                <button className="btn-primary" onClick={() => navigate('/app/funds/new')}>
-                    <Plus size={20} />
+                <button className="btn btn-primary" onClick={() => navigate('/app/funds/new')}>
+                    <Plus size={18} className="mr-2" />
                     New Fund
                 </button>
             </div>

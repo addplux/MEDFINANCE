@@ -49,16 +49,16 @@ const CorporateAccounts = () => {
                     <h1 className="page-title">Corporate Accounts</h1>
                     <p className="page-subtitle">Manage company and employer billing accounts</p>
                 </div>
-                <button className="btn-primary" onClick={() => navigate('/app/receivables/corporate/new')}>
-                    <Plus size={20} />
+                <button className="btn btn-primary" onClick={() => navigate('/app/receivables/corporate/new')}>
+                    <Plus size={18} className="mr-2" />
                     New Account
                 </button>
             </div>
 
             <div className="card">
-                <div className="card-header">
+                <div className="card-header flex flex-col md:flex-row gap-4">
                     <div className="search-box">
-                        <Search size={20} />
+                        <Search size={18} />
                         <input
                             type="text"
                             placeholder="Search accounts..."

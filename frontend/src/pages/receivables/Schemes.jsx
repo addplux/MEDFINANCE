@@ -58,16 +58,16 @@ const Schemes = () => {
                     <h1 className="page-title">Schemes</h1>
                     <p className="page-subtitle">Manage insurance schemes and discount programs</p>
                 </div>
-                <button className="btn-primary" onClick={() => navigate('/app/receivables/schemes/new')}>
-                    <Plus size={20} />
+                <button className="btn btn-primary" onClick={() => navigate('/app/receivables/schemes/new')}>
+                    <Plus size={18} className="mr-2" />
                     New Scheme
                 </button>
             </div>
 
             <div className="card">
-                <div className="card-header">
+                <div className="card-header flex flex-col md:flex-row gap-4">
                     <div className="search-box">
-                        <Search size={20} />
+                        <Search size={18} />
                         <input
                             type="text"
                             placeholder="Search schemes..."
