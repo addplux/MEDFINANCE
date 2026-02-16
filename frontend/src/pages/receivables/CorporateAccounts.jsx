@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import apiService from '../../services/apiService';
+import api from '../../services/apiClient';
 
 const CorporateAccounts = () => {
     const navigate = useNavigate();
@@ -18,7 +18,7 @@ const CorporateAccounts = () => {
         try {
             setLoading(true);
             const params = statusFilter !== 'all' ? { status: statusFilter } : {};
-            const response = await apiService.get('/receivables/corporate', { params });
+            const response = await api.get('/receivables/corporate', { params });
             setAccounts(response.data.data || response.data);
         } catch (error) {
             console.error('Error fetching corporate accounts:', error);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import apiService from '../../services/apiService';
+import api from '../../services/apiClient';
 
 const Schemes = () => {
     const navigate = useNavigate();
@@ -18,7 +18,7 @@ const Schemes = () => {
         try {
             setLoading(true);
             const params = statusFilter !== 'all' ? { status: statusFilter } : {};
-            const response = await apiService.get('/receivables/schemes', { params });
+            const response = await api.get('/receivables/schemes', { params });
             setSchemes(response.data || []);
         } catch (error) {
             console.error('Error fetching schemes:', error);

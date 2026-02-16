@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DollarSign, TrendingUp, TrendingDown, Plus } from 'lucide-react';
-import apiService from '../../services/apiService';
+import api from '../../services/apiClient';
 
 const Funds = () => {
     const navigate = useNavigate();
@@ -21,7 +21,7 @@ const Funds = () => {
     const fetchFunds = async () => {
         try {
             setLoading(true);
-            const response = await apiService.get('/funds');
+            const response = await api.get('/funds');
             setFunds(response.data);
 
             // Calculate stats
