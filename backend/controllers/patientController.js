@@ -54,7 +54,7 @@ const getPatient = async (req, res) => {
 // Create patient
 const createPatient = async (req, res) => {
     try {
-        const { firstName, lastName, dateOfBirth, gender, phone, email, address, nhimaNumber, emergencyContact, emergencyPhone } = req.body;
+        const { firstName, lastName, dateOfBirth, gender, phone, email, address, nhimaNumber, paymentMethod, emergencyContact, emergencyPhone } = req.body;
 
         // Validate required fields
         if (!firstName || !lastName || !dateOfBirth || !gender) {
@@ -75,6 +75,7 @@ const createPatient = async (req, res) => {
             email,
             address,
             nhimaNumber,
+            paymentMethod: paymentMethod || 'cash',
             emergencyContact,
             emergencyPhone
         });
@@ -82,7 +83,11 @@ const createPatient = async (req, res) => {
         res.status(201).json(patient);
     } catch (error) {
         console.error('Create patient error:', error);
-        res.status(500).json({ error: 'Failed to create patient' });
+        res.status(500).json({
+            error: 'Failed to create patient',
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 };
 
