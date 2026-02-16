@@ -133,10 +133,11 @@ const startServer = async () => {
         }
 
         // Start listening
-        app.listen(PORT, () => {
+        app.listen(PORT, '0.0.0.0', () => {
             console.log(`🚀 Server running on port ${PORT}`);
+            console.log(`🔌 PORT env var: ${process.env.PORT}`);
             console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-            console.log(`🔗 API: http://localhost:${PORT}/api`);
+            console.log(`🔗 API: http://0.0.0.0:${PORT}/api`);
         });
     } catch (error) {
         console.error('Failed to start server process:', error);
