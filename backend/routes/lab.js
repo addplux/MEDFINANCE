@@ -5,8 +5,8 @@ const { authMiddleware: authenticateToken, authorize } = require('../middleware/
 
 // Test Management
 router.get('/tests', authenticateToken, labController.getAllTests);
-router.post('/tests', authenticateToken, authorize(['admin', 'lab_manager']), labController.createTest);
-router.put('/tests/:id', authenticateToken, authorize(['admin', 'lab_manager']), labController.updateTest);
+router.post('/tests', authenticateToken, authorize('admin', 'lab_manager'), labController.createTest);
+router.put('/tests/:id', authenticateToken, authorize('admin', 'lab_manager'), labController.updateTest);
 
 // Requests
 router.post('/requests', authenticateToken, labController.createRequest);
@@ -14,6 +14,6 @@ router.get('/requests', authenticateToken, labController.getRequests);
 router.patch('/requests/:id/status', authenticateToken, labController.updateRequestStatus);
 
 // Results
-router.post('/results', authenticateToken, authorize(['admin', 'lab_technician', 'lab_manager']), labController.enterResults);
+router.post('/results', authenticateToken, authorize('admin', 'lab_technician', 'lab_manager'), labController.enterResults);
 
 module.exports = router;

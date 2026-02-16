@@ -5,14 +5,14 @@ const { authMiddleware: authenticateToken, authorize } = require('../middleware/
 
 // Inventory Management
 router.get('/', authenticateToken, pharmacyController.getAllMedications);
-router.post('/', authenticateToken, authorize(['admin', 'pharmacist']), pharmacyController.createMedication);
-router.put('/:id', authenticateToken, authorize(['admin', 'pharmacist']), pharmacyController.updateMedication);
+router.post('/', authenticateToken, authorize('admin', 'pharmacist'), pharmacyController.createMedication);
+router.put('/:id', authenticateToken, authorize('admin', 'pharmacist'), pharmacyController.updateMedication);
 
 // Stock Management (GRN)
-router.post('/grn', authenticateToken, authorize(['admin', 'pharmacist']), pharmacyController.receiveStock);
+router.post('/grn', authenticateToken, authorize('admin', 'pharmacist'), pharmacyController.receiveStock);
 router.get('/batch/:medicationId', authenticateToken, pharmacyController.getBatches);
 
 // Dispensing
-router.post('/dispense', authenticateToken, authorize(['admin', 'pharmacist', 'billing_staff']), pharmacyController.dispenseMedication);
+router.post('/dispense', authenticateToken, authorize('admin', 'pharmacist', 'billing_staff'), pharmacyController.dispenseMedication);
 
 module.exports = router;
