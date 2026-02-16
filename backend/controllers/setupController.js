@@ -1,4 +1,5 @@
 const { Service, User, Department } = require('../models');
+const { Op } = require('sequelize');
 
 // ========== Services/Tariffs ==========
 
@@ -34,14 +35,17 @@ const createService = async (req, res) => {
 
         const normalizedCategory = category.toLowerCase();
 
-        // Generate service code based on the LAST service code, not count
+        const categoryPrefix = normalizedCategory.substring(0, 3).toUpperCase();
+
+        // Generate service code based on the LAST service code with this PREFIX
         const lastService = await Service.findOne({
-            where: { category: normalizedCategory },
-            order: [['createdAt', 'DESC']],
+            where: {
+                serviceCode: { [Op.like]: `${categoryPrefix}%` }
+            },
+            order: [['serviceCode', 'DESC']],
             attributes: ['serviceCode']
         });
 
-        const categoryPrefix = normalizedCategory.substring(0, 3).toUpperCase();
         let nextNumber = 1;
 
         if (lastService && lastService.serviceCode) {
