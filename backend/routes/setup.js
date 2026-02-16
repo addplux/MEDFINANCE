@@ -26,4 +26,8 @@ router.get('/departments/:id', setupController.getDepartment);
 router.post('/departments', setupController.createDepartment);
 router.put('/departments/:id', setupController.updateDepartment);
 
+// Organization Profile
+router.get('/organization', setupController.getOrganization);
+router.put('/organization', setupController.updateOrganization);
+
 module.exports = router;

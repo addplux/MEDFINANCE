@@ -186,6 +186,10 @@ export const setupAPI = {
         update: (id, data) => api.put(`/setup/departments/${id}`, data),
         delete: (id) => api.delete(`/setup/departments/${id}`),
     },
+    organization: {
+        get: () => api.get('/setup/organization'),
+        update: (data) => api.put('/setup/organization', data),
+    },
 };
 
 // Dashboard

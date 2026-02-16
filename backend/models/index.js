@@ -24,7 +24,9 @@ const PettyCash = require('./PettyCash');
 const Department = require('./Department');
 const Budget = require('./Budget');
 const Asset = require('./Asset');
+const Asset = require('./Asset');
 const AuditLog = require('./AuditLog');
+const Organization = require('./Organization');
 
 // Define relationships
 
@@ -148,5 +150,6 @@ module.exports = {
     Department,
     Budget,
     Asset,
-    AuditLog
+    AuditLog,
+    Organization
 };

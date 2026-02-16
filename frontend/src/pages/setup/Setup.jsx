@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { setupAPI } from '../../services/apiService';
 import { Settings, Plus, Search, Eye, Edit, Trash2 } from 'lucide-react';
+import OrganizationProfile from './OrganizationProfile';
 
 const Setup = () => {
     const navigate = useNavigate();
@@ -13,6 +14,7 @@ const Setup = () => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const tabs = [
+        { id: 'profile', label: 'Organization Profile' },
         { id: 'services', label: 'Services & Tariffs' },
         { id: 'users', label: 'Users' },
         { id: 'departments', label: 'Departments' }
@@ -37,6 +39,10 @@ const Setup = () => {
                 case 'departments':
                     const deptsRes = await setupAPI.departments.getAll();
                     setDepartments(deptsRes.data);
+                    break;
+                case 'profile':
+                    // Profile data handles its own loading
+                    setLoading(false);
                     break;
                 default:
                     break;
@@ -80,13 +86,15 @@ const Setup = () => {
                     <h1 className="text-3xl font-bold text-gray-900">System Setup</h1>
                     <p className="text-gray-600 mt-1">Configure system settings and master data</p>
                 </div>
-                <button
-                    onClick={() => navigate(`/app/setup/${activeTab}/new`)}
-                    className="btn btn-primary"
-                >
-                    <Plus className="w-5 h-5" />
-                    New {activeTab === 'services' ? 'Service' : activeTab === 'users' ? 'User' : 'Department'}
-                </button>
+                {activeTab !== 'profile' && (
+                    <button
+                        onClick={() => navigate(`/app/setup/${activeTab}/new`)}
+                        className="btn btn-primary"
+                    >
+                        <Plus className="w-5 h-5" />
+                        New {activeTab === 'services' ? 'Service' : activeTab === 'users' ? 'User' : 'Department'}
+                    </button>
+                )}
             </div>
 
             {/* Tabs */}
@@ -109,20 +117,24 @@ const Setup = () => {
                 </div>
 
                 {/* Search */}
-                <div className="p-4 border-b border-gray-200">
-                    <div className="relative max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder={`Search ${activeTab}...`}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="form-input pl-11"
-                        />
+                {activeTab !== 'profile' && (
+                    <div className="p-4 border-b border-gray-200">
+                        <div className="relative max-w-md">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder={`Search ${activeTab}...`}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="form-input pl-11"
+                            />
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Content */}
+                {activeTab === 'profile' && <OrganizationProfile />}
+
                 {/* Services Tab */}
                 {activeTab === 'services' && (
                     <>

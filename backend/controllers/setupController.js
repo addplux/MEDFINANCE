@@ -1,4 +1,4 @@
-const { Service, User, Department } = require('../models');
+const { Service, User, Department, Organization } = require('../models');
 const { Op } = require('sequelize');
 
 // ========== Services/Tariffs ==========
@@ -328,6 +328,48 @@ const getDepartment = async (req, res) => {
     }
 };
 
+// ========== Organization Profile ==========
+
+// Get organization details
+const getOrganization = async (req, res) => {
+    try {
+        let organization = await Organization.findOne();
+
+        if (!organization) {
+            // Create default organization if none exists
+            organization = await Organization.create({
+                name: 'My Hospital',
+                type: 'Private Hospital',
+                address: '123 Health Street',
+                currency: 'ZMW'
+            });
+        }
+
+        res.json(organization);
+    } catch (error) {
+        console.error('Get organization error:', error);
+        res.status(500).json({ error: 'Failed to get organization details' });
+    }
+};
+
+// Update organization details
+const updateOrganization = async (req, res) => {
+    try {
+        let organization = await Organization.findOne();
+
+        if (!organization) {
+            organization = await Organization.create(req.body);
+        } else {
+            await organization.update(req.body);
+        }
+
+        res.json(organization);
+    } catch (error) {
+        console.error('Update organization error:', error);
+        res.status(500).json({ error: 'Failed to update organization details' });
+    }
+};
+
 module.exports = {
     getAllServices,
     createService,
@@ -342,5 +384,10 @@ module.exports = {
     createDepartment,
     updateDepartment,
     deleteDepartment,
-    getDepartment
+    createDepartment,
+    updateDepartment,
+    deleteDepartment,
+    getDepartment,
+    getOrganization,
+    updateOrganization
 };
