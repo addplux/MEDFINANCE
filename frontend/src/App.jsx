@@ -46,6 +46,10 @@ import Budgets from './pages/budgets/Budgets';
 // Assets
 import Assets from './pages/assets/Assets';
 
+// Receivables
+import CorporateAccounts from './pages/receivables/CorporateAccounts';
+import Schemes from './pages/receivables/Schemes';
+
 // Reports
 import Reports from './pages/reports/Reports';
 
@@ -111,6 +115,8 @@ function App() {
                       <Route path="/nhima/tracking" element={<ClaimsTracking />} />
                       <Route path="/nhima/reconciliation" element={<Reconciliation />} />
                       <Route path="/receivables/nhima" element={<NHIMAClaims />} />
+                      <Route path="/receivables/corporate" element={<CorporateAccounts />} />
+                      <Route path="/receivables/schemes" element={<Schemes />} />
                       <Route path="/payables/suppliers" element={<Suppliers />} />
                       <Route path="/ledger/accounts" element={<ChartOfAccounts />} />
                       <Route path="/cash/payments" element={<Payments />} />

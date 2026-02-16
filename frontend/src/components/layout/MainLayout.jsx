@@ -97,8 +97,10 @@ const MainLayout = ({ children }) => {
             icon: DollarSign,
             label: 'Receivables',
             submenu: [
-                { path: '/app/nhima/eligibility', label: 'Eligibility Check' },
-                { path: '/app/nhima/submission', label: 'Claims Submission' },
+                { path: '/app/receivables/corporate', label: 'Corporate Accounts' },
+                { path: '/app/receivables/schemes', label: 'Schemes' },
+                { path: '/app/nhima/eligibility', label: 'NHIMA Eligibility' },
+                { path: '/app/nhima/submission', label: 'NHIMA Claims' },
                 { path: '/app/nhima/tracking', label: 'Claims Tracking' },
                 { path: '/app/nhima/reconciliation', label: 'Reconciliation' }
             ]
