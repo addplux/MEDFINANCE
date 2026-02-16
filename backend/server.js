@@ -16,7 +16,9 @@ const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:5180',
     'http://127.0.0.1:5173',
-    'http://127.0.0.1:5180'
+    'http://127.0.0.1:5180',
+    'https://medfinance-one.vercel.app',
+    'https://medfinance-production.up.railway.app'
 ];
 
 if (process.env.CORS_ORIGIN) {
