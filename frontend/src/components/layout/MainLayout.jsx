@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { setupAPI } from '../../services/apiService';
 import {
     LayoutDashboard,
     FileText,
@@ -25,6 +26,21 @@ const MainLayout = ({ children }) => {
     const { user, logout } = useAuth();
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
     const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+    const [orgName, setOrgName] = React.useState('MEDFINANCE360');
+
+    React.useEffect(() => {
+        const fetchOrgProfile = async () => {
+            try {
+                const response = await setupAPI.organization.get();
+                if (response.data && response.data.name) {
+                    setOrgName(response.data.name);
+                }
+            } catch (error) {
+                console.error('Failed to fetch organization profile', error);
+            }
+        };
+        fetchOrgProfile();
+    }, []);
 
     const menuItems = [
         { path: '/app/dashboard', icon: LayoutDashboard, label: 'Home' },
@@ -64,7 +80,7 @@ const MainLayout = ({ children }) => {
                 <div className="h-14 px-4 flex items-center justify-between border-b border-border-color">
                     {!sidebarCollapsed && (
                         <div className="flex items-center gap-2">
-                            <span className="text-lg font-bold text-text-primary tracking-tight">MEDFINANCE</span>
+                            <span className="text-lg font-bold text-text-primary tracking-tight">{orgName}</span>
                         </div>
                     )}
                     <button
@@ -170,7 +186,7 @@ const MainLayout = ({ children }) => {
                     >
                         <Menu className="w-5 h-5 text-text-primary" />
                     </button>
-                    <span className="text-base font-bold text-text-primary">MEDFINANCE360</span>
+                    <span className="text-base font-bold text-text-primary">{orgName}</span>
                     <div className="w-9" /> {/* Spacer for centering */}
                 </header>
 

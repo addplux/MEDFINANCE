@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { authAPI } from '../../services/apiService';
 import { Activity, Mail, Lock, AlertCircle, ArrowLeft } from 'lucide-react';
 
 const Login = () => {
@@ -12,6 +13,21 @@ const Login = () => {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [orgName, setOrgName] = useState('MEDFINANCE360');
+
+    React.useEffect(() => {
+        const fetchOrgInfo = async () => {
+            try {
+                const response = await authAPI.getPublicOrgInfo();
+                if (response.data && response.data.name) {
+                    setOrgName(response.data.name);
+                }
+            } catch (error) {
+                console.error('Failed to fetch org info', error);
+            }
+        };
+        fetchOrgInfo();
+    }, []);
 
     const handleChange = (e) => {
         setFormData({
@@ -59,7 +75,7 @@ const Login = () => {
                         </div>
                         <div>
                             <h1 className="text-3xl font-bold text-white tracking-tight drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-                                MEDFINANCE360
+                                {orgName}
                             </h1>
                             <p className="text-gray-400">Medical Finance Management</p>
                         </div>
@@ -104,7 +120,7 @@ const Login = () => {
                             <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary-600 to-accent-600 rounded-xl mb-4 shadow-lg">
                                 <Activity className="w-7 h-7 text-white" />
                             </div>
-                            <h1 className="text-2xl font-bold text-white">MEDFINANCE360</h1>
+                            <h1 className="text-2xl font-bold text-white">{orgName}</h1>
                         </div>
 
                         <h2 className="text-2xl font-bold mb-2 text-white">Sign In</h2>

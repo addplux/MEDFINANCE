@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const { User, Organization } = require('../models');
 
 // Login
 const login = async (req, res) => {
@@ -79,8 +79,27 @@ const logout = async (req, res) => {
     }
 };
 
+// Get organization info (public)
+const getOrganizationInfo = async (req, res) => {
+    try {
+        const organization = await Organization.findOne({
+            attributes: ['name', 'logo', 'type']
+        });
+
+        if (!organization) {
+            return res.json({ name: 'MEDFINANCE360' });
+        }
+
+        res.json(organization);
+    } catch (error) {
+        console.error('Get organization info error:', error);
+        res.status(500).json({ error: 'Failed to get organization info' });
+    }
+};
+
 module.exports = {
     login,
     getCurrentUser,
-    logout
+    logout,
+    getOrganizationInfo
 };
