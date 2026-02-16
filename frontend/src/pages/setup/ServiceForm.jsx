@@ -22,13 +22,12 @@ const ServiceForm = () => {
     const [error, setError] = useState(null);
 
     const categories = [
-        'Consultation',
-        'Laboratory',
-        'Radiology',
-        'Procedure',
-        'Surgery',
-        'Accommodation',
-        'Other'
+        { value: 'opd', label: 'OPD / Consultation' },
+        { value: 'ipd', label: 'IPD / Accommodation' },
+        { value: 'pharmacy', label: 'Pharmacy' },
+        { value: 'laboratory', label: 'Laboratory' },
+        { value: 'radiology', label: 'Radiology' },
+        { value: 'other', label: 'Other' }
     ];
 
     useEffect(() => {
@@ -71,7 +70,10 @@ const ServiceForm = () => {
             }
             navigate('/app/setup');
         } catch (err) {
-            setError(err.response?.data?.error || 'Failed to save service');
+            const errorMsg = err.response?.data?.error || 'Failed to save service';
+            const details = err.response?.data?.details ? ` - ${err.response.data.details}` : '';
+            const validation = err.response?.data?.validation ? ` (${err.response.data.validation.join(', ')})` : '';
+            setError(`${errorMsg}${details}${validation}`);
             console.error(err);
         } finally {
             setLoading(false);
@@ -126,7 +128,7 @@ const ServiceForm = () => {
                             >
                                 <option value="">Select Category</option>
                                 {categories.map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
+                                    <option key={cat.value} value={cat.value}>{cat.label}</option>
                                 ))}
                             </select>
                         </div>
