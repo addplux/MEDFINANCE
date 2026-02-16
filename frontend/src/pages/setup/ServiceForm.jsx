@@ -14,6 +14,7 @@ const ServiceForm = () => {
         serviceName: '',
         category: '',
         department: '',
+        tariffType: 'Low Cost',
         price: '',
         description: '',
         isActive: true
@@ -147,16 +148,32 @@ const ServiceForm = () => {
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="label">Department</label>
-                        <input
-                            type="text"
-                            name="department"
-                            value={formData.department}
-                            onChange={handleChange}
-                            className="form-input"
-                            placeholder="e.g. OPD, Pharmacy"
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="label">Department</label>
+                            <input
+                                type="text"
+                                name="department"
+                                value={formData.department}
+                                onChange={handleChange}
+                                className="form-input"
+                                placeholder="e.g. OPD, Pharmacy"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="label">Tariff Type</label>
+                            <select
+                                name="tariffType"
+                                value={formData.tariffType}
+                                onChange={handleChange}
+                                className="form-select"
+                                required
+                            >
+                                <option value="Low Cost">Low Cost</option>
+                                <option value="High Cost">High Cost</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div className="space-y-2">

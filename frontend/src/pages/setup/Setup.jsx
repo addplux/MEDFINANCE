@@ -145,6 +145,7 @@ const Setup = () => {
                                         <th>Service Code</th>
                                         <th>Service Name</th>
                                         <th>Category</th>
+                                        <th>Tariff Type</th>
                                         <th>Department</th>
                                         <th>Price</th>
                                         <th>Status</th>
@@ -160,6 +161,7 @@ const Setup = () => {
                                             <td className="font-medium">{service.serviceCode}</td>
                                             <td>{service.serviceName}</td>
                                             <td className="capitalize">{service.category}</td>
+                                            <td>{service.tariffType}</td>
                                             <td>{service.department}</td>
                                             <td className="font-semibold">K {service.price?.toLocaleString()}</td>
                                             <td>
@@ -207,6 +209,7 @@ const Setup = () => {
                                     </div>
                                     <div className="text-sm space-y-1">
                                         <div><span className="text-gray-500">Category:</span> <span className="capitalize">{service.category}</span></div>
+                                        <div><span className="text-gray-500">Tariff:</span> <span>{service.tariffType}</span></div>
                                         <div><span className="text-gray-500">Price:</span> <span className="font-semibold">K {service.price?.toLocaleString()}</span></div>
                                     </div>
                                     <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">

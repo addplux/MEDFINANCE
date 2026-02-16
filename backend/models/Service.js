@@ -24,6 +24,11 @@ const Service = sequelize.define('Service', {
         type: DataTypes.STRING(50),
         allowNull: true
     },
+    tariffType: {
+        type: DataTypes.ENUM('Low Cost', 'High Cost'),
+        allowNull: false,
+        defaultValue: 'Low Cost'
+    },
     price: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
