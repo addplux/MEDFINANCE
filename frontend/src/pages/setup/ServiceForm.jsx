@@ -16,6 +16,11 @@ const ServiceForm = () => {
         department: '',
         tariffType: 'Low Cost',
         price: '',
+        cashPrice: '',
+        nhimaPrice: '',
+        corporatePrice: '',
+        schemePrice: '',
+        staffPrice: '',
         description: '',
         isActive: true
     });
@@ -135,17 +140,82 @@ const ServiceForm = () => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="label">Price</label>
+                            <label className="label">Base Price (Global Fallback)</label>
                             <input
                                 type="number"
                                 name="price"
                                 value={formData.price}
                                 onChange={handleChange}
-                                className="form-input"
+                                className="form-input font-bold"
                                 required
                                 min="0"
                             />
                         </div>
+                    </div>
+
+                    {/* Pricing Matrix */}
+                    <div className="border border-border-color rounded-lg p-4 bg-bg-tertiary/50 space-y-4">
+                        <h3 className="text-sm font-bold text-text-secondary uppercase tracking-wider">Pricing Matrix (Category Specific)</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-text-secondary">Cash Price</label>
+                                <input
+                                    type="number"
+                                    name="cashPrice"
+                                    value={formData.cashPrice}
+                                    onChange={handleChange}
+                                    className="form-input form-input-sm"
+                                    placeholder="Leave 0 for Base"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-text-secondary">NHIMA Price</label>
+                                <input
+                                    type="number"
+                                    name="nhimaPrice"
+                                    value={formData.nhimaPrice}
+                                    onChange={handleChange}
+                                    className="form-input form-input-sm"
+                                    placeholder="Leave 0 for Base"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-text-secondary">Staff Price</label>
+                                <input
+                                    type="number"
+                                    name="staffPrice"
+                                    value={formData.staffPrice}
+                                    onChange={handleChange}
+                                    className="form-input form-input-sm"
+                                    placeholder="Leave 0 for Base"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-text-secondary">Corporate Price</label>
+                                <input
+                                    type="number"
+                                    name="corporatePrice"
+                                    value={formData.corporatePrice}
+                                    onChange={handleChange}
+                                    className="form-input form-input-sm"
+                                    placeholder="Leave 0 for Base"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-text-secondary">Scheme Price</label>
+                                <input
+                                    type="number"
+                                    name="schemePrice"
+                                    value={formData.schemePrice}
+                                    onChange={handleChange}
+                                    className="form-input form-input-sm"
+                                    placeholder="Leave 0 for Base"
+                                />
+                            </div>
+                        </div>
+                        <p className="text-xs text-text-secondary italic">
+                            * If a category price is set to 0, the system will automatically use the <strong>Base Price</strong> for that category.
+                        </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

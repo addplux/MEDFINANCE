@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { patientAPI } from '../../services/apiService';
+import { patientAPI, setupAPI } from '../../services/apiService';
 import { ArrowLeft, Save } from 'lucide-react';
 
 const CreatePatient = () => {
@@ -15,9 +15,24 @@ const CreatePatient = () => {
         email: '',
         address: '',
         nhimaNumber: '',
-        paymentMethod: 'cash' // Default to cash (non-NHIMA)
+        paymentMethod: 'cash', // Default to cash (non-NHIMA)
+        staffId: ''
     });
+    const [staffMembers, setStaffMembers] = useState([]);
     const [errors, setErrors] = useState({});
+
+    useEffect(() => {
+        fetchStaffMembers();
+    }, []);
+
+    const fetchStaffMembers = async () => {
+        try {
+            const response = await setupAPI.users.getAll({ isActive: true });
+            setStaffMembers(response.data);
+        } catch (error) {
+            console.error('Failed to fetch staff members:', error);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -164,6 +179,26 @@ const CreatePatient = () => {
                             <option value="staff">Staff</option>
                         </select>
                     </div>
+
+                    {/* Staff Member - Only show if payment method is Staff */}
+                    {formData.paymentMethod === 'staff' && (
+                        <div className="form-group">
+                            <label className="form-label">Principal Staff Member *</label>
+                            <select
+                                value={formData.staffId}
+                                onChange={(e) => setFormData({ ...formData, staffId: e.target.value })}
+                                className="form-select"
+                                required
+                            >
+                                <option value="">Select Staff Member</option>
+                                {staffMembers.map(staff => (
+                                    <option key={staff.id} value={staff.id}>
+                                        {staff.firstName} {staff.lastName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     {/* NHIMA Number - Only show if payment method is NHIMA */}
                     {formData.paymentMethod === 'nhima' && (

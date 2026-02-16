@@ -27,7 +27,7 @@ const getAllServices = async (req, res) => {
 // Create service
 const createService = async (req, res) => {
     try {
-        const { serviceName, category, department, price, description } = req.body;
+        const { serviceName, category, department, price, cashPrice, nhimaPrice, corporatePrice, schemePrice, staffPrice, description } = req.body;
 
         if (!serviceName || !category || price === undefined || price === null) {
             return res.status(400).json({ error: 'Service name, category, and price are required' });
@@ -66,6 +66,11 @@ const createService = async (req, res) => {
             category: normalizedCategory,
             department,
             price,
+            cashPrice: cashPrice || price,
+            nhimaPrice: nhimaPrice || price,
+            corporatePrice: corporatePrice || price,
+            schemePrice: schemePrice || price,
+            staffPrice: staffPrice || price,
             description
         });
 
@@ -156,7 +161,7 @@ const getAllUsers = async (req, res) => {
 // Create user
 const createUser = async (req, res) => {
     try {
-        const { username, email, password, role, firstName, lastName } = req.body;
+        const { username, email, password, role, firstName, lastName, medicalLimitMonthly, medicalLimitAnnual } = req.body;
 
         if (!username || !email || !password || !role) {
             return res.status(400).json({ error: 'Username, email, password, and role are required' });
@@ -168,7 +173,9 @@ const createUser = async (req, res) => {
             password,
             role,
             firstName,
-            lastName
+            lastName,
+            medicalLimitMonthly: medicalLimitMonthly || 0,
+            medicalLimitAnnual: medicalLimitAnnual || 0
         });
 
         res.status(201).json(user.toSafeObject());

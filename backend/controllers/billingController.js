@@ -71,9 +71,25 @@ const createOPDBill = async (req, res) => {
             return res.status(404).json({ error: 'Service not found' });
         }
 
+        // Get patient to determine pricing tier
+        const patient = await Patient.findByPk(patientId);
+        if (!patient) {
+            return res.status(404).json({ error: 'Patient not found' });
+        }
+
+        // Determine unit price based on patient's payment method
+        let unitPrice = parseFloat(service.price); // Base fallback
+
+        const tier = patient.paymentMethod; // e.g., 'cash', 'nhima', 'corporate', 'scheme', 'staff'
+
+        if (tier === 'cash' && service.cashPrice > 0) unitPrice = parseFloat(service.cashPrice);
+        else if (tier === 'nhima' && service.nhimaPrice > 0) unitPrice = parseFloat(service.nhimaPrice);
+        else if (tier === 'corporate' && service.corporatePrice > 0) unitPrice = parseFloat(service.corporatePrice);
+        else if (tier === 'scheme' && service.schemePrice > 0) unitPrice = parseFloat(service.schemePrice);
+        else if (tier === 'staff' && service.staffPrice > 0) unitPrice = parseFloat(service.staffPrice);
+
         // Calculate amounts
         const qty = quantity || 1;
-        const unitPrice = parseFloat(service.price);
         const totalAmount = unitPrice * qty;
         const discountAmount = parseFloat(discount) || 0;
         const netAmount = totalAmount - discountAmount;
@@ -81,6 +97,45 @@ const createOPDBill = async (req, res) => {
         // Generate bill number
         const billCount = await OPDBill.count();
         const billNumber = `OPD${String(billCount + 1).padStart(6, '0')}`;
+
+        // Check Staff Medical Limits
+        if (tier === 'staff') {
+            const staffId = patient.staffId; // Use linked staff ID for dependents (or self)
+
+            if (!staffId) {
+                return res.status(400).json({ error: 'Staff patient must be linked to a staff member' });
+            }
+
+            const staffMember = await User.findByPk(staffId);
+            if (!staffMember) {
+                return res.status(404).json({ error: 'Linked staff member not found' });
+            }
+
+            // Check limits
+            const newUsageMonthly = parseFloat(staffMember.medicalUsageMonthly || 0) + totalAmount;
+            const newUsageAnnual = parseFloat(staffMember.medicalUsageAnnual || 0) + totalAmount;
+
+            const limitMonthly = parseFloat(staffMember.medicalLimitMonthly || 0);
+            const limitAnnual = parseFloat(staffMember.medicalLimitAnnual || 0);
+
+            if (limitMonthly > 0 && newUsageMonthly > limitMonthly) {
+                return res.status(400).json({
+                    error: `Monthly medical limit exceeded. Available: K${(limitMonthly - parseFloat(staffMember.medicalUsageMonthly)).toFixed(2)}`
+                });
+            }
+
+            if (limitAnnual > 0 && newUsageAnnual > limitAnnual) {
+                return res.status(400).json({
+                    error: `Annual medical limit exceeded. Available: K${(limitAnnual - parseFloat(staffMember.medicalUsageAnnual)).toFixed(2)}`
+                });
+            }
+
+            // Update usage (Optimistic update - in a real app, use transaction)
+            await staffMember.update({
+                medicalUsageMonthly: newUsageMonthly,
+                medicalUsageAnnual: newUsageAnnual
+            });
+        }
 
         // Create bill
         const bill = await OPDBill.create({

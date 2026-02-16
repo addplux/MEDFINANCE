@@ -15,6 +15,8 @@ const UserForm = () => {
         role: 'viewer',
         firstName: '',
         lastName: '',
+        medicalLimitMonthly: '',
+        medicalLimitAnnual: '',
         isActive: true
     });
     const [loading, setLoading] = useState(false);
@@ -139,6 +141,36 @@ const UserForm = () => {
                             className="form-input"
                             required
                         />
+                    </div>
+
+                    <div className="border border-border-color rounded-lg p-4 bg-bg-tertiary/50 space-y-4">
+                        <h3 className="text-sm font-bold text-text-secondary uppercase tracking-wider">Staff Medical Scheme Limits</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-text-secondary">Monthly Limit (K)</label>
+                                <input
+                                    type="number"
+                                    name="medicalLimitMonthly"
+                                    value={formData.medicalLimitMonthly}
+                                    onChange={handleChange}
+                                    className="form-input"
+                                    placeholder="0.00"
+                                    min="0"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-text-secondary">Annual Limit (K)</label>
+                                <input
+                                    type="number"
+                                    name="medicalLimitAnnual"
+                                    value={formData.medicalLimitAnnual}
+                                    onChange={handleChange}
+                                    className="form-input"
+                                    placeholder="0.00"
+                                    min="0"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <div className="space-y-2">

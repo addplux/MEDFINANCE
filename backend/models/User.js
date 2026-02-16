@@ -41,6 +41,26 @@ const User = sequelize.define('User', {
     isActive: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
+    },
+    medicalLimitMonthly: {
+        type: DataTypes.DECIMAL(10, 2),
+        defaultValue: 0.00
+    },
+    medicalLimitAnnual: {
+        type: DataTypes.DECIMAL(10, 2),
+        defaultValue: 0.00
+    },
+    medicalUsageMonthly: {
+        type: DataTypes.DECIMAL(10, 2),
+        defaultValue: 0.00
+    },
+    medicalUsageAnnual: {
+        type: DataTypes.DECIMAL(10, 2),
+        defaultValue: 0.00
+    },
+    relationshipToStaff: {
+        type: DataTypes.ENUM('Self', 'Spouse', 'Child'),
+        defaultValue: 'Self'
     }
 }, {
     tableName: 'users',

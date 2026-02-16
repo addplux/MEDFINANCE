@@ -29,6 +29,11 @@ const Organization = require('./Organization');
 const PayrollDeduction = require('./PayrollDeduction');
 const Fund = require('./Fund');
 const FundTransaction = require('./FundTransaction');
+const Medication = require('./Medication');
+const PharmacyBatch = require('./PharmacyBatch');
+const LabTest = require('./LabTest');
+const LabRequest = require('./LabRequest');
+const LabResult = require('./LabResult');
 
 // Define relationships
 
@@ -120,6 +125,23 @@ Fund.hasMany(FundTransaction, { foreignKey: 'fundId', as: 'transactions' });
 FundTransaction.belongsTo(Fund, { foreignKey: 'fundId', as: 'fund' });
 FundTransaction.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 
+// Pharmacy relationships
+Medication.hasMany(PharmacyBatch, { foreignKey: 'medicationId', as: 'batches' });
+PharmacyBatch.belongsTo(Medication, { foreignKey: 'medicationId', as: 'medication' });
+
+PharmacyBill.belongsTo(Medication, { foreignKey: 'medicationId', as: 'medicationDetails' });
+PharmacyBill.belongsTo(PharmacyBatch, { foreignKey: 'batchId', as: 'batch' });
+
+// Lab relationships
+LabRequest.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
+LabRequest.belongsTo(User, { foreignKey: 'requestedBy', as: 'doctor' });
+LabRequest.hasMany(LabResult, { foreignKey: 'labRequestId', as: 'results' });
+
+LabResult.belongsTo(LabRequest, { foreignKey: 'labRequestId', as: 'request' });
+LabResult.belongsTo(LabTest, { foreignKey: 'testId', as: 'test' });
+LabResult.belongsTo(User, { foreignKey: 'technicianId', as: 'technician' });
+LabResult.belongsTo(User, { foreignKey: 'verifiedBy', as: 'verifier' });
+
 // Payroll Deduction relationships
 PayrollDeduction.belongsTo(User, { foreignKey: 'staffId', as: 'staff' });
 
@@ -165,5 +187,10 @@ module.exports = {
     Organization,
     PayrollDeduction,
     Fund,
-    FundTransaction
+    FundTransaction,
+    Medication,
+    PharmacyBatch,
+    LabTest,
+    LabRequest,
+    LabResult
 };

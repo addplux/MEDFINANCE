@@ -67,6 +67,17 @@ import UserForm from './pages/setup/UserForm';
 import DepartmentForm from './pages/setup/DepartmentForm';
 import PayrollMedical from './pages/payroll/PayrollMedical';
 
+// Pharmacy
+import PharmacyInventory from './pages/pharmacy/PharmacyInventory';
+import GoodsReceivedNote from './pages/pharmacy/GoodsReceivedNote';
+import Dispense from './pages/pharmacy/Dispense';
+
+// Lab
+import LabDashboard from './pages/lab/LabDashboard';
+import LabTests from './pages/lab/LabTests';
+import LabRequestForm from './pages/lab/LabRequestForm';
+import LabResultEntry from './pages/lab/LabResultEntry';
+
 // Layout
 import MainLayout from './components/layout/MainLayout';
 
@@ -147,6 +158,16 @@ function App() {
                       <Route path="setup/departments/new" element={<DepartmentForm />} />
                       <Route path="setup/departments/:id/edit" element={<DepartmentForm />} />
                       <Route path="payroll/medical" element={<PayrollMedical />} />
+                      <Route path="payroll/medical" element={<PayrollMedical />} />
+                      <Route path="pharmacy/inventory" element={<PharmacyInventory />} />
+                      <Route path="pharmacy/grn" element={<GoodsReceivedNote />} />
+                      <Route path="pharmacy/dispense" element={<Dispense />} />
+
+                      <Route path="lab/dashboard" element={<LabDashboard />} />
+                      <Route path="lab/tests" element={<LabTests />} />
+                      <Route path="lab/requests/new" element={<LabRequestForm />} />
+                      <Route path="lab/results/:id" element={<LabResultEntry />} />
+
                       <Route path="setup" element={<Setup />} />
                       <Route path="*" element={<Navigate to="dashboard" replace />} />
                     </Routes>

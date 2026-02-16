@@ -201,6 +201,39 @@ export const payrollAPI = {
     updateStatus: (id, status) => api.put(`/payroll/deductions/${id}`, { status }),
 };
 
+// Pharmacy
+export const pharmacyAPI = {
+    inventory: {
+        getAll: (params) => api.get('/pharmacy', { params }),
+        create: (data) => api.post('/pharmacy', data),
+        update: (id, data) => api.put(`/pharmacy/${id}`, data)
+    },
+    grn: {
+        receive: (data) => api.post('/pharmacy/grn', data)
+    },
+    batches: {
+        getByMedication: (medicationId) => api.get(`/pharmacy/batch/${medicationId}`)
+    },
+    dispense: (data) => api.post('/pharmacy/dispense', data)
+};
+
+// Lab
+export const labAPI = {
+    tests: {
+        getAll: (params) => api.get('/lab/tests', { params }),
+        create: (data) => api.post('/lab/tests', data),
+        update: (id, data) => api.put(`/lab/tests/${id}`, data)
+    },
+    requests: {
+        getAll: (params) => api.get('/lab/requests', { params }),
+        create: (data) => api.post('/lab/requests', data),
+        updateStatus: (id, status) => api.patch(`/lab/requests/${id}/status`, { status })
+    },
+    results: {
+        enter: (data) => api.post('/lab/results', data)
+    }
+};
+
 // Dashboard
 export const dashboardAPI = {
     getOverview: () => api.get('/dashboard/overview'),

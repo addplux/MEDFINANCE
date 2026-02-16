@@ -20,9 +20,21 @@ const PharmacyBill = sequelize.define('PharmacyBill', {
             key: 'id'
         }
     },
-    medication: {
-        type: DataTypes.STRING(100),
-        allowNull: false
+    medicationId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'medications',
+            key: 'id'
+        }
+    },
+    batchId: {
+        type: DataTypes.INTEGER,
+        allowNull: true, // Allow null for migration compatibility or direct sales without batch
+        references: {
+            model: 'pharmacy_batches',
+            key: 'id'
+        }
     },
     batchNumber: {
         type: DataTypes.STRING(50),

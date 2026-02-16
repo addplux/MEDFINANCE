@@ -60,6 +60,14 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.ENUM('cash', 'nhima', 'corporate', 'scheme', 'staff'),
         allowNull: false,
         defaultValue: 'cash'
+    },
+    staffId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'users',
+            key: 'id'
+        }
     }
 }, {
     tableName: 'patients',
