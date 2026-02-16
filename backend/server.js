@@ -25,25 +25,29 @@ if (process.env.CORS_ORIGIN) {
     allowedOrigins.push(process.env.CORS_ORIGIN);
 }
 
-// CORS configuration with dynamic origin validation
+// CORS configuration
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
+        // Allow requests with no origin (like mobile apps)
         if (!origin) return callback(null, true);
 
-        if (allowedOrigins.indexOf(origin) !== -1 || (origin && origin.includes('vercel.app'))) {
+        const isVercel = origin.endsWith('.vercel.app');
+        const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1');
+        const isAllowed = allowedOrigins.includes(origin) || isVercel || isLocal;
+
+        if (isAllowed || process.env.NODE_ENV === 'development') {
             callback(null, true);
         } else {
-            console.log('CORS blocked origin:', origin);
-            // In development, allow all, in production be strict
-            if (process.env.NODE_ENV === 'development') {
-                callback(null, true);
-            } else {
-                callback(new Error('Not allowed by CORS'));
-            }
+            console.error('CORS blocked origin:', origin);
+            // Instead of throwing an error which hides the headers, we just don't allow it
+            callback(null, false);
         }
     },
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    optionsSuccessStatus: 200 // Some legacy browsers choke on 204
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
