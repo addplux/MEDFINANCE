@@ -7,7 +7,7 @@ const Asset = sequelize.define('Asset', {
         primaryKey: true,
         autoIncrement: true
     },
-    assetCode: {
+    assetTag: {
         type: DataTypes.STRING(20),
         allowNull: false,
         unique: true
@@ -32,7 +32,7 @@ const Asset = sequelize.define('Asset', {
         type: DataTypes.DATEONLY,
         allowNull: false
     },
-    cost: {
+    purchasePrice: {
         type: DataTypes.DECIMAL(15, 2),
         allowNull: false
     },
@@ -45,6 +45,10 @@ const Asset = sequelize.define('Asset', {
         allowNull: false,
         comment: 'Useful life in years'
     },
+    annualDepreciation: {
+        type: DataTypes.DECIMAL(15, 2),
+        defaultValue: 0.00
+    },
     depreciationMethod: {
         type: DataTypes.ENUM('straight_line', 'declining_balance', 'units_of_production'),
         allowNull: false,
@@ -56,7 +60,7 @@ const Asset = sequelize.define('Asset', {
     },
     bookValue: {
         type: DataTypes.DECIMAL(15, 2),
-        allowNull: false
+        allowNull: true
     },
     status: {
         type: DataTypes.ENUM('active', 'disposed', 'under_maintenance', 'retired'),
@@ -71,9 +75,21 @@ const Asset = sequelize.define('Asset', {
         type: DataTypes.STRING(100),
         allowNull: true
     },
-    notes: {
+    supplier: {
+        type: DataTypes.STRING(100),
+        allowNull: true
+    },
+    description: {
         type: DataTypes.TEXT,
         allowNull: true
+    },
+    createdBy: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'users',
+            key: 'id'
+        }
     }
 }, {
     tableName: 'assets',

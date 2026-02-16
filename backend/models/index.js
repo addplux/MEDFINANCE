@@ -108,6 +108,7 @@ Budget.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
 
 // Asset relationships
 Asset.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
+Asset.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 
 // Audit Log relationships
 AuditLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
