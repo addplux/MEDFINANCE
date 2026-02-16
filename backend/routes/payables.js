@@ -8,7 +8,10 @@ router.use(authMiddleware);
 
 // Suppliers
 router.get('/suppliers', payablesController.getAllSuppliers);
+router.get('/suppliers/:id', payablesController.getSupplierById);
 router.post('/suppliers', authorize('admin', 'accountant'), payablesController.createSupplier);
+router.put('/suppliers/:id', authorize('admin', 'accountant'), payablesController.updateSupplier);
+router.delete('/suppliers/:id', authorize('admin', 'accountant'), payablesController.deleteSupplier);
 
 // Invoices
 router.get('/invoices', payablesController.getAllInvoices);

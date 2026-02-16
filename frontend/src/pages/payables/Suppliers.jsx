@@ -51,46 +51,45 @@ const Suppliers = () => {
     );
 
     return (
-        <div className="space-y-6">
+        <div className="page-container">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="page-header">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Suppliers</h1>
-                    <p className="text-gray-600 mt-1">Manage supplier accounts</p>
+                    <h1 className="page-title">Suppliers</h1>
+                    <p className="page-subtitle">Manage supplier accounts and payment terms</p>
                 </div>
                 <button
                     onClick={() => navigate('/app/payables/suppliers/new')}
                     className="btn btn-primary"
                 >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-4 h-4 mr-2" />
                     New Supplier
                 </button>
             </div>
 
-            {/* Search */}
-            <div className="card p-4">
-                <div className="relative max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Search suppliers..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="form-input pl-11"
-                    />
+            <div className="card mb-6">
+                <div className="card-header border-b-0">
+                    <div className="search-box">
+                        <Search className="text-text-secondary" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search suppliers by name or code..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                 </div>
             </div>
 
             {/* Suppliers Table */}
-            <div className="card overflow-hidden">
-                {/* Desktop Table View */}
-                <div className="hidden md:block overflow-x-auto">
-                    <table className="table">
+            <div className="card">
+                <div className="table-responsive">
+                    <table className="data-table">
                         <thead>
                             <tr>
                                 <th>Supplier Code</th>
                                 <th>Supplier Name</th>
-                                <th>Contact Person</th>
+                                <th>Contact</th>
                                 <th>Phone</th>
                                 <th>Email</th>
                                 <th>Status</th>
@@ -100,8 +99,11 @@ const Suppliers = () => {
                         <tbody>
                             {filteredSuppliers.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7" className="text-center py-8 text-gray-500">
-                                        {loading ? 'Loading...' : 'No suppliers found'}
+                                    <td colSpan="7" className="text-center py-12">
+                                        <div className="empty-state">
+                                            <Building2 size={48} />
+                                            <p>{loading ? 'Loading...' : 'No suppliers found'}</p>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (
@@ -113,19 +115,12 @@ const Suppliers = () => {
                                         <td>{supplier.phone || '-'}</td>
                                         <td>{supplier.email || '-'}</td>
                                         <td>
-                                            <span className={`badge ${getStatusBadge(supplier.status)}`}>
+                                            <span className={getStatusBadge(supplier.status)}>
                                                 {supplier.status}
                                             </span>
                                         </td>
                                         <td>
                                             <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => navigate(`/app/payables/suppliers/${supplier.id}`)}
-                                                    className="btn btn-sm btn-secondary"
-                                                    title="View"
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </button>
                                                 <button
                                                     onClick={() => navigate(`/app/payables/suppliers/${supplier.id}/edit`)}
                                                     className="btn btn-sm btn-secondary"
@@ -149,64 +144,7 @@ const Suppliers = () => {
                     </table>
                 </div>
 
-                {/* Mobile Card View */}
-                <div className="grid grid-cols-1 gap-4 md:hidden">
-                    {filteredSuppliers.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                            {loading ? 'Loading...' : 'No suppliers found'}
-                        </div>
-                    ) : (
-                        filteredSuppliers.map((supplier) => (
-                            <div key={supplier.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <div className="font-medium text-gray-900">{supplier.supplierName}</div>
-                                        <div className="text-sm text-gray-500">{supplier.supplierCode}</div>
-                                    </div>
-                                    <span className={`badge ${getStatusBadge(supplier.status)}`}>
-                                        {supplier.status}
-                                    </span>
-                                </div>
 
-                                <div className="space-y-1">
-                                    <div className="text-sm">
-                                        <span className="text-gray-500">Contact:</span>{' '}
-                                        <span className="font-medium">{supplier.contactPerson || '-'}</span>
-                                    </div>
-                                    <div className="text-sm">
-                                        <span className="text-gray-500">Phone:</span>{' '}
-                                        <span className="font-medium">{supplier.phone || '-'}</span>
-                                    </div>
-                                    <div className="text-sm">
-                                        <span className="text-gray-500">Email:</span>{' '}
-                                        <span className="font-medium">{supplier.email || '-'}</span>
-                                    </div>
-                                </div>
-
-                                <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
-                                    <button
-                                        onClick={() => navigate(`/app/payables/suppliers/${supplier.id}`)}
-                                        className="btn btn-sm btn-secondary flex-1 justify-center"
-                                    >
-                                        <Eye className="w-4 h-4 mr-1" /> View
-                                    </button>
-                                    <button
-                                        onClick={() => navigate(`/app/payables/suppliers/${supplier.id}/edit`)}
-                                        className="btn btn-sm btn-secondary flex-1 justify-center"
-                                    >
-                                        <Edit className="w-4 h-4 mr-1" /> Edit
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(supplier.id)}
-                                        className="btn btn-sm btn-danger flex-1 justify-center"
-                                    >
-                                        <Trash2 className="w-4 h-4 mr-1" /> Delete
-                                    </button>
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
 
                 {/* Pagination */}
                 {totalPages > 1 && (

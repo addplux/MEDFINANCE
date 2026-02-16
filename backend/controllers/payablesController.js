@@ -64,6 +64,73 @@ const createSupplier = async (req, res) => {
     }
 };
 
+// Get supplier by ID
+const getSupplierById = async (req, res) => {
+    try {
+        const supplier = await Supplier.findByPk(req.params.id);
+        if (!supplier) {
+            return res.status(404).json({ error: 'Supplier not found' });
+        }
+        res.json(supplier);
+    } catch (error) {
+        console.error('Get supplier by ID error:', error);
+        res.status(500).json({ error: 'Failed to get supplier' });
+    }
+};
+
+// Update supplier
+const updateSupplier = async (req, res) => {
+    try {
+        const { supplierName, contactPerson, phone, email, address, paymentTerms, taxId, bankName, bankAccountNumber, status, notes } = req.body;
+
+        const supplier = await Supplier.findByPk(req.params.id);
+        if (!supplier) {
+            return res.status(404).json({ error: 'Supplier not found' });
+        }
+
+        await supplier.update({
+            supplierName,
+            contactPerson,
+            phone,
+            email,
+            address,
+            paymentTerms,
+            taxId,
+            bankName,
+            bankAccountNumber,
+            status,
+            notes
+        });
+
+        res.json(supplier);
+    } catch (error) {
+        console.error('Update supplier error:', error);
+        res.status(500).json({ error: 'Failed to update supplier' });
+    }
+};
+
+// Delete supplier
+const deleteSupplier = async (req, res) => {
+    try {
+        const supplier = await Supplier.findByPk(req.params.id);
+        if (!supplier) {
+            return res.status(404).json({ error: 'Supplier not found' });
+        }
+
+        // Check for dependencies (invoices)
+        const invoiceCount = await Invoice.count({ where: { supplierId: req.params.id } });
+        if (invoiceCount > 0) {
+            return res.status(400).json({ error: 'Cannot delete supplier with existing invoices' });
+        }
+
+        await supplier.destroy();
+        res.json({ message: 'Supplier deleted successfully' });
+    } catch (error) {
+        console.error('Delete supplier error:', error);
+        res.status(500).json({ error: 'Failed to delete supplier' });
+    }
+};
+
 // ========== Invoices ==========
 
 // Get all invoices
@@ -231,7 +298,10 @@ const createPaymentVoucher = async (req, res) => {
 
 module.exports = {
     getAllSuppliers,
+    getSupplierById,
     createSupplier,
+    updateSupplier,
+    deleteSupplier,
     getAllInvoices,
     createInvoice,
     getAllPaymentVouchers,

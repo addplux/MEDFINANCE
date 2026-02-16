@@ -72,7 +72,7 @@ const CreatePatient = () => {
                             type="text"
                             value={formData.firstName}
                             onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                            className={`form - input ${errors.firstName ? 'border-red-500' : ''} `}
+                            className={`form-input ${errors.firstName ? 'border-red-500' : ''}`}
                             required
                         />
                         {errors.firstName && (
@@ -87,7 +87,7 @@ const CreatePatient = () => {
                             type="text"
                             value={formData.lastName}
                             onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                            className={`form - input ${errors.lastName ? 'border-red-500' : ''} `}
+                            className={`form-input ${errors.lastName ? 'border-red-500' : ''}`}
                             required
                         />
                         {errors.lastName && (
@@ -112,7 +112,7 @@ const CreatePatient = () => {
                         <select
                             value={formData.gender}
                             onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                            className={`form - select ${errors.gender ? 'border-red-500' : ''} `}
+                            className={`form-select ${errors.gender ? 'border-red-500' : ''}`}
                             required
                         >
                             <option value="">Select Gender</option>

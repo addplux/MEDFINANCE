@@ -58,39 +58,37 @@ const Assets = () => {
     );
 
     return (
-        <div className="space-y-6">
+        <div className="page-container">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="page-header">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Asset Register</h1>
-                    <p className="text-gray-600 mt-1">Manage fixed assets and depreciation</p>
+                    <h1 className="page-title">Asset Register</h1>
+                    <p className="page-subtitle">Manage fixed assets, acquisition, and depreciation tracking</p>
                 </div>
                 <button
                     onClick={() => navigate('/app/assets/new')}
                     className="btn btn-primary"
                 >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-4 h-4 mr-2" />
                     New Asset
                 </button>
             </div>
 
-            {/* Filters */}
-            <div className="card p-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <div className="card mb-6">
+                <div className="card-header border-b-0 flex flex-col md:flex-row gap-4">
+                    <div className="search-box">
+                        <Search className="text-text-secondary" size={18} />
                         <input
                             type="text"
-                            placeholder="Search assets..."
+                            placeholder="Search assets by tag or name..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="form-input pl-11"
                         />
                     </div>
                     <select
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value)}
-                        className="form-select"
+                        className="filter-select md:w-48"
                     >
                         <option value="">All Categories</option>
                         <option value="equipment">Equipment</option>
@@ -98,17 +96,13 @@ const Assets = () => {
                         <option value="vehicles">Vehicles</option>
                         <option value="buildings">Buildings</option>
                     </select>
-                    <button onClick={loadAssets} className="btn btn-secondary">
-                        Refresh
-                    </button>
                 </div>
             </div>
 
             {/* Assets Table */}
-            <div className="card overflow-hidden">
-                {/* Desktop Table View */}
-                <div className="hidden md:block overflow-x-auto">
-                    <table className="table">
+            <div className="card">
+                <div className="table-responsive">
+                    <table className="data-table">
                         <thead>
                             <tr>
                                 <th>Asset Tag</th>
@@ -124,8 +118,11 @@ const Assets = () => {
                         <tbody>
                             {filteredAssets.length === 0 ? (
                                 <tr>
-                                    <td colSpan="8" className="text-center py-8 text-gray-500">
-                                        {loading ? 'Loading...' : 'No assets found'}
+                                    <td colSpan="8" className="text-center py-12">
+                                        <div className="empty-state">
+                                            <Package size={48} />
+                                            <p>{loading ? 'Loading...' : 'No assets found'}</p>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (
@@ -135,10 +132,10 @@ const Assets = () => {
                                         <td>{asset.assetName}</td>
                                         <td className="capitalize">{asset.category}</td>
                                         <td className="font-semibold">K {asset.purchasePrice?.toLocaleString()}</td>
-                                        <td className="text-orange-600">
+                                        <td className="text-error">
                                             K {asset.accumulatedDepreciation?.toLocaleString() || '0.00'}
                                         </td>
-                                        <td className="font-semibold text-green-600">
+                                        <td className="font-semibold text-success">
                                             K {calculateBookValue(asset).toLocaleString()}
                                         </td>
                                         <td>
@@ -148,13 +145,6 @@ const Assets = () => {
                                         </td>
                                         <td>
                                             <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => navigate(`/app/assets/${asset.id}`)}
-                                                    className="btn btn-sm btn-secondary"
-                                                    title="View"
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </button>
                                                 <button
                                                     onClick={() => navigate(`/app/assets/${asset.id}/edit`)}
                                                     className="btn btn-sm btn-secondary"
@@ -176,65 +166,6 @@ const Assets = () => {
                             )}
                         </tbody>
                     </table>
-                </div>
-
-                {/* Mobile Card View */}
-                <div className="grid grid-cols-1 gap-4 md:hidden">
-                    {filteredAssets.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                            {loading ? 'Loading...' : 'No assets found'}
-                        </div>
-                    ) : (
-                        filteredAssets.map((asset) => (
-                            <div key={asset.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <div className="font-medium text-gray-900">{asset.assetName}</div>
-                                        <div className="text-sm text-gray-500">{asset.assetTag}</div>
-                                    </div>
-                                    <span className={getStatusBadge(asset.status)}>
-                                        {asset.status?.replace('_', ' ')}
-                                    </span>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <div className="text-sm flex justify-between">
-                                        <span className="text-gray-500">Category:</span>
-                                        <span className="capitalize">{asset.category}</span>
-                                    </div>
-                                    <div className="text-sm flex justify-between">
-                                        <span className="text-gray-500">Purchase Price:</span>
-                                        <span className="font-semibold">K {asset.purchasePrice?.toLocaleString()}</span>
-                                    </div>
-                                    <div className="text-sm flex justify-between">
-                                        <span className="text-gray-500">Book Value:</span>
-                                        <span className="font-semibold text-green-600">K {calculateBookValue(asset).toLocaleString()}</span>
-                                    </div>
-                                </div>
-
-                                <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
-                                    <button
-                                        onClick={() => navigate(`/app/assets/${asset.id}`)}
-                                        className="btn btn-sm btn-secondary flex-1 justify-center"
-                                    >
-                                        <Eye className="w-4 h-4 mr-1" /> View
-                                    </button>
-                                    <button
-                                        onClick={() => navigate(`/app/assets/${asset.id}/edit`)}
-                                        className="btn btn-sm btn-secondary flex-1 justify-center"
-                                    >
-                                        <Edit className="w-4 h-4 mr-1" /> Edit
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(asset.id)}
-                                        className="btn btn-sm btn-danger flex-1 justify-center"
-                                    >
-                                        <Trash2 className="w-4 h-4 mr-1" /> Delete
-                                    </button>
-                                </div>
-                            </div>
-                        ))
-                    )}
                 </div>
             </div>
         </div>

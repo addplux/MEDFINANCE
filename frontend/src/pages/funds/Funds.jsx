@@ -1,184 +1,176 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DollarSign, TrendingUp, TrendingDown, Plus } from 'lucide-react';
-import api from '../../services/apiClient';
+import { fundAPI } from '../../services/apiService';
+import { Plus, Search, Edit, Trash2, Building, TrendingUp, Shield, Clock } from 'lucide-react';
 
 const Funds = () => {
     const navigate = useNavigate();
     const [funds, setFunds] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({
-        totalBalance: 0,
-        nhimaBalance: 0,
-        donorBalance: 0,
-        retentionBalance: 0
-    });
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        fetchFunds();
+        loadFunds();
     }, []);
 
-    const fetchFunds = async () => {
+    const loadFunds = async () => {
         try {
             setLoading(true);
-            const response = await api.get('/funds');
+            const response = await fundAPI.getAll();
             setFunds(response.data);
-
-            // Calculate stats
-            const stats = response.data.reduce((acc, fund) => {
-                acc.totalBalance += parseFloat(fund.balance || 0);
-                if (fund.fundType === 'nhima') acc.nhimaBalance += parseFloat(fund.balance || 0);
-                if (fund.fundType === 'donor') acc.donorBalance += parseFloat(fund.balance || 0);
-                if (fund.fundType === 'retention') acc.retentionBalance += parseFloat(fund.balance || 0);
-                return acc;
-            }, { totalBalance: 0, nhimaBalance: 0, donorBalance: 0, retentionBalance: 0 });
-
-            setStats(stats);
         } catch (error) {
-            console.error('Error fetching funds:', error);
+            console.error('Failed to load funds:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const getFundTypeLabel = (type) => {
-        const labels = {
-            'nhima': 'NHIMA Fund',
-            'donor': 'Donor Fund',
-            'retention': 'Retention Fund',
-            'general': 'General Fund'
-        };
-        return labels[type] || type;
+    const handleDelete = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this fund?')) return;
+        try {
+            await fundAPI.delete(id);
+            loadFunds();
+        } catch (error) {
+            console.error('Failed to delete fund:', error);
+            alert('Failed to delete fund');
+        }
     };
 
-    const getFundTypeBadge = (type) => {
+    const getStatusBadge = (status) => {
         const badges = {
-            'nhima': 'badge-primary',
-            'donor': 'badge-success',
-            'retention': 'badge-warning',
-            'general': 'badge-secondary'
+            active: 'badge-success',
+            inactive: 'badge-secondary',
+            closed: 'badge-danger'
         };
-        return `badge ${badges[type] || 'badge-secondary'}`;
+        return `badge ${badges[status] || 'badge-info'}`;
     };
+
+    const totalBalance = funds.reduce((sum, fund) => sum + parseFloat(fund.currentBalance || 0), 0);
+
+    const filteredFunds = funds.filter(fund =>
+        fund.fundName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        fund.fundType?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div className="page-container">
+            {/* Header */}
             <div className="page-header">
                 <div>
-                    <h1 className="page-title">Fund Accounting</h1>
-                    <p className="page-subtitle">Manage designated funds and track balances</p>
+                    <h1 className="page-title">Fund Accounts</h1>
+                    <p className="page-subtitle">Manage restricted and unrestricted funds</p>
                 </div>
-                <button className="btn btn-primary" onClick={() => navigate('/app/funds/new')}>
-                    <Plus size={18} className="mr-2" />
+                <button
+                    onClick={() => navigate('/app/funds/new')}
+                    className="btn btn-primary"
+                >
+                    <Plus className="w-4 h-4 mr-2" />
                     New Fund
                 </button>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                <div className="card p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600">Total Balance</p>
-                            <h3 className="text-2xl font-bold mt-1">K{stats.totalBalance.toLocaleString()}</h3>
-                        </div>
-                        <DollarSign className="text-blue-500" size={32} />
+            <div className="stats-grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="stat-card">
+                    <div className="stat-label">Total Funds Balance</div>
+                    <div className="stat-value">K {totalBalance.toLocaleString()}</div>
+                    <div className="stat-trend text-success flex items-center gap-1">
+                        <TrendingUp size={14} /> Global Portfolio
                     </div>
                 </div>
-
-                <div className="card p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600">NHIMA Fund</p>
-                            <h3 className="text-2xl font-bold mt-1">K{stats.nhimaBalance.toLocaleString()}</h3>
-                        </div>
-                        <TrendingUp className="text-primary" size={32} />
+                <div className="stat-card">
+                    <div className="stat-label">Active Funds</div>
+                    <div className="stat-value">{funds.length}</div>
+                    <div className="stat-trend text-success flex items-center gap-1">
+                        <Shield size={14} /> Operational
                     </div>
                 </div>
-
-                <div className="card p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600">Donor Fund</p>
-                            <h3 className="text-2xl font-bold mt-1">K{stats.donorBalance.toLocaleString()}</h3>
-                        </div>
-                        <TrendingUp className="text-success" size={32} />
+                <div className="stat-card">
+                    <div className="stat-label">Recent Transactions</div>
+                    <div className="stat-value">0</div>
+                    <div className="stat-trend text-text-secondary flex items-center gap-1">
+                        <Clock size={14} /> Last 24h
                     </div>
                 </div>
+            </div>
 
-                <div className="card p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600">Retention Fund</p>
-                            <h3 className="text-2xl font-bold mt-1">K{stats.retentionBalance.toLocaleString()}</h3>
-                        </div>
-                        <TrendingDown className="text-warning" size={32} />
+            {/* Filter & Search */}
+            <div className="card mb-6">
+                <div className="card-header border-b-0">
+                    <div className="search-box">
+                        <Search className="text-text-secondary" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search funds..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                 </div>
             </div>
 
             {/* Funds List */}
             <div className="card">
-                <div className="card-header">
-                    <h2 className="text-lg font-semibold">All Funds</h2>
-                </div>
-
-                {loading ? (
-                    <div className="loading-state">Loading funds...</div>
-                ) : (
-                    <div className="table-responsive">
-                        <table className="data-table">
-                            <thead>
+                <div className="table-responsive">
+                    <table className="data-table">
+                        <thead>
+                            <tr>
+                                <th>Fund Name</th>
+                                <th>Type</th>
+                                <th>Current Balance</th>
+                                <th>Purpose</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredFunds.length === 0 ? (
                                 <tr>
-                                    <th>Fund Code</th>
-                                    <th>Fund Name</th>
-                                    <th>Type</th>
-                                    <th>Balance</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <td colSpan="6" className="text-center py-12">
+                                        <div className="empty-state">
+                                            <Building size={48} />
+                                            <p>{loading ? 'Loading...' : 'No funds found'}</p>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {funds.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="6" className="text-center">
-                                            <div className="empty-state">
-                                                <DollarSign size={48} />
-                                                <p>No funds found</p>
+                            ) : (
+                                filteredFunds.map((fund) => (
+                                    <tr key={fund.id}>
+                                        <td className="font-semibold">{fund.fundName}</td>
+                                        <td className="capitalize">{fund.fundType}</td>
+                                        <td className="font-bold text-success">
+                                            K {parseFloat(fund.currentBalance || 0).toLocaleString()}
+                                        </td>
+                                        <td>{fund.purpose || '-'}</td>
+                                        <td>
+                                            <span className={getStatusBadge(fund.status)}>
+                                                {fund.status}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => navigate(`/app/funds/${fund.id}/edit`)}
+                                                    className="btn btn-sm btn-secondary"
+                                                    title="Edit"
+                                                >
+                                                    <Edit className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(fund.id)}
+                                                    className="btn btn-sm btn-danger"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
-                                ) : (
-                                    funds.map((fund) => (
-                                        <tr key={fund.id}>
-                                            <td className="font-medium">{fund.fundCode}</td>
-                                            <td>{fund.fundName}</td>
-                                            <td>
-                                                <span className={getFundTypeBadge(fund.fundType)}>
-                                                    {getFundTypeLabel(fund.fundType)}
-                                                </span>
-                                            </td>
-                                            <td className="font-medium">K{parseFloat(fund.balance || 0).toLocaleString()}</td>
-                                            <td>
-                                                <span className={`badge ${fund.status === 'active' ? 'badge-success' : 'badge-secondary'}`}>
-                                                    {fund.status}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <button
-                                                    className="btn-sm btn-secondary"
-                                                    onClick={() => navigate(`/app/funds/${fund.id}`)}
-                                                >
-                                                    View
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

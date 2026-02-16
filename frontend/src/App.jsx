@@ -33,6 +33,7 @@ import Reconciliation from './pages/nhima/Reconciliation';
 
 // Payables
 import Suppliers from './pages/payables/Suppliers';
+import SupplierForm from './pages/payables/SupplierForm';
 
 // Ledger
 import ChartOfAccounts from './pages/ledger/ChartOfAccounts';
@@ -42,12 +43,15 @@ import Payments from './pages/cash/Payments';
 
 // Budgets
 import Budgets from './pages/budgets/Budgets';
+import BudgetForm from './pages/budgets/BudgetForm';
 
 // Assets
 import Assets from './pages/assets/Assets';
+import AssetForm from './pages/assets/AssetForm';
 
 // Funds
 import Funds from './pages/funds/Funds';
+import FundForm from './pages/funds/FundForm';
 
 // Receivables
 import CorporateAccounts from './pages/receivables/CorporateAccounts';
@@ -121,12 +125,20 @@ function App() {
                       <Route path="/receivables/corporate" element={<CorporateAccounts />} />
                       <Route path="/receivables/schemes" element={<Schemes />} />
                       <Route path="/payables/suppliers" element={<Suppliers />} />
+                      <Route path="/payables/suppliers/new" element={<SupplierForm />} />
+                      <Route path="/payables/suppliers/:id/edit" element={<SupplierForm />} />
                       <Route path="/ledger/accounts" element={<ChartOfAccounts />} />
                       <Route path="/cash/payments" element={<Payments />} />
                       <Route path="/budgets" element={<Budgets />} />
+                      <Route path="/budgets/new" element={<BudgetForm />} />
+                      <Route path="/budgets/:id/edit" element={<BudgetForm />} />
                       <Route path="/funds" element={<Funds />} />
+                      <Route path="/funds/new" element={<FundForm />} />
+                      <Route path="/funds/:id/edit" element={<FundForm />} />
                       <Route path="/funds/:id" element={<Funds />} />
                       <Route path="/assets" element={<Assets />} />
+                      <Route path="/assets/new" element={<AssetForm />} />
+                      <Route path="/assets/:id/edit" element={<AssetForm />} />
                       <Route path="/reports" element={<Reports />} />
                       <Route path="setup/services/new" element={<ServiceForm />} />
                       <Route path="setup/services/:id/edit" element={<ServiceForm />} />
