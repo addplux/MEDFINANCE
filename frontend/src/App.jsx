@@ -46,6 +46,9 @@ import Budgets from './pages/budgets/Budgets';
 // Assets
 import Assets from './pages/assets/Assets';
 
+// Funds
+import Funds from './pages/funds/Funds';
+
 // Receivables
 import CorporateAccounts from './pages/receivables/CorporateAccounts';
 import Schemes from './pages/receivables/Schemes';
@@ -121,6 +124,8 @@ function App() {
                       <Route path="/ledger/accounts" element={<ChartOfAccounts />} />
                       <Route path="/cash/payments" element={<Payments />} />
                       <Route path="/budgets" element={<Budgets />} />
+                      <Route path="/funds" element={<Funds />} />
+                      <Route path="/funds/:id" element={<Funds />} />
                       <Route path="/assets" element={<Assets />} />
                       <Route path="/reports" element={<Reports />} />
                       <Route path="setup/services/new" element={<ServiceForm />} />

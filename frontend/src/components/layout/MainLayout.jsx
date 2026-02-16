@@ -109,6 +109,17 @@ const MainLayout = ({ children }) => {
         { path: '/app/ledger/accounts', icon: BookOpen, label: 'Ledger' },
         { path: '/app/cash/payments', icon: Wallet, label: 'Cash & Bank' },
         { path: '/app/budgets', icon: TrendingUp, label: 'Budgets' },
+        {
+            id: 'funds',
+            icon: DollarSign,
+            label: 'Fund Accounting',
+            submenu: [
+                { path: '/app/funds', label: 'All Funds' },
+                { path: '/app/funds/nhima', label: 'NHIMA Fund' },
+                { path: '/app/funds/donor', label: 'Donor Fund' },
+                { path: '/app/funds/retention', label: 'Retention Fund' }
+            ]
+        },
         { path: '/app/assets', icon: Package, label: 'Assets' },
         { path: '/app/payroll/medical', icon: Stethoscope, label: 'Payroll Medical' },
         { path: '/app/reports', icon: BarChart3, label: 'Reports' },

@@ -27,6 +27,8 @@ const Asset = require('./Asset');
 const AuditLog = require('./AuditLog');
 const Organization = require('./Organization');
 const PayrollDeduction = require('./PayrollDeduction');
+const Fund = require('./Fund');
+const FundTransaction = require('./FundTransaction');
 
 // Define relationships
 
@@ -113,6 +115,11 @@ Asset.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 // Audit Log relationships
 AuditLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
+// Fund relationships
+Fund.hasMany(FundTransaction, { foreignKey: 'fundId', as: 'transactions' });
+FundTransaction.belongsTo(Fund, { foreignKey: 'fundId', as: 'fund' });
+FundTransaction.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+
 // Payroll Deduction relationships
 PayrollDeduction.belongsTo(User, { foreignKey: 'staffId', as: 'staff' });
 
@@ -156,5 +163,7 @@ module.exports = {
     Asset,
     AuditLog,
     Organization,
-    PayrollDeduction
+    PayrollDeduction,
+    Fund,
+    FundTransaction
 };
