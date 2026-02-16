@@ -62,6 +62,11 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', message: 'MEDFINANCE360 API is running' });
 });
 
+// Root route for load balancer checks
+app.get('/', (req, res) => {
+    res.status(200).send('MEDFINANCE360 API is running');
+});
+
 // API Routes (will be added in next phases)
 app.get('/api', (req, res) => {
     res.json({
