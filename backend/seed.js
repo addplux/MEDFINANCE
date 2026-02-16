@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { syncDatabase, User, Department, Service, ChartOfAccounts } = require('./models');
 
 const seedDatabase = async () => {
@@ -176,5 +177,10 @@ const seedDatabase = async () => {
     }
 };
 
-// Run seeding
-seedDatabase();
+// Export for use in server.js
+module.exports = { seedDatabase };
+
+// Run directly if called from command line
+if (require.main === module) {
+    seedDatabase();
+}

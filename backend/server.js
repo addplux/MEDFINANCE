@@ -6,8 +6,9 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { syncDatabase } = require('./models');
+const { syncDatabase, User } = require('./models');
 const { sequelize, testConnection } = require('./config/database');
+const { seedDatabase } = require('./seed');
 
 const app = express();
 
@@ -138,11 +139,23 @@ const startServer = async () => {
         }
 
         // Start listening
-        app.listen(PORT, '0.0.0.0', () => {
+        app.listen(PORT, '0.0.0.0', async () => {
             console.log(`🚀 Server running on port ${PORT}`);
             console.log(`🔌 PORT env var: ${process.env.PORT}`);
             console.log(`📊 Environment: ${process.env.NODE_ENV}`);
             console.log(`🔗 API: http://0.0.0.0:${PORT}/api`);
+
+            // Auto-seed if database is empty
+            try {
+                const userCount = await User.count();
+                if (userCount === 0) {
+                    console.log('🌱 Database appears empty. Running auto-seed...');
+                    await seedDatabase();
+                    console.log('✅ Auto-seed completed via server startup.');
+                }
+            } catch (seedError) {
+                console.error('⚠️ Auto-seed check failed:', seedError);
+            }
         });
     } catch (error) {
         console.error('Failed to start server process:', error);
