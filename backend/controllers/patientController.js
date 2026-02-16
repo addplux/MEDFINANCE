@@ -1,4 +1,5 @@
 const { Patient } = require('../models');
+const { Op } = require('sequelize');
 
 // Get all patients
 const getAllPatients = async (req, res) => {
@@ -8,10 +9,10 @@ const getAllPatients = async (req, res) => {
 
         const where = {};
         if (search) {
-            where[sequelize.Sequelize.Op.or] = [
-                { firstName: { [sequelize.Sequelize.Op.iLike]: `%${search}%` } },
-                { lastName: { [sequelize.Sequelize.Op.iLike]: `%${search}%` } },
-                { patientNumber: { [sequelize.Sequelize.Op.iLike]: `%${search}%` } }
+            where[Op.or] = [
+                { firstName: { [Op.iLike]: `%${search}%` } },
+                { lastName: { [Op.iLike]: `%${search}%` } },
+                { patientNumber: { [Op.iLike]: `%${search}%` } }
             ];
         }
 

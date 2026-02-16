@@ -277,7 +277,7 @@ const updateDepartment = async (req, res) => {
 
         await department.update(req.body);
 
-        res.json(updatedDepartment);
+        res.json(department);
     } catch (error) {
         console.error('Update department error:', error);
         res.status(500).json({ error: 'Failed to update department' });

@@ -31,11 +31,16 @@ app.use(cors({
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
 
-        if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('vercel.app')) {
+        if (allowedOrigins.indexOf(origin) !== -1 || (origin && origin.includes('vercel.app'))) {
             callback(null, true);
         } else {
             console.log('CORS blocked origin:', origin);
-            callback(new Error('Not allowed by CORS'));
+            // In development, allow all, in production be strict
+            if (process.env.NODE_ENV === 'development') {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
         }
     },
     credentials: true
@@ -115,7 +120,7 @@ const startServer = async () => {
         await testConnection();
 
         // Sync database models (create tables if they don't exist)
-        await syncDatabase({ alter: false }); // Use { force: true } to drop and recreate tables
+        await syncDatabase({ alter: true }); // Enable alter to sync schema changes
 
         // Start listening
         app.listen(PORT, () => {

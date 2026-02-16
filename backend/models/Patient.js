@@ -55,6 +55,11 @@ const Patient = sequelize.define('Patient', {
     emergencyPhone: {
         type: DataTypes.STRING(20),
         allowNull: true
+    },
+    paymentMethod: {
+        type: DataTypes.ENUM('cash', 'nhima', 'corporate', 'scheme', 'staff'),
+        allowNull: false,
+        defaultValue: 'cash'
     }
 }, {
     tableName: 'patients',
