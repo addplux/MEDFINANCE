@@ -34,10 +34,27 @@ const createService = async (req, res) => {
 
         const normalizedCategory = category.toLowerCase();
 
-        // Generate service code
-        const serviceCount = await Service.count({ where: { category: normalizedCategory } });
+        // Generate service code based on the LAST service code, not count
+        const lastService = await Service.findOne({
+            where: { category: normalizedCategory },
+            order: [['createdAt', 'DESC']],
+            attributes: ['serviceCode']
+        });
+
         const categoryPrefix = normalizedCategory.substring(0, 3).toUpperCase();
-        const serviceCode = `${categoryPrefix}${String(serviceCount + 1).padStart(3, '0')}`;
+        let nextNumber = 1;
+
+        if (lastService && lastService.serviceCode) {
+            // Extract the number part from the last service code
+            // Format is XXX001, so we remove the first 3 chars
+            const lastNumberStr = lastService.serviceCode.substring(3);
+            const lastNumber = parseInt(lastNumberStr);
+            if (!isNaN(lastNumber)) {
+                nextNumber = lastNumber + 1;
+            }
+        }
+
+        const serviceCode = `${categoryPrefix}${String(nextNumber).padStart(3, '0')}`;
 
         const service = await Service.create({
             serviceCode,
