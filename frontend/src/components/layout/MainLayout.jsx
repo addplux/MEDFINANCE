@@ -67,7 +67,7 @@ const MainLayout = ({ children }) => {
             newExpanded['billing'] = true;
         }
         if (path.includes('/nhima/')) {
-            newExpanded['nhima'] = true;
+            newExpanded['receivables'] = true;
         }
 
         setExpandedMenus(newExpanded);
@@ -93,9 +93,9 @@ const MainLayout = ({ children }) => {
         },
         { path: '/app/patients', icon: Users, label: 'Patients' },
         {
-            id: 'nhima',
+            id: 'receivables',
             icon: DollarSign,
-            label: 'NHIMA',
+            label: 'Receivables',
             submenu: [
                 { path: '/app/nhima/eligibility', label: 'Eligibility Check' },
                 { path: '/app/nhima/submission', label: 'Claims Submission' },
