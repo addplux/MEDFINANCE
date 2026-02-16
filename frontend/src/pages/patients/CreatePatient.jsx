@@ -14,7 +14,8 @@ const CreatePatient = () => {
         phone: '',
         email: '',
         address: '',
-        nhimaNumber: ''
+        nhimaNumber: '',
+        paymentMethod: 'cash' // Default to cash (non-NHIMA)
     });
     const [errors, setErrors] = useState({});
 
@@ -147,16 +148,35 @@ const CreatePatient = () => {
                         />
                     </div>
 
-                    {/* NHIMA Number */}
+                    {/* Payment Method */}
                     <div className="form-group">
-                        <label className="form-label">NHIMA Number</label>
-                        <input
-                            type="text"
-                            value={formData.nhimaNumber}
-                            onChange={(e) => setFormData({ ...formData, nhimaNumber: e.target.value })}
-                            className="form-input"
-                        />
+                        <label className="form-label">Payment Method *</label>
+                        <select
+                            value={formData.paymentMethod}
+                            onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
+                            className="form-select"
+                            required
+                        >
+                            <option value="cash">Cash (Self-Pay)</option>
+                            <option value="nhima">NHIMA</option>
+                            <option value="corporate">Corporate Account</option>
+                            <option value="scheme">Insurance Scheme</option>
+                        </select>
                     </div>
+
+                    {/* NHIMA Number - Only show if payment method is NHIMA */}
+                    {formData.paymentMethod === 'nhima' && (
+                        <div className="form-group">
+                            <label className="form-label">NHIMA Number *</label>
+                            <input
+                                type="text"
+                                value={formData.nhimaNumber}
+                                onChange={(e) => setFormData({ ...formData, nhimaNumber: e.target.value })}
+                                className="form-input"
+                                required
+                            />
+                        </div>
+                    )}
 
                     {/* Address */}
                     <div className="form-group md:col-span-2">
