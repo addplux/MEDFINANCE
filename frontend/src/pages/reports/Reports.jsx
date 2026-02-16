@@ -15,7 +15,8 @@ const Reports = () => {
         { id: 'revenue', label: 'Revenue Report', icon: BarChart3 },
         { id: 'cashflow', label: 'Cashflow Analysis', icon: BarChart3 },
         { id: 'profitability', label: 'Department Profitability', icon: BarChart3 },
-        { id: 'billing', label: 'Billing Summary', icon: BarChart3 }
+        { id: 'billing', label: 'Billing Summary', icon: BarChart3 },
+        { id: 'performance', label: 'Cashier Performance', icon: BarChart3 }
     ];
 
     useEffect(() => {
@@ -171,7 +172,7 @@ const Reports = () => {
                             )}
 
                             {/* Other reports placeholder */}
-                            {(activeTab === 'profitability' || activeTab === 'billing') && (
+                            {(activeTab === 'profitability' || activeTab === 'billing' || activeTab === 'performance') && (
                                 <div className="text-center py-12 text-gray-500">
                                     Report data will be displayed here
                                 </div>

@@ -61,6 +61,11 @@ const Patient = sequelize.define('Patient', {
         allowNull: false,
         defaultValue: 'cash'
     },
+    costCategory: {
+        type: DataTypes.ENUM('standard', 'high_cost', 'low_cost'),
+        allowNull: false,
+        defaultValue: 'standard'
+    },
     staffId: {
         type: DataTypes.INTEGER,
         allowNull: true,

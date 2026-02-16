@@ -16,6 +16,7 @@ const CreatePatient = () => {
         address: '',
         nhimaNumber: '',
         paymentMethod: 'cash', // Default to cash (non-NHIMA)
+        costCategory: 'standard',
         staffId: ''
     });
     const [staffMembers, setStaffMembers] = useState([]);
@@ -138,6 +139,21 @@ const CreatePatient = () => {
                         {errors.gender && (
                             <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
                         )}
+                    </div>
+
+                    {/* Cost Category */}
+                    <div className="form-group">
+                        <label className="form-label">Cost Category *</label>
+                        <select
+                            value={formData.costCategory}
+                            onChange={(e) => setFormData({ ...formData, costCategory: e.target.value })}
+                            className="form-select"
+                            required
+                        >
+                            <option value="standard">Standard</option>
+                            <option value="high_cost">High Cost</option>
+                            <option value="low_cost">Low Cost</option>
+                        </select>
                     </div>
 
                     {/* Phone */}

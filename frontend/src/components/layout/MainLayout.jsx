@@ -97,33 +97,75 @@ const MainLayout = ({ children }) => {
             icon: DollarSign,
             label: 'Receivables',
             submenu: [
-                { path: '/app/receivables/corporate', label: 'Corporate Accounts' },
+                { path: '/app/nhima/submission', label: 'NHIMA' }, // Grouped link or dashboard? Keeping simple for now
                 { path: '/app/receivables/schemes', label: 'Schemes' },
-                { path: '/app/nhima/eligibility', label: 'NHIMA Eligibility' },
-                { path: '/app/nhima/submission', label: 'NHIMA Claims' },
+                { path: '/app/receivables/corporate', label: 'Corporate' },
+                { path: '/app/payroll/medical', label: 'Staff Payroll' },
+                { path: '/app/receivables/ageing', label: 'Debtor Ageing' }
+            ]
+        },
+        {
+            id: 'nhima',
+            icon: Activity, // Reuse or find better
+            label: 'NHIMA',
+            submenu: [
+                { path: '/app/nhima/eligibility', label: 'Eligibility Check' },
+                { path: '/app/nhima/submission', label: 'Claims Submission' },
                 { path: '/app/nhima/tracking', label: 'Claims Tracking' },
                 { path: '/app/nhima/reconciliation', label: 'Reconciliation' }
             ]
         },
         { path: '/app/payables/suppliers', icon: CreditCard, label: 'Payables' },
         { path: '/app/ledger/accounts', icon: BookOpen, label: 'Ledger' },
-        { path: '/app/cash/payments', icon: Wallet, label: 'Cash & Bank' },
-        { path: '/app/budgets', icon: TrendingUp, label: 'Budgets' },
+        {
+            id: 'cash',
+            icon: Wallet,
+            label: 'Cash & Banking',
+            submenu: [
+                { path: '/app/cash/payments', label: 'Receive Payment' }, // Also Payments?
+                { path: '/app/cash/shift-report', label: 'Shift Report' }
+            ]
+        },
+        {
+            id: 'budgets',
+            icon: TrendingUp,
+            label: 'Budget Management',
+            submenu: [
+                { path: '/app/budgets', label: 'Annual Budget' },
+                { path: '/app/budgets/analysis', label: 'Budget vs Actual' }
+            ]
+        },
         {
             id: 'funds',
             icon: DollarSign,
             label: 'Fund Accounting',
             submenu: [
-                { path: '/app/funds', label: 'All Funds' },
                 { path: '/app/funds/nhima', label: 'NHIMA Fund' },
                 { path: '/app/funds/donor', label: 'Donor Fund' },
                 { path: '/app/funds/retention', label: 'Retention Fund' }
             ]
         },
         { path: '/app/assets', icon: Package, label: 'Assets' },
-        { path: '/app/payroll/medical', icon: Stethoscope, label: 'Payroll Medical' },
+        {
+            id: 'payroll_medical',
+            icon: Stethoscope,
+            label: 'Payroll Medical',
+            submenu: [
+                { path: '/app/payroll/medical', label: 'Deduction Schedule' },
+                { path: '/app/payroll/medical', label: 'Staff Balances' } // Both link to same page with tabs
+            ]
+        },
         { path: '/app/lab/dashboard', icon: Activity, label: 'Laboratory' },
-        { path: '/app/reports', icon: BarChart3, label: 'Reports' },
+        {
+            id: 'reports',
+            icon: BarChart3,
+            label: 'Reports & Analytics',
+            submenu: [
+                { path: '/app/reports', label: 'Revenue Report' },
+                { path: '/app/reports', label: 'Department Income' },
+                { path: '/app/reports', label: 'Cashier Performance' }
+            ]
+        },
         {
             id: 'pharmacy',
             icon: Package,
@@ -134,7 +176,17 @@ const MainLayout = ({ children }) => {
                 { path: '/app/pharmacy/dispense', label: 'Dispense' }
             ]
         },
-        { path: '/app/setup', icon: Settings, label: 'Setup' },
+        {
+            id: 'setup',
+            icon: Settings,
+            label: 'Setup',
+            submenu: [
+                { path: '/app/setup', label: 'Tariffs' }, // Services
+                { path: '/app/setup/services', label: 'Services' },
+                { path: '/app/setup/users/new', label: 'Staff Management' },
+                { path: '/app/setup/roles', label: 'User Roles' }
+            ]
+        },
     ];
 
     const handleLogout = () => {

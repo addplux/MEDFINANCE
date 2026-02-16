@@ -38,13 +38,6 @@ import SupplierForm from './pages/payables/SupplierForm';
 // Ledger
 import ChartOfAccounts from './pages/ledger/ChartOfAccounts';
 
-// Cash & Bank
-import Payments from './pages/cash/Payments';
-
-// Budgets
-import Budgets from './pages/budgets/Budgets';
-import BudgetForm from './pages/budgets/BudgetForm';
-
 // Assets
 import Assets from './pages/assets/Assets';
 import AssetForm from './pages/assets/AssetForm';
@@ -56,6 +49,7 @@ import FundForm from './pages/funds/FundForm';
 // Receivables
 import CorporateAccounts from './pages/receivables/CorporateAccounts';
 import Schemes from './pages/receivables/Schemes';
+import DebtorAgeing from './pages/receivables/DebtorAgeing';
 
 // Reports
 import Reports from './pages/reports/Reports';
@@ -63,9 +57,20 @@ import Reports from './pages/reports/Reports';
 // Setup
 import Setup from './pages/setup/Setup';
 import ServiceForm from './pages/setup/ServiceForm';
+import ServicesList from './pages/setup/ServicesList';
 import UserForm from './pages/setup/UserForm';
+import UserRoles from './pages/setup/UserRoles';
 import DepartmentForm from './pages/setup/DepartmentForm';
 import PayrollMedical from './pages/payroll/PayrollMedical';
+
+// Cash
+import Payments from './pages/cash/Payments';
+import ShiftReport from './pages/cash/ShiftReport';
+
+// Budgets
+import Budgets from './pages/budgets/Budgets';
+import BudgetForm from './pages/budgets/BudgetForm';
+import BudgetAnalysis from './pages/budgets/BudgetAnalysis';
 
 // Pharmacy
 import PharmacyInventory from './pages/pharmacy/PharmacyInventory';
@@ -135,30 +140,44 @@ function App() {
                       <Route path="receivables/nhima" element={<NHIMAClaims />} />
                       <Route path="receivables/corporate" element={<CorporateAccounts />} />
                       <Route path="receivables/schemes" element={<Schemes />} />
+                      <Route path="receivables/ageing" element={<DebtorAgeing />} />
+
                       <Route path="payables/suppliers" element={<Suppliers />} />
                       <Route path="payables/suppliers/new" element={<SupplierForm />} />
                       <Route path="payables/suppliers/:id/edit" element={<SupplierForm />} />
+
                       <Route path="ledger/accounts" element={<ChartOfAccounts />} />
+
                       <Route path="cash/payments" element={<Payments />} />
+                      <Route path="cash/shift-report" element={<ShiftReport />} />
+
                       <Route path="budgets" element={<Budgets />} />
                       <Route path="budgets/new" element={<BudgetForm />} />
                       <Route path="budgets/:id/edit" element={<BudgetForm />} />
+                      <Route path="budgets/analysis" element={<BudgetAnalysis />} />
+
                       <Route path="funds" element={<Funds />} />
                       <Route path="funds/new" element={<FundForm />} />
                       <Route path="funds/:id/edit" element={<FundForm />} />
                       <Route path="funds/:id" element={<Funds />} />
+
                       <Route path="assets" element={<Assets />} />
                       <Route path="assets/new" element={<AssetForm />} />
                       <Route path="assets/:id/edit" element={<AssetForm />} />
+
                       <Route path="reports" element={<Reports />} />
+
+                      <Route path="setup/services" element={<ServicesList />} />
                       <Route path="setup/services/new" element={<ServiceForm />} />
                       <Route path="setup/services/:id/edit" element={<ServiceForm />} />
                       <Route path="setup/users/new" element={<UserForm />} />
                       <Route path="setup/users/:id/edit" element={<UserForm />} />
+                      <Route path="setup/roles" element={<UserRoles />} />
                       <Route path="setup/departments/new" element={<DepartmentForm />} />
                       <Route path="setup/departments/:id/edit" element={<DepartmentForm />} />
+
                       <Route path="payroll/medical" element={<PayrollMedical />} />
-                      <Route path="payroll/medical" element={<PayrollMedical />} />
+
                       <Route path="pharmacy/inventory" element={<PharmacyInventory />} />
                       <Route path="pharmacy/grn" element={<GoodsReceivedNote />} />
                       <Route path="pharmacy/dispense" element={<Dispense />} />
