@@ -59,6 +59,7 @@ const OrganizationProfile = () => {
             setSaving(true);
             setMessage(null);
             await setupAPI.organization.update(formData);
+            window.dispatchEvent(new Event('org-profile-updated'));
             setMessage({ type: 'success', text: 'Organization profile updated successfully' });
         } catch (error) {
             console.error('Failed to update profile:', error);

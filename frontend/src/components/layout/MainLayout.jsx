@@ -39,7 +39,15 @@ const MainLayout = ({ children }) => {
                 console.error('Failed to fetch organization profile', error);
             }
         };
+
         fetchOrgProfile();
+
+        // Listen for profile updates
+        window.addEventListener('org-profile-updated', fetchOrgProfile);
+
+        return () => {
+            window.removeEventListener('org-profile-updated', fetchOrgProfile);
+        };
     }, []);
 
     const menuItems = [
