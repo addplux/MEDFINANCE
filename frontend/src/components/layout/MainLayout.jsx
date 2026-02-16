@@ -17,7 +17,8 @@ import {
     LogOut,
     Menu,
     X,
-    ChevronLeft
+    ChevronLeft,
+    Stethoscope
 } from 'lucide-react';
 
 const MainLayout = ({ children }) => {
@@ -60,6 +61,7 @@ const MainLayout = ({ children }) => {
         { path: '/app/cash/payments', icon: Wallet, label: 'Cash & Bank' },
         { path: '/app/budgets', icon: TrendingUp, label: 'Budgets' },
         { path: '/app/assets', icon: Package, label: 'Assets' },
+        { path: '/app/payroll/medical', icon: Stethoscope, label: 'Payroll Medical' },
         { path: '/app/reports', icon: BarChart3, label: 'Reports' },
         { path: '/app/setup', icon: Settings, label: 'Setup' },
     ];

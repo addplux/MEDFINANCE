@@ -26,6 +26,7 @@ const Budget = require('./Budget');
 const Asset = require('./Asset');
 const AuditLog = require('./AuditLog');
 const Organization = require('./Organization');
+const PayrollDeduction = require('./PayrollDeduction');
 
 // Define relationships
 
@@ -111,6 +112,9 @@ Asset.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
 // Audit Log relationships
 AuditLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
+// Payroll Deduction relationships
+PayrollDeduction.belongsTo(User, { foreignKey: 'staffId', as: 'staff' });
+
 // Sync database
 const syncDatabase = async (options = {}) => {
     try {
@@ -150,5 +154,6 @@ module.exports = {
     Budget,
     Asset,
     AuditLog,
-    Organization
+    Organization,
+    PayrollDeduction
 };

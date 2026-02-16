@@ -193,6 +193,14 @@ export const setupAPI = {
     },
 };
 
+// Payroll Medical
+export const payrollAPI = {
+    getDeductions: (params) => api.get('/payroll/deductions', { params }),
+    getStaffBalances: () => api.get('/payroll/balances'),
+    createDeduction: (data) => api.post('/payroll/deductions', data),
+    updateStatus: (id, status) => api.put(`/payroll/deductions/${id}`, { status }),
+};
+
 // Dashboard
 export const dashboardAPI = {
     getOverview: () => api.get('/dashboard/overview'),

@@ -48,6 +48,7 @@ import Setup from './pages/setup/Setup';
 import ServiceForm from './pages/setup/ServiceForm';
 import UserForm from './pages/setup/UserForm';
 import DepartmentForm from './pages/setup/DepartmentForm';
+import PayrollMedical from './pages/payroll/PayrollMedical';
 
 // Layout
 import MainLayout from './components/layout/MainLayout';
@@ -112,6 +113,7 @@ function App() {
                       <Route path="setup/users/:id/edit" element={<UserForm />} />
                       <Route path="setup/departments/new" element={<DepartmentForm />} />
                       <Route path="setup/departments/:id/edit" element={<DepartmentForm />} />
+                      <Route path="payroll/medical" element={<PayrollMedical />} />
                       <Route path="setup" element={<Setup />} />
                       {/* More routes will be added in next phases */}
                     </Routes>
