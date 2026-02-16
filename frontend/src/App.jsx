@@ -45,6 +45,9 @@ import Reports from './pages/reports/Reports';
 
 // Setup
 import Setup from './pages/setup/Setup';
+import ServiceForm from './pages/setup/ServiceForm';
+import UserForm from './pages/setup/UserForm';
+import DepartmentForm from './pages/setup/DepartmentForm';
 
 // Layout
 import MainLayout from './components/layout/MainLayout';
@@ -103,7 +106,13 @@ function App() {
                       <Route path="/budgets" element={<Budgets />} />
                       <Route path="/assets" element={<Assets />} />
                       <Route path="/reports" element={<Reports />} />
-                      <Route path="/setup" element={<Setup />} />
+                      <Route path="setup/services/new" element={<ServiceForm />} />
+                      <Route path="setup/services/:id/edit" element={<ServiceForm />} />
+                      <Route path="setup/users/new" element={<UserForm />} />
+                      <Route path="setup/users/:id/edit" element={<UserForm />} />
+                      <Route path="setup/departments/new" element={<DepartmentForm />} />
+                      <Route path="setup/departments/:id/edit" element={<DepartmentForm />} />
+                      <Route path="setup" element={<Setup />} />
                       {/* More routes will be added in next phases */}
                     </Routes>
                   </MainLayout>

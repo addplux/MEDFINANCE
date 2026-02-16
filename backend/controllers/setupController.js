@@ -88,6 +88,20 @@ const deleteService = async (req, res) => {
     }
 };
 
+// Get single service
+const getService = async (req, res) => {
+    try {
+        const service = await Service.findByPk(req.params.id);
+        if (!service) {
+            return res.status(404).json({ error: 'Service not found' });
+        }
+        res.json(service);
+    } catch (error) {
+        console.error('Get service error:', error);
+        res.status(500).json({ error: 'Failed to get service' });
+    }
+};
+
 // ========== Users ==========
 
 // Get all users
@@ -154,6 +168,22 @@ const updateUser = async (req, res) => {
     } catch (error) {
         console.error('Update user error:', error);
         res.status(500).json({ error: 'Failed to update user' });
+    }
+};
+
+// Get single user
+const getUser = async (req, res) => {
+    try {
+        const user = await User.findByPk(req.params.id, {
+            attributes: { exclude: ['password'] }
+        });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.json(user);
+    } catch (error) {
+        console.error('Get user error:', error);
+        res.status(500).json({ error: 'Failed to get user' });
     }
 };
 
@@ -231,15 +261,34 @@ const updateDepartment = async (req, res) => {
     }
 };
 
+// Get single department
+const getDepartment = async (req, res) => {
+    try {
+        const department = await Department.findByPk(req.params.id, {
+            include: [{ association: 'manager', attributes: ['id', 'firstName', 'lastName'] }]
+        });
+        if (!department) {
+            return res.status(404).json({ error: 'Department not found' });
+        }
+        res.json(department);
+    } catch (error) {
+        console.error('Get department error:', error);
+        res.status(500).json({ error: 'Failed to get department' });
+    }
+};
+
 module.exports = {
     getAllServices,
     createService,
     updateService,
     deleteService,
+    getService,
     getAllUsers,
     createUser,
     updateUser,
+    getUser,
     getAllDepartments,
     createDepartment,
-    updateDepartment
+    updateDepartment,
+    getDepartment
 };
