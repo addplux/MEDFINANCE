@@ -26,8 +26,8 @@ const ServicesList = () => {
     };
 
     const filteredServices = services.filter(s =>
-        s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.code.toLowerCase().includes(searchTerm.toLowerCase())
+        (s.serviceName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (s.serviceCode || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -73,10 +73,10 @@ const ServicesList = () => {
                     <tbody className="divide-y divide-border-color">
                         {filteredServices.map(service => (
                             <tr key={service.id} className="hover:bg-bg-tertiary/50">
-                                <td className="p-4 font-medium text-primary-600">{service.code}</td>
-                                <td className="p-4">{service.name}</td>
-                                <td className="p-4 text-text-secondary">{service.category}</td>
-                                <td className="p-4 text-right">K{parseFloat(service.basePrice).toFixed(2)}</td>
+                                <td className="p-4 font-medium text-primary-600">{service.serviceCode}</td>
+                                <td className="p-4">{service.serviceName}</td>
+                                <td className="p-4 text-text-secondary uppercase">{service.category}</td>
+                                <td className="p-4 text-right">K{parseFloat(service.price || 0).toFixed(2)}</td>
                                 <td className="p-4 text-right">
                                     <button
                                         onClick={() => navigate(`/app/setup/services/${service.id}/edit`)}
