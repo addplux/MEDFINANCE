@@ -66,6 +66,7 @@ import PayrollMedical from './pages/payroll/PayrollMedical';
 
 // Cash
 import Payments from './pages/cash/Payments';
+import PaymentForm from './pages/cash/PaymentForm';
 import ShiftReport from './pages/cash/ShiftReport';
 
 // Budgets
@@ -152,6 +153,8 @@ function App() {
                       <Route path="ledger/accounts" element={<ChartOfAccounts />} />
 
                       <Route path="cash/payments" element={<Payments />} />
+                      <Route path="cash/payments/new" element={<PaymentForm />} />
+                      <Route path="cash/payments/:id/edit" element={<PaymentForm />} />
                       <Route path="cash/shift-report" element={<ShiftReport />} />
 
                       <Route path="budgets" element={<Budgets />} />
