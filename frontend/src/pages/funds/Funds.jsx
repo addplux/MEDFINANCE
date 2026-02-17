@@ -69,27 +69,49 @@ const Funds = () => {
                 </button>
             </div>
 
-            {/* Stats Cards */}
-            <div className="stats-grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div className="stat-card">
-                    <div className="stat-label">Total Funds Balance</div>
-                    <div className="stat-value">K {totalBalance.toLocaleString()}</div>
-                    <div className="stat-trend text-success flex items-center gap-1">
-                        <TrendingUp size={14} /> Global Portfolio
+            {/* Stats Cards - Vertical Layout */}
+            <div className="card mb-6 p-6">
+                <div className="space-y-6">
+                    {/* Total Funds Balance */}
+                    <div className="flex items-start gap-4 pb-6 border-b border-border-color">
+                        <div className="p-3 rounded-lg bg-primary-500/10">
+                            <TrendingUp className="w-6 h-6 text-primary-500" />
+                        </div>
+                        <div className="flex-1">
+                            <div className="text-sm text-text-secondary mb-1">Total Funds Balance</div>
+                            <div className="text-3xl font-bold text-text-primary mb-1">K {totalBalance.toLocaleString()}</div>
+                            <div className="text-xs text-success flex items-center gap-1">
+                                <TrendingUp size={12} /> Global Portfolio
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-label">Active Funds</div>
-                    <div className="stat-value">{funds.length}</div>
-                    <div className="stat-trend text-success flex items-center gap-1">
-                        <Shield size={14} /> Operational
+
+                    {/* Active Funds */}
+                    <div className="flex items-start gap-4 pb-6 border-b border-border-color">
+                        <div className="p-3 rounded-lg bg-green-500/10">
+                            <Shield className="w-6 h-6 text-green-500" />
+                        </div>
+                        <div className="flex-1">
+                            <div className="text-sm text-text-secondary mb-1">Active Funds</div>
+                            <div className="text-3xl font-bold text-text-primary mb-1">{funds.length}</div>
+                            <div className="text-xs text-success flex items-center gap-1">
+                                <Shield size={12} /> Operational
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-label">Recent Transactions</div>
-                    <div className="stat-value">0</div>
-                    <div className="stat-trend text-text-secondary flex items-center gap-1">
-                        <Clock size={14} /> Last 24h
+
+                    {/* Recent Transactions */}
+                    <div className="flex items-start gap-4">
+                        <div className="p-3 rounded-lg bg-gray-500/10">
+                            <Clock className="w-6 h-6 text-gray-400" />
+                        </div>
+                        <div className="flex-1">
+                            <div className="text-sm text-text-secondary mb-1">Recent Transactions</div>
+                            <div className="text-3xl font-bold text-text-primary mb-1">0</div>
+                            <div className="text-xs text-text-secondary flex items-center gap-1">
+                                <Clock size={12} /> Last 24h
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
