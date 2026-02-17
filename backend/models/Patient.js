@@ -73,6 +73,14 @@ const Patient = sequelize.define('Patient', {
             model: 'users',
             key: 'id'
         }
+    },
+    serviceId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'services',
+            key: 'id'
+        }
     }
 }, {
     tableName: 'patients',

@@ -17,13 +17,16 @@ const CreatePatient = () => {
         nhimaNumber: '',
         paymentMethod: 'cash', // Default to cash (non-NHIMA)
         costCategory: 'standard',
-        staffId: ''
+        staffId: '',
+        serviceId: ''
     });
     const [staffMembers, setStaffMembers] = useState([]);
+    const [services, setServices] = useState([]);
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
         fetchStaffMembers();
+        fetchServices();
     }, []);
 
     const fetchStaffMembers = async () => {
@@ -32,6 +35,15 @@ const CreatePatient = () => {
             setStaffMembers(response.data);
         } catch (error) {
             console.error('Failed to fetch staff members:', error);
+        }
+    };
+
+    const fetchServices = async () => {
+        try {
+            const response = await setupAPI.services.getAll({ isActive: true });
+            setServices(response.data);
+        } catch (error) {
+            console.error('Failed to fetch services:', error);
         }
     };
 
@@ -153,6 +165,23 @@ const CreatePatient = () => {
                             <option value="standard">Standard</option>
                             <option value="high_cost">High Cost</option>
                             <option value="low_cost">Low Cost</option>
+                        </select>
+                    </div>
+
+                    {/* Service */}
+                    <div className="form-group">
+                        <label className="form-label">Service</label>
+                        <select
+                            value={formData.serviceId}
+                            onChange={(e) => setFormData({ ...formData, serviceId: e.target.value })}
+                            className="form-select"
+                        >
+                            <option value="">Select Service</option>
+                            {services.map(service => (
+                                <option key={service.id} value={service.id}>
+                                    {service.serviceName} ({service.category})
+                                </option>
+                            ))}
                         </select>
                     </div>
 

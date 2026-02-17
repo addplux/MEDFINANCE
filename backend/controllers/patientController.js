@@ -54,7 +54,7 @@ const getPatient = async (req, res) => {
 // Create patient
 const createPatient = async (req, res) => {
     try {
-        const { firstName, lastName, dateOfBirth, gender, phone, email, address, nhimaNumber, paymentMethod, costCategory, staffId, emergencyContact, emergencyPhone } = req.body;
+        const { firstName, lastName, dateOfBirth, gender, phone, email, address, nhimaNumber, paymentMethod, costCategory, staffId, serviceId, emergencyContact, emergencyPhone } = req.body;
 
         // Validate required fields
         if (!firstName || !lastName || !dateOfBirth || !gender) {
@@ -78,6 +78,7 @@ const createPatient = async (req, res) => {
             paymentMethod: paymentMethod || 'cash',
             costCategory: costCategory || 'standard',
             staffId: (paymentMethod === 'staff' && staffId) ? staffId : null,
+            serviceId: serviceId || null,
             emergencyContact,
             emergencyPhone
         });
