@@ -50,6 +50,7 @@ import FundForm from './pages/funds/FundForm';
 import CorporateAccounts from './pages/receivables/CorporateAccounts';
 import CorporateAccountForm from './pages/receivables/CorporateAccountForm';
 import Schemes from './pages/receivables/Schemes';
+import SchemeForm from './pages/receivables/SchemeForm';
 import DebtorAgeing from './pages/receivables/DebtorAgeing';
 
 // Reports
@@ -144,6 +145,8 @@ function App() {
                       <Route path="receivables/corporate/new" element={<CorporateAccountForm />} />
                       <Route path="receivables/corporate/:id/edit" element={<CorporateAccountForm />} />
                       <Route path="receivables/schemes" element={<Schemes />} />
+                      <Route path="receivables/schemes/new" element={<SchemeForm />} />
+                      <Route path="receivables/schemes/:id/edit" element={<SchemeForm />} />
                       <Route path="receivables/ageing" element={<DebtorAgeing />} />
 
                       <Route path="payables/suppliers" element={<Suppliers />} />
