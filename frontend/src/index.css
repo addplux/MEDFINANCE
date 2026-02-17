@@ -300,6 +300,20 @@
     min-height: 100px;
   }
 
+  /* Ensure dropdown options have proper text color */
+  .form-select option {
+    color: #1a1a1a;
+    background-color: #ffffff;
+  }
+
+  /* Dark mode support for select options */
+  @media (prefers-color-scheme: dark) {
+    .form-select option {
+      color: #ffffff;
+      background-color: #1a1a1a;
+    }
+  }
+
   .search-box {
     @apply flex items-center gap-2 bg-bg-tertiary border border-border-color rounded-md px-3 py-2 flex-1 max-w-md;
   }
