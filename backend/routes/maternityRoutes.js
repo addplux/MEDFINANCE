@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const maternityController = require('../controllers/maternityController');
-const { authenticate } = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
 
 // All routes require authentication
-router.use(authenticate);
+router.use(authMiddleware);
 
 // Maternity bill routes
 router.post('/bills', maternityController.createMaternityBill);

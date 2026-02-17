@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const specialistClinicController = require('../controllers/specialistClinicController');
-const { authenticate } = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
 
 // All routes require authentication
-router.use(authenticate);
+router.use(authMiddleware);
 
 // Specialist clinic bill routes
 router.post('/bills', specialistClinicController.createSpecialistBill);
