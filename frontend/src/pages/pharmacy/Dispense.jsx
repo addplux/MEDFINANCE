@@ -36,8 +36,8 @@ const Dispense = () => {
                 patientAPI.getAll(),
                 pharmacyAPI.inventory.getAll()
             ]);
-            setPatients(pRes.data);
-            setMedications(mRes.data);
+            setPatients(pRes.data.data || []);
+            setMedications(mRes.data || []);
         } catch (error) {
             console.error('Failed to load data:', error);
         }
@@ -46,8 +46,8 @@ const Dispense = () => {
     const fetchBatches = async (medId) => {
         try {
             const res = await pharmacyAPI.batches.getByMedication(medId);
-            setBatches(res.data);
-            if (res.data.length > 0) {
+            setBatches(res.data || []);
+            if (res.data && res.data.length > 0) {
                 setSelectedBatch(res.data[0].id); // Auto select first batch (FIFO)
             }
         } catch (error) {
@@ -120,7 +120,7 @@ const Dispense = () => {
     const cartTotal = cart.reduce((sum, item) => sum + item.total, 0);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh - 100px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-100px)]">
             {/* Left Panel: Selection */}
             <div className="lg:col-span-2 space-y-6 overflow-y-auto pr-2">
                 <div className="card p-6">
@@ -133,7 +133,7 @@ const Dispense = () => {
                         onChange={e => setSelectedPatient(e.target.value)}
                     >
                         <option value="">-- Choose Patient --</option>
-                        {patients.map(p => (
+                        {(patients || []).map(p => (
                             <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>
                         ))}
                     </select>
