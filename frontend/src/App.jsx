@@ -139,6 +139,8 @@ function App() {
                       <Route path="nhima/reconciliation" element={<Reconciliation />} />
                       <Route path="receivables/nhima" element={<NHIMAClaims />} />
                       <Route path="receivables/corporate" element={<CorporateAccounts />} />
+                      <Route path="receivables/corporate/new" element={<CorporateAccounts />} />
+                      <Route path="receivables/corporate/:id" element={<CorporateAccounts />} />
                       <Route path="receivables/schemes" element={<Schemes />} />
                       <Route path="receivables/ageing" element={<DebtorAgeing />} />
 
