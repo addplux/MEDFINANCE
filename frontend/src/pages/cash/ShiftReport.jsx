@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { cashAPI } from '../../services/apiService';
-import { Printer, Calendar } from 'lucide-react';
+import { Printer, Calendar, Edit3, Download, Save } from 'lucide-react';
 
 const ShiftReport = () => {
     // Current date default
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [shift, setShift] = useState('morning'); // morning, afternoon, night
+    const [isEditable, setIsEditable] = useState(false);
     const [report, setReport] = useState({
         cashOnHand: 5000,
         totalReceipts: 15400,
@@ -21,11 +22,39 @@ const ShiftReport = () => {
             card: 5000,
             mobile: 5000,
             insurance: 15000
+        },
+        reconciliation: {
+            openingFloat: 1000,
+            expenses: 200
         }
     });
 
     const handlePrint = () => {
-        window.print();
+        setIsEditable(false);
+        setTimeout(() => {
+            window.print();
+        }, 100);
+    };
+
+    const handleExportPDF = () => {
+        setIsEditable(false);
+        setTimeout(() => {
+            window.print();
+        }, 100);
+    };
+
+    const updateReportValue = (path, value) => {
+        const keys = path.split('.');
+        setReport(prev => {
+            const newReport = { ...prev };
+            let current = newReport;
+            for (let i = 0; i < keys.length - 1; i++) {
+                current[keys[i]] = { ...current[keys[i]] };
+                current = current[keys[i]];
+            }
+            current[keys[keys.length - 1]] = parseFloat(value) || 0;
+            return newReport;
+        });
     };
 
     return (
@@ -35,10 +64,23 @@ const ShiftReport = () => {
                     <h1 className="text-2xl font-bold text-text-primary">Shift Report</h1>
                     <p className="text-text-secondary">Daily cashier closing report</p>
                 </div>
-                <button onClick={handlePrint} className="btn btn-secondary flex items-center gap-2">
-                    <Printer className="w-4 h-4" />
-                    Print Report
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setIsEditable(!isEditable)}
+                        className={`btn ${isEditable ? 'btn-primary' : 'btn-secondary'} flex items-center gap-2`}
+                    >
+                        {isEditable ? <Save className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
+                        {isEditable ? 'Done Editing' : 'Edit Report'}
+                    </button>
+                    <button onClick={handlePrint} className="btn btn-secondary flex items-center gap-2">
+                        <Printer className="w-4 h-4" />
+                        Print
+                    </button>
+                    <button onClick={handleExportPDF} className="btn btn-secondary flex items-center gap-2">
+                        <Download className="w-4 h-4" />
+                        Export PDF
+                    </button>
+                </div>
             </div>
 
             {/* Filters */}
@@ -84,15 +126,51 @@ const ShiftReport = () => {
                             <tbody className="divide-y divide-gray-100">
                                 <tr className="py-2">
                                     <td className="py-2 text-text-secondary">Cash</td>
-                                    <td className="py-2 text-right font-medium">K{report.summary.cash.toLocaleString()}</td>
+                                    <td className="py-2 text-right font-medium">
+                                        {isEditable ? (
+                                            <input
+                                                type="number"
+                                                value={report.summary.cash}
+                                                onChange={(e) => updateReportValue('summary.cash', e.target.value)}
+                                                className="w-24 px-2 py-1 text-right border border-primary-500 rounded"
+                                                step="0.01"
+                                            />
+                                        ) : (
+                                            `K${report.summary.cash.toLocaleString()}`
+                                        )}
+                                    </td>
                                 </tr>
                                 <tr className="py-2">
                                     <td className="py-2 text-text-secondary">Card / POS</td>
-                                    <td className="py-2 text-right font-medium">K{report.summary.card.toLocaleString()}</td>
+                                    <td className="py-2 text-right font-medium">
+                                        {isEditable ? (
+                                            <input
+                                                type="number"
+                                                value={report.summary.card}
+                                                onChange={(e) => updateReportValue('summary.card', e.target.value)}
+                                                className="w-24 px-2 py-1 text-right border border-primary-500 rounded"
+                                                step="0.01"
+                                            />
+                                        ) : (
+                                            `K${report.summary.card.toLocaleString()}`
+                                        )}
+                                    </td>
                                 </tr>
                                 <tr className="py-2">
                                     <td className="py-2 text-text-secondary">Mobile Money</td>
-                                    <td className="py-2 text-right font-medium">K{report.summary.mobile.toLocaleString()}</td>
+                                    <td className="py-2 text-right font-medium">
+                                        {isEditable ? (
+                                            <input
+                                                type="number"
+                                                value={report.summary.mobile}
+                                                onChange={(e) => updateReportValue('summary.mobile', e.target.value)}
+                                                className="w-24 px-2 py-1 text-right border border-primary-500 rounded"
+                                                step="0.01"
+                                            />
+                                        ) : (
+                                            `K${report.summary.mobile.toLocaleString()}`
+                                        )}
+                                    </td>
                                 </tr>
                                 <tr className="py-2 bg-gray-50 font-bold">
                                     <td className="py-2 text-text-primary pl-2">Total Collected</td>
@@ -107,7 +185,19 @@ const ShiftReport = () => {
                             <tbody className="divide-y divide-gray-100">
                                 <tr className="py-2">
                                     <td className="py-2 text-text-secondary">Opening Float</td>
-                                    <td className="py-2 text-right font-medium">K1,000.00</td>
+                                    <td className="py-2 text-right font-medium">
+                                        {isEditable ? (
+                                            <input
+                                                type="number"
+                                                value={report.reconciliation.openingFloat}
+                                                onChange={(e) => updateReportValue('reconciliation.openingFloat', e.target.value)}
+                                                className="w-24 px-2 py-1 text-right border border-primary-500 rounded"
+                                                step="0.01"
+                                            />
+                                        ) : (
+                                            `K${report.reconciliation.openingFloat.toLocaleString()}`
+                                        )}
+                                    </td>
                                 </tr>
                                 <tr className="py-2">
                                     <td className="py-2 text-text-secondary">Cash Sales</td>
@@ -115,11 +205,23 @@ const ShiftReport = () => {
                                 </tr>
                                 <tr className="py-2">
                                     <td className="py-2 text-text-secondary">Expenses / Refunds</td>
-                                    <td className="py-2 text-right font-medium text-red-600">- K{Math.abs(report.totalPayments).toLocaleString()}</td>
+                                    <td className="py-2 text-right font-medium text-red-600">
+                                        {isEditable ? (
+                                            <input
+                                                type="number"
+                                                value={report.reconciliation.expenses}
+                                                onChange={(e) => updateReportValue('reconciliation.expenses', e.target.value)}
+                                                className="w-24 px-2 py-1 text-right border border-primary-500 rounded"
+                                                step="0.01"
+                                            />
+                                        ) : (
+                                            `- K${Math.abs(report.reconciliation.expenses).toLocaleString()}`
+                                        )}
+                                    </td>
                                 </tr>
                                 <tr className="py-2 bg-gray-50 font-bold">
                                     <td className="py-2 text-text-primary pl-2">Expected Cash</td>
-                                    <td className="py-2 text-right pr-2">K{(1000 + report.summary.cash-200).toLocaleString()}</td>
+                                    <td className="py-2 text-right pr-2">K{(report.reconciliation.openingFloat + report.summary.cash - report.reconciliation.expenses).toLocaleString()}</td>
                                 </tr>
                             </tbody>
                         </table>
