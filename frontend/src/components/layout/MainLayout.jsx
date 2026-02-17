@@ -203,9 +203,9 @@ const MainLayout = ({ children }) => {
             {/* Sidebar */}
             <aside
                 className={`
-          fixed top - 0 left - 0 h - full glass - panel border - r border - border - color z - 40
-          transform transition - all duration - 300 lg: translate - x - 0
-          flex flex - col
+          fixed top-0 left-0 h-full glass-panel border-r border-border-color z-40
+          transform transition-all duration-300 lg:translate-x-0
+          flex flex-col
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${sidebarCollapsed ? 'w-16' : 'w-56'}
 `}
@@ -221,7 +221,7 @@ const MainLayout = ({ children }) => {
                         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
                         className="hidden lg:flex p-1.5 hover:bg-bg-tertiary rounded-md transition-colors"
                     >
-                        <ChevronLeft className={`w - 4 h - 4 text - text - secondary transition - transform ${sidebarCollapsed ? 'rotate-180' : ''} `} />
+                        <ChevronLeft className={`w-4 h-4 text-text-secondary transition-transform ${sidebarCollapsed ? 'rotate-180' : ''} `} />
                     </button>
                     <button
                         onClick={() => setSidebarOpen(false)}
@@ -268,8 +268,8 @@ const MainLayout = ({ children }) => {
                                         <button
                                             onClick={() => toggleMenu(item.id)}
                                             className={`
-w - full flex items - center gap - 3 px - 3 py - 2 rounded - md
-transition - all duration - 200 text - sm
+w-full flex items-center gap-3 px-3 py-2 rounded-md
+transition-all duration-200 text-sm
                                                 ${hasActiveChild
                                                     ? 'bg-bg-tertiary text-text-primary font-medium'
                                                     : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
@@ -304,8 +304,8 @@ transition - all duration - 200 text - sm
                                                                 setSidebarOpen(false);
                                                             }}
                                                             className={`
-w - full flex items - center px - 3 py - 1.5 rounded - md
-transition - all duration - 200 text - sm
+w-full flex items-center px-3 py-1.5 rounded-md
+transition-all duration-200 text-sm
                                                                 ${isActive
                                                                     ? 'bg-primary-50 text-primary-600 font-medium'
                                                                     : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
@@ -332,8 +332,8 @@ transition - all duration - 200 text - sm
                                         setSidebarOpen(false);
                                     }}
                                     className={`
-w - full flex items - center gap - 3 px - 3 py - 2 rounded - md
-transition - all duration - 200 text - sm
+w-full flex items-center gap-3 px-3 py-2 rounded-md
+transition-all duration-200 text-sm
                                         ${active
                                             ? 'bg-bg-tertiary text-text-primary font-medium'
                                             : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
@@ -355,9 +355,9 @@ transition - all duration - 200 text - sm
                     <button
                         onClick={handleLogout}
                         className={`
-w - full flex items - center gap - 3 px - 3 py - 2 rounded - md
-text - sm text - text - secondary hover: bg - bg - tertiary hover: text - error
-transition - all duration - 200
+w-full flex items-center gap-3 px-3 py-2 rounded-md
+text-sm text-text-secondary hover:bg-bg-tertiary hover:text-error
+transition-all duration-200
               ${sidebarCollapsed ? 'justify-center' : ''}
 `}
                         title={sidebarCollapsed ? 'Logout' : ''}
@@ -377,7 +377,7 @@ transition - all duration - 200
             )}
 
             {/* Main Content */}
-            <div className={`flex - 1 flex flex - col transition - all duration - 300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-56'} `}>
+            <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-56'} `}>
                 {/* Mobile Header */}
                 <header className="lg:hidden h-14 glass border-b border-border-color px-4 flex items-center justify-between sticky top-0 z-20">
                     <button

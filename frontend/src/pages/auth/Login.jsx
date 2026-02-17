@@ -60,7 +60,7 @@ const Login = () => {
             <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-accent-600/20 rounded-full blur-[120px] pointer-events-none" />
 
             <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center relative z-10">
-                {/* Left Side - Branding */}
+                {/* Left Side-Branding */}
                 <div className="hidden lg:block p-8">
                     <button
                         onClick={() => navigate('/')}
@@ -111,7 +111,7 @@ const Login = () => {
                     </div>
                 </div>
 
-                {/* Right Side - Login Form (Glassmorphism) */}
+                {/* Right Side-Login Form (Glassmorphism) */}
                 <div className="w-full">
                     <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-8 lg:p-10 shadow-2xl relative overflow-hidden">
                         {/* Inner glow */}

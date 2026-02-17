@@ -196,7 +196,7 @@ const CreatePatient = () => {
                         </select>
                     </div>
 
-                    {/* Staff Member - Only show if payment method is Staff */}
+                    {/* Staff Member-Only show if payment method is Staff */}
                     {formData.paymentMethod === 'staff' && (
                         <div className="form-group">
                             <label className="form-label">Principal Staff Member *</label>
@@ -216,7 +216,7 @@ const CreatePatient = () => {
                         </div>
                     )}
 
-                    {/* NHIMA Number - Only show if payment method is NHIMA */}
+                    {/* NHIMA Number-Only show if payment method is NHIMA */}
                     {formData.paymentMethod === 'nhima' && (
                         <div className="form-group">
                             <label className="form-label">NHIMA Number *</label>

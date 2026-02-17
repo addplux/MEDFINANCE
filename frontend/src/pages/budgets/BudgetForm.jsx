@@ -20,7 +20,7 @@ const BudgetForm = () => {
     const [error, setError] = useState(null);
 
     const currentYear = new Date().getFullYear();
-    const years = [currentYear - 1, currentYear, currentYear + 1, currentYear + 2];
+    const years = [currentYear-1, currentYear, currentYear + 1, currentYear + 2];
 
     useEffect(() => {
         loadDepartments();

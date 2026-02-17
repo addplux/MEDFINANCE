@@ -11,10 +11,10 @@ const ShiftReport = () => {
         totalReceipts: 15400,
         totalPayments: 200,
         transactions: [
-            { id: 1, time: '08:30', description: 'OPD Consultation - John Doe', amount: 150, type: 'in', method: 'Cash' },
-            { id: 2, time: '09:15', description: 'Lab Test - Jane Smith', amount: 400, type: 'in', method: 'Card' },
-            { id: 3, time: '10:00', description: 'Pharmacy - Peter Jones', amount: 250, type: 'in', method: 'Cash' },
-            { id: 4, time: '12:30', description: 'Refund - Overpayment', amount: -50, type: 'out', method: 'Cash' },
+            { id: 1, time: '08:30', description: 'OPD Consultation-John Doe', amount: 150, type: 'in', method: 'Cash' },
+            { id: 2, time: '09:15', description: 'Lab Test-Jane Smith', amount: 400, type: 'in', method: 'Card' },
+            { id: 3, time: '10:00', description: 'Pharmacy-Peter Jones', amount: 250, type: 'in', method: 'Cash' },
+            { id: 4, time: '12:30', description: 'Refund-Overpayment', amount: -50, type: 'out', method: 'Cash' },
         ],
         summary: {
             cash: 5400,
@@ -59,9 +59,9 @@ const ShiftReport = () => {
                         value={shift}
                         onChange={e => setShift(e.target.value)}
                     >
-                        <option value="morning">Morning (06:00 - 14:00)</option>
-                        <option value="afternoon">Afternoon (14:00 - 22:00)</option>
-                        <option value="night">Night (22:00 - 06:00)</option>
+                        <option value="morning">Morning (06:00-14:00)</option>
+                        <option value="afternoon">Afternoon (14:00-22:00)</option>
+                        <option value="night">Night (22:00-06:00)</option>
                     </select>
                 </div>
                 <button className="btn btn-primary">View Report</button>
@@ -119,7 +119,7 @@ const ShiftReport = () => {
                                 </tr>
                                 <tr className="py-2 bg-gray-50 font-bold">
                                     <td className="py-2 text-text-primary pl-2">Expected Cash</td>
-                                    <td className="py-2 text-right pr-2">K{(1000 + report.summary.cash - 200).toLocaleString()}</td>
+                                    <td className="py-2 text-right pr-2">K{(1000 + report.summary.cash-200).toLocaleString()}</td>
                                 </tr>
                             </tbody>
                         </table>

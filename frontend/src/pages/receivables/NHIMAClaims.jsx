@@ -265,7 +265,7 @@ const NHIMAClaims = () => {
                         </div>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                onClick={() => setCurrentPage(p => Math.max(1, p-1))}
                                 disabled={currentPage === 1}
                                 className="btn btn-sm btn-secondary"
                             >
