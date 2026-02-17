@@ -78,6 +78,12 @@ LabBill.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 RadiologyBill.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 RadiologyBill.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 
+TheatreBill.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
+
+MaternityBill.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
+
+SpecialistClinicBill.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
+
 // NHIMA Claims
 NHIMAClaim.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 NHIMAClaim.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
