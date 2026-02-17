@@ -110,6 +110,8 @@ app.use('/api/lab', require('./routes/lab'));
 app.use('/api/theatre', require('./routes/theatreRoutes'));
 app.use('/api/maternity', require('./routes/maternityRoutes'));
 app.use('/api/specialist-clinics', require('./routes/specialistClinicRoutes'));
+app.use('/api/shifts', require('./routes/shifts'));
+app.use('/api/refunds', require('./routes/refunds'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

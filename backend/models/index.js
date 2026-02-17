@@ -37,14 +37,49 @@ const LabResult = require('./LabResult');
 const TheatreBill = require('./TheatreBill');
 const MaternityBill = require('./MaternityBill');
 const SpecialistClinicBill = require('./SpecialistClinicBill');
+const Shift = require('./Shift');
+const Refund = require('./Refund');
 
 // Define relationships
+
+// ... (existing relationships)
+
+
+
+// Refund relationships
+Refund.belongsTo(Payment, { foreignKey: 'paymentId', as: 'payment' });
+Refund.belongsTo(User, { foreignKey: 'requestedBy', as: 'requester' });
+Refund.belongsTo(User, { foreignKey: 'approvedBy', as: 'approver' });
+
+// ... (rest of file)
+
+module.exports = {
+    // ...
+    Shift,
+    Refund
+};
 
 // User relationships
 User.hasMany(OPDBill, { foreignKey: 'createdBy', as: 'opdBills' });
 User.hasMany(IPDBill, { foreignKey: 'createdBy', as: 'ipdBills' });
 User.hasMany(AuditLog, { foreignKey: 'userId', as: 'auditLogs' });
 User.hasMany(Department, { foreignKey: 'managerId', as: 'managedDepartments' });
+User.hasMany(Shift, { foreignKey: 'userId', as: 'shifts' });
+
+// ... (other relationships)
+
+// Shift relationships
+Shift.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+// ... (rest of file)
+
+module.exports = {
+    // ...
+    TheatreBill,
+    MaternityBill,
+    SpecialistClinicBill,
+    Shift
+};
 
 // Patient relationships
 Patient.hasMany(OPDBill, { foreignKey: 'patientId', as: 'opdBills' });
@@ -207,5 +242,7 @@ module.exports = {
     LabResult,
     TheatreBill,
     MaternityBill,
-    SpecialistClinicBill
+    SpecialistClinicBill,
+    Shift,
+    Refund
 };

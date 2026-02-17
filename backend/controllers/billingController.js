@@ -1,4 +1,4 @@
-const { OPDBill, Patient, Service, User } = require('../models');
+const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, Patient, Service, User, sequelize } = require('../models');
 
 // Get all OPD bills
 const getAllOPDBills = async (req, res) => {
@@ -223,10 +223,117 @@ const deleteOPDBill = async (req, res) => {
     }
 };
 
+// Get patient balance
+const getPatientBalance = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Sum all bills (simplified - in production, might want a centralized Transaction table)
+        const opdTotal = await OPDBill.sum('netAmount', { where: { patientId: id } }) || 0;
+        const ipdTotal = await IPDBill.sum('totalAmount', { where: { patientId: id } }) || 0;
+        const pharmacyTotal = await PharmacyBill.sum('totalAmount', { where: { patientId: id } }) || 0;
+        const labTotal = await LabBill.sum('totalAmount', { where: { patientId: id } }) || 0;
+        const radiologyTotal = await RadiologyBill.sum('totalAmount', { where: { patientId: id } }) || 0;
+
+        const totalBilled = parseFloat(opdTotal) + parseFloat(ipdTotal) + parseFloat(pharmacyTotal) + parseFloat(labTotal) + parseFloat(radiologyTotal);
+
+        // Sum all payments
+        const totalPaid = await Payment.sum('amount', { where: { patientId: id } }) || 0;
+
+        const balance = totalBilled - parseFloat(totalPaid);
+
+        res.json({
+            patientId: id,
+            totalBilled: totalBilled.toFixed(2),
+            totalPaid: parseFloat(totalPaid).toFixed(2),
+            balance: balance.toFixed(2)
+        });
+    } catch (error) {
+        console.error('Get patient balance error:', error);
+        res.status(500).json({ error: 'Failed to get patient balance' });
+    }
+};
+
+// Get patient statement
+const getPatientStatement = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Fetch all activities
+        const payments = await Payment.findAll({
+            where: { patientId: id },
+            order: [['paymentDate', 'ASC']]
+        });
+
+        const opdBills = await OPDBill.findAll({ where: { patientId: id } });
+        const ipdBills = await IPDBill.findAll({ where: { patientId: id } });
+        // Add other bill types as needed
+
+        // Combine and sort
+        const activities = [];
+
+        payments.forEach(p => {
+            activities.push({
+                date: p.paymentDate,
+                type: 'PAYMENT',
+                reference: p.receiptNumber || `PAY-${p.id}`,
+                description: `Payment via ${p.paymentMethod}`,
+                debit: 0,
+                credit: parseFloat(p.amount)
+            });
+        });
+
+        opdBills.forEach(b => {
+            activities.push({
+                date: b.createdAt,
+                type: 'BILL',
+                reference: b.billNumber,
+                description: 'OPD Services',
+                debit: parseFloat(b.netAmount),
+                credit: 0
+            });
+        });
+
+        ipdBills.forEach(b => {
+            activities.push({
+                date: b.createdAt,
+                type: 'BILL',
+                reference: b.billNumber || `IPD-${b.id}`, // Fallback if no bill number
+                description: 'Inpatient Services',
+                debit: parseFloat(b.totalAmount),
+                credit: 0
+            });
+        });
+
+        // Sort by date
+        activities.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        // Calculate running balance
+        let balance = 0;
+        const statement = activities.map(item => {
+            balance += item.debit - item.credit;
+            return {
+                ...item,
+                balance: balance.toFixed(2)
+            };
+        });
+
+        res.json({
+            patientId: id,
+            statement
+        });
+    } catch (error) {
+        console.error('Get patient statement error:', error);
+        res.status(500).json({ error: 'Failed to get patient statement' });
+    }
+};
+
 module.exports = {
     getAllOPDBills,
     getOPDBill,
     createOPDBill,
     updateOPDBill,
-    deleteOPDBill
+    deleteOPDBill,
+    getPatientBalance,
+    getPatientStatement
 };

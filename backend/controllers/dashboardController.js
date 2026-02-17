@@ -1,4 +1,4 @@
-const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, sequelize } = require('../models');
+const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, Patient, Department, User, sequelize } = require('../models');
 
 // Get dashboard overview statistics
 const getOverview = async (req, res) => {
@@ -127,8 +127,169 @@ const getRevenueChart = async (req, res) => {
     }
 };
 
+// Medical Superintendent Dashboard
+const getMedicalSuperintendentDashboard = async (req, res) => {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Clinical Stats
+        const totalPatients = await Patient.count();
+        const newPatientsToday = await Patient.count({
+            where: {
+                createdAt: { [sequelize.Sequelize.Op.gte]: today }
+            }
+        });
+
+        const activeInpatients = await IPDBill.count({ where: { status: 'active' } });
+
+        // Department Activity (Today)
+        const opdVisitsToday = await OPDBill.count({
+            where: { createdAt: { [sequelize.Sequelize.Op.gte]: today } }
+        });
+
+        // Clinical Revenue (High Level)
+        const totalRevenue = await Payment.sum('amount') || 0;
+
+        res.json({
+            patientStats: {
+                totalRegistered: totalPatients,
+                newToday: newPatientsToday,
+                currentlyAdmitted: activeInpatients
+            },
+            clinicalActivity: {
+                opdVisitsToday,
+                // Add more granular clinical stats here as models allow
+            },
+            financials: {
+                totalRevenue: parseFloat(totalRevenue).toFixed(2)
+            }
+        });
+    } catch (error) {
+        console.error('Get Med Supt dashboard error:', error);
+        res.status(500).json({ error: 'Failed to get Medical Superintendent dashboard' });
+    }
+};
+
+// Administrator Dashboard
+const getAdministratorDashboard = async (req, res) => {
+    try {
+        // Staff Stats
+        const totalStaff = await User.count({ where: { role: { [sequelize.Sequelize.Op.ne]: 'admin' } } });
+        const activeStaff = await User.count({ where: { isActive: true } });
+
+        // Department Stats
+        const activeDepartments = await Department.count({ where: { status: 'active' } });
+
+        // Financial Overview
+        const totalRevenue = await Payment.sum('amount') || 0;
+
+        // Recent System Activity (using created payments/bills as proxy)
+        const recentActivityCount = await Payment.count({
+            where: {
+                createdAt: {
+                    [sequelize.Sequelize.Op.gte]: new Date(new Date() - 24 * 60 * 60 * 1000) // Last 24 hours
+                }
+            }
+        });
+
+        res.json({
+            staffStats: {
+                total: totalStaff,
+                active: activeStaff
+            },
+            operationalStats: {
+                activeDepartments,
+                recentSystemActivity: recentActivityCount
+            },
+            financialOverview: {
+                totalRevenue: parseFloat(totalRevenue).toFixed(2)
+            }
+        });
+    } catch (error) {
+        console.error('Get Admin dashboard error:', error);
+        res.status(500).json({ error: 'Failed to get Administrator dashboard' });
+    }
+};
+
+// Accounts Dashboard
+const getAccountsDashboard = async (req, res) => {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Daily Financials
+        const collectedToday = await Payment.sum('amount', {
+            where: { paymentDate: { [sequelize.Sequelize.Op.gte]: today } }
+        }) || 0;
+
+        const collectedMonth = await Payment.sum('amount', {
+            where: {
+                paymentDate: {
+                    [sequelize.Sequelize.Op.gte]: new Date(today.getFullYear(), today.getMonth(), 1)
+                }
+            }
+        }) || 0;
+
+        // Pending Receivables (Estimates based on pending bills)
+        const pendingOPD = await OPDBill.sum('netAmount', { where: { status: 'pending' } }) || 0;
+        const pendingIPD = await IPDBill.sum('totalAmount', { where: { status: 'active' } }) || 0; // Active IPD bills are essentially pending
+
+        const totalReceivables = parseFloat(pendingOPD) + parseFloat(pendingIPD);
+
+        res.json({
+            collections: {
+                today: parseFloat(collectedToday).toFixed(2),
+                thisMonth: parseFloat(collectedMonth).toFixed(2)
+            },
+            receivables: {
+                totalPending: totalReceivables.toFixed(2),
+                breakdown: {
+                    opd: parseFloat(pendingOPD).toFixed(2),
+                    ipd: parseFloat(pendingIPD).toFixed(2)
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Get Accounts dashboard error:', error);
+        res.status(500).json({ error: 'Failed to get Accounts dashboard' });
+    }
+};
+
+// Ministry / Provincial Dashboard
+const getMinistryDashboard = async (req, res) => {
+    try {
+        // High level aggregated stats
+        const totalPatients = await Patient.count();
+        const totalRevenue = await Payment.sum('amount') || 0;
+
+        // Bed Occupancy Rate (Mock calculation - requires fixed bed count)
+        const activeInpatients = await IPDBill.count({ where: { status: 'active' } });
+        const totalBeds = 100; // Placeholder constant
+        const occupancyRate = (activeInpatients / totalBeds) * 100;
+
+        res.json({
+            facilityStats: {
+                totalPatients,
+                occupancyRate: `${occupancyRate.toFixed(1)}%`
+            },
+            financialPerformance: {
+                totalRevenue: parseFloat(totalRevenue).toFixed(2)
+            },
+            status: 'Operational'
+        });
+    } catch (error) {
+        console.error('Get Ministry dashboard error:', error);
+        res.status(500).json({ error: 'Failed to get Ministry dashboard' });
+    }
+};
+
 module.exports = {
     getOverview,
     getRecentActivities,
-    getRevenueChart
+    getRevenueChart,
+    getMedicalSuperintendentDashboard,
+    getAdministratorDashboard,
+    getAccountsDashboard,
+    getMinistryDashboard
 };

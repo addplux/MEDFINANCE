@@ -57,7 +57,7 @@ const Patient = sequelize.define('Patient', {
         allowNull: true
     },
     paymentMethod: {
-        type: DataTypes.ENUM('cash', 'nhima', 'corporate', 'scheme', 'staff'),
+        type: DataTypes.ENUM('cash', 'nhima', 'corporate', 'scheme', 'staff', 'exempted'),
         allowNull: false,
         defaultValue: 'cash'
     },

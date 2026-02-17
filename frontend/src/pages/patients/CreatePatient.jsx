@@ -240,6 +240,7 @@ const CreatePatient = () => {
                             <option value="corporate">Corporate Account</option>
                             <option value="scheme">Insurance Scheme</option>
                             <option value="staff">Staff</option>
+                            <option value="exempted">Exempted (Free)</option>
                         </select>
                     </div>
 
