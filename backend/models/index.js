@@ -34,6 +34,9 @@ const PharmacyBatch = require('./PharmacyBatch');
 const LabTest = require('./LabTest');
 const LabRequest = require('./LabRequest');
 const LabResult = require('./LabResult');
+const TheatreBill = require('./TheatreBill');
+const MaternityBill = require('./MaternityBill');
+const SpecialistClinicBill = require('./SpecialistClinicBill');
 
 // Define relationships
 
@@ -49,6 +52,9 @@ Patient.hasMany(IPDBill, { foreignKey: 'patientId', as: 'ipdBills' });
 Patient.hasMany(PharmacyBill, { foreignKey: 'patientId', as: 'pharmacyBills' });
 Patient.hasMany(LabBill, { foreignKey: 'patientId', as: 'labBills' });
 Patient.hasMany(RadiologyBill, { foreignKey: 'patientId', as: 'radiologyBills' });
+Patient.hasMany(TheatreBill, { foreignKey: 'patientId', as: 'theatreBills' });
+Patient.hasMany(MaternityBill, { foreignKey: 'patientId', as: 'maternityBills' });
+Patient.hasMany(SpecialistClinicBill, { foreignKey: 'patientId', as: 'specialistClinicBills' });
 Patient.hasMany(NHIMAClaim, { foreignKey: 'patientId', as: 'nhimaClaims' });
 Patient.hasMany(Payment, { foreignKey: 'patientId', as: 'payments' });
 
@@ -192,5 +198,8 @@ module.exports = {
     PharmacyBatch,
     LabTest,
     LabRequest,
-    LabResult
+    LabResult,
+    TheatreBill,
+    MaternityBill,
+    SpecialistClinicBill
 };

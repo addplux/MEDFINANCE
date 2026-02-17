@@ -86,6 +86,18 @@ import LabTests from './pages/lab/LabTests';
 import LabRequestForm from './pages/lab/LabRequestForm';
 import LabResultEntry from './pages/lab/LabResultEntry';
 
+// Theatre
+import TheatreBilling from './pages/theatre/TheatreBilling';
+import TheatreBillForm from './pages/theatre/TheatreBillForm';
+
+// Maternity
+import MaternityBilling from './pages/maternity/MaternityBilling';
+import MaternityBillForm from './pages/maternity/MaternityBillForm';
+
+// Specialist Clinics
+import SpecialistClinics from './pages/specialist/SpecialistClinics';
+import SpecialistClinicForm from './pages/specialist/SpecialistClinicForm';
+
 // Layout
 import MainLayout from './components/layout/MainLayout';
 
@@ -193,8 +205,20 @@ function App() {
 
                       <Route path="lab/dashboard" element={<LabDashboard />} />
                       <Route path="lab/tests" element={<LabTests />} />
-                      <Route path="lab/requests/new" element={<LabRequestForm />} />
-                      <Route path="lab/results/:id" element={<LabResultEntry />} />
+                      <Route path="lab/request" element={<LabRequestForm />} />
+                      <Route path="lab/results" element={<LabResultEntry />} />
+
+                      <Route path="theatre/billing" element={<TheatreBilling />} />
+                      <Route path="theatre/billing/new" element={<TheatreBillForm />} />
+                      <Route path="theatre/billing/:id/edit" element={<TheatreBillForm />} />
+
+                      <Route path="maternity/billing" element={<MaternityBilling />} />
+                      <Route path="maternity/billing/new" element={<MaternityBillForm />} />
+                      <Route path="maternity/billing/:id/edit" element={<MaternityBillForm />} />
+
+                      <Route path="specialist-clinics/billing" element={<SpecialistClinics />} />
+                      <Route path="specialist-clinics/billing/new" element={<SpecialistClinicForm />} />
+                      <Route path="specialist-clinics/billing/:id/edit" element={<SpecialistClinicForm />} />
 
                       <Route path="setup" element={<Setup />} />
                       <Route path="*" element={<Navigate to="dashboard" replace />} />

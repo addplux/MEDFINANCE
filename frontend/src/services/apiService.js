@@ -247,6 +247,44 @@ export const labAPI = {
     }
 };
 
+// Theatre Billing
+export const theatreAPI = {
+    bills: {
+        create: (data) => api.post('/theatre/bills', data),
+        getAll: (params) => api.get('/theatre/bills', { params }),
+        getById: (id) => api.get(`/theatre/bills/${id}`),
+        update: (id, data) => api.put(`/theatre/bills/${id}`, data),
+        delete: (id) => api.delete(`/theatre/bills/${id}`)
+    },
+    revenue: () => api.get('/theatre/revenue')
+};
+
+// Maternity Billing
+export const maternityAPI = {
+    bills: {
+        create: (data) => api.post('/maternity/bills', data),
+        getAll: (params) => api.get('/maternity/bills', { params }),
+        getById: (id) => api.get(`/maternity/bills/${id}`),
+        update: (id, data) => api.put(`/maternity/bills/${id}`, data),
+        delete: (id) => api.delete(`/maternity/bills/${id}`)
+    },
+    revenue: () => api.get('/maternity/revenue'),
+    statistics: () => api.get('/maternity/statistics')
+};
+
+// Specialist Clinic Billing
+export const specialistClinicAPI = {
+    bills: {
+        create: (data) => api.post('/specialist-clinics/bills', data),
+        getAll: (params) => api.get('/specialist-clinics/bills', { params }),
+        getById: (id) => api.get(`/specialist-clinics/bills/${id}`),
+        update: (id, data) => api.put(`/specialist-clinics/bills/${id}`, data),
+        delete: (id) => api.delete(`/specialist-clinics/bills/${id}`)
+    },
+    revenue: () => api.get('/specialist-clinics/revenue'),
+    statistics: () => api.get('/specialist-clinics/statistics')
+};
+
 // Dashboard
 export const dashboardAPI = {
     getOverview: () => api.get('/dashboard/overview'),
