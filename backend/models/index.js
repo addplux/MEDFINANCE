@@ -2,6 +2,7 @@ const { sequelize } = require('../config/database');
 
 // Import all models
 const User = require('./User');
+const Role = require('./Role');
 const Patient = require('./Patient');
 const Service = require('./Service');
 const OPDBill = require('./OPDBill');
@@ -244,5 +245,12 @@ module.exports = {
     MaternityBill,
     SpecialistClinicBill,
     Shift,
-    Refund
+    Shift,
+    Refund,
+    Role
 };
+
+// Role relationships
+Role.hasMany(User, { foreignKey: 'roleId', as: 'users' });
+User.belongsTo(Role, { foreignKey: 'roleId', as: 'userRole' });
+

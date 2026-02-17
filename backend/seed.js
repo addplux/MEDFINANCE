@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { syncDatabase, User, Department, Service, ChartOfAccounts } = require('./models');
+const { syncDatabase, User, Role, Department, Service, ChartOfAccounts } = require('./models');
 
 const seedDatabase = async () => {
     try {
@@ -10,6 +10,36 @@ const seedDatabase = async () => {
 
         console.log('📊 Creating initial data...');
 
+        // 0. Create Roles
+        const adminRole = await Role.create({
+            name: 'Administrator',
+            description: 'Full system access',
+            permissions: { all: ['manage'] },
+            isSystem: true
+        });
+
+        const accountantRole = await Role.create({
+            name: 'Accountant',
+            description: 'Financial management access',
+            permissions: { finance: ['read', 'write'], reports: ['read'] },
+            isSystem: true
+        });
+
+        const billingRole = await Role.create({
+            name: 'Billing Staff',
+            description: 'Billing and patient management',
+            permissions: { billing: ['read', 'write'], patients: ['read', 'write'] },
+            isSystem: true
+        });
+
+        const viewerRole = await Role.create({
+            name: 'Viewer',
+            description: 'Read-only access',
+            permissions: { '*': ['read'] },
+            isSystem: true
+        });
+        console.log('✅ Default roles created');
+
         // 1. Create Admin User
         const adminUser = await User.create({
             username: 'admin',
@@ -18,6 +48,7 @@ const seedDatabase = async () => {
             role: 'admin',
             firstName: 'System',
             lastName: 'Administrator',
+            roleId: adminRole.id,
             isActive: true
         });
         console.log('✅ Admin user created');
@@ -31,6 +62,7 @@ const seedDatabase = async () => {
                 role: 'accountant',
                 firstName: 'John',
                 lastName: 'Mwansa',
+                roleId: accountantRole.id,
                 isActive: true
             },
             {
@@ -40,6 +72,7 @@ const seedDatabase = async () => {
                 role: 'billing_staff',
                 firstName: 'Mary',
                 lastName: 'Banda',
+                roleId: billingRole.id,
                 isActive: true
             }
         ], { individualHooks: true });

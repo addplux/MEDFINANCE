@@ -30,6 +30,14 @@ const User = sequelize.define('User', {
         allowNull: false,
         defaultValue: 'viewer'
     },
+    roleId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'roles',
+            key: 'id'
+        }
+    },
     firstName: {
         type: DataTypes.STRING(50),
         allowNull: true

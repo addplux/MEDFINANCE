@@ -104,6 +104,7 @@ app.use('/api/funds', require('./routes/funds'));
 app.use('/api/assets', require('./routes/assets'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/setup', require('./routes/setup'));
+app.use('/api/roles', require('./routes/roleRoutes'));
 app.use('/api/payroll', require('./routes/payroll'));
 app.use('/api/pharmacy', require('./routes/pharmacy'));
 app.use('/api/lab', require('./routes/lab'));
