@@ -26,8 +26,8 @@ const LabRequestForm = () => {
                 patientAPI.getAll(),
                 labAPI.tests.getAll()
             ]);
-            setPatients(pRes.data);
-            setTests(tRes.data);
+            setPatients(pRes.data.data || []);
+            setTests(tRes.data || []);
         } catch (error) {
             console.error('Failed to load data:', error);
         }
@@ -66,9 +66,9 @@ const LabRequestForm = () => {
         }
     };
 
-    const filteredTests = tests.filter(t =>
-        t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.category.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredTests = (tests || []).filter(t =>
+        (t.name || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+        (t.category || '').toLowerCase().includes((searchTerm || '').toLowerCase())
     );
 
     return (
@@ -91,8 +91,10 @@ const LabRequestForm = () => {
                             required
                         >
                             <option value="">-- Select Patient --</option>
-                            {patients.map(p => (
-                                <option key={p.id} value={p.id}>{p.firstName} {p.lastName} ({new Date(p.dateOfBirth).getFullYear()})</option>
+                            {(patients || []).map(p => (
+                                <option key={p.id} value={p.id}>
+                                    {p.firstName || ''} {p.lastName || ''} {p.dateOfBirth ? `(${new Date(p.dateOfBirth).getFullYear()})` : ''}
+                                </option>
                             ))}
                         </select>
                     </div>
@@ -161,9 +163,9 @@ const LabRequestForm = () => {
                                                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                                             />
                                         </td>
-                                        <td className="p-3 font-medium">{test.name}</td>
-                                        <td className="p-3 text-sm text-text-secondary">{test.category}</td>
-                                        <td className="p-3 text-right">K{parseFloat(test.price).toFixed(2)}</td>
+                                        <td className="p-3 font-medium">{test.name || 'Unnamed Test'}</td>
+                                        <td className="p-3 text-sm text-text-secondary">{test.category || 'N/A'}</td>
+                                        <td className="p-3 text-right">K{parseFloat(test.price || 0).toFixed(2)}</td>
                                     </tr>
                                 ))}
                             </tbody>
