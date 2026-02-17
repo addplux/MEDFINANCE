@@ -18,7 +18,8 @@ const CreatePatient = () => {
         paymentMethod: 'cash', // Default to cash (non-NHIMA)
         costCategory: 'standard',
         staffId: '',
-        serviceId: ''
+        serviceId: '',
+        ward: ''
     });
     const [staffMembers, setStaffMembers] = useState([]);
     const [services, setServices] = useState([]);
@@ -182,6 +183,23 @@ const CreatePatient = () => {
                                     {service.serviceName} ({service.category})
                                 </option>
                             ))}
+                        </select>
+                    </div>
+
+                    {/* Ward */}
+                    <div className="form-group">
+                        <label className="form-label">Ward</label>
+                        <select
+                            value={formData.ward}
+                            onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
+                            className="form-select"
+                        >
+                            <option value="">Select Ward</option>
+                            <option value="male_ward">Male Ward</option>
+                            <option value="female_ward">Female Ward</option>
+                            <option value="general_ward">General Ward</option>
+                            <option value="pediatric_ward">Pediatric Ward</option>
+                            <option value="icu">ICU</option>
                         </select>
                     </div>
 

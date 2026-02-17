@@ -81,6 +81,10 @@ const Patient = sequelize.define('Patient', {
             model: 'services',
             key: 'id'
         }
+    },
+    ward: {
+        type: DataTypes.ENUM('male_ward', 'female_ward', 'general_ward', 'pediatric_ward', 'icu'),
+        allowNull: true
     }
 }, {
     tableName: 'patients',
