@@ -48,6 +48,7 @@ import FundForm from './pages/funds/FundForm';
 
 // Receivables
 import CorporateAccounts from './pages/receivables/CorporateAccounts';
+import CorporateAccountForm from './pages/receivables/CorporateAccountForm';
 import Schemes from './pages/receivables/Schemes';
 import DebtorAgeing from './pages/receivables/DebtorAgeing';
 
@@ -139,8 +140,8 @@ function App() {
                       <Route path="nhima/reconciliation" element={<Reconciliation />} />
                       <Route path="receivables/nhima" element={<NHIMAClaims />} />
                       <Route path="receivables/corporate" element={<CorporateAccounts />} />
-                      <Route path="receivables/corporate/new" element={<CorporateAccounts />} />
-                      <Route path="receivables/corporate/:id" element={<CorporateAccounts />} />
+                      <Route path="receivables/corporate/new" element={<CorporateAccountForm />} />
+                      <Route path="receivables/corporate/:id/edit" element={<CorporateAccountForm />} />
                       <Route path="receivables/schemes" element={<Schemes />} />
                       <Route path="receivables/ageing" element={<DebtorAgeing />} />
 
