@@ -87,8 +87,11 @@ const MainLayout = ({ children }) => {
             icon: FileText,
             label: 'Patient Billing',
             submenu: [
-                { path: '/app/billing/opd/new', label: 'New Bill' },
-                { path: '/app/billing/opd', label: 'Invoice List' }
+                { path: '/app/billing/opd/new', label: 'New OPD Bill' },
+                { path: '/app/billing/opd', label: 'OPD Invoice List' },
+                { path: '/app/theatre/billing', label: 'Theatre Billing' },
+                { path: '/app/maternity/billing', label: 'Maternity Billing' },
+                { path: '/app/specialist-clinics/billing', label: 'Specialist Clinics' }
             ]
         },
         { path: '/app/patients', icon: Users, label: 'Patients' },
