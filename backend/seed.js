@@ -42,7 +42,7 @@ const seedDatabase = async () => {
                 lastName: 'Banda',
                 isActive: true
             }
-        ]);
+        ], { individualHooks: true });
         console.log('✅ Sample users created');
 
         // 3. Create Departments
@@ -162,7 +162,13 @@ const seedDatabase = async () => {
             isActive: true
         });
 
-        console.log('✅ Chart of Accounts created');
+        // 6. Create Organization Info
+        await Organization.create({
+            name: 'MEDFINANCE360',
+            type: 'Government',
+            logo: '/logo.png'
+        });
+        console.log('✅ Organization record created');
 
         console.log('\n🎉 Database seeding completed successfully!');
         console.log('\n📝 Login Credentials:');
@@ -170,10 +176,10 @@ const seedDatabase = async () => {
         console.log('Accountant: accountant@medfinance360.com / Account@123');
         console.log('Billing Staff: billing@medfinance360.com / Billing@123');
 
-        process.exit(0);
+        return true;
     } catch (error) {
         console.error('❌ Error seeding database:', error);
-        process.exit(1);
+        throw error;
     }
 };
 
@@ -182,5 +188,5 @@ module.exports = { seedDatabase };
 
 // Run directly if called from command line
 if (require.main === module) {
-    seedDatabase();
+    seedDatabase().then(() => process.exit(0)).catch(() => process.exit(1));
 }
