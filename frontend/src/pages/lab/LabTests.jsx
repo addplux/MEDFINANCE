@@ -106,12 +106,12 @@ const LabTests = () => {
 
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-lg w-full space-y-4">
+                    <div className="bg-bg-secondary border border-border-color rounded-lg p-6 max-w-lg w-full space-y-4">
                         <h2 className="text-xl font-bold">Add New Lab Test</h2>
                         <form onSubmit={handleCreate} className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="label">Name</label>
+                                    <label className="form-label">Name</label>
                                     <input
                                         className="form-input"
                                         value={formData.name}
@@ -120,7 +120,7 @@ const LabTests = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="label">Code</label>
+                                    <label className="form-label">Code</label>
                                     <input
                                         className="form-input"
                                         value={formData.code}
@@ -131,7 +131,7 @@ const LabTests = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="label">Category</label>
+                                    <label className="form-label">Category</label>
                                     <select
                                         className="form-select"
                                         value={formData.category}
@@ -145,7 +145,7 @@ const LabTests = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="label">Price (K)</label>
+                                    <label className="form-label">Price (K)</label>
                                     <input
                                         type="number"
                                         className="form-input"
@@ -157,7 +157,7 @@ const LabTests = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="label">Normal Range</label>
+                                    <label className="form-label">Normal Range</label>
                                     <input
                                         className="form-input"
                                         value={formData.normalRange}
@@ -166,7 +166,7 @@ const LabTests = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="label">Units</label>
+                                    <label className="form-label">Units</label>
                                     <input
                                         className="form-input"
                                         value={formData.units}
