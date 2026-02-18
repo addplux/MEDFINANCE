@@ -206,7 +206,7 @@ function App() {
                       <Route path="lab/dashboard" element={<LabDashboard />} />
                       <Route path="lab/tests" element={<LabTests />} />
                       <Route path="lab/request" element={<LabRequestForm />} />
-                      <Route path="lab/results" element={<LabResultEntry />} />
+                      <Route path="lab/results/:id" element={<LabResultEntry />} />
 
                       <Route path="theatre/billing" element={<TheatreBilling />} />
                       <Route path="theatre/billing/new" element={<TheatreBillForm />} />
@@ -221,7 +221,7 @@ function App() {
                       <Route path="specialist-clinics/billing/:id/edit" element={<SpecialistClinicForm />} />
 
                       <Route path="setup" element={<Setup />} />
-                      <Route path="*" element={<Navigate to="dashboard" replace />} />
+                      <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
                     </Routes>
                   </MainLayout>
                 </ProtectedRoute>

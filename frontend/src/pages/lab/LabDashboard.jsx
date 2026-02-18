@@ -61,7 +61,7 @@ const LabDashboard = () => {
                         Test Catalog
                     </button>
                     <button
-                        onClick={() => navigate('/app/lab/requests/new')}
+                        onClick={() => navigate('/app/lab/request')}
                         className="btn btn-primary flex items-center gap-2"
                     >
                         <Activity className="w-4 h-4" />
@@ -118,8 +118,8 @@ const LabDashboard = () => {
                         key={f}
                         onClick={() => setFilter(f)}
                         className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${filter === f
-                                ? 'bg-primary-600 text-white'
-                                : 'bg-bg-tertiary text-text-secondary hover:bg-gray-200'
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-bg-tertiary text-text-secondary hover:bg-gray-200'
                             }`}
                     >
                         {f.charAt(0).toUpperCase() + f.slice(1).replace('_', ' ')}
