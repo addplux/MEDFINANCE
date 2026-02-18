@@ -145,7 +145,7 @@ const Dispense = () => {
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="label">Medication</label>
+                            <label className="form-label">Medication</label>
                             <select
                                 className="form-select w-full"
                                 value={selectedMedication}
@@ -158,7 +158,7 @@ const Dispense = () => {
                             </select>
                         </div>
                         <div>
-                            <label className="label">Batch (Expiry)</label>
+                            <label className="form-label">Batch (Expiry)</label>
                             <select
                                 className="form-select w-full"
                                 value={selectedBatch}
@@ -173,7 +173,7 @@ const Dispense = () => {
                             </select>
                         </div>
                         <div>
-                            <label className="label">Quantity</label>
+                            <label className="form-label">Quantity</label>
                             <input
                                 type="number"
                                 className="form-input"
