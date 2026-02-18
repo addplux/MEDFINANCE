@@ -93,7 +93,11 @@ const createBudget = async (req, res) => {
         res.status(201).json(createdBudget);
     } catch (error) {
         console.error('Create budget error:', error);
-        res.status(500).json({ error: 'Failed to create budget' });
+        res.status(500).json({
+            error: 'Failed to create budget',
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 };
 
