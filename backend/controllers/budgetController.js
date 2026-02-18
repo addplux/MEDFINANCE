@@ -59,7 +59,7 @@ const getBudget = async (req, res) => {
 // Create budget
 const createBudget = async (req, res) => {
     try {
-        const { departmentId, fiscalYear, budgetAmount, notes } = req.body;
+        const { departmentId, fiscalYear, budgetAmount, category, notes } = req.body;
 
         if (!departmentId || !fiscalYear || !budgetAmount) {
             return res.status(400).json({ error: 'Department, fiscal year, and budget amount are required' });
@@ -67,17 +67,18 @@ const createBudget = async (req, res) => {
 
         // Check if budget already exists for this department and fiscal year
         const existingBudget = await Budget.findOne({
-            where: { departmentId, fiscalYear }
+            where: { departmentId, fiscalYear, category: category || 'Operational' }
         });
 
         if (existingBudget) {
-            return res.status(400).json({ error: 'Budget already exists for this department and fiscal year' });
+            return res.status(400).json({ error: 'Budget already exists for this department, fiscal year and category' });
         }
 
         const budget = await Budget.create({
             departmentId,
             fiscalYear,
-            budgetAmount,
+            budgetedAmount: budgetAmount, // Map to correct model field
+            category: category || 'Operational', // Default if missing
             notes,
             createdBy: req.user.id
         });

@@ -12,6 +12,7 @@ const BudgetForm = () => {
         departmentId: '',
         fiscalYear: new Date().getFullYear().toString(),
         budgetAmount: '',
+        category: 'Operational',
         notes: '',
         status: 'draft'
     });
@@ -20,7 +21,7 @@ const BudgetForm = () => {
     const [error, setError] = useState(null);
 
     const currentYear = new Date().getFullYear();
-    const years = [currentYear-1, currentYear, currentYear + 1, currentYear + 2];
+    const years = [currentYear - 1, currentYear, currentYear + 1, currentYear + 2];
 
     useEffect(() => {
         loadDepartments();
@@ -128,6 +129,22 @@ const BudgetForm = () => {
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
+                            <div className="form-group">
+                                <label className="form-label">Category *</label>
+                                <select
+                                    name="category"
+                                    value={formData.category}
+                                    onChange={handleChange}
+                                    className="form-select"
+                                    required
+                                >
+                                    <option value="Operational">Operational</option>
+                                    <option value="Capital">Capital</option>
+                                    <option value="Personnel">Personnel</option>
+                                    <option value="Administrative">Administrative</option>
+                                </select>
+                            </div>
+
                             <div className="form-group">
                                 <label className="form-label">Fiscal Year *</label>
                                 <select
