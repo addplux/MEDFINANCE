@@ -114,6 +114,7 @@ app.use('/api/specialist-clinics', require('./routes/specialistClinicRoutes'));
 app.use('/api/shifts', require('./routes/shifts'));
 app.use('/api/refunds', require('./routes/refunds'));
 app.use('/api/debug', require('./routes/debug'));
+app.use('/api/sync', require('./routes/sync'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

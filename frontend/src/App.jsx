@@ -105,6 +105,10 @@ import MainLayout from './components/layout/MainLayout';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 
+// Offline Support
+import { OfflineProvider } from './context/OfflineContext';
+import OfflineBanner from './components/ui/OfflineBanner';
+
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -127,109 +131,112 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <ToastProvider>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
+      <OfflineProvider>
+        <AuthProvider>
+          <Router>
+            <OfflineBanner />
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
 
-            {/* Protected Routes */}
-            <Route
-              path="/app/*"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Routes>
-                      <Route path="/" element={<Dashboard />} />
-                      <Route path="dashboard" element={<Dashboard />} />
-                      <Route path="billing/opd" element={<OPDBilling />} />
-                      <Route path="billing/opd/new" element={<CreateOPDBill />} />
-                      <Route path="patients" element={<Patients />} />
-                      <Route path="patients/new" element={<CreatePatient />} />
-                      <Route path="nhima/eligibility" element={<EligibilityCheck />} />
-                      <Route path="nhima/submission" element={<ClaimsSubmission />} />
-                      <Route path="nhima/tracking" element={<ClaimsTracking />} />
-                      <Route path="nhima/reconciliation" element={<Reconciliation />} />
-                      <Route path="receivables/nhima" element={<NHIMAClaims />} />
-                      <Route path="receivables/corporate" element={<CorporateAccounts />} />
-                      <Route path="receivables/corporate/new" element={<CorporateAccountForm />} />
-                      <Route path="receivables/corporate/:id/edit" element={<CorporateAccountForm />} />
-                      <Route path="receivables/schemes" element={<Schemes />} />
-                      <Route path="receivables/schemes/new" element={<SchemeForm />} />
-                      <Route path="receivables/schemes/:id/edit" element={<SchemeForm />} />
-                      <Route path="receivables/ageing" element={<DebtorAgeing />} />
+              {/* Protected Routes */}
+              <Route
+                path="/app/*"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Routes>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="dashboard" element={<Dashboard />} />
+                        <Route path="billing/opd" element={<OPDBilling />} />
+                        <Route path="billing/opd/new" element={<CreateOPDBill />} />
+                        <Route path="patients" element={<Patients />} />
+                        <Route path="patients/new" element={<CreatePatient />} />
+                        <Route path="nhima/eligibility" element={<EligibilityCheck />} />
+                        <Route path="nhima/submission" element={<ClaimsSubmission />} />
+                        <Route path="nhima/tracking" element={<ClaimsTracking />} />
+                        <Route path="nhima/reconciliation" element={<Reconciliation />} />
+                        <Route path="receivables/nhima" element={<NHIMAClaims />} />
+                        <Route path="receivables/corporate" element={<CorporateAccounts />} />
+                        <Route path="receivables/corporate/new" element={<CorporateAccountForm />} />
+                        <Route path="receivables/corporate/:id/edit" element={<CorporateAccountForm />} />
+                        <Route path="receivables/schemes" element={<Schemes />} />
+                        <Route path="receivables/schemes/new" element={<SchemeForm />} />
+                        <Route path="receivables/schemes/:id/edit" element={<SchemeForm />} />
+                        <Route path="receivables/ageing" element={<DebtorAgeing />} />
 
-                      <Route path="payables/suppliers" element={<Suppliers />} />
-                      <Route path="payables/suppliers/new" element={<SupplierForm />} />
-                      <Route path="payables/suppliers/:id/edit" element={<SupplierForm />} />
+                        <Route path="payables/suppliers" element={<Suppliers />} />
+                        <Route path="payables/suppliers/new" element={<SupplierForm />} />
+                        <Route path="payables/suppliers/:id/edit" element={<SupplierForm />} />
 
-                      <Route path="ledger/accounts" element={<ChartOfAccounts />} />
+                        <Route path="ledger/accounts" element={<ChartOfAccounts />} />
 
-                      <Route path="cash/payments" element={<Payments />} />
-                      <Route path="cash/payments/new" element={<PaymentForm />} />
-                      <Route path="cash/payments/:id/edit" element={<PaymentForm />} />
-                      <Route path="cash/shift-report" element={<ShiftReport />} />
+                        <Route path="cash/payments" element={<Payments />} />
+                        <Route path="cash/payments/new" element={<PaymentForm />} />
+                        <Route path="cash/payments/:id/edit" element={<PaymentForm />} />
+                        <Route path="cash/shift-report" element={<ShiftReport />} />
 
-                      <Route path="budgets" element={<Budgets />} />
-                      <Route path="budgets/new" element={<BudgetForm />} />
-                      <Route path="budgets/:id/edit" element={<BudgetForm />} />
-                      <Route path="budgets/analysis" element={<BudgetAnalysis />} />
+                        <Route path="budgets" element={<Budgets />} />
+                        <Route path="budgets/new" element={<BudgetForm />} />
+                        <Route path="budgets/:id/edit" element={<BudgetForm />} />
+                        <Route path="budgets/analysis" element={<BudgetAnalysis />} />
 
-                      <Route path="funds" element={<Funds />} />
-                      <Route path="funds/new" element={<FundForm />} />
-                      <Route path="funds/:id/edit" element={<FundForm />} />
-                      <Route path="funds/:id" element={<Funds />} />
+                        <Route path="funds" element={<Funds />} />
+                        <Route path="funds/new" element={<FundForm />} />
+                        <Route path="funds/:id/edit" element={<FundForm />} />
+                        <Route path="funds/:id" element={<Funds />} />
 
-                      <Route path="assets" element={<Assets />} />
-                      <Route path="assets/new" element={<AssetForm />} />
-                      <Route path="assets/:id/edit" element={<AssetForm />} />
+                        <Route path="assets" element={<Assets />} />
+                        <Route path="assets/new" element={<AssetForm />} />
+                        <Route path="assets/:id/edit" element={<AssetForm />} />
 
-                      <Route path="reports" element={<Reports />} />
+                        <Route path="reports" element={<Reports />} />
 
-                      <Route path="setup/services" element={<ServicesList />} />
-                      <Route path="setup/services/new" element={<ServiceForm />} />
-                      <Route path="setup/services/:id/edit" element={<ServiceForm />} />
-                      <Route path="setup/users/new" element={<UserForm />} />
-                      <Route path="setup/users/:id/edit" element={<UserForm />} />
-                      <Route path="setup/roles" element={<UserRoles />} />
-                      <Route path="setup/departments/new" element={<DepartmentForm />} />
-                      <Route path="setup/departments/:id/edit" element={<DepartmentForm />} />
+                        <Route path="setup/services" element={<ServicesList />} />
+                        <Route path="setup/services/new" element={<ServiceForm />} />
+                        <Route path="setup/services/:id/edit" element={<ServiceForm />} />
+                        <Route path="setup/users/new" element={<UserForm />} />
+                        <Route path="setup/users/:id/edit" element={<UserForm />} />
+                        <Route path="setup/roles" element={<UserRoles />} />
+                        <Route path="setup/departments/new" element={<DepartmentForm />} />
+                        <Route path="setup/departments/:id/edit" element={<DepartmentForm />} />
 
-                      <Route path="payroll/medical" element={<PayrollMedical />} />
+                        <Route path="payroll/medical" element={<PayrollMedical />} />
 
-                      <Route path="pharmacy/inventory" element={<PharmacyInventory />} />
-                      <Route path="pharmacy/grn" element={<GoodsReceivedNote />} />
-                      <Route path="pharmacy/dispense" element={<Dispense />} />
+                        <Route path="pharmacy/inventory" element={<PharmacyInventory />} />
+                        <Route path="pharmacy/grn" element={<GoodsReceivedNote />} />
+                        <Route path="pharmacy/dispense" element={<Dispense />} />
 
-                      <Route path="lab/dashboard" element={<LabDashboard />} />
-                      <Route path="lab/tests" element={<LabTests />} />
-                      <Route path="lab/request" element={<LabRequestForm />} />
-                      <Route path="lab/results/:id" element={<LabResultEntry />} />
+                        <Route path="lab/dashboard" element={<LabDashboard />} />
+                        <Route path="lab/tests" element={<LabTests />} />
+                        <Route path="lab/request" element={<LabRequestForm />} />
+                        <Route path="lab/results/:id" element={<LabResultEntry />} />
 
-                      <Route path="theatre/billing" element={<TheatreBilling />} />
-                      <Route path="theatre/billing/new" element={<TheatreBillForm />} />
-                      <Route path="theatre/billing/:id/edit" element={<TheatreBillForm />} />
+                        <Route path="theatre/billing" element={<TheatreBilling />} />
+                        <Route path="theatre/billing/new" element={<TheatreBillForm />} />
+                        <Route path="theatre/billing/:id/edit" element={<TheatreBillForm />} />
 
-                      <Route path="maternity/billing" element={<MaternityBilling />} />
-                      <Route path="maternity/billing/new" element={<MaternityBillForm />} />
-                      <Route path="maternity/billing/:id/edit" element={<MaternityBillForm />} />
+                        <Route path="maternity/billing" element={<MaternityBilling />} />
+                        <Route path="maternity/billing/new" element={<MaternityBillForm />} />
+                        <Route path="maternity/billing/:id/edit" element={<MaternityBillForm />} />
 
-                      <Route path="specialist-clinics/billing" element={<SpecialistClinics />} />
-                      <Route path="specialist-clinics/billing/new" element={<SpecialistClinicForm />} />
-                      <Route path="specialist-clinics/billing/:id/edit" element={<SpecialistClinicForm />} />
+                        <Route path="specialist-clinics/billing" element={<SpecialistClinics />} />
+                        <Route path="specialist-clinics/billing/new" element={<SpecialistClinicForm />} />
+                        <Route path="specialist-clinics/billing/:id/edit" element={<SpecialistClinicForm />} />
 
-                      <Route path="setup" element={<Setup />} />
-                      <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
-                    </Routes>
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </Router>
-      </AuthProvider>
+                        <Route path="setup" element={<Setup />} />
+                        <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
+                      </Routes>
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </Router>
+        </AuthProvider>
+      </OfflineProvider>
     </ToastProvider>
   );
 }

@@ -1,0 +1,16 @@
+{
+    "name": "MEDFINANCE360",
+    "short_name": "MedFinance",
+    "description": "Medical Finance Management System",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#1e40af",
+    "icons": [
+        {
+            "src": "/vite.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ]
+}
