@@ -135,12 +135,12 @@ const PharmacyInventory = () => {
             {/* Add Medication Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-lg w-full space-y-4">
+                    <div className="bg-bg-secondary border border-border-color rounded-lg p-6 max-w-lg w-full space-y-4">
                         <h2 className="text-xl font-bold">Add New Medication</h2>
                         <form onSubmit={handleCreate} className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="label">Name</label>
+                                    <label className="form-label">Name</label>
                                     <input
                                         type="text"
                                         className="form-input"
@@ -150,7 +150,7 @@ const PharmacyInventory = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="label">Code</label>
+                                    <label className="form-label">Code</label>
                                     <input
                                         type="text"
                                         className="form-input"
@@ -162,7 +162,7 @@ const PharmacyInventory = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="label">Category</label>
+                                    <label className="form-label">Category</label>
                                     <select
                                         className="form-select"
                                         value={formData.category}
@@ -176,7 +176,7 @@ const PharmacyInventory = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="label">Unit</label>
+                                    <label className="form-label">Unit</label>
                                     <input
                                         type="text"
                                         className="form-input"
@@ -189,7 +189,7 @@ const PharmacyInventory = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="label">Reorder Level</label>
+                                    <label className="form-label">Reorder Level</label>
                                     <input
                                         type="number"
                                         className="form-input"
@@ -199,7 +199,7 @@ const PharmacyInventory = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="label">Manufacturer</label>
+                                    <label className="form-label">Manufacturer</label>
                                     <input
                                         type="text"
                                         className="form-input"
@@ -209,7 +209,7 @@ const PharmacyInventory = () => {
                                 </div>
                             </div>
                             <div>
-                                <label className="label">Description</label>
+                                <label className="form-label">Description</label>
                                 <textarea
                                     className="form-textarea"
                                     value={formData.description}
