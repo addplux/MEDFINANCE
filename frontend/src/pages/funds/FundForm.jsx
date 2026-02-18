@@ -114,9 +114,10 @@ const FundForm = () => {
                                     className="form-select"
                                     required
                                 >
-                                    <option value="unrestricted">Unrestricted</option>
-                                    <option value="restricted">Restricted</option>
-                                    <option value="endowment">Endowment</option>
+                                    <option value="general">General Fund</option>
+                                    <option value="nhima">NHIMA Fund</option>
+                                    <option value="donor">Donor Fund</option>
+                                    <option value="retention">Retention Fund</option>
                                 </select>
                             </div>
                             <div className="form-group">
@@ -128,7 +129,6 @@ const FundForm = () => {
                                     className="form-select"
                                 >
                                     <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
                                     <option value="closed">Closed</option>
                                 </select>
                             </div>
