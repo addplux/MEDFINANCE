@@ -58,11 +58,7 @@ User.belongsTo(Role, { foreignKey: 'roleId', as: 'userRole' });
 
 // ... (rest of file)
 
-module.exports = {
-    // ...
-    Shift,
-    Refund
-};
+
 
 // User relationships
 User.hasMany(OPDBill, { foreignKey: 'createdBy', as: 'opdBills' });
@@ -78,13 +74,7 @@ Shift.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 // ... (rest of file)
 
-module.exports = {
-    // ...
-    TheatreBill,
-    MaternityBill,
-    SpecialistClinicBill,
-    Shift
-};
+
 
 // Patient relationships
 Patient.hasMany(OPDBill, { foreignKey: 'patientId', as: 'opdBills' });
