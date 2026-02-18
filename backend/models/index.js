@@ -52,9 +52,6 @@ Refund.belongsTo(Payment, { foreignKey: 'paymentId', as: 'payment' });
 Refund.belongsTo(User, { foreignKey: 'requestedBy', as: 'requester' });
 Refund.belongsTo(User, { foreignKey: 'approvedBy', as: 'approver' });
 
-// Role relationships
-Role.hasMany(User, { foreignKey: 'roleId', as: 'users' });
-User.belongsTo(Role, { foreignKey: 'roleId', as: 'userRole' });
 
 // ... (rest of file)
 
