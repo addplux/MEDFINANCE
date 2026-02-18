@@ -93,8 +93,9 @@ const Assets = () => {
                         <option value="">All Categories</option>
                         <option value="equipment">Equipment</option>
                         <option value="furniture">Furniture</option>
-                        <option value="vehicles">Vehicles</option>
-                        <option value="buildings">Buildings</option>
+                        <option value="vehicle">Vehicle</option>
+                        <option value="building">Building</option>
+                        <option value="computer">Computer</option>
                     </select>
                 </div>
             </div>
