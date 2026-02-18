@@ -4,30 +4,40 @@
  * Developed: 2026
  *
  * Strategy:
- *  - Static assets (JS, CSS, fonts, images): Cache-first with runtime population.
- *    On first visit (online), all assets are cached as they load.
- *    On subsequent visits (offline), served from cache.
- *  - API GET requests: Network-first, fall back to cache.
- *  - Mutations (POST/PUT/DELETE/PATCH): Passed through — apiClient.js handles queuing.
- *  - Navigation requests: Cache-first, always serve index.html for SPA routing.
+ *  - Pre-caches ALL Vite build assets (hashed JS/CSS) at install time.
+ *    The __PRECACHE_ASSETS__ placeholder is replaced by vite.config.js
+ *    after build with the actual asset list from the Vite manifest.
+ *  - Static assets: Cache-first (served from pre-cache)
+ *  - API GET requests: Network-first, fall back to cache
+ *  - Mutations (POST/PUT/DELETE/PATCH): Passed through — apiClient.js queues them
+ *  - Navigation: Always serve index.html from cache (SPA routing)
  */
 
-const CACHE_NAME = 'medfinance360-v2';
+const CACHE_NAME = 'medfinance360-v3';
 
-// ─── Install ──────────────────────────────────────────────────────────────────
+// Injected by vite.config.js at build time — contains all hashed asset URLs.
+// Falls back to just the root in dev mode (runtime caching handles the rest).
+const PRECACHE_ASSETS = self.__PRECACHE_ASSETS__ || ['/', '/index.html'];
+
+// ─── Install: pre-cache everything ────────────────────────────────────────────
 self.addEventListener('install', (event) => {
-    // Pre-cache the root HTML immediately
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            return cache.add('/');
-        }).catch(() => {
-            // Ignore if offline during install (SW will still activate)
+            // addAll fails if any single request fails, so we add individually
+            // to be resilient against any single asset 404
+            return Promise.allSettled(
+                PRECACHE_ASSETS.map((url) =>
+                    cache.add(url).catch((err) => {
+                        console.warn(`[SW] Failed to pre-cache ${url}:`, err.message);
+                    })
+                )
+            );
         })
     );
     self.skipWaiting();
 });
 
-// ─── Activate ─────────────────────────────────────────────────────────────────
+// ─── Activate: clean up old caches ────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) =>
@@ -46,12 +56,7 @@ self.addEventListener('fetch', (event) => {
     const { request } = event;
     const url = new URL(request.url);
 
-    // Only handle same-origin requests (and API calls)
-    if (url.origin !== self.location.origin && !url.pathname.startsWith('/api/')) {
-        return;
-    }
-
-    // Skip non-GET requests — mutations are handled by apiClient offline queue
+    // Skip non-GET — mutations handled by apiClient offline queue
     if (request.method !== 'GET') return;
 
     // API requests: network-first, fall back to cache
@@ -60,13 +65,13 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Navigation requests (page loads/reloads): serve index.html from cache for SPA
+    // Navigation (page load/reload): always serve index.html for SPA routing
     if (request.mode === 'navigate') {
         event.respondWith(serveAppShell(request));
         return;
     }
 
-    // Static assets (JS, CSS, images, fonts): cache-first with runtime caching
+    // All other assets (JS, CSS, images): cache-first
     event.respondWith(cacheFirst(request));
 });
 
@@ -86,37 +91,35 @@ async function notifyClientsToSync() {
 
 // ─── Strategies ───────────────────────────────────────────────────────────────
 
-/**
- * For SPA navigation: try network first, fall back to cached index.html.
- * This ensures page reloads work offline for any route.
- */
 async function serveAppShell(request) {
     try {
         const response = await fetch(request);
         if (response.ok) {
             const cache = await caches.open(CACHE_NAME);
             cache.put(request, response.clone());
-            // Also cache as /index.html for fallback
             cache.put('/index.html', response.clone());
         }
         return response;
     } catch {
-        // Offline: serve cached index.html for any navigation (SPA routing)
+        // Offline: serve cached index.html for any route (SPA)
         const cached =
             (await caches.match('/index.html')) ||
             (await caches.match('/')) ||
             (await caches.match(request));
         if (cached) return cached;
         return new Response(
-            '<html><body><h2>MEDFINANCE360 — You are offline</h2><p>Please connect to the internet and reload.</p></body></html>',
-            { status: 503, headers: { 'Content-Type': 'text/html' } }
+            `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MEDFINANCE360</title>
+       <style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;
+       min-height:100vh;margin:0;background:#0f172a;color:#e2e8f0;text-align:center;}
+       h2{color:#60a5fa;}p{color:#94a3b8;}</style></head>
+       <body><div><h2>📡 You are offline</h2>
+       <p>MEDFINANCE360 is loading from cache.<br>If this persists, please reconnect and reload once.</p>
+       </div></body></html>`,
+            { status: 200, headers: { 'Content-Type': 'text/html' } }
         );
     }
 }
 
-/**
- * Cache-first: serve from cache if available, otherwise fetch and cache.
- */
 async function cacheFirst(request) {
     const cached = await caches.match(request);
     if (cached) return cached;
@@ -133,9 +136,6 @@ async function cacheFirst(request) {
     }
 }
 
-/**
- * Network-first: try network, fall back to cache.
- */
 async function networkFirst(request) {
     try {
         const response = await fetch(request);
