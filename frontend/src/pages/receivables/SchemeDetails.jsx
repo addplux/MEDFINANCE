@@ -66,8 +66,8 @@ const SchemeDetails = () => {
     return (
         <div className="min-h-screen bg-gray-50/50">
             {/* Header */}
-            <div className="print:hidden bg-white border-b border-gray-200 px-6 py-4 mb-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 max-w-7xl mx-auto">
+            <div className="print:hidden bg-white border-b border-gray-200 px-4 md:px-6 py-4 mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-4 w-full">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => navigate('/app/receivables/schemes')}
@@ -78,8 +78,8 @@ const SchemeDetails = () => {
                         <div>
                             {scheme ? (
                                 <>
-                                    <h1 className="text-xl font-bold text-gray-900">{scheme.schemeName}</h1>
-                                    <p className="text-sm text-gray-500">Scheme Code: {scheme.schemeCode}</p>
+                                    <h1 className="text-xl font-bold text-gray-900 font-sans tracking-tight">{scheme.schemeName}</h1>
+                                    <p className="text-sm text-gray-500 font-medium">Scheme Code: {scheme.schemeCode}</p>
                                 </>
                             ) : (
                                 <div className="animate-pulse h-8 w-48 bg-gray-200 rounded"></div>
@@ -87,50 +87,42 @@ const SchemeDetails = () => {
                         </div>
                     </div>
 
-                    {/* Tabs */}
-                    <div className="flex bg-gray-100 p-1 rounded-lg">
+                    {/* Tabs (Suno Style - Text with Underline) */}
+                    <div className="flex gap-6 border-b border-transparent">
                         <button
                             onClick={() => setActiveTab('statement')}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'statement' ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'statement' ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-800'
                                 }`}
                         >
-                            <div className="flex items-center gap-2">
-                                <FileText className="w-4 h-4" />
-                                Statement
-                            </div>
+                            Statement
                         </button>
                         <button
                             onClick={() => setActiveTab('members')}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'members' ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'members' ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-800'
                                 }`}
                         >
-                            <div className="flex items-center gap-2">
-                                <Users className="w-4 h-4" />
-                                Members
-                            </div>
+                            Members
                         </button>
                         <button
                             onClick={() => setActiveTab('invoices')}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'invoices' ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'invoices' ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-800'
                                 }`}
                         >
-                            <div className="flex items-center gap-2">
-                                <FileText className="w-4 h-4" />
-                                Invoices
-                            </div>
+                            Invoices
                         </button>
                     </div>
 
                     {/* Actions (Only visible in Statement tab) */}
                     {activeTab === 'statement' && (
                         <div className="flex flex-wrap items-center gap-3">
-                            <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+                            {/* Date Picker Pill */}
+                            <div className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200">
                                 <input
                                     type="date"
                                     name="startDate"
                                     value={dateRange.startDate}
                                     onChange={handleDateChange}
-                                    className="bg-transparent border-none text-sm focus:ring-0 text-gray-700 p-1"
+                                    className="bg-transparent border-none text-xs font-medium focus:ring-0 text-gray-700 p-0 w-24"
                                 />
                                 <span className="text-gray-400">-</span>
                                 <input
@@ -138,25 +130,27 @@ const SchemeDetails = () => {
                                     name="endDate"
                                     value={dateRange.endDate}
                                     onChange={handleDateChange}
-                                    className="bg-transparent border-none text-sm focus:ring-0 text-gray-700 p-1"
+                                    className="bg-transparent border-none text-xs font-medium focus:ring-0 text-gray-700 p-0 w-24"
                                 />
+
+                                <div className="h-4 w-px bg-gray-300 mx-2" />
+
+                                <button
+                                    onClick={fetchStatement}
+                                    className="text-gray-500 hover:text-gray-900 transition-colors"
+                                    title="Refresh"
+                                >
+                                    <Calendar className="w-4 h-4" />
+                                </button>
                             </div>
 
-                            <button
-                                onClick={fetchStatement}
-                                className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                                title="Refresh"
-                            >
-                                <Calendar className="w-5 h-5" />
-                            </button>
-
-                            <div className="h-6 w-px bg-gray-300 mx-1" />
-
+                            {/* Print Button (Pill Style) */}
                             <button
                                 onClick={handlePrint}
-                                className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+                                className="flex items-center gap-1.5 px-4 py-1.5 bg-gray-900 hover:bg-black text-white rounded-full text-xs font-bold transition-colors shadow-sm"
+                                title="Print Statement"
                             >
-                                <Printer className="w-4 h-4" />
+                                <Printer className="w-3.5 h-3.5" />
                                 Print
                             </button>
                         </div>
@@ -165,7 +159,7 @@ const SchemeDetails = () => {
             </div>
 
             {/* Content Area */}
-            <div className="max-w-7xl mx-auto px-6 pb-12 print:p-0 print:max-w-none">
+            <div className="w-full px-4 md:px-6 pb-12 print:p-0">
 
                 {/* Opening Balances Summary (If available) */}
                 {scheme && scheme.openingBalances && scheme.openingBalances.total > 0 && (
