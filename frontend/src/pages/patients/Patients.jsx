@@ -87,52 +87,52 @@ const Patients = () => {
             {/* Patients Table */}
             <div className="card overflow-hidden">
                 {/* Desktop Table View */}
-                <div className="hidden md:block overflow-x-auto">
-                    <table className="table">
-                        <thead>
+                <div className="hidden md:block overflow-x-auto shadow-sm rounded-lg border border-gray-200 bg-white">
+                    <table className="w-full text-left">
+                        <thead className="text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                             <tr>
-                                <th>Patient Number</th>
-                                <th>Name</th>
-                                <th>Gender</th>
-                                <th>Phone</th>
-                                <th>NHIMA Number</th>
-                                <th>Actions</th>
+                                <th className="px-6 py-3 whitespace-nowrap">Patient Number</th>
+                                <th className="px-6 py-3 whitespace-nowrap">Name</th>
+                                <th className="px-6 py-3 whitespace-nowrap">Gender</th>
+                                <th className="px-6 py-3 whitespace-nowrap">Phone</th>
+                                <th className="px-6 py-3 whitespace-nowrap">NHIMA Number</th>
+                                <th className="px-6 py-3 whitespace-nowrap text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-gray-200">
                             {patients.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="text-center py-8 text-gray-500">
+                                    <td colSpan="6" className="text-center py-8 text-gray-500 text-sm">
                                         No patients found
                                     </td>
                                 </tr>
                             ) : (
                                 patients.map((patient) => (
-                                    <tr key={patient.id}>
-                                        <td className="font-medium">{patient.patientNumber}</td>
-                                        <td>{patient.firstName} {patient.lastName}</td>
-                                        <td className="capitalize">{patient.gender}</td>
-                                        <td>{patient.phone}</td>
-                                        <td>{patient.nhimaNumber || '-'}</td>
-                                        <td>
-                                            <div className="flex items-center gap-2">
+                                    <tr key={patient.id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-3 whitespace-nowrap text-xs font-bold text-gray-900">{patient.patientNumber}</td>
+                                        <td className="px-6 py-3 whitespace-nowrap text-xs font-bold text-gray-900">{patient.firstName} {patient.lastName}</td>
+                                        <td className="px-6 py-3 whitespace-nowrap text-xs font-semibold text-gray-600 capitalize">{patient.gender}</td>
+                                        <td className="px-6 py-3 whitespace-nowrap text-xs font-semibold text-gray-600">{patient.phone}</td>
+                                        <td className="px-6 py-3 whitespace-nowrap text-xs font-semibold text-gray-600">{patient.nhimaNumber || '-'}</td>
+                                        <td className="px-6 py-3 whitespace-nowrap text-right">
+                                            <div className="flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => navigate(`/app/patients/${patient.id}`)}
-                                                    className="btn btn-sm btn-secondary"
+                                                    className="p-1 hover:bg-gray-100 text-gray-500 hover:text-blue-600 rounded transition-colors"
                                                     title="View"
                                                 >
                                                     <Eye className="w-4 h-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => navigate(`/app/patients/${patient.id}/edit`)}
-                                                    className="btn btn-sm btn-secondary"
+                                                    className="p-1 hover:bg-gray-100 text-gray-500 hover:text-green-600 rounded transition-colors"
                                                     title="Edit"
                                                 >
                                                     <Edit className="w-4 h-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(patient.id)}
-                                                    className="btn btn-sm btn-danger"
+                                                    className="p-1 hover:bg-gray-100 text-gray-500 hover:text-red-600 rounded transition-colors"
                                                     title="Delete"
                                                 >
                                                     <Trash2 className="w-4 h-4" />

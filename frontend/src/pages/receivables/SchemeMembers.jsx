@@ -403,7 +403,7 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto max-h-[70vh] overflow-y-auto shadow-sm rounded-lg border border-gray-200">
+                <div className="overflow-x-auto max-h-[calc(100vh-250px)] overflow-y-auto shadow-sm rounded-lg border border-gray-200">
                     <table className="w-full text-left bg-white relative">
                         <thead className="text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200 sticky top-0 z-10">
                             <tr>
