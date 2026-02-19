@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, FileText, Search, Edit, Upload, Download, AlertCircle, CheckCircle } from 'lucide-react';
 import api from '../../services/apiClient';
+import * as XLSX from 'xlsx';
 
 const SchemeMembers = ({ schemeId }) => {
     const navigate = useNavigate();
@@ -99,10 +100,22 @@ const SchemeMembers = ({ schemeId }) => {
 
         setCsvFile(file);
         const reader = new FileReader();
+
         reader.onload = async (event) => {
             try {
-                const text = event.target.result;
-                const rows = text.split('\n').map(row => row.trim()).filter(row => row);
+                let csvText = '';
+
+                if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    csvText = XLSX.utils.sheet_to_csv(worksheet);
+                } else {
+                    csvText = event.target.result;
+                }
+
+                const rows = csvText.split('\n').map(row => row.trim()).filter(row => row);
 
                 if (rows.length < 2) {
                     alert('Invalid CSV file. Must contain header and data.');
@@ -159,7 +172,11 @@ const SchemeMembers = ({ schemeId }) => {
                 alert('Failed to parse CSV file.');
             }
         };
-        reader.readAsText(file);
+        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+            reader.readAsArrayBuffer(file);
+        } else {
+            reader.readAsText(file);
+        }
         e.target.value = null;
     };
 
@@ -169,8 +186,16 @@ const SchemeMembers = ({ schemeId }) => {
         // Re-read file to process full data
         const reader = new FileReader();
         reader.onload = async (event) => {
-            const text = event.target.result;
-            const rows = text.split('\n').map(row => row.trim()).filter(row => row);
+            let csvText = '';
+            if (csvFile.name.endsWith('.xlsx') || csvFile.name.endsWith('.xls')) {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                csvText = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
+            } else {
+                csvText = event.target.result;
+            }
+
+            const rows = csvText.split('\n').map(row => row.trim()).filter(row => row);
 
             // Locate header row again based on the mapped columns (finding the row that contains the selected headers)
             const mapValues = Object.values(columnMapping).filter(v => v);
@@ -332,7 +357,7 @@ const SchemeMembers = ({ schemeId }) => {
                             <input
                                 type="file"
                                 onChange={handleFileSelect}
-                                accept=".csv"
+                                accept=".csv, .xlsx, .xls"
                                 className="hidden"
                                 disabled={importing}
                             />
