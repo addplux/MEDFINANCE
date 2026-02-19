@@ -222,13 +222,6 @@ const SchemeMembers = ({ schemeId }) => {
 
                     {/* Import Actions */}
                     <div className="flex gap-2 w-full md:w-auto justify-end">
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileSelect}
-                            accept=".csv"
-                            className="hidden"
-                        />
                         <button
                             onClick={handleDownloadTemplate}
                             className="btn btn-secondary btn-sm flex items-center gap-2"
@@ -237,11 +230,15 @@ const SchemeMembers = ({ schemeId }) => {
                             <Download className="w-4 h-4" />
                             <span className="hidden sm:inline">Template</span>
                         </button>
-                        <button
-                            onClick={() => fileInputRef.current.click()}
-                            disabled={importing}
-                            className="btn btn-outline-primary btn-sm flex items-center gap-2"
-                        >
+
+                        <label className={`btn btn-primary btn-sm flex items-center gap-2 cursor-pointer ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
+                            <input
+                                type="file"
+                                onChange={handleFileSelect}
+                                accept=".csv"
+                                className="hidden"
+                                disabled={importing}
+                            />
                             {importing ? (
                                 <span className="loading loading-spinner loading-xs"></span>
                             ) : (
@@ -249,7 +246,7 @@ const SchemeMembers = ({ schemeId }) => {
                             )}
                             <span className="hidden sm:inline">Import Members</span>
                             <span className="sm:hidden">Import</span>
-                        </button>
+                        </label>
                     </div>
                 </div>
 
