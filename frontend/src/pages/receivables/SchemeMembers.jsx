@@ -15,29 +15,35 @@ const SchemeMembers = ({ schemeId }) => {
     const [importing, setImporting] = useState(false);
     const [importResult, setImportResult] = useState(null);
     const [csvFile, setCsvFile] = useState(null);
-    const [csvPreview, setCsvPreview] = useState([]);
-    const [csvHeaders, setCsvHeaders] = useState([]);
     const [showMappingModal, setShowMappingModal] = useState(false);
+    const [csvHeaders, setCsvHeaders] = useState([]);
+    const [csvPreview, setCsvPreview] = useState([]);
+    const [services, setServices] = useState([]);
+    const [selectedService, setSelectedService] = useState('');
     const [columnMapping, setColumnMapping] = useState({
-        firstName: '',
-        lastName: '', // Optional if name is full
-        fullName: '', // Alternative to First/Last
-        policyNumber: '',
-        nrc: '',
-        gender: '',
-        dob: '',
-        phone: '',
-        address: '',
-        rank: '',
-        suffix: ''
+        firstName: '', lastName: '', fullName: '',
+        policyNumber: '', nrc: '', gender: '', dob: '', phone: '', address: '', rank: '', suffix: '',
+        consultation: '', total: '',
+        nursingCare: '', laboratory: '', radiology: '', dental: '', lodging: '', surgicals: '',
+        drRound: '', food: '', physio: '', pharmacy: '', sundries: '', antenatal: ''
     });
     const fileInputRef = useRef(null);
 
     useEffect(() => {
         if (schemeId) {
             fetchMembers();
+            fetchServices();
         }
-    }, [schemeId, statusFilter]);
+    }, [schemeId, searchTerm, statusFilter]);
+
+    const fetchServices = async () => {
+        try {
+            const res = await api.get('/receivables/services');
+            setServices(res.data);
+        } catch (err) {
+            console.error('Failed to fetch services', err);
+        }
+    };
 
     const fetchMembers = async () => {
         try {
@@ -154,6 +160,19 @@ const SchemeMembers = ({ schemeId }) => {
                 address: guess(['address', 'residence', 'location']) || '',
                 rank: guess(['rank', 'level', 'grade']) || '',
                 suffix: guess(['suffix']) || '',
+                // Detailed Guesses
+                nursingCare: guess(['nursing', 'nursing care']) || '',
+                laboratory: guess(['lab', 'laboratory']) || '',
+                radiology: guess(['radio', 'radiology', 'xray', 'scan']) || '',
+                dental: guess(['dental']) || '',
+                lodging: guess(['lodging', 'ward']) || '',
+                surgicals: guess(['surgical', 'theatre']) || '',
+                drRound: guess(['round', 'dr round', 'doctor']) || '',
+                food: guess(['food', 'meal']) || '',
+                physio: guess(['physio']) || '',
+                pharmacy: guess(['pharmacy', 'drug', 'medication']) || '',
+                sundries: guess(['sundries', 'sundary']) || '',
+                antenatal: guess(['antenatal', 'maternity']) || ''
             });
 
             setShowMappingModal(true);
@@ -230,28 +249,47 @@ const SchemeMembers = ({ schemeId }) => {
                 }
             }
 
+            const cleanNum = (val) => val ? parseFloat(String(val).replace(/[^0-9.-]+/g, "")) || 0 : 0;
+
             return {
                 firstName: fName || 'Unknown',
                 lastName: lName || 'Member',
                 policyNumber: getVal('policyNumber'),
-                balance: getVal('total') ? parseFloat(getVal('total').replace(/[^0-9.-]+/g, "")) : 0, // Clean currency
+                balance: cleanNum(getVal('total')),
                 dateOfBirth: getVal('dob'),
                 phone: getVal('phone'),
                 address: getVal('address'),
                 rank: getVal('rank')?.toLowerCase() || 'principal',
-                suffix: getVal('suffix')
+                suffix: getVal('suffix'),
+                // Detailed
+                nursingCare: cleanNum(getVal('nursingCare')),
+                laboratory: cleanNum(getVal('laboratory')),
+                radiology: cleanNum(getVal('radiology')),
+                dental: cleanNum(getVal('dental')),
+                lodging: cleanNum(getVal('lodging')),
+                surgicals: cleanNum(getVal('surgicals')),
+                drRound: cleanNum(getVal('drRound')),
+                food: cleanNum(getVal('food')),
+                physio: cleanNum(getVal('physio')),
+                pharmacy: cleanNum(getVal('pharmacy')),
+                sundries: cleanNum(getVal('sundries')),
+                antenatal: cleanNum(getVal('antenatal'))
             };
         }).filter(m => m && m.policyNumber && m.policyNumber.length > 1); // Strict filter: must have policy number
 
         await uploadMembers(membersData);
         setShowMappingModal(false);
+        setSelectedService(''); // Reset service selection
     };
 
     const uploadMembers = async (membersData) => {
         setImporting(true);
         setImportResult(null);
         try {
-            const response = await api.post(`/receivables/schemes/${schemeId}/import`, { members: membersData });
+            const response = await api.post(`/receivables/schemes/${schemeId}/import`, {
+                members: membersData,
+                serviceId: selectedService || null
+            });
             setImportResult({ type: 'success', summary: response.data.summary });
             fetchMembers(); // Refresh list
         } catch (error) {
@@ -368,59 +406,81 @@ const SchemeMembers = ({ schemeId }) => {
                     <table className="w-full text-sm text-left">
                         <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
                             <tr>
-                                <th className="px-4 py-3">Policy #</th>
-                                <th className="px-4 py-3">Suffix</th>
-                                <th className="px-4 py-3">Name</th>
-                                <th className="px-4 py-3">NRC / ID</th>
-                                <th className="px-4 py-3">Rank</th>
-                                <th className="px-4 py-3">Status</th>
-                                <th className="px-4 py-3 text-right">Actions</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Policy #</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suffix</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nursing</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Radio</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dental</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lodging</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Surgicals</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dr Round</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Food</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Physio</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pharmacy</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sundries</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Antenatal</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {loading ? (
-                                <tr><td colSpan="7" className="p-8 text-center text-gray-500">Loading members...</td></tr>
-                            ) : members.length === 0 ? (
-                                <tr><td colSpan="7" className="p-8 text-center text-gray-500">No members found.</td></tr>
-                            ) : (
-                                members.map((member) => (
-                                    <tr key={member.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3 font-mono text-gray-600">{member.policyNumber || '-'}</td>
-                                        <td className="px-4 py-3 text-gray-500">*{member.memberSuffix || (member.memberRank === 'principal' ? 1 : '?')}</td>
-                                        <td className="px-4 py-3 font-medium text-gray-900">
-                                            {member.firstName} {member.lastName}
-                                            <div className="text-xs text-gray-400">{member.patientNumber}</div>
-                                        </td>
-                                        <td className="px-4 py-3 text-gray-500">{member.nrc || '-'}</td>
-                                        <td className="px-4 py-3">
-                                            <span className={getRankBadge(member.memberRank)}>{member.memberRank}</span>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span className={getStatusBadge(member.memberStatus)}>{member.memberStatus}</span>
-                                        </td>
-                                        <td className="px-4 py-3 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                {member.policyNumber && (
-                                                    <button
-                                                        onClick={() => navigate(`/app/receivables/ledger/${member.policyNumber}`)}
-                                                        className="p-1 hover:bg-primary-50 text-gray-500 hover:text-primary-600 rounded"
-                                                        title="View Family Ledger"
-                                                    >
-                                                        <FileText className="w-4 h-4" />
-                                                    </button>
-                                                )}
-                                                <button
-                                                    className="p-1 hover:bg-gray-100 text-gray-500 hover:text-gray-700 rounded"
-                                                    title="Edit Member"
-                                                    onClick={() => navigate(`/app/patients/${member.id}/edit`)} // Assuming patient edit route exists
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {loading && (
+                                <tr><td colSpan="11" className="text-center py-4">Loading members...</td></tr>
                             )}
+                            {!loading && members.length === 0 && (
+                                <tr><td colSpan="11" className="text-center py-4 text-gray-500">No members found. Use "Import Members" to add data.</td></tr>
+                            )}
+                            {members.map((member) => (
+                                <tr key={member.id} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{member.policyNumber}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.memberSuffix}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
+                                        {member.lastName}, {member.firstName}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.nursingCare || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.laboratory || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.radiology || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.dental || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.lodging || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.surgicals || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.drRound || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.food || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.physio || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.pharmacy || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.sundries || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.antenatal || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{Number(member.balance || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                ${member.memberStatus === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                            {member.memberStatus}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div className="flex items-center justify-end gap-2">
+                                            {member.policyNumber && (
+                                                <button
+                                                    onClick={() => navigate(`/app/receivables/ledger/${member.policyNumber}`)}
+                                                    className="p-1 hover:bg-primary-50 text-gray-500 hover:text-primary-600 rounded"
+                                                    title="View Family Ledger"
+                                                >
+                                                    <FileText className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                            <button
+                                                className="p-1 hover:bg-gray-100 text-gray-500 hover:text-gray-700 rounded"
+                                                title="Edit Member"
+                                                onClick={() => navigate(`/app/patients/${member.id}/edit`)}
+                                            >
+                                                <Edit className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
@@ -439,6 +499,24 @@ const SchemeMembers = ({ schemeId }) => {
                             <div className="bg-blue-50 text-blue-800 p-3 rounded-md text-sm mb-6 flex items-start gap-2">
                                 <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
                                 <p>Please select the columns from your uploaded file that match the required fields below.</p>
+                            </div>
+
+                            {/* Global Service Selection */}
+                            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                <label className="block text-sm font-bold text-gray-700 mb-2">
+                                    Assign Service / Department (Optional)
+                                </label>
+                                <select
+                                    className="select select-bordered select-sm w-full max-w-xs"
+                                    value={selectedService}
+                                    onChange={(e) => setSelectedService(e.target.value)}
+                                >
+                                    <option value="">-- No Specific Service --</option>
+                                    {services.map(s => (
+                                        <option key={s.id} value={s.id}>{s.serviceName} {s.department ? `(${s.department})` : ''}</option>
+                                    ))}
+                                </select>
+                                <p className="text-xs text-gray-500 mt-1">Select a service (e.g., Radiology, Theatre) to assign to all imported members.</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -502,6 +580,25 @@ const SchemeMembers = ({ schemeId }) => {
                                         {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
                                     </select>
                                 </div>
+                            </div>
+
+                            <h4 className="font-semibold text-sm mt-6 mb-3 text-gray-700">Financial Components (Optional)</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {['nursingCare', 'laboratory', 'radiology', 'dental', 'lodging', 'surgicals', 'drRound', 'food', 'physio', 'pharmacy', 'sundries', 'antenatal'].map(field => (
+                                    <div key={field}>
+                                        <label className="block text-xs font-semibold text-gray-700 mb-1 capitalize">
+                                            {field.replace(/([A-Z])/g, ' $1').trim()}
+                                        </label>
+                                        <select
+                                            className="w-full border border-gray-300 rounded-md p-1.5 text-xs bg-white text-gray-900"
+                                            value={columnMapping[field]}
+                                            onChange={(e) => setColumnMapping({ ...columnMapping, [field]: e.target.value })}
+                                        >
+                                            <option value="">(Skip)</option>
+                                            {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
+                                        </select>
+                                    </div>
+                                ))}
                             </div>
 
                             {/* Preview Section */}
