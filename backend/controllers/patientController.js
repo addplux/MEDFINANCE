@@ -12,7 +12,9 @@ const getAllPatients = async (req, res) => {
             where[Op.or] = [
                 { firstName: { [Op.iLike]: `%${search}%` } },
                 { lastName: { [Op.iLike]: `%${search}%` } },
-                { patientNumber: { [Op.iLike]: `%${search}%` } }
+                { patientNumber: { [Op.iLike]: `%${search}%` } },
+                { policyNumber: { [Op.iLike]: `%${search}%` } },
+                { nhimaNumber: { [Op.iLike]: `%${search}%` } }
             ];
         }
 

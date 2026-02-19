@@ -6,6 +6,7 @@
 const { Payment, BankAccount, PettyCash, Patient, User, sequelize } = require('../models');
 const logAudit = require('../utils/auditLogger');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
+const { postPayment } = require('../utils/glPoster');
 
 // ========== Payments ==========
 
@@ -84,6 +85,10 @@ const createPayment = async (req, res) => {
 
         // Update Patient Balance
         await updatePatientBalance(patientId, t);
+
+
+        // Post to General Ledger
+        await postPayment(payment, t);
 
         await t.commit();
 

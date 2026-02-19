@@ -76,7 +76,7 @@ const Patients = () => {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Search by name, patient number, or NHIMA..."
+                        placeholder="Search by name, ID, NHIMA or Policy Number..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="form-input pl-11"
@@ -209,7 +209,7 @@ const Patients = () => {
                         </div>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setCurrentPage(p => Math.max(1, p-1))}
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                 disabled={currentPage === 1}
                                 className="btn btn-sm btn-secondary"
                             >

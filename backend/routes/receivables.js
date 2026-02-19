@@ -28,4 +28,7 @@ router.post('/schemes/invoices/generate', authorize('admin', 'accountant'), rece
 router.get('/schemes/:id/invoices', receivablesController.getSchemeInvoices);
 router.get('/schemes/invoices/:id', receivablesController.getSchemeInvoice);
 
+// Bulk Import
+router.post('/schemes/:id/import', authorize('admin', 'accountant'), receivablesController.importSchemeMembers);
+
 module.exports = router;

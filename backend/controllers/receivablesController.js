@@ -1,5 +1,6 @@
 const { NHIMAClaim, CorporateAccount, Scheme, SchemeInvoice, Patient, User, OPDBill, PharmacyBill, LabBill, RadiologyBill, Service, Payment, sequelize } = require('../models');
 const { Op } = require('sequelize');
+const { postSchemeInvoice } = require('../utils/glPoster');
 
 // ========== NHIMA Claims ==========
 
@@ -571,6 +572,10 @@ const generateMonthlyInvoice = async (req, res) => {
             });
         }
 
+
+        // Post to General Ledger
+        await postSchemeInvoice(invoice, transaction);
+
         await transaction.commit();
         res.status(201).json(invoice);
 
@@ -709,6 +714,120 @@ const getSchemeInvoice = async (req, res) => {
     }
 };
 
+
+// Import Scheme Members (Bulk)
+const importSchemeMembers = async (req, res) => {
+    const t = await sequelize.transaction();
+    try {
+        const { id } = req.params; // Scheme ID
+        const { members } = req.body; // Array of member objects
+
+        if (!members || !Array.isArray(members) || members.length === 0) {
+            return res.status(400).json({ error: 'No members data provided' });
+        }
+
+        const scheme = await Scheme.findByPk(id);
+        if (!scheme) {
+            return res.status(404).json({ error: 'Scheme not found' });
+        }
+
+        let addedCount = 0;
+        let updatedCount = 0;
+        let failedCount = 0;
+        const errors = [];
+
+        for (const member of members) {
+            try {
+                // Validate required fields
+                if (!member.firstName || !member.lastName || !member.policyNumber) {
+                    failedCount++;
+                    errors.push(`Missing required fields for ${member.firstName} ${member.lastName}`);
+                    continue;
+                }
+
+                // Check if patient exists (by Policy Number + Scheme, or NRC)
+                // Priority: Policy Number within this Scheme
+                let patient = await Patient.findOne({
+                    where: {
+                        policyNumber: member.policyNumber,
+                        schemeId: id
+                    },
+                    transaction: t
+                });
+
+                // If not found, check by NHIMA/NRC if provided
+                if (!patient && member.nrc) {
+                    patient = await Patient.findOne({ where: { nrc: member.nrc }, transaction: t });
+                }
+
+                // Determine paymentMethod based on Scheme Type
+                let paymentMethod = 'scheme';
+                if (scheme.schemeType === 'corporate') {
+                    paymentMethod = 'corporate';
+                }
+
+                const patientData = {
+                    firstName: member.firstName,
+                    lastName: member.lastName,
+                    dateOfBirth: member.dateOfBirth || new Date('1990-01-01'), // Default if missing
+                    gender: member.gender ? member.gender.toLowerCase() : 'other',
+                    policyNumber: member.policyNumber,
+                    schemeId: id,
+                    paymentMethod,
+                    memberRank: member.rank || 'principal',
+                    memberSuffix: member.suffix || 1,
+                    phone: member.phone,
+                    email: member.email,
+                    nrc: member.nrc,
+                    address: member.address,
+                    memberStatus: 'active'
+                };
+
+                if (patient) {
+                    // Update
+                    await patient.update(patientData, { transaction: t });
+                    updatedCount++;
+                } else {
+                    // Create
+                    // Ensure unique patientNumber
+                    const count = await Patient.count({ transaction: t });
+                    const patientNumber = `P${String(count + addedCount + 1).padStart(6, '0')}`;
+
+                    await Patient.create({
+                        ...patientData,
+                        patientNumber,
+                        balance: 0.00
+                    }, { transaction: t });
+                    addedCount++;
+                }
+
+            } catch (err) {
+                console.error(`Failed to import member row:`, err);
+                failedCount++;
+                errors.push(`Error for ${member.firstName || 'Unknown'}: ${err.message}`);
+            }
+        }
+
+        await t.commit();
+
+        res.json({
+            message: 'Import processed',
+            summary: {
+                total: members.length,
+                added: addedCount,
+                updated: updatedCount,
+                failed: failedCount,
+                errors
+            }
+        });
+
+    } catch (error) {
+        await t.rollback();
+        console.error('Import members error:', error);
+        res.status(500).json({ error: 'Failed to import members' });
+    }
+};
+
 module.exports = {
     getAllNHIMAClaims,
     createNHIMAClaim,
@@ -723,5 +842,6 @@ module.exports = {
     getFamilyLedger,
     generateMonthlyInvoice,
     getSchemeInvoice,
-    getSchemeInvoices
+    getSchemeInvoices,
+    importSchemeMembers
 };

@@ -120,7 +120,16 @@ const MainLayout = ({ children }) => {
             ]
         },
         { path: '/app/payables/suppliers', icon: CreditCard, label: 'Payables' },
-        { path: '/app/ledger/accounts', icon: BookOpen, label: 'Ledger' },
+        {
+            id: 'ledger',
+            icon: BookOpen,
+            label: 'General Ledger',
+            submenu: [
+                { path: '/app/ledger/accounts', label: 'Chart of Accounts' },
+                { path: '/app/ledger/journal-entries', label: 'Journal Entries' },
+                { path: '/app/ledger/trial-balance', label: 'Trial Balance' } // Placeholder or if exists
+            ]
+        },
         {
             id: 'cash',
             icon: Wallet,
