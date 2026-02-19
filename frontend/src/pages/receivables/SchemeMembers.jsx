@@ -403,9 +403,9 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto shadow-sm rounded-lg border border-gray-200">
-                    <table className="w-full text-left bg-white">
-                        <thead className="text-sm font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
+                <div className="overflow-x-auto max-h-[70vh] overflow-y-auto shadow-sm rounded-lg border border-gray-200">
+                    <table className="w-full text-left bg-white relative">
+                        <thead className="text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200 sticky top-0 z-10">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Policy #</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suffix</th>
@@ -436,26 +436,26 @@ const SchemeMembers = ({ schemeId }) => {
                             )}
                             {members.map((member) => (
                                 <tr key={member.id} className="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-none">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{member.policyNumber}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{member.memberSuffix}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-bold text-gray-900">{member.policyNumber}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-semibold text-gray-600">{member.memberSuffix}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-800 font-bold">
                                         {member.lastName}, {member.firstName}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.nursingCare || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.laboratory || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.radiology || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.dental || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.lodging || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.surgicals || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.drRound || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.food || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.physio || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.pharmacy || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.sundries || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.antenatal || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{Number(member.balance || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.nursingCare || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.laboratory || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.radiology || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.dental || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.lodging || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.surgicals || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.drRound || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.food || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-semibold text-gray-500">{Number(member.physio || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-semibold text-gray-500">{Number(member.pharmacy || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-semibold text-gray-500">{Number(member.sundries || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-semibold text-gray-500">{Number(member.antenatal || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-bold text-gray-900">{Number(member.balance || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-3 whitespace-nowrap">
+                                        <span className={`px-2 inline-flex text-[10px] leading-4 font-bold rounded-full uppercase
                                                 ${member.memberStatus === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                             {member.memberStatus}
                                         </span>
