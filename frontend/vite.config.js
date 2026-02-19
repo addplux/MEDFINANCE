@@ -17,9 +17,20 @@ function injectSwAssets() {
     closeBundle() {
       try {
         const manifestPath = resolve(__dirname, 'dist/.vite/manifest.json')
+        const manifestPathLegacy = resolve(__dirname, 'dist/manifest.json')
         const swPath = resolve(__dirname, 'dist/sw.js')
 
-        const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'))
+        let manifest = null;
+        try {
+          manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'))
+        } catch (e) {
+          try {
+            manifest = JSON.parse(readFileSync(manifestPathLegacy, 'utf-8'))
+          } catch (e2) {
+            console.warn('[inject-sw-assets] Manifest not found at .vite/manifest.json or manifest.json. Skipping SW injection.');
+            return;
+          }
+        }
 
         // Collect all output asset URLs
         const assets = new Set(['/', '/index.html'])
@@ -30,10 +41,15 @@ function injectSwAssets() {
         }
 
         // Prepend the asset list assignment to sw.js
-        const sw = readFileSync(swPath, 'utf-8')
-        const injection = `self.__PRECACHE_ASSETS__ = ${JSON.stringify([...assets])};\n`
-        writeFileSync(swPath, injection + sw)
-        console.log(`[inject-sw-assets] Injected ${assets.size} assets into sw.js`)
+        if (require('fs').existsSync(swPath)) {
+          const sw = readFileSync(swPath, 'utf-8')
+          const injection = `self.__PRECACHE_ASSETS__ = ${JSON.stringify([...assets])};\n`
+          writeFileSync(swPath, injection + sw)
+          console.log(`[inject-sw-assets] Injected ${assets.size} assets into sw.js`)
+        } else {
+          console.warn('[inject-sw-assets] sw.js not found. Skipping injection.');
+        }
+
       } catch (err) {
         console.warn('[inject-sw-assets] Could not inject assets:', err.message)
       }
