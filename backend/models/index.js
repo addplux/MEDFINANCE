@@ -13,6 +13,7 @@ const RadiologyBill = require('./RadiologyBill');
 const NHIMAClaim = require('./NHIMAClaim');
 const CorporateAccount = require('./CorporateAccount');
 const Scheme = require('./Scheme');
+const SchemeInvoice = require('./SchemeInvoice');
 const Supplier = require('./Supplier');
 const Invoice = require('./Invoice');
 const PaymentVoucher = require('./PaymentVoucher');
@@ -91,6 +92,10 @@ Patient.hasMany(Payment, { foreignKey: 'patientId', as: 'payments' });
 // Service relationships
 Service.hasMany(OPDBill, { foreignKey: 'serviceId', as: 'opdBills' });
 
+// Scheme relationships
+Scheme.hasMany(Patient, { foreignKey: 'schemeId', as: 'patients' });
+Patient.belongsTo(Scheme, { foreignKey: 'schemeId', as: 'scheme' });
+
 // Billing relationships
 OPDBill.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 OPDBill.belongsTo(Service, { foreignKey: 'serviceId', as: 'service' });
@@ -143,6 +148,22 @@ JournalLine.belongsTo(ChartOfAccounts, { foreignKey: 'accountId', as: 'account' 
 // Payment relationships
 Payment.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 Payment.belongsTo(User, { foreignKey: 'receivedBy', as: 'receiver' });
+
+// Scheme Invoice relationships
+SchemeInvoice.belongsTo(Scheme, { foreignKey: 'schemeId', as: 'scheme' });
+SchemeInvoice.belongsTo(User, { foreignKey: 'generatedBy', as: 'generator' });
+Scheme.hasMany(SchemeInvoice, { foreignKey: 'schemeId', as: 'invoices' });
+
+// Bill associations with Scheme Invoice
+OPDBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
+PharmacyBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
+LabBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
+RadiologyBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
+
+SchemeInvoice.hasMany(OPDBill, { foreignKey: 'schemeInvoiceId', as: 'opdBills' });
+SchemeInvoice.hasMany(PharmacyBill, { foreignKey: 'schemeInvoiceId', as: 'pharmacyBills' });
+SchemeInvoice.hasMany(LabBill, { foreignKey: 'schemeInvoiceId', as: 'labBills' });
+SchemeInvoice.hasMany(RadiologyBill, { foreignKey: 'schemeInvoiceId', as: 'radiologyBills' });
 
 // Petty Cash relationships
 PettyCash.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
@@ -213,6 +234,7 @@ module.exports = {
     NHIMAClaim,
     CorporateAccount,
     Scheme,
+    SchemeInvoice,
     Supplier,
     Invoice,
     PaymentVoucher,

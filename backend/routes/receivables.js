@@ -18,5 +18,14 @@ router.post('/corporate', authorize('admin', 'accountant'), receivablesControlle
 // Schemes
 router.get('/schemes', receivablesController.getAllSchemes);
 router.post('/schemes', authorize('admin', 'accountant'), receivablesController.createScheme);
+router.get('/schemes/:id', receivablesController.getSchemeById);
+router.get('/schemes/:id/statement', receivablesController.getSchemeStatement);
+router.get('/schemes/:id/members', receivablesController.getSchemeMembers);
+router.get('/schemes/ledger/:policyNumber', receivablesController.getFamilyLedger);
+
+// Scheme Invoices
+router.post('/schemes/invoices/generate', authorize('admin', 'accountant'), receivablesController.generateMonthlyInvoice);
+router.get('/schemes/:id/invoices', receivablesController.getSchemeInvoices);
+router.get('/schemes/invoices/:id', receivablesController.getSchemeInvoice);
 
 module.exports = router;

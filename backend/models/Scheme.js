@@ -20,6 +20,16 @@ const Scheme = sequelize.define('Scheme', {
         type: DataTypes.ENUM('insurance', 'corporate', 'government', 'ngo', 'other'),
         allowNull: false
     },
+    billingCycle: {
+        type: DataTypes.ENUM('monthly', 'quarterly', 'annually'),
+        allowNull: false,
+        defaultValue: 'monthly'
+    },
+    pricingModel: {
+        type: DataTypes.ENUM('standard', 'tiered'),
+        allowNull: false,
+        defaultValue: 'standard'
+    },
     discountRate: {
         type: DataTypes.DECIMAL(5, 2),
         defaultValue: 0.00,

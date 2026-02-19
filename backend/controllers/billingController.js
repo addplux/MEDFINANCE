@@ -1,4 +1,5 @@
 const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, Patient, Service, User, sequelize } = require('../models');
+const { updatePatientBalance } = require('../utils/balanceUpdater');
 
 // Get all OPD bills
 const getAllOPDBills = async (req, res) => {
@@ -152,6 +153,9 @@ const createOPDBill = async (req, res) => {
             createdBy: req.user.id
         });
 
+        // Update Patient Balance
+        await updatePatientBalance(patientId);
+
         // Fetch with associations
         const createdBill = await OPDBill.findByPk(bill.id, {
             include: [
@@ -190,6 +194,9 @@ const updateOPDBill = async (req, res) => {
 
         await bill.save();
 
+        // Update Patient Balance
+        await updatePatientBalance(bill.patientId);
+
         // Fetch with associations
         const updatedBill = await OPDBill.findByPk(bill.id, {
             include: [
@@ -216,6 +223,10 @@ const deleteOPDBill = async (req, res) => {
         }
 
         await bill.destroy();
+
+        // Update Patient Balance
+        await updatePatientBalance(bill.patientId);
+
         res.json({ message: 'OPD bill deleted successfully' });
     } catch (error) {
         console.error('Delete OPD bill error:', error);
@@ -228,25 +239,18 @@ const getPatientBalance = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Sum all bills (simplified - in production, might want a centralized Transaction table)
-        const opdTotal = await OPDBill.sum('netAmount', { where: { patientId: id } }) || 0;
-        const ipdTotal = await IPDBill.sum('totalAmount', { where: { patientId: id } }) || 0;
-        const pharmacyTotal = await PharmacyBill.sum('totalAmount', { where: { patientId: id } }) || 0;
-        const labTotal = await LabBill.sum('totalAmount', { where: { patientId: id } }) || 0;
-        const radiologyTotal = await RadiologyBill.sum('totalAmount', { where: { patientId: id } }) || 0;
+        // Efficiently get balance from Patient model
+        const patient = await Patient.findByPk(id, { attributes: ['balance'] });
 
-        const totalBilled = parseFloat(opdTotal) + parseFloat(ipdTotal) + parseFloat(pharmacyTotal) + parseFloat(labTotal) + parseFloat(radiologyTotal);
-
-        // Sum all payments
-        const totalPaid = await Payment.sum('amount', { where: { patientId: id } }) || 0;
-
-        const balance = totalBilled - parseFloat(totalPaid);
+        if (!patient) {
+            return res.status(404).json({ error: 'Patient not found' });
+        }
 
         res.json({
             patientId: id,
-            totalBilled: totalBilled.toFixed(2),
-            totalPaid: parseFloat(totalPaid).toFixed(2),
-            balance: balance.toFixed(2)
+            balance: patient.balance,
+            // Deprecated breakdowns could be removed or calculated on demand if UI needs them
+            // For now, ensuring frontend receives the 'balance' key correctly
         });
     } catch (error) {
         console.error('Get patient balance error:', error);

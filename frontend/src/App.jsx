@@ -52,6 +52,10 @@ import CorporateAccounts from './pages/receivables/CorporateAccounts';
 import CorporateAccountForm from './pages/receivables/CorporateAccountForm';
 import Schemes from './pages/receivables/Schemes';
 import SchemeForm from './pages/receivables/SchemeForm';
+import SchemeDetails from './pages/receivables/SchemeDetails';
+import SchemeInvoices from './pages/receivables/SchemeInvoices';
+import InvoiceView from './pages/receivables/InvoiceView';
+import FamilyLedger from './pages/receivables/FamilyLedger';
 import DebtorAgeing from './pages/receivables/DebtorAgeing';
 
 // Reports
@@ -169,7 +173,10 @@ function App() {
                         <Route path="receivables/corporate/:id/edit" element={<CorporateAccountForm />} />
                         <Route path="receivables/schemes" element={<Schemes />} />
                         <Route path="receivables/schemes/new" element={<SchemeForm />} />
+                        <Route path="receivables/schemes/:id" element={<SchemeDetails />} />
                         <Route path="receivables/schemes/:id/edit" element={<SchemeForm />} />
+                        <Route path="receivables/invoices/:id" element={<InvoiceView />} />
+                        <Route path="receivables/ledger/:policyNumber" element={<FamilyLedger />} />
                         <Route path="receivables/ageing" element={<DebtorAgeing />} />
 
                         <Route path="payables/suppliers" element={<Suppliers />} />

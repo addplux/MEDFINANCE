@@ -1,4 +1,5 @@
 const { Medication, PharmacyBatch, PharmacyBill, Patient, User } = require('../models');
+const { updatePatientBalance } = require('../utils/balanceUpdater');
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
 
@@ -211,6 +212,9 @@ const dispenseMedication = async (req, res) => {
 
             bills.push(bill);
         }
+
+        // Update Patient Balance
+        await updatePatientBalance(patientId, t);
 
         await t.commit();
         res.status(201).json(bills);

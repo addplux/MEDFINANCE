@@ -1,4 +1,5 @@
-const { NHIMAClaim, CorporateAccount, Scheme, Patient, User, sequelize } = require('../models');
+const { NHIMAClaim, CorporateAccount, Scheme, SchemeInvoice, Patient, User, OPDBill, PharmacyBill, LabBill, RadiologyBill, Service, Payment, sequelize } = require('../models');
+const { Op } = require('sequelize');
 
 // ========== NHIMA Claims ==========
 
@@ -217,6 +218,497 @@ const createScheme = async (req, res) => {
     }
 };
 
+// Get single scheme details
+const getSchemeById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const scheme = await Scheme.findByPk(id);
+        if (!scheme) return res.status(404).json({ error: 'Scheme not found' });
+        res.json(scheme);
+    } catch (error) {
+        console.error('Get scheme error:', error);
+        res.status(500).json({ error: 'Failed to get scheme' });
+    }
+};
+
+// Get scheme statement (bills)
+const getSchemeStatement = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { startDate, endDate } = req.query;
+
+        const scheme = await Scheme.findByPk(id);
+        if (!scheme) return res.status(404).json({ error: 'Scheme not found' });
+
+        // Filter bills by date and scheme payment
+        const where = {
+            // paymentMethod: ['insurance', 'credit'] // simplistic check
+        };
+
+        if (startDate && endDate) {
+            where.billDate = { [Op.between]: [startDate, endDate] };
+        }
+
+        // Find bills for patients appearing in this scheme
+        const bills = await OPDBill.findAll({
+            where,
+            include: [
+                {
+                    model: Patient,
+                    as: 'patient',
+                    where: { schemeId: id }, // Only bills for patients in this scheme
+                    attributes: ['id', 'firstName', 'lastName', 'patientNumber', 'gender', 'nhimaNumber']
+                },
+                {
+                    model: Service,
+                    as: 'service',
+                    attributes: ['serviceName']
+                },
+                {
+                    model: User,
+                    as: 'creator',
+                    attributes: ['firstName', 'lastName']
+                }
+            ],
+            order: [['billDate', 'DESC']]
+        });
+
+        res.json({ scheme, bills });
+    } catch (error) {
+        console.error('Get scheme statement error:', error);
+        res.status(500).json({ error: 'Failed to generate scheme statement' });
+    }
+};
+
+// Get scheme members
+const getSchemeMembers = async (req, res) => {
+    try {
+        const { id } = req.params; // Scheme ID
+        const { search, status } = req.query;
+
+        const where = { schemeId: id };
+
+        if (status) where.memberStatus = status;
+
+        if (search) {
+            where[Op.or] = [
+                { firstName: { [Op.iLike]: `%${search}%` } },
+                { lastName: { [Op.iLike]: `%${search}%` } },
+                { policyNumber: { [Op.iLike]: `%${search}%` } },
+                { nrc: { [Op.iLike]: `%${search}%` } },
+                { patientNumber: { [Op.iLike]: `%${search}%` } }
+            ];
+        }
+
+        const members = await Patient.findAll({
+            where,
+            order: [
+                ['policyNumber', 'ASC'],
+                ['memberSuffix', 'ASC'],
+                ['createdAt', 'DESC']
+            ]
+        });
+
+        res.json(members);
+    } catch (error) {
+        console.error('Get scheme members error:', error);
+        res.status(500).json({ error: 'Failed to get scheme members' });
+    }
+};
+
+// Get family ledger (Running Balance Statement)
+const getFamilyLedger = async (req, res) => {
+    try {
+        const { policyNumber } = req.params;
+        const { startDate, endDate } = req.query;
+
+        if (!policyNumber) return res.status(400).json({ error: 'Policy number is required' });
+
+        // 1. Get all family members matching this policy
+        const members = await Patient.findAll({
+            where: { policyNumber },
+            attributes: ['id', 'firstName', 'lastName', 'memberRank', 'memberSuffix', 'patientNumber', 'nrc', 'memberStatus']
+        });
+
+        if (members.length === 0) {
+            return res.json({ members: [], transactions: [], balance: 0, broughtForward: 0 });
+        }
+
+        const patientIds = members.map(m => m.id);
+        const memberMap = members.reduce((acc, m) => {
+            acc[m.id] = m;
+            return acc;
+        }, {});
+
+        // 2. Fetch ALL Bills & Payments (no date filter yet, so we get correct running balance)
+        // We will filter by date AFTER calculating running balance to determine 'brought forward'
+
+        const opdBills = await OPDBill.findAll({
+            where: { patientId: { [Op.in]: patientIds } },
+            include: [{ model: Service, as: 'service' }]
+        });
+
+        const pharmacyBills = await PharmacyBill.findAll({
+            where: { patientId: { [Op.in]: patientIds } }
+        });
+
+        const payments = await Payment.findAll({
+            where: { patientId: { [Op.in]: patientIds } }
+        });
+
+        // 4. Combine and Sort
+        let allTransactions = [];
+
+        // Map OPD Bills
+        opdBills.forEach(bill => {
+            const member = memberMap[bill.patientId];
+            const suffix = member.memberSuffix || (member.memberRank === 'principal' ? 1 : 2);
+            allTransactions.push({
+                date: bill.billDate,
+                type: 'bill',
+                ref: bill.billNumber,
+                description: `*${suffix} - ${member.firstName} - ${bill.service?.serviceName || 'Service'}`,
+                debit: Number(bill.netAmount),
+                credit: 0
+            });
+        });
+
+        // Map Pharmacy Bills
+        pharmacyBills.forEach(bill => {
+            const member = memberMap[bill.patientId];
+            const suffix = member.memberSuffix || '?';
+            allTransactions.push({
+                date: bill.billDate,
+                type: 'bill',
+                ref: bill.billNumber,
+                description: `*${suffix} - ${member.firstName} - Drugs/Medication`,
+                debit: Number(bill.calculateTotal ? bill.calculateTotal() : bill.totalAmount),
+                credit: 0
+            });
+        });
+
+        // Map Payments
+        payments.forEach(doc => {
+            const member = memberMap[doc.patientId];
+            const suffix = member.memberSuffix || '?';
+            allTransactions.push({
+                date: doc.paymentDate,
+                type: 'payment',
+                ref: doc.receiptNumber,
+                description: `*${suffix} - ${member.firstName} - Payment (${doc.paymentMethod})`,
+                debit: 0,
+                credit: Number(doc.amount)
+            });
+        });
+
+        // Sort by date
+        allTransactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        // 5. Calculate Running Balance
+        let runningBalance = 0;
+        allTransactions = allTransactions.map(t => {
+            runningBalance += (t.debit - t.credit);
+            return { ...t, balance: runningBalance };
+        });
+
+        // 6. Filter by Date Range and handle Brought Forward
+        let finalTransactions = allTransactions;
+        let broughtForward = 0;
+
+        if (startDate) {
+            const start = new Date(startDate);
+            // Find first transaction on or after start date
+            const splitIndex = allTransactions.findIndex(t => new Date(t.date) >= start);
+
+            if (splitIndex > 0) {
+                broughtForward = allTransactions[splitIndex - 1].balance;
+                finalTransactions = allTransactions.slice(splitIndex);
+            } else if (splitIndex === -1) {
+                // If all transactions are before start date, check if there are any transactions
+                if (allTransactions.length > 0) {
+                    broughtForward = allTransactions[allTransactions.length - 1].balance;
+                }
+                finalTransactions = [];
+            } else {
+                // splitIndex === 0, all transactions are after start date
+                broughtForward = 0;
+            }
+        }
+
+        if (endDate) {
+            const end = new Date(endDate);
+            finalTransactions = finalTransactions.filter(t => new Date(t.date) <= end);
+        }
+
+        const principal = members.find(m => m.memberRank === 'principal') || members[0];
+
+        res.json({
+            principal,
+            members,
+            broughtForward,
+            transactions: finalTransactions,
+            finalBalance: runningBalance // Current total balance regardless of view
+        });
+
+    } catch (error) {
+        console.error('Get family ledger error:', error);
+        res.status(500).json({ error: 'Failed to generate family ledger' });
+    }
+};
+
+
+
+// Generate Monthly Scheme Invoice
+const generateMonthlyInvoice = async (req, res) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const { schemeId, month, year } = req.body; // month is 1-12
+
+        if (!schemeId || !month || !year) {
+            return res.status(400).json({ error: 'Scheme ID, month, and year are required' });
+        }
+
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 0); // Last day of month
+
+        // Fetch uninvoiced bills
+        // 1. OPD Bills
+        const opdBills = await OPDBill.findAll({
+            where: {
+                schemeInvoiceId: null,
+                billDate: { [Op.between]: [startDate, endDate] }
+            },
+            include: [
+                { model: Patient, where: { schemeId }, attributes: ['id'] },
+                { model: Service, as: 'service' }
+            ]
+        });
+
+        // 2. Pharmacy Bills
+        const pharmacyBills = await PharmacyBill.findAll({
+            where: {
+                schemeInvoiceId: null,
+                billDate: { [Op.between]: [startDate, endDate] }
+            },
+            include: [
+                { model: Patient, where: { schemeId }, attributes: ['id'] },
+            ]
+        });
+
+        // 3. Lab Bills
+        const labBills = await LabBill.findAll({
+            where: {
+                schemeInvoiceId: null,
+                billDate: { [Op.between]: [startDate, endDate] }
+            },
+            include: [
+                { model: Patient, where: { schemeId }, attributes: ['id'] },
+            ]
+        });
+
+        // 4. Radiology Bills
+        const radiologyBills = await RadiologyBill.findAll({
+            where: {
+                schemeInvoiceId: null,
+                billDate: { [Op.between]: [startDate, endDate] }
+            },
+            include: [
+                { model: Patient, where: { schemeId }, attributes: ['id'] },
+            ]
+        });
+
+        const totalOPD = opdBills.reduce((sum, b) => Number(sum) + Number(b.netAmount), 0);
+        const totalPharmacy = pharmacyBills.reduce((sum, b) => Number(sum) + Number(b.netAmount), 0);
+        const totalLab = labBills.reduce((sum, b) => Number(sum) + Number(b.netAmount), 0);
+        const totalRadiology = radiologyBills.reduce((sum, b) => Number(sum) + Number(b.netAmount), 0);
+
+        const grandTotal = totalOPD + totalPharmacy + totalLab + totalRadiology;
+
+        if (grandTotal === 0) {
+            await transaction.rollback();
+            return res.status(400).json({ error: 'No uninvoiced bills found for this period' });
+        }
+
+        // Generate Invoice Number
+        const scheme = await Scheme.findByPk(schemeId);
+        const count = await SchemeInvoice.count() + 1;
+        const invoiceNumber = `INV-${scheme.schemeCode}-${year}${String(month).padStart(2, '0')}-${String(count).padStart(3, '0')}`;
+
+        // Create Invoice
+        const invoice = await SchemeInvoice.create({
+            invoiceNumber,
+            schemeId,
+            periodStart: startDate,
+            periodEnd: endDate,
+            totalAmount: grandTotal,
+            status: 'draft',
+            generatedBy: req.user?.id || 1
+        }, { transaction });
+
+        // Update Bills with Invoice ID
+        if (opdBills.length > 0) {
+            await OPDBill.update({ schemeInvoiceId: invoice.id }, {
+                where: { id: { [Op.in]: opdBills.map(b => b.id) } },
+                transaction
+            });
+        }
+        if (pharmacyBills.length > 0) {
+            await PharmacyBill.update({ schemeInvoiceId: invoice.id }, {
+                where: { id: { [Op.in]: pharmacyBills.map(b => b.id) } },
+                transaction
+            });
+        }
+        if (labBills.length > 0) {
+            await LabBill.update({ schemeInvoiceId: invoice.id }, {
+                where: { id: { [Op.in]: labBills.map(b => b.id) } },
+                transaction
+            });
+        }
+        if (radiologyBills.length > 0) {
+            await RadiologyBill.update({ schemeInvoiceId: invoice.id }, {
+                where: { id: { [Op.in]: radiologyBills.map(b => b.id) } },
+                transaction
+            });
+        }
+
+        await transaction.commit();
+        res.status(201).json(invoice);
+
+    } catch (error) {
+        if (transaction.finished !== 'commit') await transaction.rollback();
+        console.error('Generate scheme invoice error:', error);
+        res.status(500).json({ error: 'Failed to generate scheme invoice' });
+    }
+};
+
+// Get Scheme Invoices List
+const getSchemeInvoices = async (req, res) => {
+    try {
+        const { id } = req.params; // schemeId
+        const invoices = await SchemeInvoice.findAll({
+            where: { schemeId: id },
+            order: [['createdAt', 'DESC']]
+        });
+        res.json(invoices);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch invoices' });
+    }
+};
+
+// Get Single Invoice with Matrix Data
+const getSchemeInvoice = async (req, res) => {
+    try {
+        const { id } = req.params; // invoiceId
+        const invoice = await SchemeInvoice.findByPk(id, {
+            include: [{ model: Scheme, as: 'scheme' }]
+        });
+
+        if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+
+        // Fetch bills linked to this invoice
+        const opdBills = await OPDBill.findAll({
+            where: { schemeInvoiceId: id },
+            include: [
+                { model: Patient, as: 'patient' },
+                { model: Service, as: 'service' }
+            ]
+        });
+
+        const pharmacyBills = await PharmacyBill.findAll({
+            where: { schemeInvoiceId: id },
+            include: [{ model: Patient, as: 'patient' }]
+        });
+
+        const labBills = await LabBill.findAll({
+            where: { schemeInvoiceId: id },
+            include: [{ model: Patient, as: 'patient' }]
+        });
+
+        const radiologyBills = await RadiologyBill.findAll({
+            where: { schemeInvoiceId: id },
+            include: [{ model: Patient, as: 'patient' }]
+        });
+
+        const matrix = {}; // Key: "yyyy-mm-dd_patientId"
+
+        const addToMatrix = (bill, type, amount, description) => {
+            if (!bill.patient) return; // robustness
+            const date = bill.billDate;
+            const patient = bill.patient;
+            const key = `${date}_${patient.id}`;
+
+            if (!matrix[key]) {
+                matrix[key] = {
+                    date,
+                    patientName: `${patient.firstName} ${patient.lastName}`,
+                    manNumber: patient.schemeNumber || patient.patientNumber, // Using schemeNumber as MAN NO
+                    policyNumber: patient.policyNumber,
+                    consult: 0,
+                    drugs: 0,
+                    lab: 0,
+                    radiology: 0,
+                    other: 0,
+                    total: 0
+                };
+            }
+
+            if (['consult', 'drugs', 'lab', 'radiology'].includes(type)) {
+                matrix[key][type] += Number(amount);
+            } else {
+                matrix[key]['other'] += Number(amount);
+            }
+
+            matrix[key].total += Number(amount);
+        };
+
+        opdBills.forEach(b => {
+            let type = 'other';
+            if (b.service) { // Map service category
+                if (b.service.category === 'opd') type = 'consult';
+                else if (b.service.category === 'laboratory') type = 'lab';
+                else if (b.service.category === 'radiology') type = 'radiology';
+                else if (b.service.category === 'pharmacy') type = 'drugs';
+                else type = 'other';
+            }
+            addToMatrix(b, type, b.netAmount, b.service?.serviceName);
+        });
+
+        pharmacyBills.forEach(b => {
+            addToMatrix(b, 'drugs', b.netAmount, 'Medication');
+        });
+
+        labBills.forEach(b => {
+            addToMatrix(b, 'lab', b.netAmount, b.testName);
+        });
+
+        radiologyBills.forEach(b => {
+            addToMatrix(b, 'radiology', b.netAmount, b.scanType);
+        });
+
+        const rows = Object.values(matrix).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        // Calculate Column Totals
+        const totals = {
+            consult: rows.reduce((s, r) => s + r.consult, 0),
+            drugs: rows.reduce((s, r) => s + r.drugs, 0),
+            lab: rows.reduce((s, r) => s + r.lab, 0),
+            radiology: rows.reduce((s, r) => s + r.radiology, 0),
+            other: rows.reduce((s, r) => s + r.other, 0),
+            grandTotal: rows.reduce((s, r) => s + r.total, 0)
+        };
+
+        res.json({
+            invoice,
+            rows,
+            totals
+        });
+
+    } catch (error) {
+        console.error('Get invoice details error:', error);
+        res.status(500).json({ error: 'Failed to fetch invoice details' });
+    }
+};
+
 module.exports = {
     getAllNHIMAClaims,
     createNHIMAClaim,
@@ -224,5 +716,12 @@ module.exports = {
     getAllCorporateAccounts,
     createCorporateAccount,
     getAllSchemes,
-    createScheme
+    createScheme,
+    getSchemeById,
+    getSchemeStatement,
+    getSchemeMembers,
+    getFamilyLedger,
+    generateMonthlyInvoice,
+    getSchemeInvoice,
+    getSchemeInvoices
 };

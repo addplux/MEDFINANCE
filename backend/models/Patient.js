@@ -74,6 +74,35 @@ const Patient = sequelize.define('Patient', {
             key: 'id'
         }
     },
+    schemeId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'schemes',
+            key: 'id'
+        }
+    },
+    policyNumber: {
+        type: DataTypes.STRING(50),
+        allowNull: true
+    },
+    memberRank: {
+        type: DataTypes.ENUM('principal', 'spouse', 'child', 'dependant', 'other'),
+        allowNull: true
+    },
+    nrc: { // National Registration Card
+        type: DataTypes.STRING(20),
+        allowNull: true
+    },
+    memberStatus: {
+        type: DataTypes.ENUM('active', 'suspended', 'closed', 'not_collected'),
+        allowNull: false,
+        defaultValue: 'active'
+    },
+    memberSuffix: { // 1=Principal, 2=Spouse, etc.
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
     serviceId: {
         type: DataTypes.INTEGER,
         allowNull: true,
@@ -85,6 +114,11 @@ const Patient = sequelize.define('Patient', {
     ward: {
         type: DataTypes.ENUM('male_ward', 'female_ward', 'general_ward', 'pediatric_ward', 'icu'),
         allowNull: true
+    },
+    balance: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0.00
     }
 }, {
     tableName: 'patients',
