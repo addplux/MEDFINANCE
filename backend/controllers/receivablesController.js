@@ -796,7 +796,7 @@ const importSchemeMembers = async (req, res) => {
                     await Patient.create({
                         ...patientData,
                         patientNumber,
-                        balance: 0.00
+                        balance: member.balance ? parseFloat(member.balance) : 0.00
                     }, { transaction: t });
                     addedCount++;
                 }

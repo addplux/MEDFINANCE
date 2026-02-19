@@ -132,7 +132,8 @@ const SchemeMembers = ({ schemeId }) => {
             if (headers.length === 0) headers = data[0].map(c => String(c).trim());
 
             setCsvHeaders(headers);
-            setCsvPreview(data.slice(headerRowIndex + 1, headerRowIndex + 6)); // Preview next 5 rows
+            setCsvHeaders(headers);
+            setCsvPreview(data.slice(headerRowIndex + 1, headerRowIndex + 11)); // Preview next 10 rows
 
             // Auto-guess columns
             const lowerHeaders = headers.map(h => h.toLowerCase());
@@ -146,8 +147,8 @@ const SchemeMembers = ({ schemeId }) => {
                 lastName: guess(['lastname', 'last name', 'surname']) || '',
                 fullName: guess(['name', 'employee name', 'patient name', 'member name']) || '',
                 policyNumber: guess(['policy', 'man no', 'man #', 'staff id', 'employee id', 'ref no']) || '',
-                nrc: guess(['nrc', 'national id', 'id number']) || '',
-                gender: guess(['gender', 'sex']) || '',
+                consultation: guess(['consultation', 'consult']) || '',
+                total: guess(['total', 'amount', 'balance', 'charge']) || '',
                 dob: guess(['dob', 'birth', 'date of birth']) || '',
                 phone: guess(['phone', 'mobile', 'contact', 'cell']) || '',
                 address: guess(['address', 'residence', 'location']) || '',
@@ -233,9 +234,8 @@ const SchemeMembers = ({ schemeId }) => {
                 firstName: fName || 'Unknown',
                 lastName: lName || 'Member',
                 policyNumber: getVal('policyNumber'),
-                nrc: getVal('nrc'),
+                balance: getVal('total') ? parseFloat(getVal('total').replace(/[^0-9.-]+/g, "")) : 0, // Clean currency
                 dateOfBirth: getVal('dob'),
-                gender: getVal('gender'),
                 phone: getVal('phone'),
                 address: getVal('address'),
                 rank: getVal('rank')?.toLowerCase() || 'principal',
@@ -473,30 +473,30 @@ const SchemeMembers = ({ schemeId }) => {
                                     </select>
                                 </div>
 
-                                {/* NRC Mapping */}
+                                {/* "Consultation" Mapping (Dummy/Validation) */}
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                        National ID / NRC
+                                        Consultation
                                     </label>
                                     <select
                                         className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                                        value={columnMapping.nrc}
-                                        onChange={(e) => setColumnMapping({ ...columnMapping, nrc: e.target.value })}
+                                        value={columnMapping.consultation}
+                                        onChange={(e) => setColumnMapping({ ...columnMapping, consultation: e.target.value })}
                                     >
                                         <option value="">-- Select Column --</option>
                                         {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
                                     </select>
                                 </div>
 
-                                {/* Gender Mapping */}
+                                {/* "Total" Mapping (Balances) */}
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                        Gender
+                                        Total Bill / Balance
                                     </label>
                                     <select
                                         className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                                        value={columnMapping.gender}
-                                        onChange={(e) => setColumnMapping({ ...columnMapping, gender: e.target.value })}
+                                        value={columnMapping.total}
+                                        onChange={(e) => setColumnMapping({ ...columnMapping, total: e.target.value })}
                                     >
                                         <option value="">-- Select Column --</option>
                                         {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
@@ -506,7 +506,7 @@ const SchemeMembers = ({ schemeId }) => {
 
                             {/* Preview Section */}
                             <div className="mt-8">
-                                <h4 className="font-semibold text-sm mb-2 text-gray-700">File Preview (First 5 Rows)</h4>
+                                <h4 className="font-semibold text-sm mb-2 text-gray-700">File Preview (First 10 Rows)</h4>
                                 <div className="overflow-x-auto border border-gray-200 rounded-md bg-gray-50">
                                     <table className="w-full text-xs text-left">
                                         <thead className="bg-gray-100 border-b border-gray-200 text-gray-600 font-semibold uppercase">
