@@ -96,20 +96,20 @@ const SchemeMembers = ({ schemeId }) => {
                 let headerRowIndex = 0;
                 let headers = [];
 
-                for (let i = 0; i < Math.min(rows.length, 10); i++) {
+                // Search deeper (up to 20 rows) for a valid header
+                for (let i = 0; i < Math.min(rows.length, 20); i++) {
                     const candidateHeaders = rows[i].split(',').map(h => h.trim().toLowerCase());
-                    const hasName = candidateHeaders.some(h => h.includes('name') || h.includes('employee'));
-                    const hasId = candidateHeaders.some(h => h.includes('policy') || h.includes('man no') || h.includes('man #') || h.includes('nrc'));
+                    const hasName = candidateHeaders.some(h => h.includes('name') || h.includes('employee') || h.includes('patient'));
+                    const hasId = candidateHeaders.some(h => h.includes('policy') || h.includes('man no') || h.includes('man #') || h.includes('nrc') || h.includes('id'));
 
-                    if (hasName || hasId) {
+                    if (hasName) { // Be permissive: if we find "Name", it's likely the header
                         headerRowIndex = i;
                         headers = candidateHeaders;
-                        break; // Found the header row
+                        break;
                     }
                 }
 
                 if (headers.length === 0) {
-                    // Fallback to first row if detection fails
                     headers = rows[0].split(',').map(h => h.trim().toLowerCase());
                 }
 
@@ -160,7 +160,7 @@ const SchemeMembers = ({ schemeId }) => {
                 }).filter(m => m && (m.firstName !== 'Unknown' || m.policyNumber)); // Filter out empty/invalid rows
 
                 if (membersData.length === 0) {
-                    alert('No valid member records found. Please check your CSV format.');
+                    alert('No valid member records found.\nPlease ensure your CSV has columns for "Name" and "Man No" (or Policy Number).');
                     return;
                 }
 
