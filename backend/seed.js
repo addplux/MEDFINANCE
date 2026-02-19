@@ -49,7 +49,8 @@ const seedDatabase = async () => {
             firstName: 'System',
             lastName: 'Administrator',
             roleId: adminRole.id,
-            isActive: true
+            isActive: true,
+            status: 'approved'
         });
         console.log('✅ Admin user created');
 
@@ -63,7 +64,8 @@ const seedDatabase = async () => {
                 firstName: 'John',
                 lastName: 'Mwansa',
                 roleId: accountantRole.id,
-                isActive: true
+                isActive: true,
+                status: 'approved'
             },
             {
                 username: 'billing1',
@@ -73,7 +75,8 @@ const seedDatabase = async () => {
                 firstName: 'Mary',
                 lastName: 'Banda',
                 roleId: billingRole.id,
-                isActive: true
+                isActive: true,
+                status: 'approved'
             }
         ], { individualHooks: true });
         console.log('✅ Sample users created');

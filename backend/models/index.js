@@ -40,6 +40,7 @@ const MaternityBill = require('./MaternityBill');
 const SpecialistClinicBill = require('./SpecialistClinicBill');
 const Shift = require('./Shift');
 const Refund = require('./Refund');
+const Notification = require('./Notification');
 
 // Define relationships
 
@@ -63,6 +64,8 @@ User.hasMany(IPDBill, { foreignKey: 'createdBy', as: 'ipdBills' });
 User.hasMany(AuditLog, { foreignKey: 'userId', as: 'auditLogs' });
 User.hasMany(Department, { foreignKey: 'managerId', as: 'managedDepartments' });
 User.hasMany(Shift, { foreignKey: 'userId', as: 'shifts' });
+User.hasMany(Notification, { foreignKey: 'userId', as: 'notifications' });
+Notification.belongsTo(User, { foreignKey: 'userId', as: 'recipient' });
 
 // ... (other relationships)
 
@@ -237,7 +240,8 @@ module.exports = {
     SpecialistClinicBill,
     Shift,
     Refund,
-    Role
+    Role,
+    Notification
 };
 
 

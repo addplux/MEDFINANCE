@@ -115,6 +115,7 @@ app.use('/api/shifts', require('./routes/shifts'));
 app.use('/api/refunds', require('./routes/refunds'));
 app.use('/api/debug', require('./routes/debug'));
 app.use('/api/sync', require('./routes/sync'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

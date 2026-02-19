@@ -7,7 +7,20 @@ export const authAPI = {
     logout: () => api.post('/auth/logout'),
     getCurrentUser: () => api.get('/auth/me'),
     getPublicOrgInfo: () => api.get('/auth/info'),
+    // Admin approval
+    getPendingUsers: () => api.get('/auth/pending-users'),
+    approveUser: (id, data) => api.put(`/auth/approve/${id}`, data),
+    rejectUser: (id, data) => api.put(`/auth/reject/${id}`, data),
 };
+
+// Notifications
+export const notificationsAPI = {
+    getAll: () => api.get('/notifications'),
+    getCount: () => api.get('/notifications/count'),
+    markRead: (id) => api.put(`/notifications/${id}/read`),
+    markAllRead: () => api.put('/notifications/read-all'),
+};
+
 
 // Patients
 export const patientAPI = {

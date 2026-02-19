@@ -48,7 +48,20 @@ const User = sequelize.define('User', {
     },
     isActive: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true
+        defaultValue: false
+    },
+    status: {
+        type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+        defaultValue: 'pending',
+        allowNull: false
+    },
+    department: {
+        type: DataTypes.STRING(100),
+        allowNull: true
+    },
+    rejectionReason: {
+        type: DataTypes.STRING(255),
+        allowNull: true
     },
     medicalLimitMonthly: {
         type: DataTypes.DECIMAL(10, 2),

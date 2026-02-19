@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { setupAPI } from '../../services/apiService';
+import NotificationBell from '../ui/NotificationBell';
 import {
     LayoutDashboard,
     FileText,
@@ -187,7 +188,8 @@ const MainLayout = ({ children }) => {
                 { path: '/app/setup', label: 'Tariffs' }, // Services
                 { path: '/app/setup/services', label: 'Services' },
                 { path: '/app/setup/users/new', label: 'Staff Management' },
-                { path: '/app/setup/roles', label: 'User Roles' }
+                { path: '/app/setup/roles', label: 'User Roles' },
+                ...(user?.role === 'admin' ? [{ path: '/app/setup/pending-approvals', label: '🔔 Pending Approvals' }] : [])
             ]
         },
     ];
@@ -390,7 +392,7 @@ transition-all duration-200
                         <Menu className="w-5 h-5 text-text-primary" />
                     </button>
                     <span className="text-base font-bold text-text-primary">{orgName}</span>
-                    <div className="w-9" /> {/* Spacer for centering */}
+                    <NotificationBell />
                 </header>
 
                 {/* Page Content */}

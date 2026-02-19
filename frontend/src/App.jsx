@@ -9,6 +9,7 @@ import './index.css';
 
 // Auth Pages
 import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
 import LandingPage from './pages/LandingPage';
 
 // Dashboard
@@ -98,6 +99,9 @@ import MaternityBillForm from './pages/maternity/MaternityBillForm';
 import SpecialistClinics from './pages/specialist/SpecialistClinics';
 import SpecialistClinicForm from './pages/specialist/SpecialistClinicForm';
 
+// Admin
+import PendingApprovals from './pages/setup/PendingApprovals';
+
 // Layout
 import MainLayout from './components/layout/MainLayout';
 
@@ -139,6 +143,7 @@ function App() {
               {/* Public Routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
 
               {/* Protected Routes */}
@@ -227,6 +232,7 @@ function App() {
                         <Route path="specialist-clinics/billing/:id/edit" element={<SpecialistClinicForm />} />
 
                         <Route path="setup" element={<Setup />} />
+                        <Route path="setup/pending-approvals" element={<PendingApprovals />} />
                         <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
                       </Routes>
                     </MainLayout>
