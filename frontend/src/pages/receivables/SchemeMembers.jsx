@@ -94,6 +94,8 @@ const SchemeMembers = ({ schemeId }) => {
         a.click();
     };
 
+    const [allRows, setAllRows] = useState([]);
+
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -101,159 +103,148 @@ const SchemeMembers = ({ schemeId }) => {
         setCsvFile(file);
         const reader = new FileReader();
 
-        reader.onload = async (event) => {
-            try {
-                let csvText = '';
+        const processWorkbook = (wb) => {
+            const sheetName = wb.SheetNames[0];
+            const ws = wb.Sheets[sheetName];
+            const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' }); // Array of arrays
 
-                if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-                    const data = new Uint8Array(event.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    csvText = XLSX.utils.sheet_to_csv(worksheet);
-                } else {
-                    csvText = event.target.result;
-                }
-
-                const rows = csvText.split('\n').map(row => row.trim()).filter(row => row);
-
-                if (rows.length < 2) {
-                    alert('Invalid CSV file. Must contain header and data.');
-                    return;
-                }
-
-                // Initial basic header detection to find the "start" of the table
-                let headerRowIndex = 0;
-                let headers = [];
-                for (let i = 0; i < Math.min(rows.length, 20); i++) {
-                    const candidateHeaders = rows[i].split(',').map(h => h.trim());
-                    // Heuristic: row has more than 1 column and contains likely keywords
-                    const sig = candidateHeaders.join(' ').toLowerCase();
-                    if ((sig.includes('name') || sig.includes('consult') || sig.includes('policy') || sig.includes('man no')) && candidateHeaders.length > 2) {
-                        headerRowIndex = i;
-                        headers = candidateHeaders;
-                        break;
-                    }
-                }
-
-                if (headers.length === 0) headers = rows[0].split(',').map(h => h.trim());
-
-                setCsvHeaders(headers);
-
-                // Parse preview data (first 5 rows after header)
-                const previewRows = rows.slice(headerRowIndex + 1, headerRowIndex + 6).map(row => row.split(',').map(v => v.trim()));
-                setCsvPreview(previewRows);
-
-                // Auto-guess mapping
-                const lowerHeaders = headers.map(h => h.toLowerCase());
-                const guess = (keywords) => {
-                    const key = keywords.find(k => lowerHeaders.some(h => h.includes(k)));
-                    return key ? headers[lowerHeaders.findIndex(h => h.includes(key))] : '';
-                }
-
-                setColumnMapping({
-                    firstName: guess(['firstname', 'first name']) || '',
-                    lastName: guess(['lastname', 'last name', 'surname']) || '',
-                    fullName: guess(['name', 'employee name', 'patient name', 'member name', 'client name']) || '',
-                    policyNumber: guess(['policy', 'man no', 'man #', 'staff id', 'employee id', 'ref no']) || '',
-                    nrc: guess(['nrc', 'national id']) || '',
-                    gender: guess(['gender', 'sex']) || '',
-                    dob: guess(['dob', 'birth', 'date of birth']) || '',
-                    phone: guess(['phone', 'mobile', 'contact']) || '',
-                    address: guess(['address', 'residence']) || '',
-                    rank: guess(['rank', 'level']) || '',
-                    suffix: guess(['suffix']) || '',
-                });
-
-                setShowMappingModal(true); // Open Modal
-
-            } catch (error) {
-                console.error('CSV Parse Error:', error);
-                alert('Failed to parse CSV file.');
-            }
-        };
-        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-            reader.readAsArrayBuffer(file);
-        } else {
-            reader.readAsText(file);
-        }
-        e.target.value = null;
-    };
-
-    const processImport = async () => {
-        if (!csvFile) return;
-
-        // Re-read file to process full data
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-            let csvText = '';
-            if (csvFile.name.endsWith('.xlsx') || csvFile.name.endsWith('.xls')) {
-                const data = new Uint8Array(event.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                csvText = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
-            } else {
-                csvText = event.target.result;
+            if (data.length < 2) {
+                alert('Invalid file: too few rows.');
+                return;
             }
 
-            const rows = csvText.split('\n').map(row => row.trim()).filter(row => row);
+            setAllRows(data);
 
-            // Locate header row again based on the mapped columns (finding the row that contains the selected headers)
-            const mapValues = Object.values(columnMapping).filter(v => v);
+            // Header Recognition (Look for "Name" or "Policy" in first 20 rows)
             let headerRowIndex = 0;
-            for (let i = 0; i < Math.min(rows.length, 20); i++) {
-                const rowCols = rows[i].split(',').map(c => c.trim());
-                if (mapValues.every(mv => rowCols.includes(mv))) {
+            let headers = [];
+
+            for (let i = 0; i < Math.min(data.length, 20); i++) {
+                const row = data[i].map(c => String(c).trim());
+                const sig = row.join(' ').toLowerCase();
+                if ((sig.includes('name') || sig.includes('consult') || sig.includes('man no') || sig.includes('policy')) && row.length > 1) {
                     headerRowIndex = i;
+                    headers = row;
                     break;
                 }
             }
 
-            // Get actual indices
-            const headerRow = rows[headerRowIndex].split(',').map(c => c.trim());
-            const getIndex = (colName) => headerRow.indexOf(colName);
-            const rankIndex = getIndex(columnMapping.rank);
-            const suffixIndex = getIndex(columnMapping.suffix);
+            if (headers.length === 0) headers = data[0].map(c => String(c).trim());
 
-            const membersData = rows.slice(headerRowIndex + 1).map(row => {
-                if (!row || row.toLowerCase().startsWith('total')) return null;
-                const cols = row.split(',').map(c => c.trim());
+            setCsvHeaders(headers);
+            setCsvPreview(data.slice(headerRowIndex + 1, headerRowIndex + 6)); // Preview next 5 rows
 
-                const getVal = (mappingKey) => {
-                    const colName = columnMapping[mappingKey];
-                    if (!colName) return '';
-                    const idx = getIndex(colName);
-                    return idx !== -1 ? cols[idx] : '';
-                };
+            // Auto-guess columns
+            const lowerHeaders = headers.map(h => h.toLowerCase());
+            const guess = (keywords) => {
+                const key = keywords.find(k => lowerHeaders.some(h => h.includes(k)));
+                return key ? headers[lowerHeaders.findIndex(h => h.includes(key))] : '';
+            };
 
-                let fName = getVal('firstName');
-                let lName = getVal('lastName');
-                const full = getVal('fullName');
+            setColumnMapping({
+                firstName: guess(['firstname', 'first name', 'given name']) || '',
+                lastName: guess(['lastname', 'last name', 'surname']) || '',
+                fullName: guess(['name', 'employee name', 'patient name', 'member name']) || '',
+                policyNumber: guess(['policy', 'man no', 'man #', 'staff id', 'employee id', 'ref no']) || '',
+                nrc: guess(['nrc', 'national id', 'id number']) || '',
+                gender: guess(['gender', 'sex']) || '',
+                dob: guess(['dob', 'birth', 'date of birth']) || '',
+                phone: guess(['phone', 'mobile', 'contact', 'cell']) || '',
+                address: guess(['address', 'residence', 'location']) || '',
+                rank: guess(['rank', 'level', 'grade']) || '',
+                suffix: guess(['suffix']) || '',
+            });
 
-                if (!fName && full) {
-                    const parts = full.trim().split(/\s+/);
+            setShowMappingModal(true);
+        };
+
+        reader.onload = (event) => {
+            try {
+                const data = event.target.result;
+                let workbook;
+                if (file.name.endsWith('.csv')) {
+                    // Force read CSV as string first to handle encodings if needed, but binary is safer for XLSX read
+                    workbook = XLSX.read(data, { type: 'binary' });
+                } else {
+                    workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
+                }
+                processWorkbook(workbook);
+            } catch (error) {
+                console.error('File Parse Error:', error);
+                alert('Failed to parse file. Please check the format.');
+            }
+        };
+
+        if (file.name.endsWith('.csv')) {
+            reader.readAsBinaryString(file);
+        } else {
+            reader.readAsArrayBuffer(file);
+        }
+        e.target.value = null; // Reset input
+    };
+
+    const processImport = async () => {
+        if (!allRows || allRows.length === 0) return;
+
+        // Find header row again using the mapped Policy Number column name
+        const policyColName = columnMapping.policyNumber;
+        let headerRowIndex = 0;
+
+        // Find line where headers match
+        for (let i = 0; i < Math.min(allRows.length, 20); i++) {
+            const row = allRows[i].map(c => String(c).trim());
+            if (row.includes(policyColName)) {
+                headerRowIndex = i;
+                break;
+            }
+        }
+
+        const headers = allRows[headerRowIndex].map(c => String(c).trim());
+        const getIndex = (name) => headers.indexOf(name);
+
+        const membersData = allRows.slice(headerRowIndex + 1).map(row => {
+            // Safe access helper
+            const getVal = (mappingKey) => {
+                const colName = columnMapping[mappingKey];
+                if (!colName) return '';
+                const idx = getIndex(colName);
+                if (idx === -1) return '';
+                return row[idx] ? String(row[idx]).trim() : '';
+            };
+
+            // Skip total rows or empty rows
+            if (!row || row.length === 0) return null;
+            // Crude check for total line
+            if (String(row[0]).toLowerCase().includes('total')) return null;
+
+            let fName = getVal('firstName');
+            let lName = getVal('lastName');
+            const full = getVal('fullName');
+
+            if (!fName && full) {
+                const parts = full.split(/\s+/);
+                if (parts.length > 0) {
                     fName = parts[0];
                     lName = parts.slice(1).join(' ');
                 }
+            }
 
-                return {
-                    firstName: fName || 'Unknown',
-                    lastName: lName || 'Member',
-                    policyNumber: getVal('policyNumber'),
-                    nrc: getVal('nrc'),
-                    dateOfBirth: getVal('dob'),
-                    gender: getVal('gender'),
-                    phone: getVal('phone'),
-                    email: '',
-                    address: getVal('address'),
-                    rank: getVal('rank')?.toLowerCase() || 'principal',
-                    suffix: getVal('suffix')
-                };
-            }).filter(m => m && (m.firstName !== 'Unknown' || m.policyNumber));
+            return {
+                firstName: fName || 'Unknown',
+                lastName: lName || 'Member',
+                policyNumber: getVal('policyNumber'),
+                nrc: getVal('nrc'),
+                dateOfBirth: getVal('dob'),
+                gender: getVal('gender'),
+                phone: getVal('phone'),
+                address: getVal('address'),
+                rank: getVal('rank')?.toLowerCase() || 'principal',
+                suffix: getVal('suffix')
+            };
+        }).filter(m => m && m.policyNumber && m.policyNumber.length > 1); // Strict filter: must have policy number
 
-            await uploadMembers(membersData);
-            setShowMappingModal(false);
-        };
-        reader.readAsText(csvFile);
+        await uploadMembers(membersData);
+        setShowMappingModal(false);
     };
 
     const uploadMembers = async (membersData) => {
@@ -439,75 +430,92 @@ const SchemeMembers = ({ schemeId }) => {
             {showMappingModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-                        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                            <h3 className="font-semibold text-lg">Map CSV Columns</h3>
-                            <button onClick={() => setShowMappingModal(false)} className="text-gray-500 hover:text-gray-700">&times;</button>
+                        <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
+                            <h3 className="font-semibold text-lg text-gray-800">Map File Columns</h3>
+                            <button onClick={() => setShowMappingModal(false)} className="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
                         </div>
-                        <div className="p-4 overflow-y-auto flex-1">
-                            <p className="text-sm text-gray-600 mb-4">Please select which columns from your file match the required fields.</p>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="form-control">
-                                    <label className="label text-xs font-bold">Full Name (or First Name)</label>
+                        <div className="p-6 overflow-y-auto flex-1">
+                            <div className="bg-blue-50 text-blue-800 p-3 rounded-md text-sm mb-6 flex items-start gap-2">
+                                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                                <p>Please select the columns from your uploaded file that match the required fields below.</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Name Mapping */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                        Full Name Column <span className="text-red-500">*</span>
+                                    </label>
                                     <select
-                                        className="select select-bordered select-sm w-full"
+                                        className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
                                         value={columnMapping.fullName || columnMapping.firstName}
                                         onChange={(e) => setColumnMapping({ ...columnMapping, fullName: e.target.value, firstName: '' })}
                                     >
                                         <option value="">-- Select Column --</option>
-                                        {csvHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                                        {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
                                     </select>
-                                    <span className="text-xs text-gray-400 mt-1">If name is in one column (e.g. "John Doe")</span>
+                                    <p className="text-xs text-gray-500 mt-1">Select the column containing the member's name (e.g. "Employee Name").</p>
                                 </div>
 
-                                <div className="form-control">
-                                    <label className="label text-xs font-bold">Policy / Man Number <span className="text-red-500">*</span></label>
+                                {/* Policy Mapping */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                        Policy / Man Number <span className="text-red-500">*</span>
+                                    </label>
                                     <select
-                                        className="select select-bordered select-sm w-full"
+                                        className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
                                         value={columnMapping.policyNumber}
                                         onChange={(e) => setColumnMapping({ ...columnMapping, policyNumber: e.target.value })}
                                     >
                                         <option value="">-- Select Column --</option>
-                                        {csvHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                                        {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
                                     </select>
                                 </div>
 
-                                <div className="form-control">
-                                    <label className="label text-xs font-bold">National ID / NRC</label>
+                                {/* NRC Mapping */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                        National ID / NRC
+                                    </label>
                                     <select
-                                        className="select select-bordered select-sm w-full"
+                                        className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
                                         value={columnMapping.nrc}
                                         onChange={(e) => setColumnMapping({ ...columnMapping, nrc: e.target.value })}
                                     >
                                         <option value="">-- Select Column --</option>
-                                        {csvHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                                        {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
                                     </select>
                                 </div>
-                                <div className="form-control">
-                                    <label className="label text-xs font-bold">Gender</label>
+
+                                {/* Gender Mapping */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                        Gender
+                                    </label>
                                     <select
-                                        className="select select-bordered select-sm w-full"
+                                        className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
                                         value={columnMapping.gender}
                                         onChange={(e) => setColumnMapping({ ...columnMapping, gender: e.target.value })}
                                     >
                                         <option value="">-- Select Column --</option>
-                                        {csvHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                                        {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
                                     </select>
                                 </div>
                             </div>
 
                             {/* Preview Section */}
-                            <div className="mt-6">
-                                <h4 className="font-semibold text-sm mb-2">File Preview</h4>
-                                <div className="overflow-x-auto border rounded text-xs">
-                                    <table className="table table-compact w-full">
-                                        <thead>
-                                            <tr>{csvHeaders.map((h, i) => <th key={i}>{h}</th>)}</tr>
+                            <div className="mt-8">
+                                <h4 className="font-semibold text-sm mb-2 text-gray-700">File Preview (First 5 Rows)</h4>
+                                <div className="overflow-x-auto border border-gray-200 rounded-md bg-gray-50">
+                                    <table className="w-full text-xs text-left">
+                                        <thead className="bg-gray-100 border-b border-gray-200 text-gray-600 font-semibold uppercase">
+                                            <tr>{csvHeaders.map((h, i) => <th key={i} className="px-3 py-2 whitespace-nowrap">{h}</th>)}</tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody className="divide-y divide-gray-200 bg-white">
                                             {csvPreview.map((row, i) => (
                                                 <tr key={i}>
-                                                    {row.map((cell, j) => <td key={j} className="whitespace-nowrap">{cell}</td>)}
+                                                    {row.map((cell, j) => <td key={j} className="px-3 py-2 whitespace-nowrap text-gray-600">{cell}</td>)}
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -515,14 +523,19 @@ const SchemeMembers = ({ schemeId }) => {
                                 </div>
                             </div>
                         </div>
-                        <div className="p-4 border-t border-gray-200 flex justify-end gap-2 bg-gray-50 rounded-b-lg">
-                            <button onClick={() => setShowMappingModal(false)} className="btn btn-ghost btn-sm">Cancel</button>
+                        <div className="p-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-lg">
+                            <button
+                                onClick={() => setShowMappingModal(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
                             <button
                                 onClick={processImport}
-                                className="btn btn-primary btn-sm"
+                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                                 disabled={importing || !(columnMapping.policyNumber && (columnMapping.firstName || columnMapping.fullName))}
                             >
-                                {importing ? <span className="loading loading-spinner"></span> : 'Import Members'}
+                                {importing ? 'Importing...' : 'Import Members'}
                             </button>
                         </div>
                     </div>
