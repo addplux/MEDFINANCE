@@ -65,7 +65,7 @@ api.interceptors.response.use(
                 await enqueue({
                     method: config.method.toUpperCase(),
                     url: url,
-                    data: config.data ? JSON.parse(config.data) : undefined,
+                    data: (typeof config.data === 'string' && config.data !== 'undefined') ? JSON.parse(config.data) : config.data,
                     headers: {
                         ...(config.headers?.Authorization
                             ? { Authorization: config.headers.Authorization }

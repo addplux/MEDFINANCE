@@ -21,7 +21,14 @@ export const AuthProvider = ({ children }) => {
         const savedUser = localStorage.getItem('user');
 
         if (token && savedUser) {
-            setUser(JSON.parse(savedUser));
+            try {
+                setUser(JSON.parse(savedUser));
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                setUser(null);
+            }
             setLoading(false);
 
             // Verify token is still valid
