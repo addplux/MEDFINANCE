@@ -13,6 +13,23 @@ const SchemeMembers = ({ schemeId }) => {
     // Import State
     const [importing, setImporting] = useState(false);
     const [importResult, setImportResult] = useState(null);
+    const [csvFile, setCsvFile] = useState(null);
+    const [csvPreview, setCsvPreview] = useState([]);
+    const [csvHeaders, setCsvHeaders] = useState([]);
+    const [showMappingModal, setShowMappingModal] = useState(false);
+    const [columnMapping, setColumnMapping] = useState({
+        firstName: '',
+        lastName: '', // Optional if name is full
+        fullName: '', // Alternative to First/Last
+        policyNumber: '',
+        nrc: '',
+        gender: '',
+        dob: '',
+        phone: '',
+        address: '',
+        rank: '',
+        suffix: ''
+    });
     const fileInputRef = useRef(null);
 
     useEffect(() => {
@@ -80,6 +97,7 @@ const SchemeMembers = ({ schemeId }) => {
         const file = e.target.files[0];
         if (!file) return;
 
+        setCsvFile(file);
         const reader = new FileReader();
         reader.onload = async (event) => {
             try {
@@ -91,88 +109,126 @@ const SchemeMembers = ({ schemeId }) => {
                     return;
                 }
 
-                // --- Flexible Header Detection logic ---
-                // Find the header row by looking for keywords like 'name', 'policy', 'man no'
+                // Initial basic header detection to find the "start" of the table
                 let headerRowIndex = 0;
                 let headers = [];
-
-                // Search deeper (up to 20 rows) for a valid header
                 for (let i = 0; i < Math.min(rows.length, 20); i++) {
-                    const candidateHeaders = rows[i].split(',').map(h => h.trim().toLowerCase());
-                    const hasName = candidateHeaders.some(h => h.includes('name') || h.includes('employee') || h.includes('patient'));
-                    const hasId = candidateHeaders.some(h => h.includes('policy') || h.includes('man no') || h.includes('man #') || h.includes('nrc') || h.includes('id'));
-
-                    if (hasName) { // Be permissive: if we find "Name", it's likely the header
+                    const candidateHeaders = rows[i].split(',').map(h => h.trim());
+                    // Heuristic: row has more than 1 column and contains likely keywords
+                    const sig = candidateHeaders.join(' ').toLowerCase();
+                    if ((sig.includes('name') || sig.includes('consult') || sig.includes('policy') || sig.includes('man no')) && candidateHeaders.length > 2) {
                         headerRowIndex = i;
                         headers = candidateHeaders;
                         break;
                     }
                 }
 
-                if (headers.length === 0) {
-                    headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+                if (headers.length === 0) headers = rows[0].split(',').map(h => h.trim());
+
+                setCsvHeaders(headers);
+
+                // Parse preview data (first 5 rows after header)
+                const previewRows = rows.slice(headerRowIndex + 1, headerRowIndex + 6).map(row => row.split(',').map(v => v.trim()));
+                setCsvPreview(previewRows);
+
+                // Auto-guess mapping
+                const lowerHeaders = headers.map(h => h.toLowerCase());
+                const guess = (keywords) => {
+                    const key = keywords.find(k => lowerHeaders.some(h => h.includes(k)));
+                    return key ? headers[lowerHeaders.findIndex(h => h.includes(key))] : '';
                 }
 
-                console.log('Detected Headers:', headers);
+                setColumnMapping({
+                    firstName: guess(['firstname', 'first name']) || '',
+                    lastName: guess(['lastname', 'last name', 'surname']) || '',
+                    fullName: guess(['name', 'employee name', 'patient name', 'member name', 'client name']) || '',
+                    policyNumber: guess(['policy', 'man no', 'man #', 'staff id', 'employee id', 'ref no']) || '',
+                    nrc: guess(['nrc', 'national id']) || '',
+                    gender: guess(['gender', 'sex']) || '',
+                    dob: guess(['dob', 'birth', 'date of birth']) || '',
+                    phone: guess(['phone', 'mobile', 'contact']) || '',
+                    address: guess(['address', 'residence']) || '',
+                    rank: guess(['rank', 'level']) || '',
+                    suffix: guess(['suffix']) || '',
+                });
 
-                const membersData = rows.slice(headerRowIndex + 1).map(row => {
-                    // Handle potential empty lines or footer totals
-                    if (!row || row.toLowerCase().startsWith('total')) return null;
+                setShowMappingModal(true); // Open Modal
 
-                    const values = row.split(',').map(v => v.trim());
-
-                    const getValue = (keywords) => {
-                        const index = headers.findIndex(h => keywords.some(k => h.includes(k)));
-                        return index !== -1 ? values[index] : '';
-                    };
-
-                    // --- Mapping Logic ---
-                    // 1. Name: Try composite 'Name' first, then split. Or look for First/Last specific.
-                    let firstName = getValue(['firstname', 'first name']);
-                    let lastName = getValue(['lastname', 'last name', 'surname']);
-
-                    if (!firstName && !lastName) {
-                        const fullName = getValue(['name', 'employee name', 'patient name', 'member name']);
-                        if (fullName) {
-                            const parts = fullName.split(' ');
-                            firstName = parts[0];
-                            lastName = parts.slice(1).join(' '); // Join the rest as last name
-                        }
-                    }
-
-                    // 2. Policy Number: Look for 'policy', 'man no', 'employee id'
-                    let policyNumber = getValue(['policy', 'man no', 'man #', 'staff id', 'employee id']);
-
-                    // 3. Other fields
-                    return {
-                        firstName: firstName || 'Unknown',
-                        lastName: lastName || 'Member',
-                        policyNumber: policyNumber || '', // Backend handles missing policy if nrc exists, but usually required
-                        dateOfBirth: getValue(['dob', 'birth', 'date of birth']),
-                        gender: getValue(['gender', 'sex']),
-                        rank: getValue(['rank', 'level'])?.toLowerCase() || 'principal', // Default to Principal
-                        suffix: getValue(['suffix']),
-                        phone: getValue(['phone', 'mobile', 'contact']),
-                        email: getValue(['email']),
-                        nrc: getValue(['nrc', 'national id']),
-                        address: getValue(['address', 'residence'])
-                    };
-                }).filter(m => m && (m.firstName !== 'Unknown' || m.policyNumber)); // Filter out empty/invalid rows
-
-                if (membersData.length === 0) {
-                    alert('No valid member records found.\nPlease ensure your CSV has columns for "Name" and "Man No" (or Policy Number).');
-                    return;
-                }
-
-                await uploadMembers(membersData);
             } catch (error) {
                 console.error('CSV Parse Error:', error);
                 alert('Failed to parse CSV file.');
             }
         };
         reader.readAsText(file);
-        // Reset input
         e.target.value = null;
+    };
+
+    const processImport = async () => {
+        if (!csvFile) return;
+
+        // Re-read file to process full data
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            const text = event.target.result;
+            const rows = text.split('\n').map(row => row.trim()).filter(row => row);
+
+            // Locate header row again based on the mapped columns (finding the row that contains the selected headers)
+            const mapValues = Object.values(columnMapping).filter(v => v);
+            let headerRowIndex = 0;
+            for (let i = 0; i < Math.min(rows.length, 20); i++) {
+                const rowCols = rows[i].split(',').map(c => c.trim());
+                if (mapValues.every(mv => rowCols.includes(mv))) {
+                    headerRowIndex = i;
+                    break;
+                }
+            }
+
+            // Get actual indices
+            const headerRow = rows[headerRowIndex].split(',').map(c => c.trim());
+            const getIndex = (colName) => headerRow.indexOf(colName);
+            const rankIndex = getIndex(columnMapping.rank);
+            const suffixIndex = getIndex(columnMapping.suffix);
+
+            const membersData = rows.slice(headerRowIndex + 1).map(row => {
+                if (!row || row.toLowerCase().startsWith('total')) return null;
+                const cols = row.split(',').map(c => c.trim());
+
+                const getVal = (mappingKey) => {
+                    const colName = columnMapping[mappingKey];
+                    if (!colName) return '';
+                    const idx = getIndex(colName);
+                    return idx !== -1 ? cols[idx] : '';
+                };
+
+                let fName = getVal('firstName');
+                let lName = getVal('lastName');
+                const full = getVal('fullName');
+
+                if (!fName && full) {
+                    const parts = full.trim().split(/\s+/);
+                    fName = parts[0];
+                    lName = parts.slice(1).join(' ');
+                }
+
+                return {
+                    firstName: fName || 'Unknown',
+                    lastName: lName || 'Member',
+                    policyNumber: getVal('policyNumber'),
+                    nrc: getVal('nrc'),
+                    dateOfBirth: getVal('dob'),
+                    gender: getVal('gender'),
+                    phone: getVal('phone'),
+                    email: '',
+                    address: getVal('address'),
+                    rank: getVal('rank')?.toLowerCase() || 'principal',
+                    suffix: getVal('suffix')
+                };
+            }).filter(m => m && (m.firstName !== 'Unknown' || m.policyNumber));
+
+            await uploadMembers(membersData);
+            setShowMappingModal(false);
+        };
+        reader.readAsText(csvFile);
     };
 
     const uploadMembers = async (membersData) => {
@@ -353,6 +409,100 @@ const SchemeMembers = ({ schemeId }) => {
                     </table>
                 </div>
             </div>
+
+            {/* Modal for Column Mapping */}
+            {showMappingModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 className="font-semibold text-lg">Map CSV Columns</h3>
+                            <button onClick={() => setShowMappingModal(false)} className="text-gray-500 hover:text-gray-700">&times;</button>
+                        </div>
+                        <div className="p-4 overflow-y-auto flex-1">
+                            <p className="text-sm text-gray-600 mb-4">Please select which columns from your file match the required fields.</p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="form-control">
+                                    <label className="label text-xs font-bold">Full Name (or First Name)</label>
+                                    <select
+                                        className="select select-bordered select-sm w-full"
+                                        value={columnMapping.fullName || columnMapping.firstName}
+                                        onChange={(e) => setColumnMapping({ ...columnMapping, fullName: e.target.value, firstName: '' })}
+                                    >
+                                        <option value="">-- Select Column --</option>
+                                        {csvHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                                    </select>
+                                    <span className="text-xs text-gray-400 mt-1">If name is in one column (e.g. "John Doe")</span>
+                                </div>
+
+                                <div className="form-control">
+                                    <label className="label text-xs font-bold">Policy / Man Number <span className="text-red-500">*</span></label>
+                                    <select
+                                        className="select select-bordered select-sm w-full"
+                                        value={columnMapping.policyNumber}
+                                        onChange={(e) => setColumnMapping({ ...columnMapping, policyNumber: e.target.value })}
+                                    >
+                                        <option value="">-- Select Column --</option>
+                                        {csvHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                                    </select>
+                                </div>
+
+                                <div className="form-control">
+                                    <label className="label text-xs font-bold">National ID / NRC</label>
+                                    <select
+                                        className="select select-bordered select-sm w-full"
+                                        value={columnMapping.nrc}
+                                        onChange={(e) => setColumnMapping({ ...columnMapping, nrc: e.target.value })}
+                                    >
+                                        <option value="">-- Select Column --</option>
+                                        {csvHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                                    </select>
+                                </div>
+                                <div className="form-control">
+                                    <label className="label text-xs font-bold">Gender</label>
+                                    <select
+                                        className="select select-bordered select-sm w-full"
+                                        value={columnMapping.gender}
+                                        onChange={(e) => setColumnMapping({ ...columnMapping, gender: e.target.value })}
+                                    >
+                                        <option value="">-- Select Column --</option>
+                                        {csvHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Preview Section */}
+                            <div className="mt-6">
+                                <h4 className="font-semibold text-sm mb-2">File Preview</h4>
+                                <div className="overflow-x-auto border rounded text-xs">
+                                    <table className="table table-compact w-full">
+                                        <thead>
+                                            <tr>{csvHeaders.map((h, i) => <th key={i}>{h}</th>)}</tr>
+                                        </thead>
+                                        <tbody>
+                                            {csvPreview.map((row, i) => (
+                                                <tr key={i}>
+                                                    {row.map((cell, j) => <td key={j} className="whitespace-nowrap">{cell}</td>)}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-4 border-t border-gray-200 flex justify-end gap-2 bg-gray-50 rounded-b-lg">
+                            <button onClick={() => setShowMappingModal(false)} className="btn btn-ghost btn-sm">Cancel</button>
+                            <button
+                                onClick={processImport}
+                                className="btn btn-primary btn-sm"
+                                disabled={importing || !(columnMapping.policyNumber && (columnMapping.firstName || columnMapping.fullName))}
+                            >
+                                {importing ? <span className="loading loading-spinner"></span> : 'Import Members'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
