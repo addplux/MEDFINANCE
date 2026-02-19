@@ -30,7 +30,10 @@ const SchemeDetails = () => {
             const response = await api.get(`/receivables/schemes/${id}/statement`, {
                 params: { startDate, endDate }
             });
-            setScheme(response.data.scheme);
+            setScheme({
+                ...response.data.scheme,
+                openingBalances: response.data.openingBalances
+            });
             setBills(response.data.bills);
         } catch (error) {
             console.error('Error fetching scheme statement:', error);
@@ -163,6 +166,28 @@ const SchemeDetails = () => {
 
             {/* Content Area */}
             <div className="max-w-7xl mx-auto px-6 pb-12 print:p-0 print:max-w-none">
+
+                {/* Opening Balances Summary (If available) */}
+                {scheme && scheme.openingBalances && scheme.openingBalances.total > 0 && (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6 print:hidden">
+                        <h2 className="text-lg font-bold text-gray-800 mb-4">Opening Balance Breakdown</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            {Object.entries(scheme.openingBalances).map(([key, value]) => (
+                                key !== 'total' && value > 0 && (
+                                    <div key={key} className="bg-gray-50 p-3 rounded-md border border-gray-100">
+                                        <p className="text-xs text-gray-500 uppercase font-semibold">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
+                                        <p className="text-lg font-bold text-gray-900">{Number(value).toLocaleString()}</p>
+                                    </div>
+                                )
+                            ))}
+                            <div className="bg-primary-50 p-3 rounded-md border border-primary-100 col-span-2 md:col-span-1">
+                                <p className="text-xs text-primary-600 uppercase font-semibold">Total Balance</p>
+                                <p className="text-xl font-bold text-primary-700">{Number(scheme.openingBalances.total).toLocaleString()}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {activeTab === 'statement' ? (
                     <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-8 print:shadow-none print:border-none print:p-4" ref={componentRef}>
                         {/* Statement Header */}

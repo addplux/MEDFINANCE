@@ -600,6 +600,21 @@ const getSchemeInvoices = async (req, res) => {
     }
 };
 
+// Get All Active Services (For Dropdowns)
+const getAllServices = async (req, res) => {
+    try {
+        const services = await Service.findAll({
+            where: { isActive: true },
+            attributes: ['id', 'serviceName', 'department'],
+            order: [['serviceName', 'ASC']]
+        });
+        res.json(services);
+    } catch (error) {
+        console.error('Get services error:', error);
+        res.status(500).json({ error: 'Failed to fetch services' });
+    }
+};
+
 // Get Single Invoice with Matrix Data
 const getSchemeInvoice = async (req, res) => {
     try {
@@ -780,7 +795,21 @@ const importSchemeMembers = async (req, res) => {
                     email: member.email,
                     nrc: member.nrc,
                     address: member.address,
-                    memberStatus: 'active'
+                    memberStatus: 'active',
+                    serviceId: req.body.serviceId || null,
+                    // Detailed Balances
+                    nursingCare: member.nursingCare || 0,
+                    laboratory: member.laboratory || 0,
+                    radiology: member.radiology || 0,
+                    dental: member.dental || 0,
+                    lodging: member.lodging || 0,
+                    surgicals: member.surgicals || 0,
+                    drRound: member.drRound || 0,
+                    food: member.food || 0,
+                    physio: member.physio || 0,
+                    pharmacy: member.pharmacy || 0,
+                    sundries: member.sundries || 0,
+                    antenatal: member.antenatal || 0
                 };
 
                 if (patient) {
@@ -796,7 +825,19 @@ const importSchemeMembers = async (req, res) => {
                     await Patient.create({
                         ...patientData,
                         patientNumber,
-                        balance: member.balance ? parseFloat(member.balance) : 0.00
+                        balance: member.balance ? parseFloat(member.balance) : 0.00,
+                        nursingCare: member.nursingCare || 0,
+                        laboratory: member.laboratory || 0,
+                        radiology: member.radiology || 0,
+                        dental: member.dental || 0,
+                        lodging: member.lodging || 0,
+                        surgicals: member.surgicals || 0,
+                        drRound: member.drRound || 0,
+                        food: member.food || 0,
+                        physio: member.physio || 0,
+                        pharmacy: member.pharmacy || 0,
+                        sundries: member.sundries || 0,
+                        antenatal: member.antenatal || 0
                     }, { transaction: t });
                     addedCount++;
                 }
@@ -843,5 +884,7 @@ module.exports = {
     generateMonthlyInvoice,
     getSchemeInvoice,
     getSchemeInvoices,
-    importSchemeMembers
+    getSchemeInvoices,
+    importSchemeMembers,
+    getAllServices
 };
