@@ -304,10 +304,10 @@ const SchemeMembers = ({ schemeId }) => {
     };
 
     return (
-        <div className="space-y-4">
+        <div className="-mx-4 md:-mx-6 -mb-12 bg-white min-h-[calc(100vh-200px)] flex flex-col">
             {/* Import Status Message */}
             {importResult && (
-                <div className={`p-4 rounded-lg flex items-start gap-3 ${importResult.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+                <div className={`mx-4 md:mx-6 mt-4 p-4 rounded-lg flex items-start gap-3 ${importResult.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
                     }`}>
                     {importResult.type === 'success' ? (
                         <>
@@ -340,9 +340,9 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
             )}
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="flex-1 flex flex-col">
                 {/* Header / Filters (Suno Style) */}
-                <div className="p-3 border-b border-gray-100 flex flex-wrap gap-4 items-center">
+                <div className="px-4 md:px-6 py-4 border-b border-gray-100 flex flex-wrap gap-4 items-center bg-white sticky top-0 z-20">
                     {/* Search & Filter */}
                     <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center">
                         <form onSubmit={handleSearch} className="flex items-center gap-2 w-full sm:w-auto">
@@ -374,7 +374,7 @@ const SchemeMembers = ({ schemeId }) => {
                     </div>
 
                     {/* Import Actions */}
-                    <div className="flex gap-2 w-full md:w-auto justify-end">
+                    <div className="flex gap-2 w-full md:w-auto justify-end ml-auto">
                         <button
                             onClick={handleDownloadTemplate}
                             className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-bold transition-colors"
@@ -403,9 +403,9 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto max-h-[calc(100vh-250px)] overflow-y-auto shadow-sm rounded-lg border border-gray-200">
-                    <table className="w-full text-left bg-white relative">
-                        <thead className="text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200 sticky top-0 z-10">
+                <div className="overflow-x-auto flex-1 overflow-y-auto">
+                    <table className="w-full text-left bg-white relative border-collapse">
+                        <thead className="text-xs font-bold text-gray-700 uppercase bg-gray-50 border-b border-gray-200 sticky top-0 z-10 shadow-sm">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Policy #</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suffix</th>
@@ -486,160 +486,161 @@ const SchemeMembers = ({ schemeId }) => {
                     </table>
                 </div>
             </div>
-
             {/* Modal for Column Mapping */}
             {showMappingModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-7xl max-h-[90vh] flex flex-col">
-                        <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
-                            <h3 className="font-semibold text-lg text-gray-800">Map File Columns</h3>
-                            <button onClick={() => setShowMappingModal(false)} className="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
-                        </div>
-
-                        <div className="p-6 overflow-y-auto flex-1">
-                            <div className="bg-blue-50 text-blue-800 p-3 rounded-md text-sm mb-6 flex items-start gap-2">
-                                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                                <p>Please select the columns from your uploaded file that match the required fields below.</p>
+                (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-lg shadow-xl w-full max-w-7xl max-h-[90vh] flex flex-col">
+                            <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
+                                <h3 className="font-semibold text-lg text-gray-800">Map File Columns</h3>
+                                <button onClick={() => setShowMappingModal(false)} className="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
                             </div>
 
-                            {/* Global Service Selection */}
-                            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                <label className="block text-sm font-bold text-gray-700 mb-2">
-                                    Assign Service / Department (Optional)
-                                </label>
-                                <select
-                                    className="select select-bordered select-sm w-full max-w-xs"
-                                    value={selectedService}
-                                    onChange={(e) => setSelectedService(e.target.value)}
-                                >
-                                    <option value="">-- No Specific Service --</option>
-                                    {services.map(s => (
-                                        <option key={s.id} value={s.id}>{s.serviceName} {s.department ? `(${s.department})` : ''}</option>
-                                    ))}
-                                </select>
-                                <p className="text-xs text-gray-500 mt-1">Select a service (e.g., Radiology, Theatre) to assign to all imported members.</p>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Name Mapping */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                        Full Name Column <span className="text-red-500">*</span>
-                                    </label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                                        value={columnMapping.fullName || columnMapping.firstName}
-                                        onChange={(e) => setColumnMapping({ ...columnMapping, fullName: e.target.value, firstName: '' })}
-                                    >
-                                        <option value="">-- Select Column --</option>
-                                        {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
-                                    </select>
-                                    <p className="text-xs text-gray-500 mt-1">Select the column containing the member's name (e.g. "Employee Name").</p>
+                            <div className="p-6 overflow-y-auto flex-1">
+                                <div className="bg-blue-50 text-blue-800 p-3 rounded-md text-sm mb-6 flex items-start gap-2">
+                                    <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                                    <p>Please select the columns from your uploaded file that match the required fields below.</p>
                                 </div>
 
-                                {/* Policy Mapping */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                        Policy / Man Number <span className="text-red-500">*</span>
+                                {/* Global Service Selection */}
+                                <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                                        Assign Service / Department (Optional)
                                     </label>
                                     <select
-                                        className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                                        value={columnMapping.policyNumber}
-                                        onChange={(e) => setColumnMapping({ ...columnMapping, policyNumber: e.target.value })}
+                                        className="select select-bordered select-sm w-full max-w-xs"
+                                        value={selectedService}
+                                        onChange={(e) => setSelectedService(e.target.value)}
                                     >
-                                        <option value="">-- Select Column --</option>
-                                        {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
+                                        <option value="">-- No Specific Service --</option>
+                                        {services.map(s => (
+                                            <option key={s.id} value={s.id}>{s.serviceName} {s.department ? `(${s.department})` : ''}</option>
+                                        ))}
                                     </select>
+                                    <p className="text-xs text-gray-500 mt-1">Select a service (e.g., Radiology, Theatre) to assign to all imported members.</p>
                                 </div>
 
-                                {/* "Consultation" Mapping (Dummy/Validation) */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                        Consultation
-                                    </label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                                        value={columnMapping.consultation}
-                                        onChange={(e) => setColumnMapping({ ...columnMapping, consultation: e.target.value })}
-                                    >
-                                        <option value="">-- Select Column --</option>
-                                        {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
-                                    </select>
-                                </div>
-
-                                {/* "Total" Mapping (Balances) */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                        Total Bill / Balance
-                                    </label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                                        value={columnMapping.total}
-                                        onChange={(e) => setColumnMapping({ ...columnMapping, total: e.target.value })}
-                                    >
-                                        <option value="">-- Select Column --</option>
-                                        {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <h4 className="font-semibold text-sm mt-6 mb-3 text-gray-700">Financial Components (Optional)</h4>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {['nursingCare', 'laboratory', 'radiology', 'dental', 'lodging', 'surgicals', 'drRound', 'food', 'physio', 'pharmacy', 'sundries', 'antenatal'].map(field => (
-                                    <div key={field}>
-                                        <label className="block text-xs font-semibold text-gray-700 mb-1 capitalize">
-                                            {field.replace(/([A-Z])/g, ' $1').trim()}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Name Mapping */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                            Full Name Column <span className="text-red-500">*</span>
                                         </label>
                                         <select
-                                            className="w-full border border-gray-300 rounded-md p-1.5 text-xs bg-white text-gray-900"
-                                            value={columnMapping[field]}
-                                            onChange={(e) => setColumnMapping({ ...columnMapping, [field]: e.target.value })}
+                                            className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                                            value={columnMapping.fullName || columnMapping.firstName}
+                                            onChange={(e) => setColumnMapping({ ...columnMapping, fullName: e.target.value, firstName: '' })}
                                         >
-                                            <option value="">(Skip)</option>
+                                            <option value="">-- Select Column --</option>
+                                            {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
+                                        </select>
+                                        <p className="text-xs text-gray-500 mt-1">Select the column containing the member's name (e.g. "Employee Name").</p>
+                                    </div>
+
+                                    {/* Policy Mapping */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                            Policy / Man Number <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                                            value={columnMapping.policyNumber}
+                                            onChange={(e) => setColumnMapping({ ...columnMapping, policyNumber: e.target.value })}
+                                        >
+                                            <option value="">-- Select Column --</option>
                                             {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
                                         </select>
                                     </div>
-                                ))}
-                            </div>
 
-                            {/* Preview Section */}
-                            <div className="mt-8">
-                                <h4 className="font-semibold text-sm mb-2 text-gray-700">File Preview (First 10 Rows)</h4>
-                                <div className="overflow-x-auto border border-gray-200 rounded-md bg-gray-50">
-                                    <table className="w-full text-xs text-left">
-                                        <thead className="bg-gray-100 border-b border-gray-200 text-gray-600 font-semibold uppercase">
-                                            <tr>{csvHeaders.map((h, i) => <th key={i} className="px-3 py-2 whitespace-nowrap">{h}</th>)}</tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-200 bg-white">
-                                            {csvPreview.map((row, i) => (
-                                                <tr key={i}>
-                                                    {row.map((cell, j) => <td key={j} className="px-3 py-2 whitespace-nowrap text-gray-600">{cell}</td>)}
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                    {/* "Consultation" Mapping (Dummy/Validation) */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                            Consultation
+                                        </label>
+                                        <select
+                                            className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                                            value={columnMapping.consultation}
+                                            onChange={(e) => setColumnMapping({ ...columnMapping, consultation: e.target.value })}
+                                        >
+                                            <option value="">-- Select Column --</option>
+                                            {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
+                                        </select>
+                                    </div>
+
+                                    {/* "Total" Mapping (Balances) */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                            Total Bill / Balance
+                                        </label>
+                                        <select
+                                            className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                                            value={columnMapping.total}
+                                            onChange={(e) => setColumnMapping({ ...columnMapping, total: e.target.value })}
+                                        >
+                                            <option value="">-- Select Column --</option>
+                                            {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <h4 className="font-semibold text-sm mt-6 mb-3 text-gray-700">Financial Components (Optional)</h4>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {['nursingCare', 'laboratory', 'radiology', 'dental', 'lodging', 'surgicals', 'drRound', 'food', 'physio', 'pharmacy', 'sundries', 'antenatal'].map(field => (
+                                        <div key={field}>
+                                            <label className="block text-xs font-semibold text-gray-700 mb-1 capitalize">
+                                                {field.replace(/([A-Z])/g, ' $1').trim()}
+                                            </label>
+                                            <select
+                                                className="w-full border border-gray-300 rounded-md p-1.5 text-xs bg-white text-gray-900"
+                                                value={columnMapping[field]}
+                                                onChange={(e) => setColumnMapping({ ...columnMapping, [field]: e.target.value })}
+                                            >
+                                                <option value="">(Skip)</option>
+                                                {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
+                                            </select>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Preview Section */}
+                                <div className="mt-8">
+                                    <h4 className="font-semibold text-sm mb-2 text-gray-700">File Preview (First 10 Rows)</h4>
+                                    <div className="overflow-x-auto border border-gray-200 rounded-md bg-gray-50">
+                                        <table className="w-full text-xs text-left">
+                                            <thead className="bg-gray-100 border-b border-gray-200 text-gray-600 font-semibold uppercase">
+                                                <tr>{csvHeaders.map((h, i) => <th key={i} className="px-3 py-2 whitespace-nowrap">{h}</th>)}</tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-200 bg-white">
+                                                {csvPreview.map((row, i) => (
+                                                    <tr key={i}>
+                                                        {row.map((cell, j) => <td key={j} className="px-3 py-2 whitespace-nowrap text-gray-600">{cell}</td>)}
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="p-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-lg">
-                            <button
-                                onClick={() => setShowMappingModal(false)}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={processImport}
-                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                                disabled={importing || !(columnMapping.policyNumber && (columnMapping.firstName || columnMapping.fullName))}
-                            >
-                                {importing ? 'Importing...' : 'Import Members'}
-                            </button>
+                            <div className="p-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-lg">
+                                <button
+                                    onClick={() => setShowMappingModal(false)}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={processImport}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                    disabled={importing || !(columnMapping.policyNumber && (columnMapping.firstName || columnMapping.fullName))}
+                                >
+                                    {importing ? 'Importing...' : 'Import Members'}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+}
+        </div >
     );
 };
 
