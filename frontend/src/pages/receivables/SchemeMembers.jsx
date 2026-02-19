@@ -342,7 +342,7 @@ const SchemeMembers = ({ schemeId }) => {
 
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                 {/* Header / Filters */}
-                <div className="p-4 border-b border-gray-200 flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="p-3 border-b border-gray-200 flex flex-col md:flex-row gap-2 items-center justify-between">
                     {/* Search & Filter */}
                     <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                         <form onSubmit={handleSearch} className="flex items-center gap-2">
