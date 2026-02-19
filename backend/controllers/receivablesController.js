@@ -731,8 +731,9 @@ const getSchemeInvoice = async (req, res) => {
 
 
 // Import Scheme Members (Bulk)
+// Import Scheme Members (Bulk)
 const importSchemeMembers = async (req, res) => {
-    const t = await sequelize.transaction();
+    // No outer transaction - we want partial success
     try {
         const { id } = req.params; // Scheme ID
         const { members } = req.body; // Array of member objects
@@ -751,17 +752,19 @@ const importSchemeMembers = async (req, res) => {
         let failedCount = 0;
         const errors = [];
 
+        // Get initial count for generating new Patient IDs
+        // Note: This is approximate in a high-concurrency environment, but sufficient for this use case
+        let currentPatientCount = await Patient.count();
+
         for (const member of members) {
+            const t = await sequelize.transaction(); // Start individual transaction
             try {
                 // Validate required fields
                 if (!member.firstName || !member.lastName || !member.policyNumber) {
-                    failedCount++;
-                    errors.push(`Missing required fields for ${member.firstName} ${member.lastName}`);
-                    continue;
+                    throw new Error(`Missing required fields (Name or Policy Number)`);
                 }
 
-                // Check if patient exists (by Policy Number + Scheme, or NRC)
-                // Priority: Policy Number within this Scheme
+                // Check if patient exists (by Policy Number + Scheme)
                 let patient = await Patient.findOne({
                     where: {
                         policyNumber: member.policyNumber,
@@ -770,7 +773,9 @@ const importSchemeMembers = async (req, res) => {
                     transaction: t
                 });
 
-                // If not found, check by NHIMA/NRC if provided
+                // If not found, check by NHIMA/NRC if provided (to avoid duplicates across schemes if that's a rule, or just link)
+                // For now, we assume if they are in a different scheme, they are a new patient record (or we link them - business logic depends)
+                // Let's stick to: if NRC matches, it's the same person.
                 if (!patient && member.nrc) {
                     patient = await Patient.findOne({ where: { nrc: member.nrc }, transaction: t });
                 }
@@ -818,9 +823,8 @@ const importSchemeMembers = async (req, res) => {
                     updatedCount++;
                 } else {
                     // Create
-                    // Ensure unique patientNumber
-                    const count = await Patient.count({ transaction: t });
-                    const patientNumber = `P${String(count + addedCount + 1).padStart(6, '0')}`;
+                    currentPatientCount++; // Increment local count
+                    const patientNumber = `P${String(currentPatientCount).padStart(6, '0')}`;
 
                     await Patient.create({
                         ...patientData,
@@ -842,14 +846,17 @@ const importSchemeMembers = async (req, res) => {
                     addedCount++;
                 }
 
+                await t.commit(); // Success for this row
+
             } catch (err) {
+                await t.rollback(); // Fail only this row
                 console.error(`Failed to import member row:`, err);
                 failedCount++;
-                errors.push(`Error for ${member.firstName || 'Unknown'}: ${err.message}`);
+                // Simplify error message
+                const msg = err.errors ? err.errors.map(e => e.message).join(', ') : err.message;
+                errors.push(`Error for ${member.firstName || 'Unknown'} ${member.lastName || ''}: ${msg}`);
             }
         }
-
-        await t.commit();
 
         res.json({
             message: 'Import processed',
@@ -863,9 +870,8 @@ const importSchemeMembers = async (req, res) => {
         });
 
     } catch (error) {
-        await t.rollback();
-        console.error('Import members error:', error);
-        res.status(500).json({ error: 'Failed to import members' });
+        console.error('Import members fatal error:', error);
+        res.status(500).json({ error: 'Failed to initiate import process' });
     }
 };
 
