@@ -375,14 +375,14 @@ const SchemeMembers = ({ schemeId }) => {
                     <div className="flex gap-2 w-full md:w-auto justify-end">
                         <button
                             onClick={handleDownloadTemplate}
-                            className="btn btn-secondary btn-sm flex items-center gap-2"
+                            className="btn btn-secondary btn-xs sm:btn-sm flex items-center gap-2"
                             title="Download CSV Template"
                         >
-                            <Download className="w-4 h-4" />
+                            <Download className="w-3.5 h-3.5" />
                             <span className="hidden sm:inline">Template</span>
                         </button>
 
-                        <label className={`btn btn-primary flex items-center gap-2 cursor-pointer shadow-md ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <label className={`btn btn-primary btn-xs sm:btn-sm flex items-center gap-2 cursor-pointer shadow-sm ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
                             <input
                                 type="file"
                                 onChange={handleFileSelect}
@@ -391,11 +391,11 @@ const SchemeMembers = ({ schemeId }) => {
                                 disabled={importing}
                             />
                             {importing ? (
-                                <span className="loading loading-spinner loading-sm"></span>
+                                <span className="loading loading-spinner loading-xs"></span>
                             ) : (
-                                <Upload className="w-5 h-5" />
+                                <Upload className="w-3.5 h-3.5" />
                             )}
-                            <span className="font-semibold text-base">Import Members</span>
+                            <span className="font-semibold text-xs">Import Members</span>
                         </label>
                     </div>
                 </div>
