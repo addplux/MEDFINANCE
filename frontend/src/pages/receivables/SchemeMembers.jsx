@@ -91,37 +91,78 @@ const SchemeMembers = ({ schemeId }) => {
                     return;
                 }
 
-                const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
-                // Validate headers loosely (check for required columns)
-                if (!headers.some(h => h.includes('firstname')) || !headers.some(h => h.includes('policynumber'))) {
-                    alert('Invalid CSV format. Header must contain FirstName and PolicyNumber.');
-                    return;
+                // --- Flexible Header Detection logic ---
+                // Find the header row by looking for keywords like 'name', 'policy', 'man no'
+                let headerRowIndex = 0;
+                let headers = [];
+
+                for (let i = 0; i < Math.min(rows.length, 10); i++) {
+                    const candidateHeaders = rows[i].split(',').map(h => h.trim().toLowerCase());
+                    const hasName = candidateHeaders.some(h => h.includes('name') || h.includes('employee'));
+                    const hasId = candidateHeaders.some(h => h.includes('policy') || h.includes('man no') || h.includes('man #') || h.includes('nrc'));
+
+                    if (hasName || hasId) {
+                        headerRowIndex = i;
+                        headers = candidateHeaders;
+                        break; // Found the header row
+                    }
                 }
 
-                const membersData = rows.slice(1).map(row => {
-                    const values = row.split(',').map(v => v.trim());
-                    // Simple index-based mapping assuming template order. 
-                    // Better approach: Map by header index.
+                if (headers.length === 0) {
+                    // Fallback to first row if detection fails
+                    headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+                }
 
-                    const getValue = (keySnippet) => {
-                        const index = headers.findIndex(h => h.includes(keySnippet));
+                console.log('Detected Headers:', headers);
+
+                const membersData = rows.slice(headerRowIndex + 1).map(row => {
+                    // Handle potential empty lines or footer totals
+                    if (!row || row.toLowerCase().startsWith('total')) return null;
+
+                    const values = row.split(',').map(v => v.trim());
+
+                    const getValue = (keywords) => {
+                        const index = headers.findIndex(h => keywords.some(k => h.includes(k)));
                         return index !== -1 ? values[index] : '';
                     };
 
+                    // --- Mapping Logic ---
+                    // 1. Name: Try composite 'Name' first, then split. Or look for First/Last specific.
+                    let firstName = getValue(['firstname', 'first name']);
+                    let lastName = getValue(['lastname', 'last name', 'surname']);
+
+                    if (!firstName && !lastName) {
+                        const fullName = getValue(['name', 'employee name', 'patient name', 'member name']);
+                        if (fullName) {
+                            const parts = fullName.split(' ');
+                            firstName = parts[0];
+                            lastName = parts.slice(1).join(' '); // Join the rest as last name
+                        }
+                    }
+
+                    // 2. Policy Number: Look for 'policy', 'man no', 'employee id'
+                    let policyNumber = getValue(['policy', 'man no', 'man #', 'staff id', 'employee id']);
+
+                    // 3. Other fields
                     return {
-                        firstName: getValue('firstname'),
-                        lastName: getValue('lastname'),
-                        dateOfBirth: getValue('dob'),
-                        gender: getValue('gender'),
-                        policyNumber: getValue('policynumber'),
-                        rank: getValue('rank')?.toLowerCase(),
-                        suffix: getValue('suffix'),
-                        phone: getValue('phone'),
-                        email: getValue('email'),
-                        nrc: getValue('nrc'),
-                        address: getValue('address')
+                        firstName: firstName || 'Unknown',
+                        lastName: lastName || 'Member',
+                        policyNumber: policyNumber || '', // Backend handles missing policy if nrc exists, but usually required
+                        dateOfBirth: getValue(['dob', 'birth', 'date of birth']),
+                        gender: getValue(['gender', 'sex']),
+                        rank: getValue(['rank', 'level'])?.toLowerCase() || 'principal', // Default to Principal
+                        suffix: getValue(['suffix']),
+                        phone: getValue(['phone', 'mobile', 'contact']),
+                        email: getValue(['email']),
+                        nrc: getValue(['nrc', 'national id']),
+                        address: getValue(['address', 'residence'])
                     };
-                });
+                }).filter(m => m && (m.firstName !== 'Unknown' || m.policyNumber)); // Filter out empty/invalid rows
+
+                if (membersData.length === 0) {
+                    alert('No valid member records found. Please check your CSV format.');
+                    return;
+                }
 
                 await uploadMembers(membersData);
             } catch (error) {
