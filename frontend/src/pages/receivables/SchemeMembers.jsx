@@ -304,10 +304,10 @@ const SchemeMembers = ({ schemeId }) => {
     };
 
     return (
-        <div className="-mx-4 md:-mx-6 -mb-12 bg-white min-h-[calc(100vh-200px)] flex flex-col">
+        <div className="space-y-4">
             {/* Import Status Message */}
             {importResult && (
-                <div className={`mx-4 md:mx-6 mt-4 p-4 rounded-lg flex items-start gap-3 ${importResult.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+                <div className={`p-4 rounded-lg flex items-start gap-3 ${importResult.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
                     }`}>
                     {importResult.type === 'success' ? (
                         <>
@@ -340,9 +340,9 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
             )}
 
-            <div className="flex-1 flex flex-col">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                 {/* Header / Filters (Suno Style) */}
-                <div className="px-4 md:px-6 py-4 border-b border-gray-100 flex flex-wrap gap-4 items-center bg-white sticky top-0 z-20">
+                <div className="p-3 border-b border-gray-100 flex flex-wrap gap-4 items-center">
                     {/* Search & Filter */}
                     <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center">
                         <form onSubmit={handleSearch} className="flex items-center gap-2 w-full sm:w-auto">
@@ -374,7 +374,7 @@ const SchemeMembers = ({ schemeId }) => {
                     </div>
 
                     {/* Import Actions */}
-                    <div className="flex gap-2 w-full md:w-auto justify-end ml-auto">
+                    <div className="flex gap-2 w-full md:w-auto justify-end">
                         <button
                             onClick={handleDownloadTemplate}
                             className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-bold transition-colors"
@@ -403,9 +403,9 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto flex-1 overflow-y-auto">
-                    <table className="w-full text-left bg-white relative border-collapse">
-                        <thead className="text-xs font-bold text-gray-700 uppercase bg-gray-50 border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+                <div className="overflow-x-auto max-h-[calc(100vh-250px)] overflow-y-auto shadow-sm rounded-lg border border-gray-200">
+                    <table className="w-full text-left bg-white relative">
+                        <thead className="text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200 sticky top-0 z-10">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Policy #</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suffix</th>
