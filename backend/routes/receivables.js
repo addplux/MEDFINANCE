@@ -15,6 +15,9 @@ router.put('/nhima/:id', authorize('admin', 'accountant'), receivablesController
 router.get('/corporate', receivablesController.getAllCorporateAccounts);
 router.post('/corporate', authorize('admin', 'accountant'), receivablesController.createCorporateAccount);
 
+// Services (For Dropdowns)
+router.get('/services', receivablesController.getAllServices);
+
 // Schemes
 router.get('/schemes', receivablesController.getAllSchemes);
 router.post('/schemes', authorize('admin', 'accountant'), receivablesController.createScheme);

@@ -119,7 +119,20 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0.00
-    }
+    },
+    // Detailed Balances (Imported)
+    nursingCare: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+    laboratory: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+    radiology: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+    dental: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+    lodging: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+    surgicals: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+    drRound: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+    food: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+    physio: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+    pharmacy: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+    sundries: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+    antenatal: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 }
 }, {
     tableName: 'patients',
     timestamps: true,
