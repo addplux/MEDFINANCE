@@ -62,6 +62,10 @@ api.interceptors.response.use(
                     ? config.url
                     : config.url; // already relative like /patients
 
+                if (url.includes('/auth/')) {
+                    return Promise.reject(error);
+                }
+
                 await enqueue({
                     method: config.method.toUpperCase(),
                     url: url,
