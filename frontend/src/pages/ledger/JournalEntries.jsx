@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../../services/apiService';
+import api from '../../services/apiClient';
 import { FileText, Search, Filter } from 'lucide-react';
 
 const JournalEntries = () => {
