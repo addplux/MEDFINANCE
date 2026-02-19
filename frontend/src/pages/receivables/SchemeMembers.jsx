@@ -382,7 +382,7 @@ const SchemeMembers = ({ schemeId }) => {
                             <span className="hidden sm:inline">Template</span>
                         </button>
 
-                        <label className={`btn btn-primary btn-sm flex items-center gap-2 cursor-pointer ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <label className={`btn btn-primary flex items-center gap-2 cursor-pointer shadow-md ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
                             <input
                                 type="file"
                                 onChange={handleFileSelect}
@@ -391,20 +391,19 @@ const SchemeMembers = ({ schemeId }) => {
                                 disabled={importing}
                             />
                             {importing ? (
-                                <span className="loading loading-spinner loading-xs"></span>
+                                <span className="loading loading-spinner loading-sm"></span>
                             ) : (
-                                <Upload className="w-4 h-4" />
+                                <Upload className="w-5 h-5" />
                             )}
-                            <span className="hidden sm:inline">Import Members</span>
-                            <span className="sm:hidden">Import</span>
+                            <span className="font-semibold text-base">Import Members</span>
                         </label>
                     </div>
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
+                <div className="overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+                    <table className="w-full text-left bg-white">
+                        <thead className="text-sm font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Policy #</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suffix</th>
@@ -434,20 +433,20 @@ const SchemeMembers = ({ schemeId }) => {
                                 <tr><td colSpan="11" className="text-center py-4 text-gray-500">No members found. Use "Import Members" to add data.</td></tr>
                             )}
                             {members.map((member) => (
-                                <tr key={member.id} className="hover:bg-gray-50 transition-colors">
+                                <tr key={member.id} className="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-none">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{member.policyNumber}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.memberSuffix}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{member.memberSuffix}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
                                         {member.lastName}, {member.firstName}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.nursingCare || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.laboratory || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.radiology || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.dental || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.lodging || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.surgicals || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.drRound || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.food || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.nursingCare || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.laboratory || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.radiology || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.dental || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.lodging || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.surgicals || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.drRound || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{Number(member.food || 0).toLocaleString()}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.physio || 0).toLocaleString()}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.pharmacy || 0).toLocaleString()}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{Number(member.sundries || 0).toLocaleString()}</td>
@@ -489,7 +488,7 @@ const SchemeMembers = ({ schemeId }) => {
             {/* Modal for Column Mapping */}
             {showMappingModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-7xl max-h-[90vh] flex flex-col">
                         <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
                             <h3 className="font-semibold text-lg text-gray-800">Map File Columns</h3>
                             <button onClick={() => setShowMappingModal(false)} className="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
