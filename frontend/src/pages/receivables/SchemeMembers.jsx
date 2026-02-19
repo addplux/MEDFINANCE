@@ -304,7 +304,8 @@ const SchemeMembers = ({ schemeId }) => {
     };
 
     return (
-        <div className="space-y-4">
+
+        <div className="flex flex-col h-[calc(100vh-120px)] space-y-4">
             {/* Import Status Message */}
             {importResult && (
                 <div className={`p-4 rounded-lg flex items-start gap-3 ${importResult.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
@@ -340,9 +341,9 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
             )}
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="flex flex-col flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 {/* Header / Filters (Suno Style) */}
-                <div className="p-3 border-b border-gray-100 flex flex-wrap gap-4 items-center">
+                <div className="p-3 border-b border-gray-100 flex flex-wrap gap-4 items-center flex-shrink-0">
                     {/* Search & Filter */}
                     <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center">
                         <form onSubmit={handleSearch} className="flex items-center gap-2 w-full sm:w-auto">
@@ -403,7 +404,7 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto max-h-[calc(100vh-250px)] overflow-y-auto shadow-sm rounded-lg border border-gray-200">
+                <div className="flex-1 overflow-x-auto overflow-y-auto">
                     <table className="w-full text-left bg-white relative">
                         <thead className="text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200 sticky top-0 z-10">
                             <tr>
