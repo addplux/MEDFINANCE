@@ -97,6 +97,7 @@ app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/billing', require('./routes/billing'));
 app.use('/api/patients', require('./routes/patients'));
 app.use('/api/receivables', require('./routes/receivables'));
+app.use('/api/corporate', require('./routes/corporateRoutes'));
 app.use('/api/payables', require('./routes/payables'));
 app.use('/api/ledger', require('./routes/ledger'));
 app.use('/api/cash', require('./routes/cash'));

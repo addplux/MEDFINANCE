@@ -144,7 +144,7 @@ const MainLayout = ({ children }) => {
             icon: BookOpen,
             label: 'Corporate Scheme',
             submenu: [
-                { path: '/app/schemes/corporate/profiles', label: 'Company profiles' },
+                { path: '/app/schemes/corporate/members', label: 'Member management' },
                 { path: '/app/schemes/corporate/credit', label: 'Credit limit' },
                 { path: '/app/schemes/corporate/terms', label: 'Payment terms' },
                 { path: '/app/schemes/corporate/billing', label: 'Monthly billing cycle' }

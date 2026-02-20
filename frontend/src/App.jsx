@@ -56,7 +56,7 @@ import ServiceCoverage from './pages/schemes/private/ServiceCoverage';
 import UtilisationTracking from './pages/schemes/private/UtilisationTracking';
 
 // Scheme Manager - Corporate
-import CompanyProfiles from './pages/schemes/corporate/CompanyProfiles';
+import CorporateMemberManagement from './pages/schemes/corporate/CorporateMemberManagement';
 import CreditLimit from './pages/schemes/corporate/CreditLimit';
 import PaymentTerms from './pages/schemes/corporate/PaymentTerms';
 import MonthlyBilling from './pages/schemes/corporate/MonthlyBilling';
@@ -222,7 +222,7 @@ function App() {
                         <Route path="schemes/private/tracking" element={<UtilisationTracking />} />
 
                         {/* Scheme Manager - Corporate */}
-                        <Route path="schemes/corporate/profiles" element={<CompanyProfiles />} />
+                        <Route path="schemes/corporate/members" element={<CorporateMemberManagement />} />
                         <Route path="schemes/corporate/credit" element={<CreditLimit />} />
                         <Route path="schemes/corporate/terms" element={<PaymentTerms />} />
                         <Route path="schemes/corporate/billing" element={<MonthlyBilling />} />
