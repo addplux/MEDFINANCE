@@ -42,6 +42,25 @@ import NHIMAClaimsSubmission from './pages/nhima/ClaimsSubmission';
 import ClaimsTracking from './pages/nhima/ClaimsTracking';
 import Reconciliation from './pages/nhima/Reconciliation';
 
+// Scheme Manager - NHIMA
+import Tariffs from './pages/nhima/Tariffs';
+import ClaimGeneration from './pages/nhima/ClaimGeneration';
+import VettingStatus from './pages/nhima/VettingStatus';
+import BatchSubmission from './pages/nhima/BatchSubmission';
+
+// Scheme Manager - Private Prepaid
+import MembershipRegistration from './pages/schemes/private/MembershipRegistration';
+import PlanSelection from './pages/schemes/private/PlanSelection';
+import StartEndDate from './pages/schemes/private/StartEndDate';
+import ServiceCoverage from './pages/schemes/private/ServiceCoverage';
+import UtilisationTracking from './pages/schemes/private/UtilisationTracking';
+
+// Scheme Manager - Corporate
+import CompanyProfiles from './pages/schemes/corporate/CompanyProfiles';
+import CreditLimit from './pages/schemes/corporate/CreditLimit';
+import PaymentTerms from './pages/schemes/corporate/PaymentTerms';
+import MonthlyBilling from './pages/schemes/corporate/MonthlyBilling';
+
 // Payables
 import Suppliers from './pages/payables/Suppliers';
 import SupplierForm from './pages/payables/SupplierForm';
@@ -188,6 +207,26 @@ function App() {
                         <Route path="nhima/submission" element={<NHIMAClaimsSubmission />} />
                         <Route path="nhima/tracking" element={<ClaimsTracking />} />
                         <Route path="nhima/reconciliation" element={<Reconciliation />} />
+
+                        {/* Scheme Manager - NHIMA */}
+                        <Route path="nhima/tariffs" element={<Tariffs />} />
+                        <Route path="nhima/claims" element={<ClaimGeneration />} />
+                        <Route path="nhima/vetting-status" element={<VettingStatus />} />
+                        <Route path="nhima/batches" element={<BatchSubmission />} />
+
+                        {/* Scheme Manager - Private Prepaid */}
+                        <Route path="schemes/private/members" element={<MembershipRegistration />} />
+                        <Route path="schemes/private/plans" element={<PlanSelection />} />
+                        <Route path="schemes/private/duration" element={<StartEndDate />} />
+                        <Route path="schemes/private/validation" element={<ServiceCoverage />} />
+                        <Route path="schemes/private/tracking" element={<UtilisationTracking />} />
+
+                        {/* Scheme Manager - Corporate */}
+                        <Route path="schemes/corporate/profiles" element={<CompanyProfiles />} />
+                        <Route path="schemes/corporate/credit" element={<CreditLimit />} />
+                        <Route path="schemes/corporate/terms" element={<PaymentTerms />} />
+                        <Route path="schemes/corporate/billing" element={<MonthlyBilling />} />
+
                         <Route path="receivables/nhima" element={<ReceivablesNHIMAClaims />} />
                         <Route path="receivables/corporate" element={<CorporateAccounts />} />
                         <Route path="receivables/corporate/new" element={<CorporateAccountForm />} />
