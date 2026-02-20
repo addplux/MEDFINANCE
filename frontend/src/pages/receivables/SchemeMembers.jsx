@@ -419,9 +419,9 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
 
                 {/* Table */}
-                <div className="flex-1 overflow-hidden bg-white w-full relative flex flex-col">
-                    <TableContainer component={Paper} sx={{ flex: 1, width: '100%', boxShadow: 'none' }}>
-                        <Table stickyHeader aria-label="scheme members table" size="small">
+                <div className="flex-1 overflow-hidden bg-white w-full relative flex flex-col min-h-0">
+                    <TableContainer sx={{ flex: 1, width: '100%', overflow: 'auto' }}>
+                        <Table stickyHeader aria-label="scheme members table" size="small" sx={{ minWidth: 650 }}>
                             <TableHead>
                                 <TableRow>
                                     <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Policy #</TableCell>
