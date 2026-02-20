@@ -305,7 +305,7 @@ const SchemeMembers = ({ schemeId }) => {
 
     return (
 
-        <div className="flex flex-col h-[calc(100vh-120px)] space-y-4">
+        <div className="flex flex-col h-full space-y-4">
             {/* Import Status Message */}
             {importResult && (
                 <div className={`p-4 rounded-lg flex items-start gap-3 ${importResult.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'

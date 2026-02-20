@@ -64,9 +64,9 @@ const SchemeDetails = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50/50">
+        <div className="h-screen flex flex-col bg-gray-50/50 overflow-hidden">
             {/* Header */}
-            <div className="print:hidden bg-white border-b border-gray-200 px-4 md:px-6 py-4 mb-6">
+            <div className="flex-shrink-0 print:hidden bg-white border-b border-gray-200 px-4 md:px-6 py-4 mb-4">
                 <div className="flex flex-wrap items-center justify-between gap-4 w-full">
                     <div className="flex items-center gap-4">
                         <button
@@ -159,33 +159,36 @@ const SchemeDetails = () => {
             </div>
 
             {/* Content Area */}
-            <div className="w-full px-4 md:px-6 pb-12 print:p-0">
+            <div className="flex-1 flex flex-col min-h-0 px-4 md:px-6 pb-6 print:p-0 overflow-hidden">
 
-                {/* Opening Balances Summary (If available) */}
-                {scheme && scheme.openingBalances && scheme.openingBalances.total > 0 && (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6 print:hidden">
-                        <h2 className="text-lg font-bold text-gray-800 mb-4">Opening Balance Breakdown</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                            {Object.entries(scheme.openingBalances).map(([key, value]) => (
-                                key !== 'total' && value > 0 && (
-                                    <div key={key} className="bg-gray-50 p-3 rounded-md border border-gray-100">
-                                        <p className="text-xs text-gray-500 uppercase font-semibold">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
-                                        <p className="text-lg font-bold text-gray-900">{Number(value).toLocaleString()}</p>
-                                    </div>
-                                )
-                            ))}
-                            <div className="bg-primary-50 p-3 rounded-md border border-primary-100 col-span-2 md:col-span-1">
-                                <p className="text-xs text-primary-600 uppercase font-semibold">Total Balance</p>
-                                <p className="text-xl font-bold text-primary-700">{Number(scheme.openingBalances.total).toLocaleString()}</p>
+                {/* Opening Balances Summary (If available) - Fixed at top of content if present */}
+                <div className="flex-shrink-0">
+                    {scheme && scheme.openingBalances && scheme.openingBalances.total > 0 && (
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6 print:hidden">
+                            <h2 className="text-lg font-bold text-gray-800 mb-4">Opening Balance Breakdown</h2>
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                {Object.entries(scheme.openingBalances).map(([key, value]) => (
+                                    key !== 'total' && value > 0 && (
+                                        <div key={key} className="bg-gray-50 p-3 rounded-md border border-gray-100">
+                                            <p className="text-xs text-gray-500 uppercase font-semibold">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
+                                            <p className="text-lg font-bold text-gray-900">{Number(value).toLocaleString()}</p>
+                                        </div>
+                                    )
+                                ))}
+                                <div className="bg-primary-50 p-3 rounded-md border border-primary-100 col-span-2 md:col-span-1">
+                                    <p className="text-xs text-primary-600 uppercase font-semibold">Total Balance</p>
+                                    <p className="text-xl font-bold text-primary-700">{Number(scheme.openingBalances.total).toLocaleString()}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
 
                 {activeTab === 'statement' ? (
-                    <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-8 print:shadow-none print:border-none print:p-4" ref={componentRef}>
-                        {/* Statement Header */}
-                        <div className="flex justify-between items-start mb-8 border-b border-gray-100 pb-6">
+                    <div className="flex-1 flex flex-col min-h-0 bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden print:shadow-none print:border-none print:p-4" ref={componentRef}>
+
+                        {/* Statement Header - Fixed */}
+                        <div className="flex-shrink-0 flex justify-between items-start p-8 pb-4 border-b border-gray-100">
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-900 mb-1">SCHEME BILLING STATEMENT</h2>
                                 <p className="text-gray-500 text-sm">Statement Period: {new Date(dateRange.startDate).toLocaleDateString()} to {new Date(dateRange.endDate).toLocaleDateString()}</p>
@@ -200,19 +203,19 @@ const SchemeDetails = () => {
                             )}
                         </div>
 
-                        {/* Bill Table */}
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left">
-                                <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-y border-gray-200">
+                        {/* Bill Table - Scrollable */}
+                        <div className="flex-1 overflow-auto p-8 pt-0">
+                            <table className="w-full text-sm text-left relative">
+                                <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-y border-gray-200 sticky top-0 z-10 shadow-sm">
                                     <tr>
-                                        <th className="px-4 py-3 font-semibold">Date</th>
-                                        <th className="px-4 py-3 font-semibold">Patient No.</th>
-                                        <th className="px-4 py-3 font-semibold">Patient Name</th>
-                                        <th className="px-4 py-3 font-semibold">Sex</th>
-                                        <th className="px-4 py-3 font-semibold">Service / Description</th>
-                                        <th className="px-4 py-3 font-semibold text-right">Amount</th>
-                                        <th className="px-4 py-3 font-semibold text-right">Discount</th>
-                                        <th className="px-4 py-3 font-semibold text-right">Net Amount</th>
+                                        <th className="px-4 py-3 font-semibold bg-gray-50">Date</th>
+                                        <th className="px-4 py-3 font-semibold bg-gray-50">Patient No.</th>
+                                        <th className="px-4 py-3 font-semibold bg-gray-50">Patient Name</th>
+                                        <th className="px-4 py-3 font-semibold bg-gray-50">Sex</th>
+                                        <th className="px-4 py-3 font-semibold bg-gray-50">Service / Description</th>
+                                        <th className="px-4 py-3 font-semibold text-right bg-gray-50">Amount</th>
+                                        <th className="px-4 py-3 font-semibold text-right bg-gray-50">Discount</th>
+                                        <th className="px-4 py-3 font-semibold text-right bg-gray-50">Net Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
@@ -243,19 +246,19 @@ const SchemeDetails = () => {
                                         ))
                                     )}
                                 </tbody>
-                                <tfoot className="bg-gray-50 font-bold border-t-2 border-gray-200">
+                                <tfoot className="bg-gray-50 font-bold border-t-2 border-gray-200 sticky bottom-0 z-10 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
                                     <tr>
                                         <td colSpan="5" className="px-4 py-4 text-right text-gray-700 uppercase tracking-wider text-xs">Grand Total</td>
-                                        <td className="px-4 py-4 text-right text-primary-700">{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                        <td className="px-4 py-4 text-right text-gray-600">{totalDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                        <td className="px-4 py-4 text-right text-primary-700 text-base">{netAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                        <td className="px-4 py-4 text-right text-primary-700 bg-gray-50">{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                        <td className="px-4 py-4 text-right text-gray-600 bg-gray-50">{totalDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                        <td className="px-4 py-4 text-right text-primary-700 text-base bg-gray-50">{netAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
 
-                        {/* Footer / Signature Area */}
-                        <div className="mt-12 flex justify-between items-end pt-8 border-t border-gray-100 print:flex hidden">
+                        {/* Footer / Signature Area - Fixed at bottom of card */}
+                        <div className="flex-shrink-0 mt-auto p-8 pt-4 flex justify-between items-end border-t border-gray-100 print:flex hidden">
                             <div className="text-xs text-gray-400">
                                 <p>Generated on {new Date().toLocaleString()}</p>
                                 <p>MEDFINANCE360 v1.0</p>
@@ -285,6 +288,11 @@ const SchemeDetails = () => {
                     .print\\:block { display: block !important; }
                     .print\\:flex { display: flex !important; }
                     .print\\:max-w-none { max-width: none !important; }
+                    /* Restore overflow for print */
+                    .overflow-x-auto, .overflow-y-auto, .overflow-hidden, .h-screen { 
+                        overflow: visible !important; 
+                        height: auto !important; 
+                    }
                 }
             `}</style>
         </div>
