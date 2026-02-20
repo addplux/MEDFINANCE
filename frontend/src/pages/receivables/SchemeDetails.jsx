@@ -159,7 +159,7 @@ const SchemeDetails = () => {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 flex flex-col min-h-0 px-4 md:px-6 pb-6 print:p-0 overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0 min-w-0 px-4 md:px-6 pb-6 print:p-0 overflow-hidden">
 
                 {/* Opening Balances Summary (If available) - Fixed at top of content if present */}
                 <div className="flex-shrink-0">
