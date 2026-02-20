@@ -164,13 +164,12 @@ const CorporateMemberManagement = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                 {/* Scheme Selection */}
-                <div className="glass-card p-6 bg-white shadow-sm border border-slate-200 rounded-xl relative overflow-hidden group">
-                    <div className="pointer-events-none absolute top-0 right-0 w-32 h-32 bg-primary-100 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                    <label className="relative z-10 block text-sm font-semibold text-slate-700 mb-2">Select Corporate Scheme</label>
+                <div className="glass-card p-6 bg-white shadow-sm border border-slate-200 rounded-xl">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">Select Corporate Scheme</label>
                     <select
                         value={selectedScheme}
                         onChange={(e) => setSelectedScheme(e.target.value)}
-                        className="relative z-10 w-full form-input mt-1 block rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 transition-colors"
+                        className="w-full form-input mt-1 block rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 transition-colors bg-white"
                     >
                         <option value="">-- Choose a Scheme --</option>
                         {corporateSchemes.map(scheme => (
@@ -180,26 +179,21 @@ const CorporateMemberManagement = () => {
                 </div>
 
                 {/* Upload Section */}
-                <div className="glass-card p-6 bg-white shadow-sm border border-slate-200 rounded-xl md:col-span-2 relative overflow-hidden group">
-                    <div className="pointer-events-none absolute top-0 left-0 w-32 h-32 bg-blue-100 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                    <label className="relative z-10 block text-sm font-semibold text-slate-700 mb-2">Upload Roster (Excel)</label>
-                    <div className="relative z-10 flex flex-col sm:flex-row gap-4 items-center">
-                        <input
-                            type="file"
-                            accept=".xlsx, .xls, .csv"
-                            onChange={handleFileChange}
-                            className="block w-full text-sm text-slate-500
-                                file:mr-4 file:py-2 file:px-4
-                                file:rounded-md file:border-0
-                                file:text-sm file:font-semibold
-                                file:bg-primary-50 file:text-primary-700
-                                hover:file:bg-primary-100
-                                cursor-pointer"
-                        />
+                <div className="glass-card p-6 bg-white shadow-sm border border-slate-200 rounded-xl md:col-span-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">Upload Roster (Excel)</label>
+                    <div className="flex flex-col sm:flex-row gap-4 items-center">
+                        <div className="flex-1 w-full relative">
+                            <input
+                                type="file"
+                                accept=".xlsx, .xls, .csv"
+                                onChange={handleFileChange}
+                                className="block w-full text-sm text-slate-900 border border-slate-300 rounded-lg cursor-pointer bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent file:mr-4 file:py-2.5 file:px-4 file:border-0 file:text-sm file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                            />
+                        </div>
                         <button
                             onClick={handleUpload}
                             disabled={!selectedFile || !selectedScheme || uploading}
-                            className="flex items-center gap-2 px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium whitespace-nowrap shadow-sm hover:shadow"
+                            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium whitespace-nowrap shadow-sm min-w-[140px]"
                         >
                             {uploading ? (
                                 <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> Uploading...</>
@@ -208,7 +202,7 @@ const CorporateMemberManagement = () => {
                             )}
                         </button>
                     </div>
-                    <p className="relative z-10 text-xs text-slate-500 mt-2">Required columns: 'Employee number', 'NRC', 'Name'. Missing patients will be auto-created.</p>
+                    <p className="text-xs text-slate-500 mt-3">Required columns: 'Employee number', 'NRC', 'Name'. Missing patients will be auto-created.</p>
                 </div>
             </div>
 
