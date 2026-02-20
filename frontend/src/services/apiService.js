@@ -29,6 +29,7 @@ export const patientAPI = {
     create: (data) => api.post('/patients', data),
     update: (id, data) => api.put(`/patients/${id}`, data),
     delete: (id) => api.delete(`/patients/${id}`),
+    merge: (data) => api.post('/patients/merge', data),
 };
 
 // Billing

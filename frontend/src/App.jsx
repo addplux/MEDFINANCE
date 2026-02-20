@@ -22,6 +22,8 @@ import CreateOPDBill from './pages/billing/CreateOPDBill';
 // Patients
 import Patients from './pages/patients/Patients';
 import CreatePatient from './pages/patients/CreatePatient';
+import EditPatient from './pages/patients/EditPatient';
+import MergePatients from './pages/patients/MergePatients';
 
 // Receivables
 import NHIMAClaims from './pages/receivables/NHIMAClaims';
@@ -165,6 +167,8 @@ function App() {
                         <Route path="billing/opd/new" element={<CreateOPDBill />} />
                         <Route path="patients" element={<Patients />} />
                         <Route path="patients/new" element={<CreatePatient />} />
+                        <Route path="patients/:id/edit" element={<EditPatient />} />
+                        <Route path="patients/merge" element={<MergePatients />} />
                         <Route path="nhima/eligibility" element={<EligibilityCheck />} />
                         <Route path="nhima/submission" element={<ClaimsSubmission />} />
                         <Route path="nhima/tracking" element={<ClaimsTracking />} />

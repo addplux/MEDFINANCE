@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { patientAPI, setupAPI } from '../../services/apiService';
 import { ArrowLeft, Save } from 'lucide-react';
 
-const CreatePatient = () => {
+const EditPatient = () => {
+    const { id } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -31,27 +33,51 @@ const CreatePatient = () => {
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
-        fetchStaffMembers();
-        fetchServices();
-    }, []);
+        const fetchData = async () => {
+            try {
+                const [patientRes, staffRes, servicesRes] = await Promise.all([
+                    patientAPI.getById(id),
+                    setupAPI.users.getAll({ isActive: true }),
+                    setupAPI.services.getAll({ isActive: true })
+                ]);
 
-    const fetchStaffMembers = async () => {
-        try {
-            const response = await setupAPI.users.getAll({ isActive: true });
-            setStaffMembers(response.data);
-        } catch (error) {
-            console.error('Failed to fetch staff members:', error);
-        }
-    };
+                const patient = patientRes.data;
+                setFormData({
+                    firstName: patient.firstName || '',
+                    lastName: patient.lastName || '',
+                    dateOfBirth: patient.dateOfBirth || '',
+                    gender: patient.gender || '',
+                    phone: patient.phone || '',
+                    email: patient.email || '',
+                    address: patient.address || '',
+                    nhimaNumber: patient.nhimaNumber || '',
+                    paymentMethod: patient.paymentMethod || 'cash',
+                    costCategory: patient.costCategory || 'standard',
+                    staffId: patient.staffId || '',
+                    serviceId: patient.serviceId || '',
+                    ward: patient.ward || '',
+                    nrc: patient.nrc || '',
+                    emergencyContact: patient.emergencyContact || '',
+                    emergencyPhone: patient.emergencyPhone || ''
+                });
 
-    const fetchServices = async () => {
-        try {
-            const response = await setupAPI.services.getAll({ isActive: true });
-            setServices(response.data);
-        } catch (error) {
-            console.error('Failed to fetch services:', error);
-        }
-    };
+                if (patient.photoUrl) {
+                    setPhotoPreview(`http://localhost:5000${patient.photoUrl}`);
+                }
+
+                setStaffMembers(staffRes.data);
+                setServices(servicesRes.data);
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                alert('Failed to load patient data');
+                navigate('/app/patients');
+            } finally {
+                setInitialLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [id, navigate]);
 
     const handlePhotoChange = (e) => {
         const file = e.target.files[0];
@@ -69,7 +95,6 @@ const CreatePatient = () => {
         e.preventDefault();
         setErrors({});
 
-        // Validation
         const newErrors = {};
         if (!formData.firstName) newErrors.firstName = 'First name is required';
         if (!formData.lastName) newErrors.lastName = 'Last name is required';
@@ -83,29 +108,37 @@ const CreatePatient = () => {
         try {
             setLoading(true);
 
-            // Create FormData object
             const data = new FormData();
             Object.keys(formData).forEach(key => {
-                if (formData[key]) data.append(key, formData[key]);
+                if (formData[key] !== null && formData[key] !== undefined) {
+                    data.append(key, formData[key]);
+                }
             });
 
             if (photoFile) {
                 data.append('photo', photoFile);
             }
 
-            await patientAPI.create(data);
+            await patientAPI.update(id, data);
             navigate('/app/patients');
         } catch (error) {
-            console.error('Failed to create patient:', error);
-            alert(error.response?.data?.error || 'Failed to create patient');
+            console.error('Failed to update patient:', error);
+            alert(error.response?.data?.error || 'Failed to update patient');
         } finally {
             setLoading(false);
         }
     };
 
+    if (initialLoading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-lg text-gray-600">Loading patient data...</div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex items-center gap-4">
                 <button
                     onClick={() => navigate('/app/patients')}
@@ -114,12 +147,11 @@ const CreatePatient = () => {
                     <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">New Patient</h1>
-                    <p className="text-gray-600 mt-1">Register a new patient</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Edit Patient</h1>
+                    <p className="text-gray-600 mt-1">Update patient information</p>
                 </div>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="card p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Photo Upload Section */}
@@ -146,10 +178,9 @@ const CreatePatient = () => {
                                 <span className="text-white text-xs font-medium">Upload Photo</span>
                             </div>
                         </div>
-                        <p className="text-sm text-gray-500">Click to upload patient photo</p>
+                        <p className="text-sm text-gray-500">Click to update patient photo</p>
                     </div>
 
-                    {/* First Name */}
                     <div className="form-group">
                         <label className="form-label">First Name *</label>
                         <input
@@ -159,12 +190,9 @@ const CreatePatient = () => {
                             className={`form-input ${errors.firstName ? 'border-red-500' : ''}`}
                             required
                         />
-                        {errors.firstName && (
-                            <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
-                        )}
+                        {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
                     </div>
 
-                    {/* Last Name */}
                     <div className="form-group">
                         <label className="form-label">Last Name *</label>
                         <input
@@ -174,12 +202,9 @@ const CreatePatient = () => {
                             className={`form-input ${errors.lastName ? 'border-red-500' : ''}`}
                             required
                         />
-                        {errors.lastName && (
-                            <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
-                        )}
+                        {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
                     </div>
 
-                    {/* Date of Birth */}
                     <div className="form-group">
                         <label className="form-label">Date of Birth</label>
                         <input
@@ -190,7 +215,6 @@ const CreatePatient = () => {
                         />
                     </div>
 
-                    {/* Gender */}
                     <div className="form-group">
                         <label className="form-label">Gender *</label>
                         <select
@@ -204,12 +228,9 @@ const CreatePatient = () => {
                             <option value="female">Female</option>
                             <option value="other">Other</option>
                         </select>
-                        {errors.gender && (
-                            <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
-                        )}
+                        {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
                     </div>
 
-                    {/* NRC (New Field) */}
                     <div className="form-group">
                         <label className="form-label">NRC Number</label>
                         <input
@@ -221,7 +242,6 @@ const CreatePatient = () => {
                         />
                     </div>
 
-                    {/* Cost Category */}
                     <div className="form-group">
                         <label className="form-label">Cost Category *</label>
                         <select
@@ -236,7 +256,6 @@ const CreatePatient = () => {
                         </select>
                     </div>
 
-                    {/* Service */}
                     <div className="form-group">
                         <label className="form-label">Service</label>
                         <select
@@ -253,7 +272,6 @@ const CreatePatient = () => {
                         </select>
                     </div>
 
-                    {/* Ward */}
                     <div className="form-group">
                         <label className="form-label">Ward</label>
                         <select
@@ -270,7 +288,6 @@ const CreatePatient = () => {
                         </select>
                     </div>
 
-                    {/* Phone */}
                     <div className="form-group">
                         <label className="form-label">Phone</label>
                         <input
@@ -278,11 +295,9 @@ const CreatePatient = () => {
                             value={formData.phone}
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                             className="form-input"
-                            placeholder="+260..."
                         />
                     </div>
 
-                    {/* Email */}
                     <div className="form-group">
                         <label className="form-label">Email</label>
                         <input
@@ -293,7 +308,6 @@ const CreatePatient = () => {
                         />
                     </div>
 
-                    {/* Next of Kin / Emergency Contact (New Fields) */}
                     <div className="form-group">
                         <label className="form-label">Next of Kin Name</label>
                         <input
@@ -301,7 +315,6 @@ const CreatePatient = () => {
                             value={formData.emergencyContact}
                             onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
                             className="form-input"
-                            placeholder="Full Name"
                         />
                     </div>
 
@@ -312,11 +325,9 @@ const CreatePatient = () => {
                             value={formData.emergencyPhone}
                             onChange={(e) => setFormData({ ...formData, emergencyPhone: e.target.value })}
                             className="form-input"
-                            placeholder="+260..."
                         />
                     </div>
 
-                    {/* Payment Method */}
                     <div className="form-group">
                         <label className="form-label">Payment Method *</label>
                         <select
@@ -334,7 +345,6 @@ const CreatePatient = () => {
                         </select>
                     </div>
 
-                    {/* Staff Member-Only show if payment method is Staff */}
                     {formData.paymentMethod === 'staff' && (
                         <div className="form-group">
                             <label className="form-label">Principal Staff Member *</label>
@@ -354,7 +364,6 @@ const CreatePatient = () => {
                         </div>
                     )}
 
-                    {/* NHIMA Number-Only show if payment method is NHIMA */}
                     {formData.paymentMethod === 'nhima' && (
                         <div className="form-group">
                             <label className="form-label">NHIMA Number *</label>
@@ -368,7 +377,6 @@ const CreatePatient = () => {
                         </div>
                     )}
 
-                    {/* Address */}
                     <div className="form-group md:col-span-2">
                         <label className="form-label">Address</label>
                         <textarea
@@ -376,12 +384,10 @@ const CreatePatient = () => {
                             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                             className="form-textarea"
                             rows="3"
-                            placeholder="Full address..."
                         />
                     </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex justify-end gap-4 mt-6">
                     <button
                         type="button"
@@ -396,7 +402,7 @@ const CreatePatient = () => {
                         className="btn btn-primary"
                     >
                         <Save className="w-5 h-5" />
-                        {loading ? 'Creating...' : 'Create Patient'}
+                        {loading ? 'Saving...' : 'Save Changes'}
                     </button>
                 </div>
             </form>
@@ -404,4 +410,4 @@ const CreatePatient = () => {
     );
 };
 
-export default CreatePatient;
+export default EditPatient;

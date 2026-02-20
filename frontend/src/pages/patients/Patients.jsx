@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { patientAPI } from '../../services/apiService';
-import { Users, Plus, Search, Eye, Edit, Trash2 } from 'lucide-react';
+import { Users, Plus, Search, Eye, Edit, Trash2, Merge } from 'lucide-react';
 
 const Patients = () => {
     const navigate = useNavigate();
@@ -65,8 +65,14 @@ const Patients = () => {
                     onClick={() => navigate('/app/patients/new')}
                     className="btn btn-primary"
                 >
-                    <Plus className="w-5 h-5" />
                     New Patient
+                </button>
+                <button
+                    onClick={() => navigate('/app/patients/merge')}
+                    className="btn btn-secondary ml-2"
+                >
+                    <Merge className="w-5 h-5" />
+                    Merge
                 </button>
             </div>
 

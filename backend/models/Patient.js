@@ -48,6 +48,10 @@ const Patient = sequelize.define('Patient', {
         allowNull: true,
         unique: true
     },
+    photoUrl: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
     emergencyContact: {
         type: DataTypes.STRING(100),
         allowNull: true
