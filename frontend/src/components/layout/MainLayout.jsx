@@ -25,7 +25,8 @@ import {
     ClipboardList,
     FileCheck,
     Activity,
-    Calculator
+    Calculator,
+    Building
 } from 'lucide-react';
 
 const MainLayout = ({ children }) => {
@@ -70,6 +71,9 @@ const MainLayout = ({ children }) => {
         if (path.includes('/nhima/')) {
             newExpanded['nhima'] = true;
         }
+        if (path.includes('/departments/')) {
+            newExpanded['departments'] = true;
+        }
 
         setExpandedMenus(newExpanded);
     }, [location.pathname]);
@@ -92,12 +96,7 @@ const MainLayout = ({ children }) => {
                 { path: '/app/visits?type=opd', label: 'OPD' },
                 { path: '/app/visits?type=inpatient', label: 'Inpatient' },
                 { path: '/app/visits?type=maternity', label: 'Maternity' },
-                { path: '/app/visits?type=emergency', label: 'Emergency' },
-                { path: '/app/billing/opd/new', label: 'New OPD Bill' },
-                { path: '/app/billing/opd', label: 'OPD Invoice List' },
-                { path: '/app/theatre/billing', label: 'Theatre Billing' },
-                { path: '/app/maternity/billing', label: 'Maternity Billing' },
-                { path: '/app/specialist-clinics/billing', label: 'Specialist Clinics' }
+                { path: '/app/visits?type=emergency', label: 'Emergency' }
             ]
         },
         {
@@ -194,13 +193,19 @@ const MainLayout = ({ children }) => {
         },
         { path: '/app/lab/dashboard', icon: Activity, label: 'Laboratory' },
         {
-            id: 'reports',
-            icon: BarChart3,
-            label: 'Reports & Analytics',
+            id: 'departments',
+            icon: Building,
+            label: 'Departments',
             submenu: [
-                { path: '/app/reports', label: 'Revenue Report' },
-                { path: '/app/reports', label: 'Department Income' },
-                { path: '/app/reports', label: 'Cashier Performance' }
+                { path: '/app/billing/opd/new', label: 'OPD' },
+                { path: '/app/billing/ipd/new', label: 'IPD / Children Ward' },
+                { path: '/app/maternity/billing', label: 'Labour Ward' },
+                { path: '/app/theatre/billing', label: 'Theater' },
+                { path: '/app/billing/radiology/new', label: 'Scan / Radiology' },
+                { path: '/app/billing/lab/new', label: 'Lab' },
+                { path: '/app/billing/physiology/new', label: 'Physiology' },
+                { path: '/app/billing/pharmacy/new', label: 'Pharmacy' },
+                { path: '/app/billing/dental/new', label: 'Dental' }
             ]
         },
         {
