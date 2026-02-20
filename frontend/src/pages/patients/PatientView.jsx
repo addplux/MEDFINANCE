@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { patientAPI } from '../../services/apiService';
+import { patientAPI, receivablesAPI } from '../../services/apiService';
 import {
     ArrowLeft, Edit, History, Phone, Mail, MapPin, User, CreditCard,
     Shield, Clipboard, Printer, Calendar, AlertCircle
@@ -47,14 +47,19 @@ const PatientView = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [patient, setPatient] = useState(null);
+    const [schemes, setSchemes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const load = async () => {
             try {
-                const res = await patientAPI.getById(id);
+                const [res, schemesRes] = await Promise.all([
+                    patientAPI.getById(id),
+                    receivablesAPI.schemes.getAll({ status: 'active' }).catch(() => ({ data: [] }))
+                ]);
                 setPatient(res.data);
+                setSchemes(schemesRes.data || []);
             } catch (err) {
                 setError('Failed to load patient record.');
             } finally {
@@ -209,7 +214,9 @@ const PatientView = () => {
 
                 {/* Classification */}
                 <Section title="Patient Classification">
-                    <InfoRow icon={Shield} label="Patient Type" value={badge.label} />
+                    <InfoRow icon={Shield} label="Billing Type" value={badge.label} />
+                    <InfoRow icon={Shield} label="Patient Type" value={patient.patientType?.toUpperCase()} />
+                    <InfoRow icon={Clipboard} label="Registered Service" value={patient.registeredService} />
                     <InfoRow icon={Clipboard} label="Cost Category" value={patient.costCategory?.replace('_', ' ')} />
                     <InfoRow icon={Clipboard} label="Ward" value={patient.ward?.replace(/_/g, ' ')} />
                     <InfoRow icon={Clipboard} label="Member Status" value={patient.memberStatus} />
@@ -226,6 +233,7 @@ const PatientView = () => {
 
                 {(patient.paymentMethod === 'corporate' || patient.paymentMethod === 'scheme' || patient.policyNumber) && (
                     <Section title="Scheme / Corporate Details">
+                        <InfoRow icon={Clipboard} label="Scheme Name" value={schemes.find(s => s.id === patient.schemeId)?.name || 'Not Specified'} />
                         <InfoRow icon={Clipboard} label="Policy Number" value={patient.policyNumber} />
                         <InfoRow icon={Clipboard} label="Member Rank" value={patient.memberRank} />
                         <InfoRow icon={Clipboard} label="Member Suffix" value={patient.memberSuffix?.toString()} />

@@ -31,25 +31,31 @@ const EditPatient = () => {
         costCategory: 'standard',
         staffId: '',
         serviceId: '',
+        registeredService: '',
         ward: '',
         nrc: '',
         emergencyContact: '',
         emergencyPhone: '',
-        nextOfKinRelationship: ''
+        nextOfKinRelationship: '',
+        patientType: 'opd',
+        schemeId: ''
     });
     const [photoFile, setPhotoFile] = useState(null);
     const [photoPreview, setPhotoPreview] = useState(null);
     const [staffMembers, setStaffMembers] = useState([]);
     const [services, setServices] = useState([]);
+    const [schemes, setSchemes] = useState([]);
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [patientRes, staffRes, servicesRes] = await Promise.all([
+                const { receivablesAPI } = await import('../../services/apiService');
+                const [patientRes, staffRes, servicesRes, schemesRes] = await Promise.all([
                     patientAPI.getById(id),
                     setupAPI.users.getAll({ isActive: true }),
-                    setupAPI.services.getAll({ isActive: true })
+                    setupAPI.services.getAll({ isActive: true }),
+                    receivablesAPI.schemes.getAll({ status: 'active' })
                 ]);
 
                 const patient = patientRes.data;
@@ -66,11 +72,14 @@ const EditPatient = () => {
                     costCategory: patient.costCategory || 'standard',
                     staffId: patient.staffId || '',
                     serviceId: patient.serviceId || '',
+                    registeredService: patient.registeredService || '',
                     ward: patient.ward || '',
                     nrc: patient.nrc || '',
                     emergencyContact: patient.emergencyContact || '',
                     emergencyPhone: patient.emergencyPhone || '',
-                    nextOfKinRelationship: patient.nextOfKinRelationship || ''
+                    nextOfKinRelationship: patient.nextOfKinRelationship || '',
+                    patientType: patient.patientType || 'opd',
+                    schemeId: patient.schemeId || ''
                 });
 
                 if (patient.photoUrl) {
@@ -79,6 +88,7 @@ const EditPatient = () => {
 
                 setStaffMembers(staffRes.data);
                 setServices(servicesRes.data);
+                setSchemes(schemesRes.data || []);
             } catch (error) {
                 console.error('Failed to load data:', error);
                 alert('Failed to load patient data');
@@ -284,6 +294,23 @@ const EditPatient = () => {
                             {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
                         </div>
 
+                        {/* Patient Type */}
+                        <div className="form-group">
+                            <label className="form-label">Patient Type *</label>
+                            <select
+                                value={formData.patientType}
+                                onChange={(e) => setFormData({ ...formData, patientType: e.target.value })}
+                                className="form-select"
+                                required
+                            >
+                                <option value="opd">OPD</option>
+                                <option value="ipd">IPD</option>
+                                <option value="maternity">Maternity</option>
+                                <option value="theatre">Theatre</option>
+                                <option value="emergency">Emergency</option>
+                            </select>
+                        </div>
+
                         <div className="form-group">
                             <label className="form-label">Last Name *</label>
                             <input
@@ -350,16 +377,26 @@ const EditPatient = () => {
                         <div className="form-group">
                             <label className="form-label">Service</label>
                             <select
-                                value={formData.serviceId}
-                                onChange={(e) => setFormData({ ...formData, serviceId: e.target.value })}
+                                value={formData.registeredService}
+                                onChange={(e) => setFormData({ ...formData, registeredService: e.target.value })}
                                 className="form-select"
                             >
                                 <option value="">Select Service</option>
-                                {services.map(service => (
-                                    <option key={service.id} value={service.id}>
-                                        {service.serviceName} ({service.category})
-                                    </option>
-                                ))}
+                                <option value="Consultation">Consultation</option>
+                                <option value="Nursing Care">Nursing Care</option>
+                                <option value="Hospitalisation">Hospitalisation</option>
+                                <option value="Ante Natal Care">Ante Natal Care</option>
+                                <option value="Normal Delivery/Post Natal Visit">Normal Delivery/Post Natal Visit</option>
+                                <option value="Surgery">Surgery</option>
+                                <option value="Anesthetic">Anesthetic</option>
+                                <option value="Theater">Theater</option>
+                                <option value="X-Ray Examination/Scan">X-Ray Examination/Scan</option>
+                                <option value="Physiotherapy">Physiotherapy</option>
+                                <option value="Medicines">Medicines</option>
+                                <option value="Miscellaneous Dressing etc">Miscellaneous Dressing etc</option>
+                                <option value="Doctors Round">Doctors Round</option>
+                                <option value="Dental Surgery">Dental Surgery</option>
+                                <option value="Other">Other</option>
                             </select>
                         </div>
 
@@ -438,7 +475,7 @@ const EditPatient = () => {
                         </div>
 
                         <div className="form-group">
-                            <label className="form-label">Payment Method *</label>
+                            <label className="form-label">Billing Type *</label>
                             <select
                                 value={formData.paymentMethod}
                                 onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
@@ -457,6 +494,25 @@ const EditPatient = () => {
                                 <option value="exempted">Exempted (Deprecated)</option>
                             </select>
                         </div>
+
+                        {/* Specific Scheme selection */}
+                        {(['corporate', 'private_prepaid', 'nhima', 'scheme'].includes(formData.paymentMethod)) && (
+                            <div className="form-group">
+                                <label className="form-label">Specific Scheme</label>
+                                <select
+                                    value={formData.schemeId}
+                                    onChange={(e) => setFormData({ ...formData, schemeId: e.target.value })}
+                                    className="form-select"
+                                >
+                                    <option value="">Select Scheme (if applicable)</option>
+                                    {schemes.map(scheme => (
+                                        <option key={scheme.id} value={scheme.id}>
+                                            {scheme.name} ({scheme.type})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
 
                         {formData.paymentMethod === 'staff' && (
                             <div className="form-group">

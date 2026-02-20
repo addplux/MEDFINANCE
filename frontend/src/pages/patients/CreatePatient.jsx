@@ -19,21 +19,26 @@ const CreatePatient = () => {
         costCategory: 'standard',
         staffId: '',
         serviceId: '',
+        registeredService: '',
         ward: '',
         nrc: '',
         emergencyContact: '',
         emergencyPhone: '',
-        nextOfKinRelationship: ''
+        nextOfKinRelationship: '',
+        patientType: 'opd',
+        schemeId: ''
     });
     const [photoFile, setPhotoFile] = useState(null);
     const [photoPreview, setPhotoPreview] = useState(null);
     const [staffMembers, setStaffMembers] = useState([]);
     const [services, setServices] = useState([]);
+    const [schemes, setSchemes] = useState([]);
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
         fetchStaffMembers();
         fetchServices();
+        fetchSchemes();
     }, []);
 
     const fetchStaffMembers = async () => {
@@ -51,6 +56,17 @@ const CreatePatient = () => {
             setServices(response.data);
         } catch (error) {
             console.error('Failed to fetch services:', error);
+        }
+    };
+
+    const fetchSchemes = async () => {
+        try {
+            // Might need import from apiService (e.g. receivablesAPI)
+            const { receivablesAPI } = await import('../../services/apiService');
+            const response = await receivablesAPI.schemes.getAll({ status: 'active' });
+            setSchemes(response.data || []);
+        } catch (error) {
+            console.error('Failed to fetch schemes:', error);
         }
     };
 
@@ -165,6 +181,23 @@ const CreatePatient = () => {
                         )}
                     </div>
 
+                    {/* Patient Type */}
+                    <div className="form-group">
+                        <label className="form-label">Patient Type *</label>
+                        <select
+                            value={formData.patientType}
+                            onChange={(e) => setFormData({ ...formData, patientType: e.target.value })}
+                            className="form-select"
+                            required
+                        >
+                            <option value="opd">OPD</option>
+                            <option value="ipd">IPD</option>
+                            <option value="maternity">Maternity</option>
+                            <option value="theatre">Theatre</option>
+                            <option value="emergency">Emergency</option>
+                        </select>
+                    </div>
+
                     {/* Last Name */}
                     <div className="form-group">
                         <label className="form-label">Last Name *</label>
@@ -241,16 +274,26 @@ const CreatePatient = () => {
                     <div className="form-group">
                         <label className="form-label">Service</label>
                         <select
-                            value={formData.serviceId}
-                            onChange={(e) => setFormData({ ...formData, serviceId: e.target.value })}
+                            value={formData.registeredService}
+                            onChange={(e) => setFormData({ ...formData, registeredService: e.target.value })}
                             className="form-select"
                         >
                             <option value="">Select Service</option>
-                            {services.map(service => (
-                                <option key={service.id} value={service.id}>
-                                    {service.serviceName} ({service.category})
-                                </option>
-                            ))}
+                            <option value="Consultation">Consultation</option>
+                            <option value="Nursing Care">Nursing Care</option>
+                            <option value="Hospitalisation">Hospitalisation</option>
+                            <option value="Ante Natal Care">Ante Natal Care</option>
+                            <option value="Normal Delivery/Post Natal Visit">Normal Delivery/Post Natal Visit</option>
+                            <option value="Surgery">Surgery</option>
+                            <option value="Anesthetic">Anesthetic</option>
+                            <option value="Theater">Theater</option>
+                            <option value="X-Ray Examination/Scan">X-Ray Examination/Scan</option>
+                            <option value="Physiotherapy">Physiotherapy</option>
+                            <option value="Medicines">Medicines</option>
+                            <option value="Miscellaneous Dressing etc">Miscellaneous Dressing etc</option>
+                            <option value="Doctors Round">Doctors Round</option>
+                            <option value="Dental Surgery">Dental Surgery</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
 
@@ -334,9 +377,9 @@ const CreatePatient = () => {
                         </select>
                     </div>
 
-                    {/* Payment Method */}
+                    {/* Billing Type */}
                     <div className="form-group">
-                        <label className="form-label">Payment Method *</label>
+                        <label className="form-label">Billing Type *</label>
                         <select
                             value={formData.paymentMethod}
                             onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
@@ -356,7 +399,26 @@ const CreatePatient = () => {
                         </select>
                     </div>
 
-                    {/* Staff Member-Only show if payment method is Staff */}
+                    {/* Specific Scheme selection */}
+                    {(['corporate', 'private_prepaid', 'nhima', 'scheme'].includes(formData.paymentMethod)) && (
+                        <div className="form-group">
+                            <label className="form-label">Specific Scheme</label>
+                            <select
+                                value={formData.schemeId}
+                                onChange={(e) => setFormData({ ...formData, schemeId: e.target.value })}
+                                className="form-select"
+                            >
+                                <option value="">Select Scheme (if applicable)</option>
+                                {schemes.map(scheme => (
+                                    <option key={scheme.id} value={scheme.id}>
+                                        {scheme.name} ({scheme.type})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    {/* Staff Member-Only show if billing type is Staff */}
                     {formData.paymentMethod === 'staff' && (
                         <div className="form-group">
                             <label className="form-label">Principal Staff Member *</label>
@@ -376,7 +438,7 @@ const CreatePatient = () => {
                         </div>
                     )}
 
-                    {/* NHIMA Number-Only show if payment method is NHIMA */}
+                    {/* NHIMA Number-Only show if billing type is NHIMA */}
                     {formData.paymentMethod === 'nhima' && (
                         <div className="form-group">
                             <label className="form-label">NHIMA Number *</label>

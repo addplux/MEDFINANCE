@@ -64,6 +64,11 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.STRING(50),
         allowNull: true
     },
+    patientType: {
+        type: DataTypes.ENUM('opd', 'ipd', 'maternity', 'theatre', 'emergency'),
+        allowNull: false,
+        defaultValue: 'opd'
+    },
     paymentMethod: {
         type: DataTypes.ENUM('cash', 'nhima', 'corporate', 'scheme', 'staff', 'exempted', 'private_prepaid', 'emergency', 'foc'),
         allowNull: false,
@@ -118,6 +123,10 @@ const Patient = sequelize.define('Patient', {
             model: 'services',
             key: 'id'
         }
+    },
+    registeredService: {
+        type: DataTypes.STRING(100),
+        allowNull: true
     },
     ward: {
         type: DataTypes.ENUM('male_ward', 'female_ward', 'general_ward', 'pediatric_ward', 'icu'),
