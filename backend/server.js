@@ -136,43 +136,44 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
+    // Start listening immediately to ensure port binding satisfies deployment checks
+    const server = app.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`🔌 PORT env var: ${process.env.PORT}`);
+        console.log(`📊 Environment: ${process.env.NODE_ENV}`);
+        console.log(`🔗 API: http://0.0.0.0:${PORT}/api`);
+    });
+
     try {
+        console.log('⏳ Initializing database connection...');
         // Test database connection
         await testConnection();
 
-        // Sync database models (create tables if they don't exist)
+        // Sync database models
+        console.log('⏳ Syncing database models...');
         try {
+            // Use alter: true to update schema, but careful on prod
             await syncDatabase({ alter: true });
             console.log('✅ Database synchronized successfully');
         } catch (syncError) {
-            console.error('⚠️ Database synchronization failed, but starting server anyway:', syncError);
+            console.error('⚠️ Database synchronization failed:', syncError);
         }
 
-        // Start listening
-        app.listen(PORT, '0.0.0.0', async () => {
-            console.log(`🚀 Server running on port ${PORT}`);
-            console.log(`🔌 PORT env var: ${process.env.PORT}`);
-            console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-            console.log(`🔗 API: http://0.0.0.0:${PORT}/api`);
-
-            // Auto-seed if database is empty
-            try {
-                const userCount = await User.count();
-                if (userCount === 0) {
-                    console.log('🌱 Database appears empty. Running auto-seed...');
-                    await seedDatabase();
-                    console.log('✅ Auto-seed completed via server startup.');
-                }
-            } catch (seedError) {
-                console.error('⚠️ Auto-seed check failed:', seedError);
+        // Auto-seed if database is empty
+        try {
+            const userCount = await User.count();
+            if (userCount === 0) {
+                console.log('🌱 Database appears empty. Running auto-seed...');
+                await seedDatabase();
+                console.log('✅ Auto-seed completed.');
             }
-        });
+        } catch (seedError) {
+            console.error('⚠️ Auto-seed check failed:', seedError);
+        }
+
     } catch (error) {
-        console.error('Failed to start server process:', error);
-        // Still try to start the app so we can see error pages/logs through HTTP
-        app.listen(PORT, () => {
-            console.log(`🚀 Server emergency started on port ${PORT} despite startup errors`);
-        });
+        console.error('❌ Database initialization failed:', error);
+        // We keep the server running to serve health checks and error logs
     }
 };
 
