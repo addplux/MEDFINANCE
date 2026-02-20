@@ -113,27 +113,46 @@ const MainLayout = ({ children }) => {
             ]
         },
         {
-            id: 'receivables',
-            icon: DollarSign,
-            label: 'Receivables',
-            submenu: [
-                { path: '/app/nhima/submission', label: 'NHIMA' }, // Grouped link or dashboard? Keeping simple for now
-                { path: '/app/receivables/schemes', label: 'Schemes' },
-                { path: '/app/receivables/corporate', label: 'Corporate' },
-                { path: '/app/payroll/medical', label: 'Staff Payroll' },
-                { path: '/app/receivables/ageing', label: 'Debtor Ageing' }
-            ]
+            isHeading: true,
+            label: 'SCHEME MANAGEMENT MODULE'
         },
         {
             id: 'nhima',
-            icon: Activity, // Reuse or find better
+            icon: Activity,
             label: 'NHIMA',
             submenu: [
-                { path: '/app/nhima/eligibility', label: 'Eligibility Check' },
-                { path: '/app/nhima/submission', label: 'Claims Submission' },
-                { path: '/app/nhima/tracking', label: 'Claims Tracking' },
-                { path: '/app/nhima/reconciliation', label: 'Reconciliation' }
+                { path: '/app/nhima/tariffs', label: 'Tariff management' },
+                { path: '/app/nhima/claims', label: 'Claim generation' },
+                { path: '/app/nhima/vetting', label: 'Vetting status' },
+                { path: '/app/nhima/batches', label: 'Batch submission' }
             ]
+        },
+        {
+            id: 'private_scheme',
+            icon: DollarSign,
+            label: 'Private Prepaid Scheme',
+            submenu: [
+                { path: '/app/schemes/private/members', label: 'Membership registration' },
+                { path: '/app/schemes/private/plans', label: 'Plan selection' },
+                { path: '/app/schemes/private/duration', label: 'Start & end date' },
+                { path: '/app/schemes/private/validation', label: 'Service coverage validation' },
+                { path: '/app/schemes/private/tracking', label: 'Utilisation tracking' }
+            ]
+        },
+        {
+            id: 'corporate_scheme',
+            icon: BookOpen,
+            label: 'Corporate Scheme',
+            submenu: [
+                { path: '/app/schemes/corporate/profiles', label: 'Company profiles' },
+                { path: '/app/schemes/corporate/credit', label: 'Credit limit' },
+                { path: '/app/schemes/corporate/terms', label: 'Payment terms' },
+                { path: '/app/schemes/corporate/billing', label: 'Monthly billing cycle' }
+            ]
+        },
+        {
+            isHeading: true,
+            label: 'FINANCE & OPERATIONS'
         },
         { path: '/app/payables/suppliers', icon: CreditCard, label: 'Payables' },
         {
@@ -143,7 +162,7 @@ const MainLayout = ({ children }) => {
             submenu: [
                 { path: '/app/ledger/accounts', label: 'Chart of Accounts' },
                 { path: '/app/ledger/journal-entries', label: 'Journal Entries' },
-                { path: '/app/ledger/trial-balance', label: 'Trial Balance' } // Placeholder or if exists
+                { path: '/app/ledger/trial-balance', label: 'Trial Balance' }
             ]
         },
         {
@@ -285,7 +304,18 @@ const MainLayout = ({ children }) => {
                 {/* Navigation */}
                 <nav className="flex-1 overflow-y-auto py-3 px-2">
                     <div className="space-y-0.5">
-                        {menuItems.map((item) => {
+                        {menuItems.map((item, index) => {
+                            if (item.isHeading) {
+                                return (
+                                    <div
+                                        key={`heading-${index}`}
+                                        className={`px-3 py-2 mt-4 mb-1 text-xs font-bold text-text-secondary tracking-wider ${sidebarCollapsed ? 'text-center' : ''}`}
+                                    >
+                                        {sidebarCollapsed ? '⋯' : item.label}
+                                    </div>
+                                );
+                            }
+
                             const Icon = item.icon;
 
                             // Parent menu with submenu
