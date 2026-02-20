@@ -29,8 +29,11 @@ const CorporateMemberManagement = () => {
     const fetchSchemes = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/receivables/schemes?status=active`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/receivables/schemes?status=active&_t=${Date.now()}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Cache-Control': 'no-cache'
+                }
             });
             if (response.ok) {
                 const data = await response.json();
