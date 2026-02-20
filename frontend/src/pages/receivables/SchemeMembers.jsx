@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, FileText, Search, Edit, Upload, Download, AlertCircle, CheckCircle } from 'lucide-react';
 import api from '../../services/apiClient';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import * as XLSX from 'xlsx';
 
 const SchemeMembers = ({ schemeId }) => {
@@ -404,87 +405,93 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
 
                 {/* Table */}
-                <div className="flex-1 overflow-auto bg-white w-full">
-                    <table className="min-w-full text-left bg-white relative">
-                        <thead className="text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200 sticky top-0 z-10">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Policy #</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Suffix</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Name</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Nursing</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Lab</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Radio</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Dental</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Lodging</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Surgicals</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Dr Round</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Food</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Physio</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Pharmacy</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Sundries</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Antenatal</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Total</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {loading && (
-                                <tr><td colSpan="11" className="text-center py-4">Loading members...</td></tr>
-                            )}
-                            {!loading && members.length === 0 && (
-                                <tr><td colSpan="11" className="text-center py-4 text-gray-500">No members found. Use "Import Members" to add data.</td></tr>
-                            )}
-                            {members.map((member) => (
-                                <tr key={member.id} className="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-none">
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-bold text-gray-900">{member.policyNumber}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-semibold text-gray-600">{member.memberSuffix}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-800 font-bold">
-                                        {member.lastName}, {member.firstName}
-                                    </td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.nursingCare || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.laboratory || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.radiology || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.dental || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.lodging || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.surgicals || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.drRound || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-600 font-semibold">{Number(member.food || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-semibold text-gray-500">{Number(member.physio || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-semibold text-gray-500">{Number(member.pharmacy || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-semibold text-gray-500">{Number(member.sundries || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-semibold text-gray-500">{Number(member.antenatal || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap text-xs font-bold text-gray-900">{Number(member.balance || 0).toLocaleString()}</td>
-                                    <td className="px-6 py-3 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-[10px] leading-4 font-bold rounded-full uppercase
+                <div className="flex-1 overflow-hidden bg-white w-full relative">
+                    <TableContainer component={Paper} sx={{ maxHeight: '100%', width: '100%', boxShadow: 'none' }}>
+                        <Table stickyHeader aria-label="scheme members table" size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Policy #</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Suffix</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Name</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Nursing</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Lab</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Radio</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Dental</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Lodging</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Surgicals</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Dr Round</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Food</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Physio</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Pharmacy</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Sundries</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Antenatal</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Total</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Status</TableCell>
+                                    <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', color: '#374151', whiteSpace: 'nowrap', textTransform: 'uppercase', fontSize: '0.75rem' }}>Actions</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {loading && (
+                                    <TableRow>
+                                        <TableCell colSpan={18} align="center" sx={{ py: 4 }}>Loading members...</TableCell>
+                                    </TableRow>
+                                )}
+                                {!loading && members.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={18} align="center" sx={{ py: 4, color: '#6b7280' }}>No members found. Use "Import Members" to add data.</TableCell>
+                                    </TableRow>
+                                )}
+                                {members.map((member) => (
+                                    <TableRow key={member.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 'bold', color: '#111827' }}>{member.policyNumber}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563' }}>{member.memberSuffix}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#1f2937', fontWeight: 'bold' }}>
+                                            {member.lastName}, {member.firstName}
+                                        </TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.nursingCare || 0).toLocaleString()}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.laboratory || 0).toLocaleString()}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.radiology || 0).toLocaleString()}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.dental || 0).toLocaleString()}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.lodging || 0).toLocaleString()}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.surgicals || 0).toLocaleString()}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.drRound || 0).toLocaleString()}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.food || 0).toLocaleString()}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{Number(member.physio || 0).toLocaleString()}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{Number(member.pharmacy || 0).toLocaleString()}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{Number(member.sundries || 0).toLocaleString()}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{Number(member.antenatal || 0).toLocaleString()}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 'bold', color: '#111827' }}>{Number(member.balance || 0).toLocaleString()}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                                            <span className={`px-2 inline-flex text-[10px] leading-4 font-bold rounded-full uppercase
                                                 ${member.memberStatus === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                            {member.memberStatus}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div className="flex items-center justify-end gap-2">
-                                            {member.policyNumber && (
+                                                {member.memberStatus}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                                            <div className="flex items-center justify-end gap-2">
+                                                {member.policyNumber && (
+                                                    <button
+                                                        onClick={() => navigate(`/app/receivables/ledger/${member.policyNumber}`)}
+                                                        className="p-1 hover:bg-blue-50 text-gray-500 hover:text-blue-600 rounded transition-colors"
+                                                        title="View Family Ledger"
+                                                    >
+                                                        <FileText className="w-4 h-4" />
+                                                    </button>
+                                                )}
                                                 <button
-                                                    onClick={() => navigate(`/app/receivables/ledger/${member.policyNumber}`)}
-                                                    className="p-1 hover:bg-primary-50 text-gray-500 hover:text-primary-600 rounded"
-                                                    title="View Family Ledger"
+                                                    className="p-1 hover:bg-gray-100 text-gray-500 hover:text-gray-700 rounded transition-colors"
+                                                    title="Edit Member"
+                                                    onClick={() => navigate(`/app/patients/${member.id}/edit`)}
                                                 >
-                                                    <FileText className="w-4 h-4" />
+                                                    <Edit className="w-4 h-4" />
                                                 </button>
-                                            )}
-                                            <button
-                                                className="p-1 hover:bg-gray-100 text-gray-500 hover:text-gray-700 rounded"
-                                                title="Edit Member"
-                                                onClick={() => navigate(`/app/patients/${member.id}/edit`)}
-                                            >
-                                                <Edit className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </div>
             </div>
             {/* Modal for Column Mapping */}

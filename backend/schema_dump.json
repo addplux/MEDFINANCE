@@ -1,0 +1,655 @@
+{
+  "users": {
+    "id": {
+      "type": "INTEGER",
+      "allowNull": false,
+      "defaultValue": "nextval(users_id_seq::regclass)",
+      "comment": null,
+      "special": [],
+      "primaryKey": true
+    },
+    "username": {
+      "type": "CHARACTER VARYING(50)",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "email": {
+      "type": "CHARACTER VARYING(100)",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "password": {
+      "type": "CHARACTER VARYING(255)",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "role": {
+      "type": "USER-DEFINED",
+      "allowNull": false,
+      "defaultValue": "viewer",
+      "comment": null,
+      "special": [
+        "admin",
+        "accountant",
+        "billing_staff",
+        "viewer"
+      ],
+      "primaryKey": false
+    },
+    "first_name": {
+      "type": "CHARACTER VARYING(50)",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "last_name": {
+      "type": "CHARACTER VARYING(50)",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "is_active": {
+      "type": "BOOLEAN",
+      "allowNull": true,
+      "defaultValue": false,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "medical_limit_monthly": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "medical_limit_annual": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "medical_usage_monthly": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "medical_usage_annual": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "relationship_to_staff": {
+      "type": "USER-DEFINED",
+      "allowNull": true,
+      "defaultValue": "Self",
+      "comment": null,
+      "special": [
+        "Self",
+        "Spouse",
+        "Child"
+      ],
+      "primaryKey": false
+    },
+    "created_at": {
+      "type": "TIMESTAMP WITH TIME ZONE",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "updated_at": {
+      "type": "TIMESTAMP WITH TIME ZONE",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "role_id": {
+      "type": "INTEGER",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "status": {
+      "type": "USER-DEFINED",
+      "allowNull": false,
+      "defaultValue": "pending",
+      "comment": null,
+      "special": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "primaryKey": false
+    },
+    "department": {
+      "type": "CHARACTER VARYING(100)",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "rejection_reason": {
+      "type": "CHARACTER VARYING(255)",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    }
+  },
+  "services": {
+    "id": {
+      "type": "INTEGER",
+      "allowNull": false,
+      "defaultValue": "nextval(services_id_seq::regclass)",
+      "comment": null,
+      "special": [],
+      "primaryKey": true
+    },
+    "service_code": {
+      "type": "CHARACTER VARYING(20)",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "service_name": {
+      "type": "CHARACTER VARYING(100)",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "category": {
+      "type": "USER-DEFINED",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [
+        "opd",
+        "ipd",
+        "pharmacy",
+        "laboratory",
+        "radiology",
+        "other"
+      ],
+      "primaryKey": false
+    },
+    "department": {
+      "type": "CHARACTER VARYING(50)",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "tariff_type": {
+      "type": "USER-DEFINED",
+      "allowNull": false,
+      "defaultValue": "Low Cost",
+      "comment": null,
+      "special": [
+        "Low Cost",
+        "High Cost"
+      ],
+      "primaryKey": false
+    },
+    "price": {
+      "type": "NUMERIC",
+      "allowNull": false,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "cash_price": {
+      "type": "NUMERIC",
+      "allowNull": false,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "nhima_price": {
+      "type": "NUMERIC",
+      "allowNull": false,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "corporate_price": {
+      "type": "NUMERIC",
+      "allowNull": false,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "scheme_price": {
+      "type": "NUMERIC",
+      "allowNull": false,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "staff_price": {
+      "type": "NUMERIC",
+      "allowNull": false,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "description": {
+      "type": "TEXT",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "is_active": {
+      "type": "BOOLEAN",
+      "allowNull": true,
+      "defaultValue": true,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "created_at": {
+      "type": "TIMESTAMP WITH TIME ZONE",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "updated_at": {
+      "type": "TIMESTAMP WITH TIME ZONE",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    }
+  },
+  "patients": {
+    "id": {
+      "type": "INTEGER",
+      "allowNull": false,
+      "defaultValue": "nextval(patients_id_seq::regclass)",
+      "comment": null,
+      "special": [],
+      "primaryKey": true
+    },
+    "patient_number": {
+      "type": "CHARACTER VARYING(20)",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "first_name": {
+      "type": "CHARACTER VARYING(50)",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "last_name": {
+      "type": "CHARACTER VARYING(50)",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "date_of_birth": {
+      "type": "DATE",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "gender": {
+      "type": "USER-DEFINED",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [
+        "male",
+        "female",
+        "other"
+      ],
+      "primaryKey": false
+    },
+    "phone": {
+      "type": "CHARACTER VARYING(20)",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "email": {
+      "type": "CHARACTER VARYING(100)",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "address": {
+      "type": "TEXT",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "nhima_number": {
+      "type": "CHARACTER VARYING(50)",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "emergency_contact": {
+      "type": "CHARACTER VARYING(100)",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "emergency_phone": {
+      "type": "CHARACTER VARYING(20)",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "payment_method": {
+      "type": "USER-DEFINED",
+      "allowNull": false,
+      "defaultValue": "cash",
+      "comment": null,
+      "special": [
+        "cash",
+        "nhima",
+        "corporate",
+        "scheme",
+        "staff",
+        "exempted"
+      ],
+      "primaryKey": false
+    },
+    "cost_category": {
+      "type": "USER-DEFINED",
+      "allowNull": false,
+      "defaultValue": "standard",
+      "comment": null,
+      "special": [
+        "standard",
+        "high_cost",
+        "low_cost"
+      ],
+      "primaryKey": false
+    },
+    "staff_id": {
+      "type": "INTEGER",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "created_at": {
+      "type": "TIMESTAMP WITH TIME ZONE",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "updated_at": {
+      "type": "TIMESTAMP WITH TIME ZONE",
+      "allowNull": false,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "service_id": {
+      "type": "INTEGER",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "ward": {
+      "type": "USER-DEFINED",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [
+        "male_ward",
+        "female_ward",
+        "general_ward",
+        "pediatric_ward",
+        "icu"
+      ],
+      "primaryKey": false
+    },
+    "balance": {
+      "type": "NUMERIC",
+      "allowNull": false,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "scheme_id": {
+      "type": "INTEGER",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "policy_number": {
+      "type": "CHARACTER VARYING(50)",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "member_rank": {
+      "type": "USER-DEFINED",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [
+        "principal",
+        "spouse",
+        "child",
+        "dependant",
+        "other"
+      ],
+      "primaryKey": false
+    },
+    "nrc": {
+      "type": "CHARACTER VARYING(20)",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "member_status": {
+      "type": "USER-DEFINED",
+      "allowNull": false,
+      "defaultValue": "active",
+      "comment": null,
+      "special": [
+        "active",
+        "suspended",
+        "closed",
+        "not_collected"
+      ],
+      "primaryKey": false
+    },
+    "member_suffix": {
+      "type": "INTEGER",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "nursing_care": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "laboratory": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "radiology": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "dental": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "lodging": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "surgicals": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "dr_round": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "food": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "physio": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "pharmacy": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "sundries": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "antenatal": {
+      "type": "NUMERIC",
+      "allowNull": true,
+      "defaultValue": "0",
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    },
+    "photo_url": {
+      "type": "CHARACTER VARYING(255)",
+      "allowNull": true,
+      "defaultValue": null,
+      "comment": null,
+      "special": [],
+      "primaryKey": false
+    }
+  }
+}
