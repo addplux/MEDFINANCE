@@ -61,7 +61,21 @@ const CorporateMemberManagement = () => {
     };
 
     const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
+        const file = event.target.files[0];
+        setSelectedFile(file);
+
+        if (file && corporateSchemes.length > 0) {
+            const fileName = file.name.toLowerCase();
+            // Automatically detect and set the scheme based on the file name
+            const matchedScheme = corporateSchemes.find(scheme =>
+                fileName.includes(scheme.schemeName.toLowerCase()) ||
+                (scheme.schemeCode && fileName.includes(scheme.schemeCode.toLowerCase()))
+            );
+
+            if (matchedScheme) {
+                setSelectedScheme(matchedScheme.id);
+            }
+        }
     };
 
     const handleUpload = async () => {
@@ -151,12 +165,12 @@ const CorporateMemberManagement = () => {
 
                 {/* Scheme Selection */}
                 <div className="glass-card p-6 bg-white shadow-sm border border-slate-200 rounded-xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary-100 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Select Corporate Scheme</label>
+                    <div className="pointer-events-none absolute top-0 right-0 w-32 h-32 bg-primary-100 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                    <label className="relative z-10 block text-sm font-semibold text-slate-700 mb-2">Select Corporate Scheme</label>
                     <select
                         value={selectedScheme}
                         onChange={(e) => setSelectedScheme(e.target.value)}
-                        className="w-full form-input mt-1 block rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 transition-colors"
+                        className="relative z-10 w-full form-input mt-1 block rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 transition-colors"
                     >
                         <option value="">-- Choose a Scheme --</option>
                         {corporateSchemes.map(scheme => (
@@ -167,9 +181,9 @@ const CorporateMemberManagement = () => {
 
                 {/* Upload Section */}
                 <div className="glass-card p-6 bg-white shadow-sm border border-slate-200 rounded-xl md:col-span-2 relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-32 h-32 bg-blue-100 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Upload Roster (Excel)</label>
-                    <div className="flex flex-col sm:flex-row gap-4 items-center">
+                    <div className="pointer-events-none absolute top-0 left-0 w-32 h-32 bg-blue-100 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                    <label className="relative z-10 block text-sm font-semibold text-slate-700 mb-2">Upload Roster (Excel)</label>
+                    <div className="relative z-10 flex flex-col sm:flex-row gap-4 items-center">
                         <input
                             type="file"
                             accept=".xlsx, .xls, .csv"
@@ -194,7 +208,7 @@ const CorporateMemberManagement = () => {
                             )}
                         </button>
                     </div>
-                    <p className="text-xs text-slate-500 mt-2">Required columns: 'Employee number', 'NRC', 'Name'. Missing patients will be auto-created.</p>
+                    <p className="relative z-10 text-xs text-slate-500 mt-2">Required columns: 'Employee number', 'NRC', 'Name'. Missing patients will be auto-created.</p>
                 </div>
             </div>
 
