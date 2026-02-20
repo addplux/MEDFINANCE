@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { ledgerAPI } from '../../services/apiService';
 import { BookOpen, Plus, Search, Eye, Edit, Trash2 } from 'lucide-react';
 
@@ -57,33 +57,33 @@ const ChartOfAccounts = () => {
     );
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-in">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Chart of Accounts</h1>
-                    <p className="text-gray-600 mt-1">Manage general ledger accounts</p>
+                    <h1 className="text-2xl font-bold text-text-primary">Chart of Accounts</h1>
+                    <p className="text-sm text-text-secondary mt-1">Manage general ledger accounts</p>
                 </div>
-                <button
-                    onClick={() => navigate('/app/ledger/accounts/new')}
-                    className="btn btn-primary"
+                <Link
+                    to="/app/ledger/accounts/new"
+                    className="btn btn-primary flex items-center gap-2"
                 >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-4 h-4" />
                     New Account
-                </button>
+                </Link>
             </div>
 
             {/* Filters */}
             <div className="card p-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
                         <input
                             type="text"
                             placeholder="Search accounts..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="form-input pl-11"
+                            className="form-input pl-10 w-full"
                         />
                     </div>
                     <select
@@ -98,9 +98,6 @@ const ChartOfAccounts = () => {
                         <option value="revenue">Revenue</option>
                         <option value="expense">Expense</option>
                     </select>
-                    <button onClick={loadAccounts} className="btn btn-secondary">
-                        Refresh
-                    </button>
                 </div>
             </div>
 
@@ -122,8 +119,8 @@ const ChartOfAccounts = () => {
                         <tbody>
                             {filteredAccounts.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="text-center py-8 text-gray-500">
-                                        {loading ? 'Loading...' : 'No accounts found'}
+                                    <td colSpan="6" className="text-center py-12 text-text-secondary">
+                                        {loading ? 'Loading...' : 'No accounts found matching your filter.'}
                                     </td>
                                 </tr>
                             ) : (

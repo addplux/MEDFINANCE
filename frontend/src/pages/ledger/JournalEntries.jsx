@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../services/apiClient';
-import { FileText, Search, Filter } from 'lucide-react';
+import { ledgerAPI } from '../../services/apiService';
+import { useToast } from '../../context/ToastContext';
+import { FileText, Search, Filter, Plus, Send } from 'lucide-react';
 
 const JournalEntries = () => {
+    const { addToast } = useToast();
     const [entries, setEntries] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [postingId, setPostingId] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [statusFilter, setStatusFilter] = useState('');
@@ -21,33 +26,57 @@ const JournalEntries = () => {
                 limit: 20,
                 status: statusFilter || undefined
             };
-            // Assuming apiService has a flexible get method or we use raw axios if not
-            // If api.ledger doesn't exist, we might need to add it or use api.get
-            const response = await api.get('/ledger/journal-entries', { params });
+            const response = await ledgerAPI.journals.getAll(params);
 
             // Adjust based on actual API response structure (ledgerController returns { data, total, ... })
             setEntries(response.data.data);
             setTotalPages(response.data.totalPages);
         } catch (error) {
             console.error('Failed to load journal entries:', error);
+            addToast('error', 'Failed to load journal entries');
         } finally {
             setLoading(false);
         }
     };
 
+    const handlePost = async (id) => {
+        if (!window.confirm('Are you sure you want to post this journal entry to the ledger? This action cannot be undone.')) {
+            return;
+        }
+
+        setPostingId(id);
+        try {
+            await api.post(`/ledger/journals/${id}/post`);
+            addToast('success', 'Journal entry posted successfully.');
+            loadEntries(); // Refresh the list
+        } catch (error) {
+            console.error('Failed to post journal entry:', error);
+            addToast('error', error.response?.data?.error || 'Failed to post journal entry.');
+        } finally {
+            setPostingId(null);
+        }
+    };
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-in">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Journal Entries</h1>
-                    <p className="text-gray-600 mt-1">General Ledger Transactions</p>
+                    <h1 className="text-2xl font-bold text-text-primary">Journal Entries</h1>
+                    <p className="text-sm text-text-secondary mt-1">General Ledger Transactions</p>
                 </div>
+                <Link
+                    to="/app/ledger/journal-entries/new"
+                    className="btn btn-primary flex items-center gap-2"
+                >
+                    <Plus className="w-4 h-4" />
+                    New Journal Entry
+                </Link>
             </div>
 
             {/* Filters */}
             <div className="card p-4 flex gap-4">
                 <div className="max-w-xs w-full">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <label className="block text-sm font-medium text-text-primary mb-1">Status</label>
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
@@ -78,18 +107,18 @@ const JournalEntries = () => {
                         <tbody>
                             {entries.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7" className="text-center py-8 text-gray-500">
+                                    <td colSpan="7" className="text-center py-12 text-text-secondary">
                                         No journal entries found
                                     </td>
                                 </tr>
                             ) : (
                                 entries.map((entry) => (
                                     <tr key={entry.id}>
-                                        <td>{new Date(entry.entryDate).toLocaleDateString()}</td>
-                                        <td className="font-mono text-sm">{entry.entryNumber}</td>
+                                        <td className="text-text-secondary">{new Date(entry.entryDate).toLocaleDateString()}</td>
+                                        <td className="font-mono text-sm font-medium">{entry.entryNumber}</td>
                                         <td>
-                                            <div className="font-medium">{entry.description}</div>
-                                            <div className="text-xs text-gray-500 mt-1">
+                                            <div className="font-medium text-text-primary">{entry.description}</div>
+                                            <div className="text-xs text-text-secondary mt-1">
                                                 Created by: {entry.creator?.firstName} {entry.creator?.lastName}
                                             </div>
                                         </td>
@@ -104,6 +133,18 @@ const JournalEntries = () => {
                                             <span className={`badge ${entry.status === 'posted' ? 'badge-success' : 'badge-warning'}`}>
                                                 {entry.status}
                                             </span>
+                                        </td>
+                                        <td>
+                                            {entry.status === 'draft' && (
+                                                <button
+                                                    onClick={() => handlePost(entry.id)}
+                                                    disabled={postingId === entry.id}
+                                                    className="btn btn-sm btn-primary flex items-center gap-2"
+                                                >
+                                                    <Send className="w-4 h-4" />
+                                                    {postingId === entry.id ? 'Posting...' : 'Post to Ledger'}
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))

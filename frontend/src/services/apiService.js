@@ -67,6 +67,11 @@ export const billingAPI = {
         update: (id, data) => api.put(`/billing/pharmacy/${id}`, data),
         delete: (id) => api.delete(`/billing/pharmacy/${id}`),
     },
+    patient: {
+        getBalance: (id) => api.get(`/billing/patient/${id}/balance`),
+        getStatement: (id) => api.get(`/billing/patient/${id}/statement`),
+        getUnpaidBills: (id) => api.get(`/billing/patient/${id}/unpaid`)
+    }
 };
 
 // Receivables
@@ -96,6 +101,10 @@ export const receivablesAPI = {
         create: (data) => api.post('/receivables/schemes', data),
         update: (id, data) => api.put(`/receivables/schemes/${id}`, data),
         delete: (id) => api.delete(`/receivables/schemes/${id}`),
+        // Invoicing
+        generateInvoice: (data) => api.post('/receivables/schemes/invoices/generate', data),
+        getInvoices: (schemeId) => api.get(`/receivables/schemes/${schemeId}/invoices`),
+        getInvoiceDetails: (invoiceId) => api.get(`/receivables/schemes/invoices/${invoiceId}`),
     },
 };
 

@@ -158,7 +158,7 @@ const MainLayout = ({ children }) => {
             icon: Wallet,
             label: 'Cash & Banking',
             submenu: [
-                { path: '/app/cash/payments', label: 'Receive Payment' }, // Also Payments?
+                { path: '/app/cash/payments', label: 'Cashier Queue' },
                 { path: '/app/cash/shift-report', label: 'Shift Report' }
             ]
         },

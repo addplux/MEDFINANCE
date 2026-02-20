@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../services/apiClient';
+import { ledgerAPI } from '../../services/apiService';
 import { FileText, Calendar, RefreshCw, Printer } from 'lucide-react';
 
 const TrialBalance = () => {
@@ -14,9 +14,7 @@ const TrialBalance = () => {
     const loadTrialBalance = async () => {
         try {
             setLoading(true);
-            const response = await api.get('/ledger/trial-balance', {
-                params: { asOfDate }
-            });
+            const response = await ledgerAPI.trialBalance({ asOfDate });
             setData(response.data);
         } catch (error) {
             console.error('Failed to load trial balance:', error);
@@ -32,25 +30,25 @@ const TrialBalance = () => {
     if (loading && !data) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="text-lg text-gray-600">Loading Report...</div>
+                <div className="text-lg text-text-secondary">Loading Report...</div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-in">
             <div className="flex items-center justify-between no-print">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Trial Balance</h1>
-                    <p className="text-gray-600 mt-1">Financial Position Overview</p>
+                    <h1 className="text-2xl font-bold text-text-primary">Trial Balance</h1>
+                    <p className="text-sm text-text-secondary mt-1">Financial Position Overview</p>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={loadTrialBalance} className="btn btn-secondary">
-                        <RefreshCw className="w-4 h-4 mr-2" />
+                    <button onClick={loadTrialBalance} className="btn btn-secondary flex items-center gap-2">
+                        <RefreshCw className="w-4 h-4" />
                         Refresh
                     </button>
-                    <button onClick={handlePrint} className="btn btn-secondary">
-                        <Printer className="w-4 h-4 mr-2" />
+                    <button onClick={handlePrint} className="btn btn-primary flex items-center gap-2">
+                        <Printer className="w-4 h-4" />
                         Print
                     </button>
                 </div>
@@ -58,14 +56,14 @@ const TrialBalance = () => {
 
             {/* Filters */}
             <div className="card p-4 no-print max-w-md">
-                <label className="block text-sm font-medium text-gray-700 mb-1">As Of Date</label>
+                <label className="block text-sm font-medium text-text-primary mb-1">As Of Date</label>
                 <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
                     <input
                         type="date"
                         value={asOfDate}
                         onChange={(e) => setAsOfDate(e.target.value)}
-                        className="form-input pl-11"
+                        className="form-input pl-10 w-full"
                     />
                 </div>
             </div>
@@ -76,59 +74,59 @@ const TrialBalance = () => {
                 <div className="hidden print:block mb-8 text-center">
                     <h1 className="text-2xl font-bold">MEDFINANCE360</h1>
                     <h2 className="text-xl">Trial Balance</h2>
-                    <p className="text-gray-600">As of {new Date(asOfDate).toLocaleDateString()}</p>
+                    <p className="text-text-secondary">As of {new Date(asOfDate).toLocaleDateString()}</p>
                 </div>
 
                 {data ? (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead className="bg-gray-50 border-b border-gray-200">
+                        <table className="table">
+                            <thead className="bg-surface/50">
                                 <tr>
-                                    <th className="text-left py-3 px-4 font-semibold text-gray-600">Account Code</th>
-                                    <th className="text-left py-3 px-4 font-semibold text-gray-600">Account Name</th>
-                                    <th className="text-right py-3 px-4 font-semibold text-gray-600">Debit</th>
-                                    <th className="text-right py-3 px-4 font-semibold text-gray-600">Credit</th>
+                                    <th className="text-left w-1/4">Account Code</th>
+                                    <th className="text-left w-2/4">Account Name</th>
+                                    <th className="text-right w-1/8">Debit (K)</th>
+                                    <th className="text-right w-1/8">Credit (K)</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y divide-border">
                                 {data.accounts.map((account) => (
-                                    <tr key={account.accountCode} className="hover:bg-gray-50">
-                                        <td className="py-2 px-4 font-mono text-gray-500">{account.accountCode}</td>
-                                        <td className="py-2 px-4 font-medium text-gray-900">{account.accountName}</td>
-                                        <td className="py-2 px-4 text-right">
+                                    <tr key={account.accountCode} className="hover:bg-surface/50">
+                                        <td className="font-mono text-sm font-medium text-text-secondary">{account.accountCode}</td>
+                                        <td className="font-medium text-text-primary">{account.accountName}</td>
+                                        <td className="text-right font-mono">
                                             {account.debit > 0 ? Number(account.debit).toLocaleString(undefined, { minimumFractionDigits: 2 }) : '-'}
                                         </td>
-                                        <td className="py-2 px-4 text-right">
+                                        <td className="text-right font-mono">
                                             {account.credit > 0 ? Number(account.credit).toLocaleString(undefined, { minimumFractionDigits: 2 }) : '-'}
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
-                            <tfoot className="border-t-2 border-gray-300 font-bold bg-gray-50">
+                            <tfoot className="border-t-2 border-border font-bold bg-surface/50">
                                 <tr>
-                                    <td colSpan="2" className="py-3 px-4 text-right">Totals</td>
-                                    <td className="py-3 px-4 text-right">{Number(data.totalDebit).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                    <td className="py-3 px-4 text-right">{Number(data.totalCredit).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                    <td colSpan="2" className="text-right">Grand Totals</td>
+                                    <td className="text-right font-mono text-text-primary">{Number(data.totalDebit).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                    <td className="text-right font-mono text-text-primary">{Number(data.totalCredit).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                                 </tr>
                             </tfoot>
                         </table>
 
-                        <div className={`mt-4 p-3 rounded-md text-center font-medium ${data.balanced ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                        <div className={`mt-6 p-4 rounded-xl font-medium border ${data.balanced ? 'bg-success-50 text-success-700 border-success-200' : 'bg-danger-50 text-danger-700 border-danger-200'}`}>
                             {data.balanced ? (
                                 <span className="flex items-center justify-center gap-2">
-                                    <FileCheckIcon className="w-5 h-5" />
+                                    <FileCheckIcon className="w-5 h-5 text-success-500" />
                                     Trial Balance is Balanced
                                 </span>
                             ) : (
                                 <span className="flex items-center justify-center gap-2">
-                                    <AlertTriangleIcon className="w-5 h-5" />
-                                    Trial Balance is NOT Balanced (Difference: {Math.abs(data.totalDebit - data.totalCredit).toLocaleString()})
+                                    <AlertTriangleIcon className="w-5 h-5 text-danger-500" />
+                                    Trial Balance is NOT Balanced (Difference: K {Math.abs(data.totalDebit - data.totalCredit).toLocaleString()})
                                 </span>
                             )}
                         </div>
                     </div>
                 ) : (
-                    <div className="text-center py-12 text-gray-500">No data available</div>
+                    <div className="text-center py-12 text-text-secondary">No data available for this date</div>
                 )}
             </div>
         </div>

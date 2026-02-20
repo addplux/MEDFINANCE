@@ -54,6 +54,11 @@ const RadiologyBill = sequelize.define('RadiologyBill', {
         allowNull: false,
         defaultValue: 'pending'
     },
+    paymentStatus: {
+        type: DataTypes.ENUM('unpaid', 'paid', 'claimed', 'voided'),
+        allowNull: false,
+        defaultValue: 'unpaid'
+    },
     scanDate: {
         type: DataTypes.DATE,
         allowNull: true

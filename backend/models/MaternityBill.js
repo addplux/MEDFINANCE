@@ -76,9 +76,9 @@ const MaternityBill = sequelize.define('MaternityBill', {
         defaultValue: 0.00
     },
     paymentStatus: {
-        type: DataTypes.ENUM('pending', 'partial', 'paid'),
+        type: DataTypes.ENUM('unpaid', 'paid', 'claimed', 'voided'),
         allowNull: false,
-        defaultValue: 'pending'
+        defaultValue: 'unpaid'
     },
     amountPaid: {
         type: DataTypes.DECIMAL(10, 2),

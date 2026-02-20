@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { billingAPI } from '../../services/apiService';
 import { useToast } from '../../context/ToastContext';
 import { FileText, Plus, Search, Filter, Eye, Edit, Trash2 } from 'lucide-react';
+import { getPaymentStatusBadge } from '../../utils/statusBadges';
 
 const OPDBilling = () => {
     const navigate = useNavigate();
@@ -129,7 +130,8 @@ const OPDBilling = () => {
                                 <th>Service</th>
                                 <th>Date</th>
                                 <th>Amount</th>
-                                <th>Status</th>
+                                <th>Clinical Status</th>
+                                <th>Payment</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -154,6 +156,9 @@ const OPDBilling = () => {
                                             <span className={getStatusBadge(bill.status)}>
                                                 {bill.status}
                                             </span>
+                                        </td>
+                                        <td>
+                                            {getPaymentStatusBadge(bill.paymentStatus)}
                                         </td>
                                         <td>
                                             <div className="flex items-center gap-2">
@@ -205,6 +210,9 @@ const OPDBilling = () => {
                                         {bill.status}
                                     </span>
                                 </div>
+                                <div className="mt-2 text-right">
+                                    {getPaymentStatusBadge(bill.paymentStatus)}
+                                </div>
 
                                 <div className="space-y-1">
                                     <div className="text-sm">
@@ -255,7 +263,7 @@ const OPDBilling = () => {
                             </div>
                             <div className="flex gap-2">
                                 <button
-                                    onClick={() => setCurrentPage(p => Math.max(1, p-1))}
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                     disabled={currentPage === 1}
                                     className="btn btn-sm btn-secondary"
                                 >

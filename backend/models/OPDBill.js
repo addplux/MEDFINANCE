@@ -59,6 +59,11 @@ const OPDBill = sequelize.define('OPDBill', {
         allowNull: false,
         defaultValue: 'pending'
     },
+    paymentStatus: {
+        type: DataTypes.ENUM('unpaid', 'paid', 'claimed', 'voided'),
+        allowNull: false,
+        defaultValue: 'unpaid'
+    },
     paymentMethod: {
         type: DataTypes.ENUM('cash', 'card', 'mobile_money', 'insurance', 'credit'),
         allowNull: true

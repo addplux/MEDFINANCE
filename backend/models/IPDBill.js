@@ -65,6 +65,11 @@ const IPDBill = sequelize.define('IPDBill', {
         allowNull: false,
         defaultValue: 'active'
     },
+    paymentStatus: {
+        type: DataTypes.ENUM('unpaid', 'paid', 'claimed', 'voided'),
+        allowNull: false,
+        defaultValue: 'unpaid'
+    },
     notes: {
         type: DataTypes.TEXT,
         allowNull: true

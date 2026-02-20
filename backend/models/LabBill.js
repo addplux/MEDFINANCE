@@ -50,6 +50,11 @@ const LabBill = sequelize.define('LabBill', {
         allowNull: false,
         defaultValue: 'pending'
     },
+    paymentStatus: {
+        type: DataTypes.ENUM('unpaid', 'paid', 'claimed', 'voided'),
+        allowNull: false,
+        defaultValue: 'unpaid'
+    },
     sampleCollected: {
         type: DataTypes.BOOLEAN,
         defaultValue: false

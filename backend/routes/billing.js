@@ -15,6 +15,7 @@ router.delete('/opd/:id', authorize('admin'), billingController.deleteOPDBill);
 
 // Patient Financials
 router.get('/patient/:id/balance', billingController.getPatientBalance);
+router.get('/patient/:id/unpaid', billingController.getUnpaidPatientBills);
 router.get('/patient/:id/statement', billingController.getPatientStatement);
 
 module.exports = router;

@@ -1,253 +1,240 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { cashAPI } from '../../services/apiService';
-import { Wallet, Plus, Search, Eye, Edit, Trash2 } from 'lucide-react';
+import { billingAPI, patientAPI } from '../../services/apiService';
+import { Search, ArrowRight, User as UserIcon, AlertCircle } from 'lucide-react';
 
-const Payments = () => {
+const PatientLedger = () => {
     const navigate = useNavigate();
-    const [payments, setPayments] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [patients, setPatients] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    const [selectedPatientId, setSelectedPatientId] = useState('');
+    const [unpaidBills, setUnpaidBills] = useState([]);
+    const [selectedBills, setSelectedBills] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        loadPayments();
-    }, [currentPage]);
+        loadPatients();
+    }, []);
 
-    const loadPayments = async () => {
+    const loadPatients = async () => {
+        try {
+            const response = await patientAPI.getAll();
+            setPatients(response.data.data || response.data || []);
+        } catch (error) {
+            console.error('Failed to load patients:', error);
+        }
+    };
+
+    const fetchUnpaidBills = async (patientId) => {
+        if (!patientId) return;
         try {
             setLoading(true);
-            const params = { page: currentPage, limit: 10 };
-            const response = await cashAPI.payments.getAll(params);
-            setPayments(response.data.data);
-            setTotalPages(response.data.totalPages);
+            const response = await billingAPI.patient.getUnpaidBills(patientId);
+            setUnpaidBills(response.data || []);
+            setSelectedBills([]); // Reset selection when patient changes
         } catch (error) {
-            console.error('Failed to load payments:', error);
+            console.error('Failed to fetch unpaid bills:', error);
+            setUnpaidBills([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this payment?')) return;
-
-        try {
-            await cashAPI.payments.delete(id);
-            loadPayments();
-        } catch (error) {
-            console.error('Failed to delete payment:', error);
-            alert('Failed to delete payment');
+    const handlePatientChange = (e) => {
+        const id = e.target.value;
+        setSelectedPatientId(id);
+        if (id) {
+            fetchUnpaidBills(id);
+        } else {
+            setUnpaidBills([]);
         }
     };
 
-    const getMethodBadge = (method) => {
-        const badges = {
-            cash: 'badge-success',
-            card: 'badge-info',
-            mobile_money: 'badge-primary',
-            bank_transfer: 'badge-warning'
-        };
-        return `badge ${badges[method] || 'badge-info'} `;
+    const handleSelectBill = (billId) => {
+        setSelectedBills(prev =>
+            prev.includes(billId) ? prev.filter(id => id !== billId) : [...prev, billId]
+        );
     };
 
-    const filteredPayments = payments.filter(payment =>
-        payment.receiptNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+    const handleSelectAll = () => {
+        if (selectedBills.length === unpaidBills.length) {
+            setSelectedBills([]);
+        } else {
+            setSelectedBills(unpaidBills.map(b => b.id));
+        }
+    };
+
+    const handleProceedToPayment = () => {
+        if (selectedBills.length === 0) return;
+
+        const billsToPay = unpaidBills.filter(b => selectedBills.includes(b.id));
+        navigate('/app/cash/payments/new', { state: { patientId: selectedPatientId, billsToPay } });
+    };
+
+    const totalSelectedAmount = unpaidBills
+        .filter(b => selectedBills.includes(b.id))
+        .reduce((sum, b) => sum + Number(b.netAmount || b.totalAmount || 0), 0);
+
+    const filteredPatients = patients.filter(p =>
+        (p.firstName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (p.lastName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (p.patientNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase())
     );
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Payments</h1>
-                    <p className="text-gray-600 mt-1">Manage payment receipts</p>
-                </div>
-                <button
-                    onClick={() => navigate('/app/cash/payments/new')}
-                    className="btn btn-primary"
-                >
-                    <Plus className="w-5 h-5" />
-                    New Payment
-                </button>
-            </div>
-
-            {/* Search */}
-            <div className="card p-4">
-                <div className="relative max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Search payments..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="form-input pl-11"
-                    />
+                    <h1 className="text-3xl font-bold text-gray-900">Cashier Queue</h1>
+                    <p className="text-gray-600 mt-1">Search patients and clear outstanding bills</p>
                 </div>
             </div>
 
-            {/* Payments Table */}
-            <div className="card overflow-hidden">
-                {/* Desktop Table View */}
-                <div className="hidden md:block overflow-x-auto">
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Receipt Number</th>
-                                <th>Patient</th>
-                                <th>Amount</th>
-                                <th>Payment Method</th>
-                                <th>Payment Date</th>
-                                <th>Bill Type</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredPayments.length === 0 ? (
+            <div className="card p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="form-label text-gray-700">Search Patient Name or ID</label>
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Start typing to filter..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="form-input pl-11"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="form-label text-gray-700">Select Patient to View Bills</label>
+                        <div className="relative">
+                            <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <select
+                                value={selectedPatientId}
+                                onChange={handlePatientChange}
+                                className="form-select pl-11"
+                            >
+                                <option value="">-- Choose a patient --</option>
+                                {filteredPatients.map(p => (
+                                    <option key={p.id} value={p.id}>
+                                        {p.patientNumber} - {p.firstName} {p.lastName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {selectedPatientId && (
+                <div className="card overflow-hidden">
+                    <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                            Outstanding Bills
+                        </h2>
+                        {unpaidBills.length > 0 && (
+                            <span className="badge badge-warning">
+                                {unpaidBills.length} Unpaid Bill(s)
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="table">
+                            <thead>
                                 <tr>
-                                    <td colSpan="7" className="text-center py-8 text-gray-500">
-                                        {loading ? 'Loading...' : 'No payments found'}
-                                    </td>
+                                    <th className="w-12 text-center">
+                                        <input
+                                            type="checkbox"
+                                            className="rounded border-gray-300 text-primary focus:ring-primary"
+                                            checked={unpaidBills.length > 0 && selectedBills.length === unpaidBills.length}
+                                            onChange={handleSelectAll}
+                                            disabled={unpaidBills.length === 0}
+                                        />
+                                    </th>
+                                    <th>Date</th>
+                                    <th>Department</th>
+                                    <th>Bill No</th>
+                                    <th>Description</th>
+                                    <th className="text-right">Amount (K)</th>
                                 </tr>
-                            ) : (
-                                filteredPayments.map((payment) => (
-                                    <tr key={payment.id}>
-                                        <td className="font-medium">{payment.receiptNumber}</td>
-                                        <td>
-                                            {payment.patient?.firstName} {payment.patient?.lastName}
+                            </thead>
+                            <tbody>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center py-8 text-gray-500">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                                            Searching departments...
                                         </td>
-                                        <td className="font-semibold text-green-600">
-                                            K {payment.amount?.toLocaleString()}
-                                        </td>
-                                        <td>
-                                            <span className={getMethodBadge(payment.paymentMethod)}>
-                                                {payment.paymentMethod?.replace('_', ' ')}
-                                            </span>
-                                        </td>
-                                        <td>{new Date(payment.paymentDate).toLocaleDateString()}</td>
-                                        <td className="capitalize">{payment.billType || '-'}</td>
-                                        <td>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => navigate(`/app/cash/payments/${payment.id}`)}
-                                                    className="btn btn-sm btn-secondary"
-                                                    title="View"
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => navigate(`/app/cash/payments/${payment.id}/edit`)}
-                                                    className="btn btn-sm btn-secondary"
-                                                    title="Edit"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(payment.id)}
-                                                    className="btn btn-sm btn-danger"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
+                                    </tr>
+                                ) : unpaidBills.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center py-12">
+                                            <div className="max-w-xs mx-auto text-gray-400">
+                                                <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                                                <p className="text-lg font-medium text-gray-600 mb-1">No Unpaid Bills</p>
+                                                <p className="text-sm">This patient has no outstanding balances.</p>
                                             </div>
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ) : (
+                                    unpaidBills.map((bill) => (
+                                        <tr key={`${bill.department}-${bill.id}`}
+                                            className={`hover:bg-gray-50 cursor-pointer transition-colors ${selectedBills.includes(bill.id) ? 'bg-blue-50/50' : ''}`}
+                                            onClick={() => handleSelectBill(bill.id)}
+                                        >
+                                            <td className="text-center" onClick={(e) => e.stopPropagation()}>
+                                                <input
+                                                    type="checkbox"
+                                                    className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                                                    checked={selectedBills.includes(bill.id)}
+                                                    onChange={() => handleSelectBill(bill.id)}
+                                                />
+                                            </td>
+                                            <td>{new Date(bill.createdAt).toLocaleDateString()}</td>
+                                            <td>
+                                                <span className="badge bg-gray-100 text-gray-700 font-medium">
+                                                    {bill.department}
+                                                </span>
+                                            </td>
+                                            <td className="font-mono text-sm text-gray-500">{bill.billNumber}</td>
+                                            <td className="text-gray-900">{bill.description || '-'}</td>
+                                            <td className="text-right font-semibold text-gray-900">
+                                                {Number(bill.netAmount || bill.totalAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+            )}
 
-                {/* Mobile Card View */}
-                <div className="grid grid-cols-1 gap-4 md:hidden">
-                    {filteredPayments.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                            {loading ? 'Loading...' : 'No payments found'}
-                        </div>
-                    ) : (
-                        filteredPayments.map((payment) => (
-                            <div key={payment.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <div className="font-medium text-gray-900">
-                                            {payment.patient?.firstName} {payment.patient?.lastName}
-                                        </div>
-                                        <div className="text-sm text-gray-500">#{payment.receiptNumber}</div>
-                                    </div>
-                                    <span className={getMethodBadge(payment.paymentMethod)}>
-                                        {payment.paymentMethod?.replace('_', ' ')}
-                                    </span>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <div className="text-sm flex justify-between">
-                                        <span className="text-gray-500">Amount:</span>
-                                        <span className="font-semibold text-green-600">K {payment.amount?.toLocaleString()}</span>
-                                    </div>
-                                    <div className="text-sm flex justify-between">
-                                        <span className="text-gray-500">Bill Type:</span>
-                                        <span className="capitalize">{payment.billType || '-'}</span>
-                                    </div>
-                                    <div className="text-sm flex justify-between">
-                                        <span className="text-gray-500">Date:</span>
-                                        <span>{new Date(payment.paymentDate).toLocaleDateString()}</span>
-                                    </div>
-                                </div>
-
-                                <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
-                                    <button
-                                        onClick={() => navigate(`/app/cash/payments/${payment.id}`)}
-                                        className="btn btn-sm btn-secondary flex-1 justify-center"
-                                    >
-                                        <Eye className="w-4 h-4 mr-1" /> View
-                                    </button>
-                                    <button
-                                        onClick={() => navigate(`/app/cash/payments/${payment.id}/edit`)}
-                                        className="btn btn-sm btn-secondary flex-1 justify-center"
-                                    >
-                                        <Edit className="w-4 h-4 mr-1" /> Edit
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(payment.id)}
-                                        className="btn btn-sm btn-danger flex-1 justify-center"
-                                    >
-                                        <Trash2 className="w-4 h-4 mr-1" /> Delete
-                                    </button>
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
-
-                {/* Pagination */}
-                {
-                    totalPages > 1 && (
-                        <div className="card-footer flex items-center justify-between">
+            {/* Sticky Action Footer */}
+            {selectedBills.length > 0 && (
+                <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-white border-t border-gray-200 p-4 shadow-lg transform transition-transform z-40">
+                    <div className="max-w-7xl mx-auto flex items-center justify-between">
+                        <div className="flex items-center gap-4">
                             <div className="text-sm text-gray-600">
-                                Page {currentPage} of {totalPages}
+                                <span className="font-medium text-gray-900">{selectedBills.length}</span> bill(s) selected
                             </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setCurrentPage(p => Math.max(1, p-1))}
-                                    disabled={currentPage === 1}
-                                    className="btn btn-sm btn-secondary"
-                                >
-                                    Previous
-                                </button>
-                                <button
-                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                    disabled={currentPage === totalPages}
-                                    className="btn btn-sm btn-secondary"
-                                >
-                                    Next
-                                </button>
+                            <div className="text-xl font-bold text-gray-900">
+                                Total: K {totalSelectedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                         </div>
-                    )
-                }
-            </div >
-        </div >
+                        <button
+                            onClick={handleProceedToPayment}
+                            className="btn btn-primary px-8"
+                        >
+                            Pay Selected Bills
+                            <ArrowRight className="w-5 h-5 ml-2" />
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
 
-export default Payments;
+export default PatientLedger;

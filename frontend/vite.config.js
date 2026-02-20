@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { readFileSync, writeFileSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
 
 /**
@@ -41,7 +41,7 @@ function injectSwAssets() {
         }
 
         // Prepend the asset list assignment to sw.js
-        if (require('fs').existsSync(swPath)) {
+        if (existsSync(swPath)) {
           const sw = readFileSync(swPath, 'utf-8')
           const injection = `self.__PRECACHE_ASSETS__ = ${JSON.stringify([...assets])};\n`
           writeFileSync(swPath, injection + sw)

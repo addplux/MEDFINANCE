@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { specialistClinicAPI } from '../../services/apiService';
 import { Plus, Search, DollarSign, FileText, AlertCircle } from 'lucide-react';
+import { getPaymentStatusBadge } from '../../utils/statusBadges';
 
 const SpecialistClinics = () => {
     const [bills, setBills] = useState([]);
@@ -168,12 +169,7 @@ const SpecialistClinics = () => {
                                         <td>{new Date(bill.consultationDate).toLocaleDateString()}</td>
                                         <td className="font-medium">K{parseFloat(bill.totalAmount).toLocaleString()}</td>
                                         <td>
-                                            <span className={`badge ${bill.paymentStatus === 'paid' ? 'badge-success' :
-                                                    bill.paymentStatus === 'partial' ? 'badge-warning' :
-                                                        'badge-error'
-                                                }`}>
-                                                {bill.paymentStatus}
-                                            </span>
+                                            {getPaymentStatusBadge(bill.paymentStatus)}
                                         </td>
                                         <td>
                                             <Link

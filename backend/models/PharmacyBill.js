@@ -70,6 +70,11 @@ const PharmacyBill = sequelize.define('PharmacyBill', {
         allowNull: false,
         defaultValue: 'pending'
     },
+    paymentStatus: {
+        type: DataTypes.ENUM('unpaid', 'paid', 'claimed', 'voided'),
+        allowNull: false,
+        defaultValue: 'unpaid'
+    },
     prescriptionNumber: {
         type: DataTypes.STRING(50),
         allowNull: true

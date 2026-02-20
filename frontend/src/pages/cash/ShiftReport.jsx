@@ -1,46 +1,88 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cashAPI } from '../../services/apiService';
-import { Printer, Calendar, Edit3, Download, Save } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import { Printer, Calendar, Edit3, Download, Save, RefreshCw } from 'lucide-react';
 
 const ShiftReport = () => {
-    // Current date default
+    const { user } = useAuth();
+    const { addToast } = useToast();
+
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [shift, setShift] = useState('morning'); // morning, afternoon, night
+    const [shift, setShift] = useState('morning');
     const [isEditable, setIsEditable] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [report, setReport] = useState({
-        cashOnHand: 5000,
-        totalReceipts: 15400,
-        totalPayments: 200,
-        transactions: [
-            { id: 1, time: '08:30', description: 'OPD Consultation-John Doe', amount: 150, type: 'in', method: 'Cash' },
-            { id: 2, time: '09:15', description: 'Lab Test-Jane Smith', amount: 400, type: 'in', method: 'Card' },
-            { id: 3, time: '10:00', description: 'Pharmacy-Peter Jones', amount: 250, type: 'in', method: 'Cash' },
-            { id: 4, time: '12:30', description: 'Refund-Overpayment', amount: -50, type: 'out', method: 'Cash' },
-        ],
+        transactions: [],
         summary: {
-            cash: 5400,
-            card: 5000,
-            mobile: 5000,
-            insurance: 15000
+            cash: 0,
+            card: 0,
+            mobile: 0,
+            insurance: 0
         },
         reconciliation: {
-            openingFloat: 1000,
-            expenses: 200
+            openingFloat: 0,
+            expenses: 0
         }
     });
 
+    useEffect(() => {
+        loadReportData();
+    }, [date, shift]);
+
+    const loadReportData = async () => {
+        setLoading(true);
+        try {
+            // Note: In a real environment, you'd filter by exact time based on shift logic
+            // For now, let's fetch payments for the specific date and user.
+            const response = await cashAPI.payments.getAll({
+                paymentDate: date,
+                receiverId: user?.id
+            });
+
+            const payments = response.data || [];
+
+            let cash = 0, card = 0, mobile = 0, insurance = 0;
+            const txs = payments.map(p => {
+                const amt = parseFloat(p.amountPaid) || 0;
+                // Group by paymentMethod
+                if (p.paymentMethod?.toLowerCase() === 'cash') cash += amt;
+                else if (p.paymentMethod?.toLowerCase().includes('card')) card += amt;
+                else if (p.paymentMethod?.toLowerCase().includes('mobile') || p.paymentMethod?.toLowerCase() === 'momo') mobile += amt;
+                else insurance += amt;
+
+                return {
+                    id: p.id,
+                    time: new Date(p.paymentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    description: p.reference || `Payment #${p.paymentNumber}`,
+                    amount: amt,
+                    type: 'in', // Assuming all are incoming for now. If refund, make it 'out'.
+                    method: p.paymentMethod
+                };
+            });
+
+            setReport(prev => ({
+                ...prev,
+                transactions: txs,
+                summary: { cash, card, mobile, insurance }
+            }));
+
+        } catch (error) {
+            console.error('Failed to load shift report:', error);
+            addToast('error', 'Failed to load shift transactions');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handlePrint = () => {
         setIsEditable(false);
-        setTimeout(() => {
-            window.print();
-        }, 100);
+        setTimeout(() => window.print(), 100);
     };
 
     const handleExportPDF = () => {
         setIsEditable(false);
-        setTimeout(() => {
-            window.print();
-        }, 100);
+        setTimeout(() => window.print(), 100);
     };
 
     const updateReportValue = (path, value) => {
@@ -58,7 +100,7 @@ const ShiftReport = () => {
     };
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <div className="space-y-6 max-w-4xl mx-auto animate-fade-in">
             <div className="flex justify-between items-center no-print">
                 <div>
                     <h1 className="text-2xl font-bold text-text-primary">Shift Report</h1>
@@ -106,7 +148,14 @@ const ShiftReport = () => {
                         <option value="night">Night (22:00-06:00)</option>
                     </select>
                 </div>
-                <button className="btn btn-primary">View Report</button>
+                <button
+                    onClick={loadReportData}
+                    disabled={loading}
+                    className="btn btn-primary flex items-center gap-2"
+                >
+                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                    {loading ? 'Refreshing...' : 'View Report'}
+                </button>
             </div>
 
             {/* Report Preview */}
@@ -115,7 +164,7 @@ const ShiftReport = () => {
                     <h2 className="text-xl font-bold">MEDFINANCE360 MEDICAL CENTRE</h2>
                     <p className="text-sm text-text-secondary">Shift Handover Report</p>
                     <p className="text-sm mt-2 font-medium">
-                        Date: {new Date(date).toLocaleDateString()} | Shift: {shift.toUpperCase()} | Cashier: {`Admin User`}
+                        Date: {new Date(date).toLocaleDateString()} | Shift: {shift.toUpperCase()} | Cashier: {user ? `${user.firstName} ${user.lastName}` : 'Admin User'}
                     </p>
                 </div>
 
@@ -240,16 +289,24 @@ const ShiftReport = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {report.transactions.map(t => (
-                                <tr key={t.id} className="border-b border-gray-100">
-                                    <td className="p-2">{t.time}</td>
-                                    <td className="p-2">{t.description}</td>
-                                    <td className="p-2">{t.method}</td>
-                                    <td className={`p-2 text-right font-medium ${t.type === 'out' ? 'text-red-600' : ''}`}>
-                                        {t.type === 'out' ? '-' : ''}K{Math.abs(t.amount).toLocaleString()}
+                            {report.transactions.length === 0 ? (
+                                <tr>
+                                    <td colSpan="4" className="p-4 text-center text-text-secondary border-b border-border">
+                                        No transactions recorded for this shift.
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                report.transactions.map(t => (
+                                    <tr key={t.id} className="border-b border-border hover:bg-surface/50">
+                                        <td className="p-2 text-text-secondary">{t.time}</td>
+                                        <td className="p-2 font-medium">{t.description}</td>
+                                        <td className="p-2">{t.method}</td>
+                                        <td className={`p-2 text-right font-mono ${t.type === 'out' ? 'text-danger-600' : 'text-success-600'}`}>
+                                            {t.type === 'out' ? '-' : ''}K{Math.abs(t.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>

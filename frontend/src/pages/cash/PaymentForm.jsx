@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft, Save, Wallet } from 'lucide-react';
 import { cashAPI, patientAPI } from '../../services/apiService';
 import { useAuth } from '../../context/AuthContext';
@@ -7,19 +7,25 @@ import { useAuth } from '../../context/AuthContext';
 const PaymentForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
+    const location = useLocation();
     const { user } = useAuth();
     const isEdit = Boolean(id);
+
+    // State from Ledger
+    const statePatientId = location.state?.patientId || '';
+    const stateBillsToPay = location.state?.billsToPay || [];
+    const prefilledAmount = stateBillsToPay.reduce((sum, b) => sum + Number(b.netAmount || b.totalAmount || 0), 0).toString();
 
     const [loading, setLoading] = useState(false);
     const [patients, setPatients] = useState([]);
     const [formData, setFormData] = useState({
-        patientId: '',
-        amount: '',
+        patientId: statePatientId,
+        amount: prefilledAmount,
         paymentMethod: 'cash',
         referenceNumber: '',
         paymentDate: new Date().toISOString().split('T')[0],
-        billType: 'opd',
-        billId: '',
+        billType: stateBillsToPay.length === 1 ? stateBillsToPay[0].department.toLowerCase() : 'multiple',
+        billId: stateBillsToPay.length === 1 ? stateBillsToPay[0].id : '',
         notes: ''
     });
 
@@ -80,9 +86,17 @@ const PaymentForm = () => {
 
         try {
             setLoading(true);
+
+            // Generate the paidBills array for the backend exactly as expected
+            const paidBills = stateBillsToPay.map(b => ({
+                type: b.department,
+                id: b.id
+            }));
+
             const payload = {
                 ...formData,
-                receivedBy: user?.id
+                receivedBy: user?.id,
+                paidBills: paidBills.length > 0 ? paidBills : undefined
             };
 
             if (isEdit) {
@@ -132,6 +146,25 @@ const PaymentForm = () => {
 
             <form onSubmit={handleSubmit} className="card p-6">
                 <div className="space-y-6">
+                    {/* Bills Summary (If coming from Ledger) */}
+                    {stateBillsToPay.length > 0 && !isEdit && (
+                        <div className="bg-blue-50 text-blue-900 p-4 rounded-lg border border-blue-100 flex justify-between items-center">
+                            <div>
+                                <h4 className="font-semibold flex items-center gap-2">
+                                    <span className="badge badge-primary">{stateBillsToPay.length}</span>
+                                    Bills Selected for Settlement
+                                </h4>
+                                <p className="text-sm mt-1 text-blue-700">
+                                    {stateBillsToPay.map(b => b.department).join(', ')}
+                                </p>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-sm text-blue-700">Total Settlement</div>
+                                <div className="text-2xl font-bold">K {Number(prefilledAmount).toLocaleString()}</div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Payment Information */}
                     <div>
                         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">

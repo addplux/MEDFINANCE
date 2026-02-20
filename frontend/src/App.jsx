@@ -67,7 +67,9 @@ import SupplierForm from './pages/payables/SupplierForm';
 
 // Ledger
 import ChartOfAccounts from './pages/ledger/ChartOfAccounts';
+import AccountForm from './pages/ledger/AccountForm';
 import JournalEntries from './pages/ledger/JournalEntries';
+import JournalEntryForm from './pages/ledger/JournalEntryForm';
 import TrialBalance from './pages/ledger/TrialBalance';
 
 // Assets
@@ -244,7 +246,10 @@ function App() {
                         <Route path="payables/suppliers/:id/edit" element={<SupplierForm />} />
 
                         <Route path="ledger/accounts" element={<ChartOfAccounts />} />
+                        <Route path="ledger/accounts/new" element={<AccountForm />} />
+                        <Route path="ledger/accounts/:id/edit" element={<AccountForm />} />
                         <Route path="ledger/journal-entries" element={<JournalEntries />} />
+                        <Route path="ledger/journal-entries/new" element={<JournalEntryForm />} />
                         <Route path="ledger/trial-balance" element={<TrialBalance />} />
 
                         <Route path="cash/payments" element={<Payments />} />

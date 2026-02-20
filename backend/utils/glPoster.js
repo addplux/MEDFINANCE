@@ -151,7 +151,70 @@ const postPayment = async (payment, t) => {
     }
 };
 
+/**
+ * Post a Patient Charge to the General Ledger
+ * Debit: Accounts Receivable (1200)
+ * Credit: Department Revenue (configurable, fallback 4000)
+ * @param {Object} bill - The generated bill object
+ * @param {String} revenueAccountCode - The GL account code for the department revenue
+ * @param {Object} t - Transaction object
+ */
+const postChargeToGL = async (bill, revenueAccountCode = '4000', t) => {
+    try {
+        const arAccount = await ChartOfAccounts.findOne({ where: { accountCode: '1200' }, transaction: t });
+        const revenueAccount = await ChartOfAccounts.findOne({ where: { accountCode: revenueAccountCode }, transaction: t });
+
+        if (!arAccount || !revenueAccount) {
+            console.warn(`GL Posting Skipped: Accounts (1200, ${revenueAccountCode}) not found.`);
+            return;
+        }
+
+        const entryNumber = `JE-CHG-${bill.billNumber}`;
+        const amount = Number(bill.netAmount) || Number(bill.totalAmount) || 0;
+
+        const entry = await JournalEntry.create({
+            entryNumber,
+            entryDate: bill.createdAt || new Date(),
+            description: `Charge Captured: ${bill.billNumber} (Patient: ${bill.patientId})`,
+            reference: bill.billNumber,
+            totalDebit: amount,
+            totalCredit: amount,
+            status: 'posted',
+            createdBy: bill.createdBy || 1,
+            postedBy: bill.createdBy || 1,
+            postedAt: new Date()
+        }, { transaction: t });
+
+        // Debit AR
+        await JournalLine.create({
+            entryId: entry.id,
+            accountId: arAccount.id,
+            debit: amount,
+            credit: 0,
+            description: `Receivable from ${bill.billNumber}`
+        }, { transaction: t });
+
+        // Credit Revenue
+        await JournalLine.create({
+            entryId: entry.id,
+            accountId: revenueAccount.id,
+            debit: 0,
+            credit: amount,
+            description: `Revenue from ${bill.billNumber}`
+        }, { transaction: t });
+
+        await arAccount.increment('balance', { by: amount, transaction: t });
+        await revenueAccount.increment('balance', { by: amount, transaction: t });
+
+        console.log(`GL Posted: Charge ${bill.billNumber}`);
+    } catch (error) {
+        console.error('Failed to post Charge to GL:', error);
+        throw error;
+    }
+};
+
 module.exports = {
     postSchemeInvoice,
-    postPayment
+    postPayment,
+    postChargeToGL
 };

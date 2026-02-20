@@ -1,5 +1,6 @@
-const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, Patient, Service, User, sequelize } = require('../models');
+const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, Patient, Service, User, sequelize, TheatreBill, MaternityBill, SpecialistClinicBill } = require('../models');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
+const { postChargeToGL } = require('../utils/glPoster');
 
 // Get all OPD bills
 const getAllOPDBills = async (req, res) => {
@@ -155,6 +156,9 @@ const createOPDBill = async (req, res) => {
 
         // Update Patient Balance
         await updatePatientBalance(patientId);
+
+        // Post to GL
+        await postChargeToGL(bill, '4000'); // Assuming 4000 is OPD Revenue
 
         // Fetch with associations
         const createdBill = await OPDBill.findByPk(bill.id, {
@@ -332,6 +336,68 @@ const getPatientStatement = async (req, res) => {
     }
 };
 
+// Get all unpaid bills for a patient across all departments
+const getUnpaidPatientBills = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const patient = await Patient.findByPk(id);
+
+        if (!patient) {
+            return res.status(404).json({ error: 'Patient not found' });
+        }
+
+        const unpaidBills = [];
+
+        // Fetch OPD
+        const opdBills = await OPDBill.findAll({
+            where: { patientId: id, paymentStatus: 'unpaid' },
+            include: [{ association: 'service', attributes: ['name'] }]
+        });
+        opdBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'OPD', description: b.service?.name }));
+
+        // Fetch Pharmacy
+        const pharmacyBills = await PharmacyBill.findAll({
+            where: { patientId: id, paymentStatus: 'unpaid' }
+        });
+        pharmacyBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Pharmacy', description: b.medication }));
+
+        // Fetch Lab
+        const labBills = await LabBill.findAll({
+            where: { patientId: id, paymentStatus: 'unpaid' }
+        });
+        labBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Laboratory', description: b.testName }));
+
+        // Fetch Radiology
+        const radBills = await RadiologyBill.findAll({
+            where: { patientId: id, paymentStatus: 'unpaid' }
+        });
+        radBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Radiology', description: b.scanType }));
+
+        // Fetch Theatre
+        const theatreBills = await TheatreBill.findAll({
+            where: { patientId: id, paymentStatus: 'unpaid' }
+        });
+        theatreBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Theatre', description: b.procedureType }));
+
+        // Fetch Maternity
+        const matBills = await MaternityBill.findAll({
+            where: { patientId: id, paymentStatus: 'unpaid' }
+        });
+        matBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Maternity', description: 'Maternity Delivery' }));
+
+        // Fetch Specialist Clinic
+        const specialistBills = await SpecialistClinicBill.findAll({
+            where: { patientId: id, paymentStatus: 'unpaid' }
+        });
+        specialistBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Specialist Clinic', description: `Consultation (${b.clinicType})` }));
+
+        res.json(unpaidBills);
+    } catch (error) {
+        console.error('Get unpaid patient bills error:', error);
+        res.status(500).json({ error: 'Failed to get unpaid patient bills' });
+    }
+};
+
 module.exports = {
     getAllOPDBills,
     getOPDBill,
@@ -339,5 +405,6 @@ module.exports = {
     updateOPDBill,
     deleteOPDBill,
     getPatientBalance,
-    getPatientStatement
+    getPatientStatement,
+    getUnpaidPatientBills
 };

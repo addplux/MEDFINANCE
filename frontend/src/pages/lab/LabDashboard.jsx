@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { labAPI } from '../../services/apiService';
 import { Activity, Clock, FileText, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getPaymentStatusBadge } from '../../utils/statusBadges';
 
 const LabDashboard = () => {
     const navigate = useNavigate();
@@ -139,7 +140,8 @@ const LabDashboard = () => {
                                 <th className="text-left p-4 font-medium text-text-secondary">Date</th>
                                 <th className="text-left p-4 font-medium text-text-secondary">Patient</th>
                                 <th className="text-left p-4 font-medium text-text-secondary">Tests</th>
-                                <th className="text-left p-4 font-medium text-text-secondary">Status</th>
+                                <th className="text-left p-4 font-medium text-text-secondary">Lab Status</th>
+                                <th className="text-left p-4 font-medium text-text-secondary">Payment</th>
                                 <th className="text-left p-4 font-medium text-text-secondary">Action</th>
                             </tr>
                         </thead>
@@ -166,6 +168,7 @@ const LabDashboard = () => {
                                         </div>
                                     </td>
                                     <td className="p-4">{getStatusBadge(req.status)}</td>
+                                    <td className="p-4">{getPaymentStatusBadge(req.bill?.paymentStatus)}</td>
                                     <td className="p-4">
                                         {req.status === 'requested' && (
                                             <button

@@ -1,5 +1,7 @@
 const { SpecialistClinicBill, Patient } = require('../models');
 const { Op } = require('sequelize');
+const { postChargeToGL } = require('../utils/glPoster');
+const { updatePatientBalance } = require('../utils/balanceUpdater');
 
 // Generate unique bill number
 const generateBillNumber = async () => {
@@ -24,6 +26,12 @@ exports.createSpecialistBill = async (req, res) => {
     try {
         const billNumber = await generateBillNumber();
         const bill = await SpecialistClinicBill.create({ ...req.body, billNumber });
+
+        if (req.body.patientId) {
+            await updatePatientBalance(req.body.patientId);
+        }
+        await postChargeToGL(bill, '4000');
+
         res.status(201).json(bill);
     } catch (error) {
         console.error('Error creating specialist clinic bill:', error);

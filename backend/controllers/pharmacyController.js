@@ -1,5 +1,6 @@
 const { Medication, PharmacyBatch, PharmacyBill, Patient, User } = require('../models');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
+const { postChargeToGL } = require('../utils/glPoster');
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
 
@@ -211,6 +212,9 @@ const dispenseMedication = async (req, res) => {
             }, { transaction: t });
 
             bills.push(bill);
+
+            // Post to GL
+            await postChargeToGL(bill, '4000', t); // 4000 is generic Service/Pharmacy Revenue
         }
 
         // Update Patient Balance

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { pharmacyAPI, patientAPI } from '../../services/apiService';
-import { ShoppingCart, User, Plus, Trash2, Save } from 'lucide-react';
+import { ShoppingCart, User, Plus, Trash2, Save, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getPaymentStatusBadge } from '../../utils/statusBadges';
 
 const Dispense = () => {
     const navigate = useNavigate();
@@ -233,6 +234,12 @@ const Dispense = () => {
                         <span>Total Amount:</span>
                         <span>K{cartTotal.toFixed(2)}</span>
                     </div>
+
+                    <div className="bg-blue-50 text-blue-800 p-3 rounded-md text-sm mb-4">
+                        <Activity className="w-4 h-4 inline-block mr-1" />
+                        Once dispensed, these items will generate a bill with status: <strong>Unpaid</strong>.
+                    </div>
+
                     <button
                         onClick={handleDispense}
                         disabled={loading || cart.length === 0 || !selectedPatient}

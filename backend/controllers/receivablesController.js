@@ -1,4 +1,4 @@
-const { NHIMAClaim, CorporateAccount, Scheme, SchemeInvoice, Patient, User, OPDBill, PharmacyBill, LabBill, RadiologyBill, Service, Payment, sequelize } = require('../models');
+const { NHIMAClaim, CorporateAccount, Scheme, SchemeInvoice, Patient, User, OPDBill, PharmacyBill, LabBill, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill, Service, Payment, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const { postSchemeInvoice } = require('../utils/glPoster');
 
@@ -518,12 +518,48 @@ const generateMonthlyInvoice = async (req, res) => {
             ]
         });
 
+        // 5. Theatre Bills
+        const theatreBills = await TheatreBill.findAll({
+            where: {
+                schemeInvoiceId: null,
+                procedureDate: { [Op.between]: [startDate, endDate] }
+            },
+            include: [
+                { model: Patient, where: { schemeId }, attributes: ['id'] },
+            ]
+        });
+
+        // 6. Maternity Bills
+        const maternityBills = await MaternityBill.findAll({
+            where: {
+                schemeInvoiceId: null,
+                createdAt: { [Op.between]: [startDate, endDate] } // Assuming creation date represents billing date if no specific delivery Date is set
+            },
+            include: [
+                { model: Patient, where: { schemeId }, attributes: ['id'] },
+            ]
+        });
+
+        // 7. Specialist Clinic Bills
+        const specialistBills = await SpecialistClinicBill.findAll({
+            where: {
+                schemeInvoiceId: null,
+                consultationDate: { [Op.between]: [startDate, endDate] }
+            },
+            include: [
+                { model: Patient, where: { schemeId }, attributes: ['id'] },
+            ]
+        });
+
         const totalOPD = opdBills.reduce((sum, b) => Number(sum) + Number(b.netAmount), 0);
         const totalPharmacy = pharmacyBills.reduce((sum, b) => Number(sum) + Number(b.netAmount), 0);
         const totalLab = labBills.reduce((sum, b) => Number(sum) + Number(b.netAmount), 0);
         const totalRadiology = radiologyBills.reduce((sum, b) => Number(sum) + Number(b.netAmount), 0);
+        const totalTheatre = theatreBills.reduce((sum, b) => Number(sum) + Number(b.totalAmount), 0);
+        const totalMaternity = maternityBills.reduce((sum, b) => Number(sum) + Number(b.totalAmount), 0);
+        const totalSpecialist = specialistBills.reduce((sum, b) => Number(sum) + Number(b.totalAmount), 0);
 
-        const grandTotal = totalOPD + totalPharmacy + totalLab + totalRadiology;
+        const grandTotal = totalOPD + totalPharmacy + totalLab + totalRadiology + totalTheatre + totalMaternity + totalSpecialist;
 
         if (grandTotal === 0) {
             await transaction.rollback();
@@ -546,28 +582,46 @@ const generateMonthlyInvoice = async (req, res) => {
             generatedBy: req.user?.id || 1
         }, { transaction });
 
-        // Update Bills with Invoice ID
+        // Update Bills with Invoice ID and paymentStatus
         if (opdBills.length > 0) {
-            await OPDBill.update({ schemeInvoiceId: invoice.id }, {
+            await OPDBill.update({ schemeInvoiceId: invoice.id, paymentStatus: 'claimed' }, {
                 where: { id: { [Op.in]: opdBills.map(b => b.id) } },
                 transaction
             });
         }
         if (pharmacyBills.length > 0) {
-            await PharmacyBill.update({ schemeInvoiceId: invoice.id }, {
+            await PharmacyBill.update({ schemeInvoiceId: invoice.id, paymentStatus: 'claimed' }, {
                 where: { id: { [Op.in]: pharmacyBills.map(b => b.id) } },
                 transaction
             });
         }
         if (labBills.length > 0) {
-            await LabBill.update({ schemeInvoiceId: invoice.id }, {
+            await LabBill.update({ schemeInvoiceId: invoice.id, paymentStatus: 'claimed' }, {
                 where: { id: { [Op.in]: labBills.map(b => b.id) } },
                 transaction
             });
         }
         if (radiologyBills.length > 0) {
-            await RadiologyBill.update({ schemeInvoiceId: invoice.id }, {
+            await RadiologyBill.update({ schemeInvoiceId: invoice.id, paymentStatus: 'claimed' }, {
                 where: { id: { [Op.in]: radiologyBills.map(b => b.id) } },
+                transaction
+            });
+        }
+        if (theatreBills.length > 0) {
+            await TheatreBill.update({ schemeInvoiceId: invoice.id, paymentStatus: 'claimed' }, {
+                where: { id: { [Op.in]: theatreBills.map(b => b.id) } },
+                transaction
+            });
+        }
+        if (maternityBills.length > 0) {
+            await MaternityBill.update({ schemeInvoiceId: invoice.id, paymentStatus: 'claimed' }, {
+                where: { id: { [Op.in]: maternityBills.map(b => b.id) } },
+                transaction
+            });
+        }
+        if (specialistBills.length > 0) {
+            await SpecialistClinicBill.update({ schemeInvoiceId: invoice.id, paymentStatus: 'claimed' }, {
+                where: { id: { [Op.in]: specialistBills.map(b => b.id) } },
                 transaction
             });
         }

@@ -3,7 +3,7 @@
  * Developed: 2026
  */
 
-const { Payment, BankAccount, PettyCash, Patient, User, sequelize } = require('../models');
+const { Payment, BankAccount, PettyCash, Patient, User, sequelize, OPDBill, PharmacyBill, LabBill, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill } = require('../models');
 const logAudit = require('../utils/auditLogger');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
 const { postPayment } = require('../utils/glPoster');
@@ -82,6 +82,30 @@ const createPayment = async (req, res) => {
             req,
             transaction: t
         });
+
+        // Handle marking bills as paid
+        let billsToProcess = req.body.paidBills; // array of { type: 'OPD', id: 1 }
+        if (!billsToProcess && billType && billId) {
+            billsToProcess = [{ type: billType, id: billId }];
+        }
+
+        if (billsToProcess && billsToProcess.length > 0) {
+            for (const b of billsToProcess) {
+                let model;
+                switch (b.type) {
+                    case 'OPD': model = OPDBill; break;
+                    case 'Pharmacy': model = PharmacyBill; break;
+                    case 'Laboratory': model = LabBill; break;
+                    case 'Radiology': model = RadiologyBill; break;
+                    case 'Theatre': model = TheatreBill; break;
+                    case 'Maternity': model = MaternityBill; break;
+                    case 'Specialist Clinic': model = SpecialistClinicBill; break;
+                }
+                if (model) {
+                    await model.update({ paymentStatus: 'paid' }, { where: { id: b.id }, transaction: t });
+                }
+            }
+        }
 
         // Update Patient Balance
         await updatePatientBalance(patientId, t);

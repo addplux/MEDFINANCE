@@ -1,4 +1,6 @@
 const { TheatreBill, Patient } = require('../models');
+const { postChargeToGL } = require('../utils/glPoster');
+const { updatePatientBalance } = require('../utils/balanceUpdater');
 
 // Generate unique bill number
 const generateBillNumber = async () => {
@@ -27,6 +29,11 @@ exports.createTheatreBill = async (req, res) => {
             ...req.body,
             billNumber
         });
+
+        if (req.body.patientId) {
+            await updatePatientBalance(req.body.patientId);
+        }
+        await postChargeToGL(bill, '4000');
 
         res.status(201).json(bill);
     } catch (error) {
