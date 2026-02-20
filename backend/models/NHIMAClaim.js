@@ -20,6 +20,14 @@ const NHIMAClaim = sequelize.define('NHIMAClaim', {
             key: 'id'
         }
     },
+    batchId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'claim_batches',
+            key: 'id'
+        }
+    },
     nhimaNumber: {
         type: DataTypes.STRING(50),
         allowNull: false
@@ -47,6 +55,10 @@ const NHIMAClaim = sequelize.define('NHIMAClaim', {
     status: {
         type: DataTypes.ENUM('pending', 'submitted', 'approved', 'rejected', 'paid'),
         allowNull: false,
+        defaultValue: 'pending'
+    },
+    vettingStatus: {
+        type: DataTypes.ENUM('pending', 'approved', 'rejected', 'flagged'),
         defaultValue: 'pending'
     },
     rejectionReason: {

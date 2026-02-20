@@ -60,8 +60,12 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.STRING(20),
         allowNull: true
     },
+    nextOfKinRelationship: {
+        type: DataTypes.STRING(50),
+        allowNull: true
+    },
     paymentMethod: {
-        type: DataTypes.ENUM('cash', 'nhima', 'corporate', 'scheme', 'staff', 'exempted'),
+        type: DataTypes.ENUM('cash', 'nhima', 'corporate', 'scheme', 'staff', 'exempted', 'private_prepaid', 'emergency', 'foc'),
         allowNull: false,
         defaultValue: 'cash'
     },

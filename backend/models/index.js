@@ -11,6 +11,7 @@ const PharmacyBill = require('./PharmacyBill');
 const LabBill = require('./LabBill');
 const RadiologyBill = require('./RadiologyBill');
 const NHIMAClaim = require('./NHIMAClaim');
+const ClaimBatch = require('./ClaimBatch');
 const CorporateAccount = require('./CorporateAccount');
 const Scheme = require('./Scheme');
 const SchemeInvoice = require('./SchemeInvoice');
@@ -35,6 +36,7 @@ const Medication = require('./Medication');
 const PharmacyBatch = require('./PharmacyBatch');
 const LabTest = require('./LabTest');
 const LabRequest = require('./LabRequest');
+const PatientMovement = require('./PatientMovement');
 const LabResult = require('./LabResult');
 const TheatreBill = require('./TheatreBill');
 const MaternityBill = require('./MaternityBill');
@@ -42,6 +44,7 @@ const SpecialistClinicBill = require('./SpecialistClinicBill');
 const Shift = require('./Shift');
 const Refund = require('./Refund');
 const Notification = require('./Notification');
+const Visit = require('./Visit');
 
 // Define relationships
 
@@ -120,8 +123,12 @@ MaternityBill.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 SpecialistClinicBill.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 
 // NHIMA Claims
+
 NHIMAClaim.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 NHIMAClaim.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+NHIMAClaim.belongsTo(ClaimBatch, { foreignKey: 'batchId', as: 'batch' });
+ClaimBatch.hasMany(NHIMAClaim, { foreignKey: 'batchId', as: 'claims' });
+ClaimBatch.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 
 // Supplier and Invoice relationships
 Supplier.hasMany(Invoice, { foreignKey: 'supplierId', as: 'invoices' });
@@ -205,6 +212,20 @@ LabResult.belongsTo(LabTest, { foreignKey: 'testId', as: 'test' });
 LabResult.belongsTo(User, { foreignKey: 'technicianId', as: 'technician' });
 LabResult.belongsTo(User, { foreignKey: 'verifiedBy', as: 'verifier' });
 
+// Patient Movement relationships
+Patient.hasMany(PatientMovement, { foreignKey: 'patientId', as: 'movements' });
+PatientMovement.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
+PatientMovement.belongsTo(User, { foreignKey: 'admittedBy', as: 'admitter' });
+
+// Visit relationships
+Visit.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
+Visit.belongsTo(User, { foreignKey: 'admittedById', as: 'admitter' });
+Visit.belongsTo(Scheme, { foreignKey: 'schemeId', as: 'scheme' });
+Visit.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
+Patient.hasMany(Visit, { foreignKey: 'patientId', as: 'visits' });
+Scheme.hasMany(Visit, { foreignKey: 'schemeId', as: 'visits' });
+Department.hasMany(Visit, { foreignKey: 'departmentId', as: 'visits' });
+
 // Payroll Deduction relationships
 PayrollDeduction.belongsTo(User, { foreignKey: 'staffId', as: 'staff' });
 
@@ -232,6 +253,7 @@ module.exports = {
     LabBill,
     RadiologyBill,
     NHIMAClaim,
+    ClaimBatch,
     CorporateAccount,
     Scheme,
     SchemeInvoice,
@@ -257,13 +279,15 @@ module.exports = {
     LabTest,
     LabRequest,
     LabResult,
+    PatientMovement,
     TheatreBill,
     MaternityBill,
     SpecialistClinicBill,
     Shift,
     Refund,
     Role,
-    Notification
+    Notification,
+    Visit
 };
 
 

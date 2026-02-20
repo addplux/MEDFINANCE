@@ -70,6 +70,9 @@ const MainLayout = ({ children }) => {
         if (path.includes('/nhima/')) {
             newExpanded['receivables'] = true;
         }
+        if (path.includes('/visits/')) {
+            newExpanded['visits'] = true;
+        }
 
         setExpandedMenus(newExpanded);
     }, [location.pathname]);
@@ -96,6 +99,19 @@ const MainLayout = ({ children }) => {
             ]
         },
         { path: '/app/patients', icon: Users, label: 'Patients' },
+        {
+            id: 'visits',
+            icon: ClipboardList,
+            label: 'Visits',
+            submenu: [
+                { path: '/app/visits', label: 'All Visits' },
+                { path: '/app/visits/new', label: 'Register Visit' },
+                { path: '/app/visits?type=opd', label: 'OPD' },
+                { path: '/app/visits?type=inpatient', label: 'Inpatient' },
+                { path: '/app/visits?type=maternity', label: 'Maternity' },
+                { path: '/app/visits?type=emergency', label: 'Emergency' }
+            ]
+        },
         {
             id: 'receivables',
             icon: DollarSign,

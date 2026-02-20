@@ -30,6 +30,18 @@ export const patientAPI = {
     update: (id, data) => api.put(`/patients/${id}`, data),
     delete: (id) => api.delete(`/patients/${id}`),
     merge: (data) => api.post('/patients/merge', data),
+    getVisitHistory: (id) => api.get(`/patients/${id}/visit-history`),
+};
+
+// Visits
+export const visitAPI = {
+    getAll: (params) => api.get('/visits', { params }),
+    getById: (id) => api.get(`/visits/${id}`),
+    create: (data) => api.post('/visits', data),
+    update: (id, data) => api.put(`/visits/${id}`, data),
+    discharge: (id) => api.post(`/visits/${id}/discharge`),
+    getMovements: (id) => api.get(`/visits/${id}/movements`),
+    logMovement: (patientId, data) => api.post('/patient-movements', { patientId, ...data }),
 };
 
 // Billing
@@ -65,6 +77,11 @@ export const receivablesAPI = {
         create: (data) => api.post('/receivables/nhima', data),
         update: (id, data) => api.put(`/receivables/nhima/${id}`, data),
         delete: (id) => api.delete(`/receivables/nhima/${id}`),
+        // Vetting & Batching
+        getPendingVetting: () => api.get('/nhima-claims/vetting/pending'),
+        vetClaim: (id, data) => api.put(`/nhima-claims/${id}/vet`, data),
+        createBatch: (data) => api.post('/nhima-claims/batches', data),
+        getBatches: () => api.get('/nhima-claims/batches'),
     },
     corporate: {
         getAll: (params) => api.get('/receivables/corporate', { params }),

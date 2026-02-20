@@ -22,7 +22,8 @@ const CreatePatient = () => {
         ward: '',
         nrc: '',
         emergencyContact: '',
-        emergencyPhone: ''
+        emergencyPhone: '',
+        nextOfKinRelationship: ''
     });
     const [photoFile, setPhotoFile] = useState(null);
     const [photoPreview, setPhotoPreview] = useState(null);
@@ -293,7 +294,6 @@ const CreatePatient = () => {
                         />
                     </div>
 
-                    {/* Next of Kin / Emergency Contact (New Fields) */}
                     <div className="form-group">
                         <label className="form-label">Next of Kin Name</label>
                         <input
@@ -316,6 +316,24 @@ const CreatePatient = () => {
                         />
                     </div>
 
+                    <div className="form-group">
+                        <label className="form-label">Next of Kin Relationship</label>
+                        <select
+                            value={formData.nextOfKinRelationship}
+                            onChange={(e) => setFormData({ ...formData, nextOfKinRelationship: e.target.value })}
+                            className="form-select"
+                        >
+                            <option value="">Select Relationship</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Parent">Parent</option>
+                            <option value="Child">Child</option>
+                            <option value="Sibling">Sibling</option>
+                            <option value="Guardian">Guardian</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
                     {/* Payment Method */}
                     <div className="form-group">
                         <label className="form-label">Payment Method *</label>
@@ -325,12 +343,16 @@ const CreatePatient = () => {
                             className="form-select"
                             required
                         >
-                            <option value="cash">Cash (Self-Pay)</option>
+                            <option value="cash">Cash</option>
                             <option value="nhima">NHIMA</option>
-                            <option value="corporate">Corporate Account</option>
-                            <option value="scheme">Insurance Scheme</option>
+                            <option value="corporate">Corporate</option>
+                            <option value="private_prepaid">Private Prepaid</option>
                             <option value="staff">Staff</option>
-                            <option value="exempted">Exempted (Free)</option>
+                            <option value="foc">FOC</option>
+                            <option value="emergency">Emergency</option>
+                            {/* Deprecated but kept for compatibility */}
+                            <option value="scheme">Insurance Scheme (Deprecated)</option>
+                            <option value="exempted">Exempted (Deprecated)</option>
                         </select>
                     </div>
 

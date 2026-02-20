@@ -24,13 +24,21 @@ import Patients from './pages/patients/Patients';
 import CreatePatient from './pages/patients/CreatePatient';
 import EditPatient from './pages/patients/EditPatient';
 import MergePatients from './pages/patients/MergePatients';
+import PatientView from './pages/patients/PatientView';
+import PatientVisitHistory from './pages/patients/PatientVisitHistory';
+
+// Visits
+import Visits from './pages/visits/Visits';
+import CreateVisit from './pages/visits/CreateVisit';
+import VisitDetail from './pages/visits/VisitDetail';
 
 // Receivables
-import NHIMAClaims from './pages/receivables/NHIMAClaims';
+import ReceivablesNHIMAClaims from './pages/receivables/NHIMAClaims';
 
 // NHIMA
 import EligibilityCheck from './pages/nhima/EligibilityCheck';
-import ClaimsSubmission from './pages/nhima/ClaimsSubmission';
+import ClaimsVetting from './pages/nhima/ClaimsVetting';
+import NHIMAClaimsSubmission from './pages/nhima/ClaimsSubmission';
 import ClaimsTracking from './pages/nhima/ClaimsTracking';
 import Reconciliation from './pages/nhima/Reconciliation';
 
@@ -167,13 +175,20 @@ function App() {
                         <Route path="billing/opd/new" element={<CreateOPDBill />} />
                         <Route path="patients" element={<Patients />} />
                         <Route path="patients/new" element={<CreatePatient />} />
-                        <Route path="patients/:id/edit" element={<EditPatient />} />
                         <Route path="patients/merge" element={<MergePatients />} />
+                        <Route path="patients/:id" element={<PatientView />} />
+                        <Route path="patients/:id/edit" element={<EditPatient />} />
+                        <Route path="patients/:id/history" element={<PatientVisitHistory />} />
+
+                        <Route path="visits" element={<Visits />} />
+                        <Route path="visits/new" element={<CreateVisit />} />
+                        <Route path="visits/:id" element={<VisitDetail />} />
                         <Route path="nhima/eligibility" element={<EligibilityCheck />} />
-                        <Route path="nhima/submission" element={<ClaimsSubmission />} />
+                        <Route path="nhima/vetting" element={<ClaimsVetting />} />
+                        <Route path="nhima/submission" element={<NHIMAClaimsSubmission />} />
                         <Route path="nhima/tracking" element={<ClaimsTracking />} />
                         <Route path="nhima/reconciliation" element={<Reconciliation />} />
-                        <Route path="receivables/nhima" element={<NHIMAClaims />} />
+                        <Route path="receivables/nhima" element={<ReceivablesNHIMAClaims />} />
                         <Route path="receivables/corporate" element={<CorporateAccounts />} />
                         <Route path="receivables/corporate/new" element={<CorporateAccountForm />} />
                         <Route path="receivables/corporate/:id/edit" element={<CorporateAccountForm />} />
