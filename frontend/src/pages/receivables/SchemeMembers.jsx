@@ -307,11 +307,101 @@ const SchemeMembers = ({ schemeId }) => {
 
         <div className="flex flex-col h-full space-y-4 min-w-0">
             {/* Import Status Message */}
-            {/* ... (keep as is) ... */}
+            {importResult && (
+                <div className={`p-4 rounded-lg flex items-start gap-3 ${importResult.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+                    }`}>
+                    {importResult.type === 'success' ? (
+                        <>
+                            <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                            <div>
+                                <h4 className="font-semibold">Import Successful</h4>
+                                <ul className="text-sm mt-1 list-disc list-inside">
+                                    <li>Added: {importResult.summary.added}</li>
+                                    <li>Updated: {importResult.summary.updated}</li>
+                                    <li>Failed: {importResult.summary.failed}</li>
+                                </ul>
+                                {importResult.summary.errors?.length > 0 && (
+                                    <div className="mt-2 text-xs text-red-600 bg-white p-2 rounded border border-red-100 max-h-32 overflow-y-auto">
+                                        <p className="font-semibold mb-1">Errors:</p>
+                                        {importResult.summary.errors.map((err, i) => <div key={i}>{err}</div>)}
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                            <div>
+                                <h4 className="font-semibold">Import Failed</h4>
+                                <p className="text-sm">{importResult.message}</p>
+                            </div>
+                        </>
+                    )}
+                    <button onClick={() => setImportResult(null)} className="ml-auto hover:text-gray-900">&times;</button>
+                </div>
+            )}
 
-            <div className="flex flex-col flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden min-w-0">
+            <div className="flex flex-col flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 {/* Header / Filters (Suno Style) */}
-                {/* ... */}
+                <div className="p-3 border-b border-gray-100 flex flex-wrap gap-4 items-center flex-shrink-0">
+                    {/* Search & Filter */}
+                    <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center">
+                        <form onSubmit={handleSearch} className="flex items-center gap-2 w-full sm:w-auto">
+                            <div className="relative flex-1 sm:w-64">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                <input
+                                    type="text"
+                                    placeholder="Search name, policy, NRC..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-9 pr-4 py-2 bg-gray-100 border-none rounded-full text-sm focus:ring-2 focus:ring-gray-200 focus:bg-white transition-all w-full placeholder-gray-500 font-medium"
+                                />
+                            </div>
+                            <button type="submit" className="px-4 py-2 bg-gray-900 hover:bg-black text-white rounded-full text-xs font-bold transition-colors shadow-sm">
+                                Search
+                            </button>
+                        </form>
+
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="px-4 py-2 bg-gray-100 border-none rounded-full text-sm font-medium text-gray-700 focus:ring-2 focus:ring-gray-200 cursor-pointer"
+                        >
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="suspended">Suspended</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+
+                    {/* Import Actions */}
+                    <div className="flex gap-2 w-full md:w-auto justify-end">
+                        <button
+                            onClick={handleDownloadTemplate}
+                            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-bold transition-colors"
+                            title="Download CSV Template"
+                        >
+                            <Download className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Template</span>
+                        </button>
+
+                        <label className={`flex items-center gap-2 px-4 py-2 bg-gray-900 hover:bg-black text-white rounded-full text-xs font-bold transition-colors shadow-sm cursor-pointer ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
+                            <input
+                                type="file"
+                                onChange={handleFileSelect}
+                                accept=".csv, .xlsx, .xls"
+                                className="hidden"
+                                disabled={importing}
+                            />
+                            {importing ? (
+                                <span className="loading loading-spinner loading-xs"></span>
+                            ) : (
+                                <Upload className="w-3.5 h-3.5" />
+                            )}
+                            <span>Import Members</span>
+                        </label>
+                    </div>
+                </div>
 
                 {/* Table */}
                 <div className="flex-1 overflow-auto bg-white w-full">
