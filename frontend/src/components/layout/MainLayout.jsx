@@ -98,18 +98,18 @@ const MainLayout = ({ children }) => {
                 { path: '/app/specialist-clinics/billing', label: 'Specialist Clinics' }
             ]
         },
-        { path: '/app/patients', icon: Users, label: 'Patients' },
         {
-            id: 'visits',
-            icon: ClipboardList,
-            label: 'Visits',
+            id: 'patients',
+            icon: Users,
+            label: 'Patients & Visits',
             submenu: [
-                { path: '/app/visits', label: 'All Visits' },
+                { path: '/app/patients', label: 'Patient Directory' },
                 { path: '/app/visits/new', label: 'Register Visit' },
                 { path: '/app/visits?type=opd', label: 'OPD' },
                 { path: '/app/visits?type=inpatient', label: 'Inpatient' },
                 { path: '/app/visits?type=maternity', label: 'Maternity' },
-                { path: '/app/visits?type=emergency', label: 'Emergency' }
+                { path: '/app/visits?type=emergency', label: 'Emergency' },
+                { path: '/app/visits', label: 'All Visits' }
             ]
         },
         {
