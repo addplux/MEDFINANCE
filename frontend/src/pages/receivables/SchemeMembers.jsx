@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, FileText, Search, Edit, Upload, Download, AlertCircle, CheckCircle } from 'lucide-react';
 import api from '../../services/apiClient';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination } from '@mui/material';
 import * as XLSX from 'xlsx';
 
 const SchemeMembers = ({ schemeId }) => {
@@ -304,6 +304,20 @@ const SchemeMembers = ({ schemeId }) => {
         }
     };
 
+
+    // Pagination State
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
     return (
 
         <div className="flex flex-col h-full space-y-4 min-w-0">
@@ -405,8 +419,8 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
 
                 {/* Table */}
-                <div className="flex-1 overflow-hidden bg-white w-full relative">
-                    <TableContainer component={Paper} sx={{ maxHeight: '100%', width: '100%', boxShadow: 'none' }}>
+                <div className="flex-1 overflow-hidden bg-white w-full relative flex flex-col">
+                    <TableContainer component={Paper} sx={{ flex: 1, width: '100%', boxShadow: 'none' }}>
                         <Table stickyHeader aria-label="scheme members table" size="small">
                             <TableHead>
                                 <TableRow>
@@ -441,57 +455,68 @@ const SchemeMembers = ({ schemeId }) => {
                                         <TableCell colSpan={18} align="center" sx={{ py: 4, color: '#6b7280' }}>No members found. Use "Import Members" to add data.</TableCell>
                                     </TableRow>
                                 )}
-                                {members.map((member) => (
-                                    <TableRow key={member.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 'bold', color: '#111827' }}>{member.policyNumber}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563' }}>{member.memberSuffix}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#1f2937', fontWeight: 'bold' }}>
-                                            {member.lastName}, {member.firstName}
-                                        </TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.nursingCare || 0).toLocaleString()}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.laboratory || 0).toLocaleString()}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.radiology || 0).toLocaleString()}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.dental || 0).toLocaleString()}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.lodging || 0).toLocaleString()}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.surgicals || 0).toLocaleString()}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.drRound || 0).toLocaleString()}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.food || 0).toLocaleString()}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{Number(member.physio || 0).toLocaleString()}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{Number(member.pharmacy || 0).toLocaleString()}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{Number(member.sundries || 0).toLocaleString()}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{Number(member.antenatal || 0).toLocaleString()}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 'bold', color: '#111827' }}>{Number(member.balance || 0).toLocaleString()}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                                            <span className={`px-2 inline-flex text-[10px] leading-4 font-bold rounded-full uppercase
+                                {members
+                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    .map((member) => (
+                                        <TableRow key={member.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 'bold', color: '#111827' }}>{member.policyNumber}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563' }}>{member.memberSuffix}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#1f2937', fontWeight: 'bold' }}>
+                                                {member.lastName}, {member.firstName}
+                                            </TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.nursingCare || 0).toLocaleString()}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.laboratory || 0).toLocaleString()}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.radiology || 0).toLocaleString()}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.dental || 0).toLocaleString()}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.lodging || 0).toLocaleString()}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.surgicals || 0).toLocaleString()}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.drRound || 0).toLocaleString()}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>{Number(member.food || 0).toLocaleString()}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{Number(member.physio || 0).toLocaleString()}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{Number(member.pharmacy || 0).toLocaleString()}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{Number(member.sundries || 0).toLocaleString()}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{Number(member.antenatal || 0).toLocaleString()}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 'bold', color: '#111827' }}>{Number(member.balance || 0).toLocaleString()}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                                                <span className={`px-2 inline-flex text-[10px] leading-4 font-bold rounded-full uppercase
                                                 ${member.memberStatus === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                                {member.memberStatus}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                                            <div className="flex items-center justify-end gap-2">
-                                                {member.policyNumber && (
+                                                    {member.memberStatus}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    {member.policyNumber && (
+                                                        <button
+                                                            onClick={() => navigate(`/app/receivables/ledger/${member.policyNumber}`)}
+                                                            className="p-1 hover:bg-blue-50 text-gray-500 hover:text-blue-600 rounded transition-colors"
+                                                            title="View Family Ledger"
+                                                        >
+                                                            <FileText className="w-4 h-4" />
+                                                        </button>
+                                                    )}
                                                     <button
-                                                        onClick={() => navigate(`/app/receivables/ledger/${member.policyNumber}`)}
-                                                        className="p-1 hover:bg-blue-50 text-gray-500 hover:text-blue-600 rounded transition-colors"
-                                                        title="View Family Ledger"
+                                                        className="p-1 hover:bg-gray-100 text-gray-500 hover:text-gray-700 rounded transition-colors"
+                                                        title="Edit Member"
+                                                        onClick={() => navigate(`/app/patients/${member.id}/edit`)}
                                                     >
-                                                        <FileText className="w-4 h-4" />
+                                                        <Edit className="w-4 h-4" />
                                                     </button>
-                                                )}
-                                                <button
-                                                    className="p-1 hover:bg-gray-100 text-gray-500 hover:text-gray-700 rounded transition-colors"
-                                                    title="Edit Member"
-                                                    onClick={() => navigate(`/app/patients/${member.id}/edit`)}
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
                             </TableBody>
                         </Table>
                     </TableContainer>
+                    <TablePagination
+                        rowsPerPageOptions={[10, 25, 100]}
+                        component="div"
+                        count={members.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
                 </div>
             </div>
             {/* Modal for Column Mapping */}
