@@ -169,7 +169,7 @@ const CorporateMemberManagement = () => {
                     <select
                         value={selectedScheme}
                         onChange={(e) => setSelectedScheme(e.target.value)}
-                        className="w-full form-input mt-1 block rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 transition-colors bg-white"
+                        className="w-full form-input mt-1 block rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 transition-colors bg-white text-slate-900"
                     >
                         <option value="">-- Choose a Scheme --</option>
                         {corporateSchemes.map(scheme => (
