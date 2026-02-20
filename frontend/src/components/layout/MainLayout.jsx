@@ -116,6 +116,7 @@ const MainLayout = ({ children }) => {
             isHeading: true,
             label: 'SCHEME MANAGER'
         },
+        { path: '/app/receivables/schemes', icon: Settings, label: 'All Schemes' },
         {
             id: 'nhima',
             icon: Activity,
