@@ -198,7 +198,7 @@ const CorporateMemberManagement = () => {
                             {uploading ? (
                                 <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> Uploading...</>
                             ) : (
-                                <><Upload className="h-4 w-4" /> Bulk Upload</>
+                                <><Upload className="h-4 w-4" /> Upload</>
                             )}
                         </button>
                     </div>

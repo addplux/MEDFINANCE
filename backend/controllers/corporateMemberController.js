@@ -55,20 +55,28 @@ exports.uploadMembers = async (req, res) => {
             errors: []
         };
 
+        const normalizeKey = (key) => key.trim().toLowerCase();
+
         for (let i = 0; i < data.length; i++) {
-            const row = data[i];
+            const rawRow = data[i];
+            const row = {};
+            for (let filterKey in rawRow) {
+                row[normalizeKey(filterKey)] = rawRow[filterKey];
+            }
+
             try {
-                // Expected Columns: 'Employee number', 'NRC', 'Name', 'Dependants'
-                const employeeNo = row['Employee number'] || row['Employee No'] || row['Policy Number'];
-                const nrc = row['NRC'];
-                const fullName = row['Name'] || row['Full Name'];
+                // Expected Columns (case insensitive): employee number, nrc, name
+                const rawEmp = row['employee number'] || row['employee no'] || row['policy number'] || row['emp no'] || row['emp no.'];
+                const employeeNo = rawEmp ? String(rawEmp).trim() : null;
+                const nrc = row['nrc'] ? String(row['nrc']).trim() : null;
+                const fullName = row['name'] || row['full name'] || row['employee name'];
 
                 if (!employeeNo || !fullName) {
                     throw new Error(`Row ${i + 2}: Missing required fields (Employee number or Name).`);
                 }
 
                 // Split Name
-                const nameParts = fullName.trim().split(' ');
+                const nameParts = String(fullName).trim().split(' ');
                 const firstName = nameParts[0];
                 const lastName = nameParts.slice(1).join(' ') || 'Unknown';
 
@@ -114,6 +122,7 @@ exports.uploadMembers = async (req, res) => {
             } catch (rowError) {
                 results.failed++;
                 results.errors.push(rowError.message);
+                console.warn(`Row ${i + 2} Import Error:`, rowError.message);
             }
         }
 
