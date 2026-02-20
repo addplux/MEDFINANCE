@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/auth');
-const { checkPermission } = require('../middleware/permissions');
+const { authMiddleware, checkPermission } = require('../middleware/auth');
 const visitController = require('../controllers/visitController');
 
 // All routes are protected
