@@ -89,12 +89,10 @@ const MainLayout = ({ children }) => {
             label: 'Patient',
             submenu: [
                 { path: '/app/patients', label: 'Patient Directory' },
-                { path: '/app/visits/new', label: 'Register Visit' },
                 { path: '/app/visits?type=opd', label: 'OPD' },
                 { path: '/app/visits?type=inpatient', label: 'Inpatient' },
                 { path: '/app/visits?type=maternity', label: 'Maternity' },
                 { path: '/app/visits?type=emergency', label: 'Emergency' },
-                { path: '/app/visits', label: 'All Visits' },
                 { path: '/app/billing/opd/new', label: 'New OPD Bill' },
                 { path: '/app/billing/opd', label: 'OPD Invoice List' },
                 { path: '/app/theatre/billing', label: 'Theatre Billing' },
