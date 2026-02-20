@@ -60,13 +60,10 @@ const CorporateMemberManagement = () => {
         }
     };
 
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        setSelectedFile(file);
-
-        if (file && corporateSchemes.length > 0) {
-            const fileName = file.name.toLowerCase();
-            // Automatically detect and set the scheme based on the file name
+    // Effect to auto-detect scheme when schemes load or file changes
+    useEffect(() => {
+        if (selectedFile && corporateSchemes.length > 0 && !selectedScheme) {
+            const fileName = selectedFile.name.toLowerCase();
             const matchedScheme = corporateSchemes.find(scheme =>
                 fileName.includes(scheme.schemeName.toLowerCase()) ||
                 (scheme.schemeCode && fileName.includes(scheme.schemeCode.toLowerCase()))
@@ -76,6 +73,11 @@ const CorporateMemberManagement = () => {
                 setSelectedScheme(matchedScheme.id);
             }
         }
+    }, [selectedFile, corporateSchemes]);
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        setSelectedFile(file);
     };
 
     const handleUpload = async () => {
@@ -192,7 +194,7 @@ const CorporateMemberManagement = () => {
                         </div>
                         <button
                             onClick={handleUpload}
-                            disabled={!selectedFile || !selectedScheme || uploading}
+                            disabled={uploading}
                             className="flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium whitespace-nowrap shadow-sm min-w-[140px]"
                         >
                             {uploading ? (
