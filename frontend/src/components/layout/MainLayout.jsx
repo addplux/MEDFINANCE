@@ -64,14 +64,11 @@ const MainLayout = ({ children }) => {
         const path = location.pathname;
         const newExpanded = { ...expandedMenus };
 
-        if (path.includes('/billing/') || path.includes('/invoice/') || path.includes('/patients')) {
+        if (path.includes('/billing/') || path.includes('/invoice/') || path.includes('/patients') || path.includes('/visits/') || path.includes('/theatre/') || path.includes('/maternity/') || path.includes('/specialist-clinics/')) {
             newExpanded['billing'] = true;
         }
         if (path.includes('/nhima/')) {
             newExpanded['nhima'] = true;
-        }
-        if (path.includes('/visits/')) {
-            newExpanded['patients'] = true;
         }
 
         setExpandedMenus(newExpanded);
@@ -88,28 +85,21 @@ const MainLayout = ({ children }) => {
         { path: '/app/dashboard', icon: LayoutDashboard, label: 'Home' },
         {
             id: 'billing',
-            icon: FileText,
+            icon: Users,
             label: 'Patient',
             submenu: [
                 { path: '/app/patients', label: 'Patient Directory' },
-                { path: '/app/billing/opd/new', label: 'New OPD Bill' },
-                { path: '/app/billing/opd', label: 'OPD Invoice List' },
-                { path: '/app/theatre/billing', label: 'Theatre Billing' },
-                { path: '/app/maternity/billing', label: 'Maternity Billing' },
-                { path: '/app/specialist-clinics/billing', label: 'Specialist Clinics' }
-            ]
-        },
-        {
-            id: 'patients',
-            icon: Users,
-            label: 'Patients & Visits',
-            submenu: [
                 { path: '/app/visits/new', label: 'Register Visit' },
                 { path: '/app/visits?type=opd', label: 'OPD' },
                 { path: '/app/visits?type=inpatient', label: 'Inpatient' },
                 { path: '/app/visits?type=maternity', label: 'Maternity' },
                 { path: '/app/visits?type=emergency', label: 'Emergency' },
-                { path: '/app/visits', label: 'All Visits' }
+                { path: '/app/visits', label: 'All Visits' },
+                { path: '/app/billing/opd/new', label: 'New OPD Bill' },
+                { path: '/app/billing/opd', label: 'OPD Invoice List' },
+                { path: '/app/theatre/billing', label: 'Theatre Billing' },
+                { path: '/app/maternity/billing', label: 'Maternity Billing' },
+                { path: '/app/specialist-clinics/billing', label: 'Specialist Clinics' }
             ]
         },
         {
