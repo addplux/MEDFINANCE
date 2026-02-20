@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { getPendingVettingClaims, vetClaim, createBatch, getBatches } = require('../controllers/nhimaController');
-const { protect } = require('../middleware/authMiddleware');
+const { authMiddleware } = require('../middleware/auth');
 
 // Claims Vetting
-router.get('/vetting/pending', protect, getPendingVettingClaims);
-router.put('/:id/vet', protect, vetClaim);
+router.get('/vetting/pending', authMiddleware, getPendingVettingClaims);
+router.put('/:id/vet', authMiddleware, vetClaim);
 
 // Batching
-router.post('/batches', protect, createBatch);
-router.get('/batches', protect, getBatches);
+router.post('/batches', authMiddleware, createBatch);
+router.get('/batches', authMiddleware, getBatches);
 
 module.exports = router;
