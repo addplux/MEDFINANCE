@@ -341,7 +341,7 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
             )}
 
-            <div className="flex flex-col flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="flex flex-col flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden min-w-0">
                 {/* Header / Filters (Suno Style) */}
                 <div className="p-3 border-b border-gray-100 flex flex-wrap gap-4 items-center flex-shrink-0">
                     {/* Search & Filter */}
