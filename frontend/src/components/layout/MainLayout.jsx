@@ -114,7 +114,7 @@ const MainLayout = ({ children }) => {
         },
         {
             isHeading: true,
-            label: 'SCHEME MANAGEMENT MODULE'
+            label: 'SCHEME MANAGER'
         },
         {
             id: 'nhima',
