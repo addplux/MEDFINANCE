@@ -63,14 +63,19 @@ const CorporateMemberManagement = () => {
     // Effect to auto-detect scheme when schemes load or file changes
     useEffect(() => {
         if (selectedFile && corporateSchemes.length > 0 && !selectedScheme) {
-            const fileName = selectedFile.name.toLowerCase();
-            const matchedScheme = corporateSchemes.find(scheme =>
-                fileName.includes(scheme.schemeName.toLowerCase()) ||
-                (scheme.schemeCode && fileName.includes(scheme.schemeCode.toLowerCase()))
-            );
+            try {
+                const fileName = selectedFile.name.toLowerCase();
+                const matchedScheme = corporateSchemes.find(scheme => {
+                    const sName = scheme.schemeName ? scheme.schemeName.toLowerCase() : '';
+                    const sCode = scheme.schemeCode ? scheme.schemeCode.toLowerCase() : '';
+                    return (sName && fileName.includes(sName)) || (sCode && fileName.includes(sCode));
+                });
 
-            if (matchedScheme) {
-                setSelectedScheme(matchedScheme.id);
+                if (matchedScheme) {
+                    setSelectedScheme(matchedScheme.id);
+                }
+            } catch (err) {
+                console.error("Auto-detect failed:", err);
             }
         }
     }, [selectedFile, corporateSchemes]);
@@ -175,9 +180,12 @@ const CorporateMemberManagement = () => {
                     >
                         <option value="">-- Choose a Scheme --</option>
                         {corporateSchemes.map(scheme => (
-                            <option key={scheme.id} value={scheme.id}>{scheme.schemeName} ({scheme.schemeCode})</option>
+                            <option key={scheme.id} value={scheme.id}>{scheme.schemeName || 'Unnamed Scheme'} ({scheme.schemeCode})</option>
                         ))}
                     </select>
+                    {corporateSchemes.length === 0 && (
+                        <p className="text-xs text-amber-600 mt-2">No active corporate schemes found.</p>
+                    )}
                 </div>
 
                 {/* Upload Section */}
