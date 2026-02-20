@@ -64,14 +64,14 @@ const MainLayout = ({ children }) => {
         const path = location.pathname;
         const newExpanded = { ...expandedMenus };
 
-        if (path.includes('/billing/') || path.includes('/invoice/')) {
+        if (path.includes('/billing/') || path.includes('/invoice/') || path.includes('/patients')) {
             newExpanded['billing'] = true;
         }
         if (path.includes('/nhima/')) {
-            newExpanded['receivables'] = true;
+            newExpanded['nhima'] = true;
         }
         if (path.includes('/visits/')) {
-            newExpanded['visits'] = true;
+            newExpanded['patients'] = true;
         }
 
         setExpandedMenus(newExpanded);
@@ -89,8 +89,9 @@ const MainLayout = ({ children }) => {
         {
             id: 'billing',
             icon: FileText,
-            label: 'Patient Billing',
+            label: 'Patient',
             submenu: [
+                { path: '/app/patients', label: 'Patient Directory' },
                 { path: '/app/billing/opd/new', label: 'New OPD Bill' },
                 { path: '/app/billing/opd', label: 'OPD Invoice List' },
                 { path: '/app/theatre/billing', label: 'Theatre Billing' },
@@ -103,7 +104,6 @@ const MainLayout = ({ children }) => {
             icon: Users,
             label: 'Patients & Visits',
             submenu: [
-                { path: '/app/patients', label: 'Patient Directory' },
                 { path: '/app/visits/new', label: 'Register Visit' },
                 { path: '/app/visits?type=opd', label: 'OPD' },
                 { path: '/app/visits?type=inpatient', label: 'Inpatient' },
