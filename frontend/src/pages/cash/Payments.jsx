@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { billingAPI, patientAPI } from '../../services/apiService';
-import { Search, ArrowRight, User as UserIcon, AlertCircle, Clock, CheckCircle, Receipt, UserPlus } from 'lucide-react';
+import {
+    Search, ArrowRight, AlertCircle, Clock, CheckCircle,
+    Receipt, UserPlus, RefreshCw, Filter, Wallet, Info
+} from 'lucide-react';
+import { DataGrid } from '@mui/x-data-grid';
+
+const fmt = (n) => `ZK ${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const PatientLedger = () => {
     const navigate = useNavigate();
@@ -46,7 +52,7 @@ const PatientLedger = () => {
             setLoading(true);
             const response = await billingAPI.patient.getUnpaidBills(patientId);
             setUnpaidBills(response.data || []);
-            setSelectedBills(response.data?.map(b => b.id) || []); // Default to selecting all
+            setSelectedBills(response.data?.map(b => b.id) || []);
         } catch (error) {
             console.error('Failed to fetch unpaid bills:', error);
             setUnpaidBills([]);
@@ -58,37 +64,10 @@ const PatientLedger = () => {
     const handleSelectPatient = (patientId) => {
         setSelectedPatientId(patientId);
         fetchUnpaidBills(patientId);
-        // Scroll to bills section
-        window.scrollTo({ top: 400, behavior: 'smooth' });
-    };
-
-    const handlePatientChange = (e) => {
-        const id = e.target.value;
-        setSelectedPatientId(id);
-        if (id) {
-            fetchUnpaidBills(id);
-        } else {
-            setUnpaidBills([]);
-        }
-    };
-
-    const handleSelectBill = (billId) => {
-        setSelectedBills(prev =>
-            prev.includes(billId) ? prev.filter(id => id !== billId) : [...prev, billId]
-        );
-    };
-
-    const handleSelectAll = () => {
-        if (selectedBills.length === unpaidBills.length) {
-            setSelectedBills([]);
-        } else {
-            setSelectedBills(unpaidBills.map(b => b.id));
-        }
     };
 
     const handleProceedToPayment = () => {
         if (selectedBills.length === 0) return;
-
         const billsToPay = unpaidBills.filter(b => selectedBills.includes(b.id));
         navigate('/app/cash/payments/new', { state: { patientId: selectedPatientId, billsToPay } });
     };
@@ -103,275 +82,328 @@ const PatientLedger = () => {
         (p.patientNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase())
     );
 
+    // Columns for Live Queue
+    const queueColumns = [
+        {
+            field: 'patient',
+            headerName: 'Patient Name',
+            flex: 1.5,
+            renderCell: (params) => (
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-[11px] font-bold text-orange-400 shrink-0 border border-orange-500/30">
+                        {params.row.firstName[0]}{params.row.lastName[0]}
+                    </div>
+                    <div className="truncate">
+                        <div className="font-bold text-text-primary text-sm leading-tight">{params.row.firstName} {params.row.lastName}</div>
+                        <div className="text-[10px] text-text-secondary font-mono">{params.row.patientNumber}</div>
+                    </div>
+                </div>
+            )
+        },
+        {
+            field: 'departments',
+            headerName: 'Departments',
+            flex: 1.2,
+            renderCell: (params) => (
+                <div className="flex flex-wrap gap-1">
+                    {params.value.split(', ').map(d => (
+                        <span key={d} className="px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[9px] font-black text-text-secondary uppercase">
+                            {d}
+                        </span>
+                    ))}
+                </div>
+            )
+        },
+        {
+            field: 'totalAmount',
+            headerName: 'Total Due',
+            flex: 1,
+            renderCell: (params) => (
+                <span className="font-black text-amber-400">{fmt(params.value)}</span>
+            )
+        },
+        {
+            field: 'wait_time',
+            headerName: 'Waiting',
+            flex: 0.8,
+            renderCell: (params) => {
+                const mins = Math.floor((new Date() - new Date(params.row.lastRequest)) / (1000 * 60));
+                return (
+                    <div className="flex items-center gap-1.5 text-text-secondary">
+                        <Clock size={12} className={mins > 60 ? 'text-red-400' : 'text-emerald-400'} />
+                        <span className="text-[11px] font-medium">{mins}m</span>
+                    </div>
+                );
+            }
+        },
+        {
+            field: 'action',
+            headerName: '',
+            sortable: false,
+            width: 120,
+            renderCell: (params) => (
+                <button
+                    onClick={() => handleSelectPatient(params.row.id)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center gap-2 ${selectedPatientId === String(params.row.id) ? 'bg-orange-500 text-white' : 'bg-surface border border-border text-text-secondary hover:bg-white/5'}`}
+                >
+                    {selectedPatientId === String(params.row.id) ? 'Selected' : 'View Bill'}
+                    <ArrowRight size={12} />
+                </button>
+            )
+        }
+    ];
+
+    // Columns for Detailed Bills
+    const billColumns = [
+        {
+            field: 'createdAt',
+            headerName: 'Date',
+            width: 100,
+            valueFormatter: (params) => new Date(params.value).toLocaleDateString()
+        },
+        {
+            field: 'department',
+            headerName: 'Dept',
+            width: 100,
+            renderCell: (params) => (
+                <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-text-secondary font-bold uppercase border border-white/10">
+                    {params.value}
+                </span>
+            )
+        },
+        {
+            field: 'description',
+            headerName: 'Service Description',
+            flex: 1.5,
+            renderCell: (params) => (
+                <span className="text-sm font-medium text-text-primary">{params.value || 'General Bill'}</span>
+            )
+        },
+        {
+            field: 'amount',
+            headerName: 'Amount',
+            flex: 1,
+            renderCell: (params) => (
+                <span className="font-black text-text-primary">
+                    {fmt(params.row.netAmount || params.row.totalAmount || 0)}
+                </span>
+            )
+        }
+    ];
+
     return (
-        <div className="space-y-6 pb-20">
+        <div className="space-y-6 pb-32 animate-fade-in">
+            {/* Header Section */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                        <Receipt className="text-primary" size={32} />
+                    <h1 className="text-3xl font-black text-text-primary tracking-tight flex items-center gap-3">
+                        <div className="p-2 bg-accent/10 rounded-2xl">
+                            <Wallet className="text-accent" size={32} />
+                        </div>
                         Cashier Queue
                     </h1>
-                    <p className="text-gray-600 mt-1">Automatically tracking unpaid services across all departments</p>
+                    <p className="text-sm text-text-secondary mt-1 ml-14">Unified billing engine tracking all active hospital departments</p>
                 </div>
-                <button
-                    onClick={fetchPendingQueue}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium"
-                >
-                    <Clock size={18} className={queueLoading ? 'animate-spin' : ''} />
-                    Refresh Queue
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={fetchPendingQueue}
+                        className="btn bg-surface border border-border p-3 rounded-2xl hover:bg-white/5 group transition-all"
+                        title="Refresh Queue"
+                    >
+                        <RefreshCw size={20} className={`text-text-secondary group-hover:text-accent ${queueLoading ? 'animate-spin' : ''}`} />
+                    </button>
+                </div>
             </div>
 
-            {/* Live Pending Queue */}
-            <div className="card overflow-hidden border-orange-200 bg-orange-50/20">
-                <div className="p-4 border-b border-orange-100 flex justify-between items-center">
-                    <h2 className="text-lg font-bold text-orange-900 flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-                        Live Pending Payments
+            {/* Live Queue Container */}
+            <div className="glass-card overflow-hidden border-orange-500/20 relative">
+                <div className="absolute top-0 right-0 p-4">
+                    <div className="flex items-center gap-2 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20">
+                        <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                        <span className="text-[10px] font-black text-orange-400 uppercase tracking-widest">Live Flow</span>
+                    </div>
+                </div>
+
+                <div className="p-6 pb-2 border-b border-white/5">
+                    <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                        Active Unpaid Patients
                     </h2>
-                    <span className="text-xs font-bold text-orange-700 bg-orange-100 px-2 py-1 rounded-lg uppercase tracking-wider">
-                        Real-time Queue
-                    </span>
+                    <p className="text-xs text-text-secondary mb-4 italic">Patients waiting at the cashier desk for settlement</p>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="table">
-                        <thead>
-                            <tr className="bg-orange-50/50">
-                                <th>Patient</th>
-                                <th>Pending Under</th>
-                                <th>Total Due (K)</th>
-                                <th>Items</th>
-                                <th>Wait Time</th>
-                                <th className="text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {queueLoading ? (
-                                <tr>
-                                    <td colSpan="6" className="text-center py-12">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
-                                        <p className="text-orange-900/60 text-sm font-medium">Scanning departments for unpaid bills...</p>
-                                    </td>
-                                </tr>
-                            ) : pendingQueue.length === 0 ? (
-                                <tr>
-                                    <td colSpan="6" className="text-center py-16">
-                                        <div className="max-w-xs mx-auto">
-                                            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                <CheckCircle className="text-emerald-500" size={32} />
-                                            </div>
-                                            <p className="text-xl font-bold text-gray-900 mb-1">Queue Clear!</p>
-                                            <p className="text-gray-600">All departments have processed payments.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : (
-                                pendingQueue.map((p) => (
-                                    <tr key={p.id} className="hover:bg-orange-50/50 transition-all border-b border-orange-50">
-                                        <td>
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-orange-200 flex items-center justify-center font-bold text-orange-700">
-                                                    {p.firstName[0]}{p.lastName[0]}
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-gray-900">{p.firstName} {p.lastName}</p>
-                                                    <p className="text-xs text-orange-700/70 font-mono">{p.patientNumber}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div className="flex flex-wrap gap-1">
-                                                {p.departments.split(', ').map(d => (
-                                                    <span key={d} className="px-2 py-0.5 rounded-lg bg-white border border-orange-200 text-[10px] font-bold text-orange-700 uppercase">
-                                                        {d}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="font-bold text-gray-900">
-                                            {Number(p.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                        </td>
-                                        <td className="text-gray-600 text-sm">{p.itemCount} bills</td>
-                                        <td className="text-xs font-medium text-gray-500">
-                                            {Math.floor((new Date() - new Date(p.lastRequest)) / (1000 * 60))} mins ago
-                                        </td>
-                                        <td className="text-right">
-                                            <button
-                                                onClick={() => handleSelectPatient(p.id)}
-                                                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ml-auto ${selectedPatientId === String(p.id) ? 'bg-orange-600 text-white shadow-lg' : 'bg-white border border-orange-300 text-orange-700 hover:bg-orange-100 shadow-sm'}`}
-                                            >
-                                                {selectedPatientId === String(p.id) ? 'Selected' : 'Open Bill'}
-                                                <ArrowRight size={14} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                <div className="h-[400px] w-full">
+                    <DataGrid
+                        rows={pendingQueue}
+                        columns={queueColumns}
+                        loading={queueLoading}
+                        density="compact"
+                        disableSelectionOnClick
+                        hideFooter={pendingQueue.length < 10}
+                        sx={{
+                            border: 'none',
+                            '& .MuiDataGrid-columnHeaders': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                                color: 'var(--text-secondary)',
+                                fontSize: '0.7rem',
+                                fontWeight: 600,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em'
+                            },
+                            '& .MuiDataGrid-cell': {
+                                borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+                                py: 1.5
+                            },
+                            '& .MuiDataGrid-row:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.03)'
+                            }
+                        }}
+                        components={{
+                            NoRowsOverlay: () => (
+                                <div className="flex flex-col items-center justify-center h-full space-y-3 p-8">
+                                    <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
+                                        <CheckCircle size={32} className="text-emerald-500" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-text-primary">Queue Clear</h3>
+                                    <p className="text-sm text-text-secondary">All processed patients have been cleared.</p>
+                                </div>
+                            )
+                        }}
+                    />
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Search Sidebar */}
-                <div className="lg:col-span-1 space-y-6">
-                    <div className="card p-6 border-blue-100 bg-blue-50/10">
-                        <label className="text-sm font-bold text-blue-900 mb-4 block uppercase tracking-wider">Manual Bill Search</label>
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                {/* Manual Search Sidebar */}
+                <div className="lg:col-span-1 space-y-4">
+                    <div className="glass-card p-6 border-indigo-500/10 bg-indigo-500/5">
+                        <h3 className="text-xs font-black text-accent uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <Filter size={14} />
+                            Manual Search
+                        </h3>
                         <div className="space-y-4">
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
                                 <input
                                     type="text"
-                                    placeholder="Patient Name or ID..."
+                                    placeholder="Search Master Patient List..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-white border border-blue-200 rounded-xl text-sm outline-none focus:border-blue-500 transition-all font-medium"
+                                    className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-xs outline-none focus:border-accent transition-all text-text-primary"
                                 />
                             </div>
 
-                            <select
-                                value={selectedPatientId}
-                                onChange={handlePatientChange}
-                                className="w-full px-4 py-3 bg-white border border-blue-200 rounded-xl text-sm outline-none focus:border-blue-500 transition-all font-medium"
-                            >
-                                <option value="">-- Direct Patient Selection --</option>
-                                {filteredPatients.map(p => (
-                                    <option key={p.id} value={p.id}>
-                                        {p.patientNumber} - {p.firstName} {p.lastName}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                            <div className="form-group border border-border bg-surface rounded-xl overflow-hidden px-2">
+                                <select
+                                    value={selectedPatientId}
+                                    onChange={(e) => {
+                                        const id = e.target.value;
+                                        setSelectedPatientId(id);
+                                        if (id) fetchUnpaidBills(id);
+                                    }}
+                                    className="w-full py-3 bg-transparent text-xs text-text-primary outline-none"
+                                >
+                                    <option value="" className="bg-surface text-text-secondary italic">-- Quick Link --</option>
+                                    {filteredPatients.map(p => (
+                                        <option key={p.id} value={p.id} className="bg-surface text-text-primary">
+                                            {p.patientNumber} - {p.firstName} {p.lastName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                        <div className="mt-6 pt-6 border-t border-blue-100">
-                            <p className="text-xs text-blue-800/60 leading-relaxed font-medium">
-                                <AlertCircle size={14} className="inline mr-1 mb-0.5" />
-                                Use manual search if a patient doesn't appear in the live queue but claims to have a bill.
-                            </p>
+                            <div className="p-4 bg-accent/5 rounded-2xl border border-accent/10 mt-6">
+                                <div className="flex gap-3">
+                                    <Info size={16} className="text-accent shrink-0 mt-0.5" />
+                                    <p className="text-[10px] text-text-secondary leading-relaxed">
+                                        Use manual search if a patient presented a request slip but isn't visible in the live flow yet.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Bill Details */}
-                <div className="lg:col-span-2">
+                {/* Detailed View - Table 2 */}
+                <div className="lg:col-span-3">
                     {selectedPatientId ? (
-                        <div className="card overflow-hidden border-indigo-200">
-                            <div className="p-4 border-b border-indigo-100 flex justify-between items-center bg-indigo-50/50">
-                                <h2 className="text-lg font-bold text-indigo-900 flex items-center gap-2">
-                                    <Receipt size={20} />
-                                    Detailed Bill Breakdown
-                                </h2>
-                                {unpaidBills.length > 0 && (
-                                    <span className="text-xs font-bold bg-amber-100 text-amber-700 px-3 py-1 rounded-full border border-amber-200">
-                                        {unpaidBills.length} Unpaid Item(s)
+                        <div className="glass-card overflow-hidden border-accent/20">
+                            <div className="p-5 border-b border-white/5 flex justify-between items-center bg-white/2">
+                                <div>
+                                    <h2 className="font-bold text-text-primary flex items-center gap-2">
+                                        <Receipt size={18} className="text-accent" />
+                                        Detailed Bill Breakdown
+                                    </h2>
+                                    <p className="text-[10px] text-text-secondary mt-0.5 uppercase tracking-widest">Select items to include in this receipt</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-black bg-accent/10 text-accent px-3 py-1 rounded-full border border-accent/20">
+                                        {unpaidBills.length} PENDING ITEMS
                                     </span>
-                                )}
+                                </div>
                             </div>
 
-                            <div className="overflow-x-auto">
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th className="w-12 text-center">
-                                                <input
-                                                    type="checkbox"
-                                                    className="rounded border-gray-300 text-primary focus:ring-primary"
-                                                    checked={unpaidBills.length > 0 && selectedBills.length === unpaidBills.length}
-                                                    onChange={handleSelectAll}
-                                                    disabled={unpaidBills.length === 0}
-                                                />
-                                            </th>
-                                            <th>Date</th>
-                                            <th>Department</th>
-                                            <th>Description</th>
-                                            <th className="text-right">Amount (K)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {loading ? (
-                                            <tr>
-                                                <td colSpan="5" className="text-center py-12">
-                                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 mx-auto mb-2"></div>
-                                                    <p className="text-gray-500 text-sm">Aggregating department bills...</p>
-                                                </td>
-                                            </tr>
-                                        ) : unpaidBills.length === 0 ? (
-                                            <tr>
-                                                <td colSpan="5" className="text-center py-16">
-                                                    <div className="max-w-xs mx-auto text-gray-400">
-                                                        <CheckCircle className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                                                        <p className="text-lg font-bold text-gray-600 mb-1">Account Balanced</p>
-                                                        <p className="text-sm">No outstanding bills found for this patient.</p>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            unpaidBills.map((bill) => (
-                                                <tr key={`${bill.department}-${bill.id}`}
-                                                    className={`hover:bg-gray-50 cursor-pointer transition-colors ${selectedBills.includes(bill.id) ? 'bg-indigo-50/50' : ''}`}
-                                                    onClick={() => handleSelectBill(bill.id)}
-                                                >
-                                                    <td className="text-center" onClick={(e) => e.stopPropagation()}>
-                                                        <input
-                                                            type="checkbox"
-                                                            className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
-                                                            checked={selectedBills.includes(bill.id)}
-                                                            onChange={() => handleSelectBill(bill.id)}
-                                                        />
-                                                    </td>
-                                                    <td className="text-xs text-gray-500">{new Date(bill.createdAt).toLocaleDateString()}</td>
-                                                    <td>
-                                                        <span className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-700 font-bold uppercase border border-gray-200">
-                                                            {bill.department}
-                                                        </span>
-                                                    </td>
-                                                    <td className="text-sm font-medium text-gray-900">{bill.description || '-'}</td>
-                                                    <td className="text-right font-bold text-gray-900">
-                                                        {Number(bill.netAmount || bill.totalAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
+                            <div className="h-[400px] w-full">
+                                <DataGrid
+                                    rows={unpaidBills}
+                                    columns={billColumns}
+                                    loading={loading}
+                                    checkboxSelection
+                                    density="compact"
+                                    onSelectionModelChange={(newSelection) => {
+                                        setSelectedBills(newSelection);
+                                    }}
+                                    selectionModel={selectedBills}
+                                    getRowId={(row) => row.id}
+                                    sx={{
+                                        border: 'none',
+                                        '& .MuiDataGrid-columnHeaders': {
+                                            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                                            color: 'var(--text-secondary)',
+                                            fontSize: '0.7rem'
+                                        },
+                                        '& .MuiDataGrid-cell': {
+                                            borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+                                            py: 1
+                                        }
+                                    }}
+                                />
                             </div>
                         </div>
                     ) : (
-                        <div className="card h-[400px] flex flex-col items-center justify-center text-center p-12 bg-gray-50/30 border-dashed">
-                            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                                <UserPlus className="text-gray-300" size={40} />
+                        <div className="glass-card h-[400px] flex flex-col items-center justify-center text-center p-12 border-dashed border-2 border-white/5 bg-white/1">
+                            <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center mb-6 border border-white/5">
+                                <UserPlus className="text-white/20" size={32} />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Detailed View</h3>
-                            <p className="text-gray-500 max-w-sm">
-                                Select a patient from the **Live Pending Queue** above or use the manual search to view and process outstanding bills.
+                            <h3 className="text-lg font-bold text-text-primary">Selection Required</h3>
+                            <p className="text-xs text-text-secondary max-w-xs mt-2">
+                                Choose a patient record to verify outstanding departmental balances and generate receipts.
                             </p>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Sticky Action Footer */}
+            {/* Premium Sticky Footer */}
             {selectedBills.length > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-white border-t border-indigo-200 p-4 shadow-[0_-8px_30px_rgb(0,0,0,0.12)] transform transition-all z-50 animate-in slide-in-from-bottom-full">
-                    <div className="max-w-7xl mx-auto flex items-center justify-between">
-                        <div className="flex items-center gap-6">
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Active Selection</span>
-                                <span className="text-sm font-bold text-indigo-900">{selectedBills.length} Bill(s)</span>
+                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 z-50">
+                    <div className="glass-card p-4 shadow-2xl shadow-accent/20 border-accent/30 bg-surface/90 backdrop-blur-xl flex items-center justify-between">
+                        <div className="flex items-center gap-6 pl-4">
+                            <div>
+                                <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none mb-1">Items Selected</p>
+                                <p className="text-xl font-black text-text-primary">{selectedBills.length} <span className="text-xs font-medium text-text-secondary">bills</span></p>
                             </div>
-                            <div className="h-10 w-px bg-indigo-100" />
-                            <div className="flex flex-col text-right lg:text-left">
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Payable Amount</span>
-                                <span className="text-2xl font-black text-gray-900">Total: K {totalSelectedAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            <div className="h-10 w-px bg-white/10" />
+                            <div>
+                                <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest leading-none mb-1">Total Payable</p>
+                                <p className="text-2xl font-black text-text-primary">{fmt(totalSelectedAmount)}</p>
                             </div>
                         </div>
                         <button
                             onClick={handleProceedToPayment}
-                            className="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-black text-lg hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-500/30 active:scale-95 transition-all flex items-center gap-3"
+                            className="bg-accent text-white px-8 py-4 rounded-2xl font-black text-sm hover:translate-y-[-2px] hover:shadow-xl hover:shadow-accent/40 active:translate-y-[1px] transition-all flex items-center gap-3"
                         >
-                            Approve Payment
-                            <ArrowRight className="w-6 h-6" />
+                            Process Payment
+                            <ArrowRight className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
