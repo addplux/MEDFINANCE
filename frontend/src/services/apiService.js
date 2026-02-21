@@ -342,3 +342,8 @@ export const dashboardAPI = {
     getRecentActivities: () => api.get('/dashboard/recent-activities'),
     getRevenueChart: () => api.get('/dashboard/revenue-chart'),
 };
+
+// Utilisation
+export const utilisationAPI = {
+    getReport: () => api.get('/utilisation/report'),
+};

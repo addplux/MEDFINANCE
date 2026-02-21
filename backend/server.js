@@ -123,6 +123,7 @@ app.use('/api/visits', require('./routes/visits'));
 app.use('/api/nhima-claims', require('./routes/nhimaClaims'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/prepaid-plans', require('./routes/prepaidPlans'));
+app.use('/api/utilisation', require('./routes/utilisation'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
