@@ -43,6 +43,17 @@ const LabRequest = sequelize.define('LabRequest', {
     requestDate: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
+    },
+    totalAmount: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0.00,
+        comment: 'Sum of all test prices in this request'
+    },
+    paymentStatus: {
+        type: DataTypes.ENUM('unpaid', 'paid', 'prepaid', 'claimed', 'waived'),
+        allowNull: false,
+        defaultValue: 'unpaid'
     }
 }, {
     tableName: 'lab_requests',

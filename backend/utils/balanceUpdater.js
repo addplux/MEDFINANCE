@@ -1,5 +1,5 @@
 const { Patient, OPDBill, PharmacyBill, LabBill, RadiologyBill,
-    MaternityBill, TheatreBill, SpecialistClinicBill, Payment } = require('../models');
+    MaternityBill, TheatreBill, SpecialistClinicBill, Payment, LabRequest } = require('../models');
 
 /**
  * Recalculates and updates the balance for a specific patient.
@@ -23,9 +23,8 @@ const updatePatientBalance = async (patientId, transaction = null) => {
         const patient = await Patient.findByPk(patientId, { transaction });
         if (!patient) throw new Error(`Patient ${patientId} not found`);
 
-        // Sum all bill types
+        // Sum standard bill models (netAmount or totalAmount)
         const billModels = [OPDBill, PharmacyBill, LabBill, RadiologyBill];
-        // Optionally include these if they exist in models
         try { billModels.push(require('../models').MaternityBill); } catch (_) { }
         try { billModels.push(require('../models').TheatreBill); } catch (_) { }
         try { billModels.push(require('../models').SpecialistClinicBill); } catch (_) { }
@@ -34,12 +33,13 @@ const updatePatientBalance = async (patientId, transaction = null) => {
         for (const Model of billModels) {
             if (!Model || !Model.sum) continue;
             const field = Model.rawAttributes?.netAmount ? 'netAmount' : 'totalAmount';
-            const sum = await Model.sum(field, {
-                where: { patientId },
-                transaction
-            });
+            const sum = await Model.sum(field, { where: { patientId }, transaction });
             totalBilled += (sum || 0);
         }
+
+        // Also sum LabRequest.totalAmount (lab module uses requests not LabBills)
+        const labRequestTotal = await LabRequest.sum('totalAmount', { where: { patientId }, transaction });
+        totalBilled += (labRequestTotal || 0);
 
         let newBalance;
 

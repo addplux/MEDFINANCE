@@ -66,6 +66,22 @@ const createRequest = async (req, res) => {
             return res.status(400).json({ error: 'Patient and tests are required' });
         }
 
+        // Fetch patient and tests
+        const patient = await Patient.findByPk(patientId, { transaction: t });
+        if (!patient) return res.status(404).json({ error: 'Patient not found' });
+
+        const tests = await LabTest.findAll({ where: { id: testIds }, transaction: t });
+        const totalAmount = tests.reduce((sum, test) => sum + parseFloat(test.price || 0), 0);
+
+        // For prepaid patients: check they have enough balance
+        const isPrepaid = patient.paymentMethod === 'private_prepaid';
+        if (isPrepaid && parseFloat(patient.balance) < totalAmount) {
+            await t.rollback();
+            return res.status(400).json({
+                error: `Insufficient prepaid balance. Available: ZK ${parseFloat(patient.balance).toFixed(2)}, Required: ZK ${totalAmount.toFixed(2)}`
+            });
+        }
+
         // Generate Request Number
         const count = await LabRequest.count({ transaction: t });
         const requestNumber = `LAB${String(count + 1).padStart(6, '0')}`;
@@ -76,22 +92,30 @@ const createRequest = async (req, res) => {
             requestedBy: req.user.id,
             priority: priority || 'routine',
             clinicalNotes,
-            status: 'requested'
+            status: 'requested',
+            totalAmount,
+            paymentStatus: isPrepaid ? 'prepaid' : 'unpaid'
         }, { transaction: t });
 
         // Create empty results for each test (to be filled later)
-        const resultPromises = testIds.map(testId => {
-            return LabResult.create({
+        const resultPromises = testIds.map(testId =>
+            LabResult.create({
                 labRequestId: request.id,
                 testId,
-                resultValue: '', // Pending
+                resultValue: '',
                 isAbnormal: false
-            }, { transaction: t });
-        });
-
+            }, { transaction: t })
+        );
         await Promise.all(resultPromises);
 
         await t.commit();
+
+        // Auto-deduct prepaid balance AFTER commit so balanceUpdater sees the new LabBill
+        if (isPrepaid && totalAmount > 0) {
+            const { updatePatientBalance } = require('../utils/balanceUpdater');
+            await updatePatientBalance(patientId);
+        }
+
         res.status(201).json(request);
 
     } catch (error) {
