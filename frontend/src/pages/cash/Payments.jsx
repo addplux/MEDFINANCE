@@ -94,8 +94,8 @@ const PatientLedger = () => {
                         {params.row.firstName[0]}{params.row.lastName[0]}
                     </div>
                     <div className="truncate">
-                        <div className="font-bold text-text-primary text-sm leading-tight">{params.row.firstName} {params.row.lastName}</div>
-                        <div className="text-[10px] text-text-secondary font-mono">{params.row.patientNumber}</div>
+                        <div className="font-bold text-white text-sm leading-tight">{params.row.firstName} {params.row.lastName}</div>
+                        <div className="text-[10px] text-gray-400 font-mono">{params.row.patientNumber}</div>
                     </div>
                 </div>
             )
@@ -107,7 +107,7 @@ const PatientLedger = () => {
             renderCell: (params) => (
                 <div className="flex flex-wrap gap-1">
                     {params.value.split(', ').map(d => (
-                        <span key={d} className="px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[9px] font-black text-text-secondary uppercase">
+                        <span key={d} className="px-1.5 py-0.5 rounded-md bg-white/10 border border-white/20 text-[9px] font-black text-white uppercase tracking-wider">
                             {d}
                         </span>
                     ))}
@@ -166,7 +166,7 @@ const PatientLedger = () => {
             headerName: 'Dept',
             width: 100,
             renderCell: (params) => (
-                <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-text-secondary font-bold uppercase border border-white/10">
+                <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-white font-bold uppercase border border-white/20 tracking-wider">
                     {params.value}
                 </span>
             )
@@ -176,7 +176,7 @@ const PatientLedger = () => {
             headerName: 'Service Description',
             flex: 1.5,
             renderCell: (params) => (
-                <span className="text-sm font-medium text-text-primary">{params.value || 'General Bill'}</span>
+                <span className="text-sm font-medium text-white">{params.value || 'General Bill'}</span>
             )
         },
         {
@@ -184,7 +184,7 @@ const PatientLedger = () => {
             headerName: 'Amount',
             flex: 1,
             renderCell: (params) => (
-                <span className="font-black text-text-primary">
+                <span className="font-black text-white">
                     {fmt(params.row.netAmount || params.row.totalAmount || 0)}
                 </span>
             )
@@ -241,12 +241,13 @@ const PatientLedger = () => {
                         sx={{
                             border: 'none',
                             '& .MuiDataGrid-columnHeaders': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                                color: 'var(--text-secondary)',
+                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                color: '#ffffff',
                                 fontSize: '0.7rem',
-                                fontWeight: 600,
+                                fontWeight: 700,
                                 textTransform: 'uppercase',
-                                letterSpacing: '0.05em'
+                                letterSpacing: '0.1em',
+                                borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
                             },
                             '& .MuiDataGrid-cell': {
                                 borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
@@ -281,13 +282,13 @@ const PatientLedger = () => {
                         </h3>
                         <div className="space-y-4">
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                 <input
                                     type="text"
                                     placeholder="Search Master Patient List..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-xs outline-none focus:border-accent transition-all text-text-primary"
+                                    className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-xs outline-none focus:border-accent transition-all text-white placeholder:text-gray-500"
                                 />
                             </div>
 
@@ -299,11 +300,11 @@ const PatientLedger = () => {
                                         setSelectedPatientId(id);
                                         if (id) fetchUnpaidBills(id);
                                     }}
-                                    className="w-full py-3 bg-transparent text-xs text-text-primary outline-none"
+                                    className="w-full py-3 bg-transparent text-xs text-white outline-none"
                                 >
-                                    <option value="" className="bg-surface text-text-secondary italic">-- Quick Link --</option>
+                                    <option value="" className="bg-surface text-gray-400 italic">-- Quick Link --</option>
                                     {filteredPatients.map(p => (
-                                        <option key={p.id} value={p.id} className="bg-surface text-text-primary">
+                                        <option key={p.id} value={p.id} className="bg-surface text-white">
                                             {p.patientNumber} - {p.firstName} {p.lastName}
                                         </option>
                                     ))}
@@ -313,7 +314,7 @@ const PatientLedger = () => {
                             <div className="p-4 bg-accent/5 rounded-2xl border border-accent/10 mt-6">
                                 <div className="flex gap-3">
                                     <Info size={16} className="text-accent shrink-0 mt-0.5" />
-                                    <p className="text-[10px] text-text-secondary leading-relaxed">
+                                    <p className="text-[10px] text-gray-400 leading-relaxed">
                                         Use manual search if a patient presented a request slip but isn't visible in the live flow yet.
                                     </p>
                                 </div>
@@ -356,12 +357,17 @@ const PatientLedger = () => {
                                     sx={{
                                         border: 'none',
                                         '& .MuiDataGrid-columnHeaders': {
-                                            backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                                            color: 'var(--text-secondary)',
-                                            fontSize: '0.7rem'
+                                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                            color: '#ffffff',
+                                            fontSize: '0.7rem',
+                                            fontWeight: 700,
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.1em',
+                                            borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
                                         },
                                         '& .MuiDataGrid-cell': {
                                             borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+                                            color: '#ffffff',
                                             py: 1.5
                                         }
                                     }}
