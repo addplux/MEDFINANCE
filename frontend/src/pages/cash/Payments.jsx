@@ -231,14 +231,13 @@ const PatientLedger = () => {
                     <p className="text-xs text-text-secondary mb-4 italic">Patients waiting at the cashier desk for settlement</p>
                 </div>
 
-                <div className="h-[400px] w-full">
+                <div className="h-[450px] w-full">
                     <DataGrid
                         rows={pendingQueue}
                         columns={queueColumns}
                         loading={queueLoading}
-                        density="compact"
                         disableSelectionOnClick
-                        hideFooter={pendingQueue.length < 10}
+                        getRowHeight={() => 'auto'}
                         sx={{
                             border: 'none',
                             '& .MuiDataGrid-columnHeaders': {
@@ -251,7 +250,7 @@ const PatientLedger = () => {
                             },
                             '& .MuiDataGrid-cell': {
                                 borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
-                                py: 1.5
+                                py: 2
                             },
                             '& .MuiDataGrid-row:hover': {
                                 backgroundColor: 'rgba(255, 255, 255, 0.03)'
@@ -342,13 +341,13 @@ const PatientLedger = () => {
                                 </div>
                             </div>
 
-                            <div className="h-[400px] w-full">
+                            <div className="h-[450px] w-full">
                                 <DataGrid
                                     rows={unpaidBills}
                                     columns={billColumns}
                                     loading={loading}
                                     checkboxSelection
-                                    density="compact"
+                                    getRowHeight={() => 'auto'}
                                     onSelectionModelChange={(newSelection) => {
                                         setSelectedBills(newSelection);
                                     }}
@@ -363,7 +362,7 @@ const PatientLedger = () => {
                                         },
                                         '& .MuiDataGrid-cell': {
                                             borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
-                                            py: 1
+                                            py: 1.5
                                         }
                                     }}
                                 />
