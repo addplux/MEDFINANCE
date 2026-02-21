@@ -143,6 +143,18 @@ const updatePatient = async (req, res) => {
         const oldData = patient.toJSON();
         const updateData = { ...req.body };
 
+        // Convert empty strings to null for optional foreign keys and enums
+        if (updateData.staffId === '') updateData.staffId = null;
+        if (updateData.serviceId === '') updateData.serviceId = null;
+        if (updateData.schemeId === '') updateData.schemeId = null;
+        if (updateData.ward === '') updateData.ward = null;
+        if (updateData.registeredService === '') updateData.registeredService = null;
+
+        // Ensure staffId is only set if paymentMethod is staff
+        if (updateData.paymentMethod && updateData.paymentMethod !== 'staff') {
+            updateData.staffId = null;
+        }
+
         // Handle photo upload
         if (req.file) {
             // Delete old photo if exists

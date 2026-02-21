@@ -9,6 +9,7 @@ const cors = require('cors');
 const { syncDatabase, User } = require('./models');
 const { sequelize, testConnection } = require('./config/database');
 const { seedDatabase } = require('./seed');
+const { initCronJobs } = require('./jobs/cronManager');
 
 const app = express();
 
@@ -174,6 +175,9 @@ const startServer = async () => {
         } catch (seedError) {
             console.error('⚠️ Auto-seed check failed:', seedError);
         }
+
+        // Initialize background jobs
+        initCronJobs();
 
     } catch (error) {
         console.error('❌ Database initialization failed:', error);

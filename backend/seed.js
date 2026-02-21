@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { syncDatabase, User, Role, Department, Service, ChartOfAccounts } = require('./models');
+const { syncDatabase, User, Role, Department, Service, ChartOfAccounts, Scheme, CorporateAccount, Patient, Medication, PharmacyBatch, LabTest, Organization } = require('./models');
 
 const seedDatabase = async () => {
     try {
@@ -11,33 +11,54 @@ const seedDatabase = async () => {
         console.log('📊 Creating initial data...');
 
         // 0. Create Roles
+        const doctorRole = await Role.create({
+            name: 'Doctor',
+            description: 'Clinical and consultation access',
+            permissions: { clinical: ['read', 'write'], patients: ['read', 'write'] },
+            isSystem: true
+        });
+
+        const nurseRole = await Role.create({
+            name: 'Nurse',
+            description: 'Ward and nursing care access',
+            permissions: { clinical: ['read', 'write'], patients: ['read'] },
+            isSystem: true
+        });
+
+        const pharmacistRole = await Role.create({
+            name: 'Pharmacist',
+            description: 'Pharmacy inventory and dispensing access',
+            permissions: { pharmacy: ['read', 'write'], inventory: ['read', 'write'] },
+            isSystem: true
+        });
+
+        const labTechRole = await Role.create({
+            name: 'Lab Technician',
+            description: 'Laboratory testing and results access',
+            permissions: { laboratory: ['read', 'write'] },
+            isSystem: true
+        });
         const adminRole = await Role.create({
-            name: 'Administrator',
+            name: 'Admin',
             description: 'Full system access',
-            permissions: { all: ['manage'] },
+            permissions: { all: ['read', 'write', 'delete'] },
             isSystem: true
         });
 
         const accountantRole = await Role.create({
             name: 'Accountant',
-            description: 'Financial management access',
+            description: 'Financial and reporting access',
             permissions: { finance: ['read', 'write'], reports: ['read'] },
             isSystem: true
         });
 
         const billingRole = await Role.create({
             name: 'Billing Staff',
-            description: 'Billing and patient management',
-            permissions: { billing: ['read', 'write'], patients: ['read', 'write'] },
+            description: 'Billing and invoicing access',
+            permissions: { billing: ['read', 'write'], patients: ['read'] },
             isSystem: true
         });
 
-        const viewerRole = await Role.create({
-            name: 'Viewer',
-            description: 'Read-only access',
-            permissions: { '*': ['read'] },
-            isSystem: true
-        });
         console.log('✅ Default roles created');
 
         // 1. Create Admin User
@@ -54,8 +75,8 @@ const seedDatabase = async () => {
         });
         console.log('✅ Admin user created');
 
-        // 2. Create sample users
-        await User.bulkCreate([
+        // 2. Create sample users (Staff)
+        const staff = await User.bulkCreate([
             {
                 username: 'accountant1',
                 email: 'accountant@medfinance360.com',
@@ -77,9 +98,55 @@ const seedDatabase = async () => {
                 roleId: billingRole.id,
                 isActive: true,
                 status: 'approved'
+            },
+            {
+                username: 'drchanda',
+                email: 'dr.chanda@medfinance360.com',
+                password: 'Doctor@123',
+                role: 'doctor',
+                firstName: 'Emmanuel',
+                lastName: 'Chanda',
+                roleId: doctorRole.id,
+                isActive: true,
+                status: 'approved'
+            },
+            {
+                username: 'nursemulenga',
+                email: 'nurse.mulenga@medfinance360.com',
+                password: 'Nurse@123',
+                role: 'nurse',
+                firstName: 'Sarah',
+                lastName: 'Mulenga',
+                roleId: nurseRole.id,
+                isActive: true,
+                status: 'approved'
+            },
+            {
+                username: 'pharmbwalya',
+                email: 'pharm.bwalya@medfinance360.com',
+                password: 'Pharm@123',
+                role: 'pharmacist',
+                firstName: 'David',
+                lastName: 'Bwalya',
+                roleId: pharmacistRole.id,
+                isActive: true,
+                status: 'approved'
+            },
+            {
+                username: 'labbvumbo',
+                email: 'lab.bvumbo@medfinance360.com',
+                password: 'Lab@123',
+                role: 'lab_technician',
+                firstName: 'Peter',
+                lastName: 'Bvumbo',
+                roleId: labTechRole.id,
+                isActive: true,
+                status: 'approved'
             }
         ], { individualHooks: true });
-        console.log('✅ Sample users created');
+        console.log('✅ Sample staff users created');
+
+        const drChandaId = staff.find(s => s.username === 'drchanda').id;
 
         // 3. Create Departments
         const departments = await Department.bulkCreate([
@@ -92,6 +159,165 @@ const seedDatabase = async () => {
             { departmentCode: 'FIN', departmentName: 'Finance', managerId: adminUser.id, status: 'active' }
         ]);
         console.log('✅ Departments created');
+
+        // 4. Create Schemes & Corporate Accounts
+        const nhimaScheme = await Scheme.create({
+            schemeCode: 'NHIMA01',
+            schemeName: 'National Health Insurance (NHIMA)',
+            schemeType: 'government',
+            billingCycle: 'monthly',
+            pricingModel: 'standard',
+            status: 'active'
+        });
+
+        const madisonScheme = await Scheme.create({
+            schemeCode: 'MAD01',
+            schemeName: 'Madison Health Insurance',
+            schemeType: 'insurance',
+            billingCycle: 'monthly',
+            pricingModel: 'tiered',
+            status: 'active'
+        });
+
+        const zamSugarCorp = await CorporateAccount.create({
+            accountNumber: 'CORP-ZSUG',
+            companyName: 'Zambia Sugar Plc',
+            contactPerson: 'HR Manager',
+            phone: '0211123456',
+            email: 'hr@zambiasugar.com',
+            creditLimit: 50000.00,
+            status: 'active'
+        });
+        console.log('✅ Schemes and Corporate accounts created');
+
+        // 5. Create Patients
+        await Patient.bulkCreate([
+            {
+                patientNumber: 'PT-000001',
+                firstName: 'James',
+                lastName: 'Phiri',
+                dateOfBirth: '1985-06-15',
+                gender: 'male',
+                phone: '0977112233',
+                patientType: 'opd',
+                paymentMethod: 'cash',
+                costCategory: 'standard',
+                balance: 0.00
+            },
+            {
+                patientNumber: 'PT-000002',
+                firstName: 'Grace',
+                lastName: 'Mutale',
+                dateOfBirth: '1990-11-20',
+                gender: 'female',
+                phone: '0966445566',
+                patientType: 'opd',
+                paymentMethod: 'nhima',
+                nhimaNumber: 'NHM-987654321',
+                schemeId: nhimaScheme.id,
+                costCategory: 'standard',
+                balance: 0.00
+            },
+            {
+                patientNumber: 'PT-000003',
+                firstName: 'Chisomo',
+                lastName: 'Banda',
+                dateOfBirth: '1978-03-10',
+                gender: 'male',
+                phone: '0955778899',
+                patientType: 'ipd',
+                paymentMethod: 'scheme',
+                schemeId: madisonScheme.id,
+                policyNumber: 'MAD-HLT-001',
+                ward: 'general_ward',
+                staffId: drChandaId,
+                costCategory: 'high_cost',
+                balance: 0.00
+            },
+            {
+                patientNumber: 'PT-000004',
+                firstName: 'Bupe',
+                lastName: 'Mwewa',
+                dateOfBirth: '1995-08-05',
+                gender: 'female',
+                phone: '0977998877',
+                patientType: 'opd',
+                paymentMethod: 'corporate',
+                policyNumber: zamSugarCorp.accountNumber,
+                costCategory: 'standard',
+                balance: 0.00
+            }
+        ]);
+        console.log('✅ Test Patients created');
+
+        // 6. Create Pharmacy Inventory
+        const panadol = await Medication.create({
+            code: 'DRUG-001',
+            name: 'Paracetamol (Panadol) 500mg',
+            category: 'Tablet',
+            unitOfMeasure: 'blister',
+            manufacturer: 'GSK',
+            isActive: true
+        });
+
+        const amox = await Medication.create({
+            code: 'DRUG-002',
+            name: 'Amoxicillin 250mg',
+            category: 'Capsule',
+            unitOfMeasure: 'box',
+            manufacturer: 'PharmaCorp',
+            isActive: true
+        });
+
+        const ivFluid = await Medication.create({
+            code: 'CONS-001',
+            name: 'Normal Saline IV Fluid 500ml',
+            category: 'Consumable',
+            unitOfMeasure: 'bag',
+            manufacturer: 'MedSupply',
+            isActive: true
+        });
+
+        await PharmacyBatch.bulkCreate([
+            {
+                medicationId: panadol.id,
+                batchNumber: 'B-PANA-2026',
+                expiryDate: '2028-12-31',
+                quantityReceived: 1000,
+                quantityOnHand: 1000,
+                unitCost: 2.50,
+                sellingPrice: 10.00
+            },
+            {
+                medicationId: amox.id,
+                batchNumber: 'B-AMOX-2026',
+                expiryDate: '2027-06-30',
+                quantityReceived: 500,
+                quantityOnHand: 500,
+                unitCost: 15.00,
+                sellingPrice: 45.00
+            },
+            {
+                medicationId: ivFluid.id,
+                batchNumber: 'B-IVF-2026',
+                expiryDate: '2029-01-01',
+                quantityReceived: 200,
+                quantityOnHand: 200,
+                unitCost: 50.00,
+                sellingPrice: 150.00
+            }
+        ]);
+        console.log('✅ Pharmacy Medications and Batches created');
+
+        // 7. Create Lab Tests
+        await LabTest.bulkCreate([
+            { code: 'LT-001', name: 'Full Blood Count (FBC)', category: 'Hematology', price: 150.00, isActive: true },
+            { code: 'LT-002', name: 'Malaria RDT', category: 'Microbiology', price: 50.00, isActive: true },
+            { code: 'LT-003', name: 'Urinalysis', category: 'Biochemistry', price: 80.00, isActive: true },
+            { code: 'LT-004', name: 'Liver Function Test (LFT)', category: 'Biochemistry', price: 250.00, isActive: true }
+        ]);
+        console.log('✅ Laboratory Tests created');
+
 
         // 4. Create Services
         await Service.bulkCreate([

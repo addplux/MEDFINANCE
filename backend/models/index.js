@@ -45,6 +45,7 @@ const Shift = require('./Shift');
 const Refund = require('./Refund');
 const Notification = require('./Notification');
 const Visit = require('./Visit');
+const ARReminderLog = require('./ARReminderLog');
 
 // Define relationships
 
@@ -91,6 +92,8 @@ Patient.hasMany(MaternityBill, { foreignKey: 'patientId', as: 'maternityBills' }
 Patient.hasMany(SpecialistClinicBill, { foreignKey: 'patientId', as: 'specialistClinicBills' });
 Patient.hasMany(NHIMAClaim, { foreignKey: 'patientId', as: 'nhimaClaims' });
 Patient.hasMany(Payment, { foreignKey: 'patientId', as: 'payments' });
+Patient.hasMany(ARReminderLog, { foreignKey: 'patientId', as: 'arReminderLogs' });
+ARReminderLog.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 
 // Service relationships
 Service.hasMany(OPDBill, { foreignKey: 'serviceId', as: 'opdBills' });
@@ -287,7 +290,8 @@ module.exports = {
     Refund,
     Role,
     Notification,
-    Visit
+    Visit,
+    ARReminderLog
 };
 
 
