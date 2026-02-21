@@ -2,49 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
     ShieldCheck, Plus, Edit2, Trash2, Users, DollarSign,
     ChevronDown, ChevronUp, Star, Zap, X, Save, Search,
-    UserPlus, CheckCircle, AlertCircle, Clock
+    UserPlus, CheckCircle, AlertCircle, Clock, Loader
 } from 'lucide-react';
-import { patientAPI } from '../../../services/apiService';
-
-// ─── Default plan catalog ───────────────────────────────────────────────────
-const DEFAULT_PLANS = [
-    {
-        id: 'basic',
-        name: 'Basic',
-        color: '#6366f1',
-        icon: 'shield',
-        monthlyPremium: 500,
-        annualPremium: 5500,
-        coverageLimit: 10000,
-        duration: 30,
-        description: 'Essential coverage for individuals needing routine outpatient and pharmacy services.',
-        benefits: ['Outpatient consultation', 'Pharmacy (generic drugs)', 'Basic laboratory tests', 'Emergency OPD'],
-    },
-    {
-        id: 'standard',
-        name: 'Standard',
-        color: '#0ea5e9',
-        icon: 'zap',
-        monthlyPremium: 1200,
-        annualPremium: 13000,
-        coverageLimit: 30000,
-        duration: 30,
-        description: 'Balanced cover for individuals and couples including specialist and radiology services.',
-        benefits: ['All Basic benefits', 'Specialist consultations', 'Radiology & Ultrasound', 'Minor theatre procedures', 'Maternity (2 ante-natal visits)'],
-    },
-    {
-        id: 'premium',
-        name: 'Premium',
-        color: '#f59e0b',
-        icon: 'star',
-        monthlyPremium: 2500,
-        annualPremium: 27000,
-        coverageLimit: 80000,
-        duration: 30,
-        description: 'Comprehensive family cover with full inpatient, theatre, and maternity benefits.',
-        benefits: ['All Standard benefits', 'Inpatient admission', 'Major theatre & anaesthesia', 'Full maternity package', 'Dental & optical (basic)', 'Physiotherapy'],
-    },
-];
+import { patientAPI, prepaidPlanAPI } from '../../../services/apiService';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const PlanIcon = ({ icon, size = 20 }) => {
@@ -57,7 +17,8 @@ const fmt = (n) => `ZK ${Number(n).toLocaleString(undefined, { minimumFractionDi
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const PlanSelection = () => {
-    const [plans, setPlans] = useState(DEFAULT_PLANS);
+    const [plans, setPlans] = useState([]);
+    const [plansLoading, setPlansLoading] = useState(true);
     const [members, setMembers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [alert, setAlert] = useState(null);
@@ -77,6 +38,19 @@ const PlanSelection = () => {
         setTimeout(() => setAlert(null), 4000);
     };
 
+    // Load plans from DB
+    const loadPlans = useCallback(async () => {
+        setPlansLoading(true);
+        try {
+            const res = await prepaidPlanAPI.getAll();
+            setPlans(res.data || []);
+        } catch {
+            showMessage('error', 'Failed to load plans');
+        } finally {
+            setPlansLoading(false);
+        }
+    }, []);
+
     // Load all prepaid members
     const loadMembers = useCallback(async () => {
         setLoading(true);
@@ -90,11 +64,14 @@ const PlanSelection = () => {
         }
     }, []);
 
-    useEffect(() => { loadMembers(); }, [loadMembers]);
+    useEffect(() => { loadPlans(); loadMembers(); }, [loadPlans, loadMembers]);
 
-    // Members for a given plan
-    const membersOnPlan = (planId) =>
-        members.filter(m => (m.memberPlan || '').toLowerCase() === planId.toLowerCase());
+    // Members for a given plan (match by planKey or plan name lowercase)
+    const membersOnPlan = (plan) =>
+        members.filter(m => {
+            const mp = (m.memberPlan || '').toLowerCase();
+            return mp === (plan.planKey || '').toLowerCase() || mp === plan.name.toLowerCase();
+        });
 
     // Unassigned members (no plan)
     const unassigned = members.filter(m => !m.memberPlan || m.memberPlan.trim() === '');
@@ -105,16 +82,31 @@ const PlanSelection = () => {
         return name.includes(memberSearch.toLowerCase());
     });
 
-    // ── Edit plan handler ──────────────────────────────────────────────────────
+    // ── Edit plan handler — persists to DB ────────────────────────────────────
     const openEdit = (plan) => {
-        setEditingPlan({ ...plan });
+        setEditingPlan({ ...plan, benefits: Array.isArray(plan.benefits) ? plan.benefits : [] });
         setShowEditModal(true);
     };
 
-    const savePlan = () => {
-        setPlans(prev => prev.map(p => p.id === editingPlan.id ? editingPlan : p));
-        setShowEditModal(false);
-        showMessage('success', `${editingPlan.name} plan updated.`);
+    const savePlan = async () => {
+        setSaving(true);
+        try {
+            const payload = {
+                ...editingPlan,
+                monthlyPremium: Number(editingPlan.monthlyPremium),
+                annualPremium: Number(editingPlan.annualPremium),
+                coverageLimit: Number(editingPlan.coverageLimit),
+                benefits: Array.isArray(editingPlan.benefits) ? editingPlan.benefits : editingPlan.benefits.split('\n').filter(Boolean)
+            };
+            await prepaidPlanAPI.update(editingPlan.id, payload);
+            await loadPlans();
+            setShowEditModal(false);
+            showMessage('success', `${editingPlan.name} plan saved to database.`);
+        } catch {
+            showMessage('error', 'Failed to save plan.');
+        } finally {
+            setSaving(false);
+        }
     };
 
     // ── Assign member to plan ──────────────────────────────────────────────────

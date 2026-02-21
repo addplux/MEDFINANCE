@@ -46,6 +46,7 @@ const Refund = require('./Refund');
 const Notification = require('./Notification');
 const Visit = require('./Visit');
 const ARReminderLog = require('./ARReminderLog');
+const PrepaidPlan = require('./PrepaidPlan');
 
 // Define relationships
 
@@ -291,7 +292,8 @@ module.exports = {
     Role,
     Notification,
     Visit,
-    ARReminderLog
+    ARReminderLog,
+    PrepaidPlan
 };
 
 

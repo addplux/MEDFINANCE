@@ -34,6 +34,15 @@ export const patientAPI = {
     topup: (id, amount) => api.post(`/patients/${id}/topup`, { amount }),
 };
 
+// Prepaid Plans
+export const prepaidPlanAPI = {
+    getAll: () => api.get('/prepaid-plans'),
+    getById: (id) => api.get(`/prepaid-plans/${id}`),
+    create: (data) => api.post('/prepaid-plans', data),
+    update: (id, data) => api.put(`/prepaid-plans/${id}`, data),
+    delete: (id) => api.delete(`/prepaid-plans/${id}`),
+};
+
 // Visits
 export const visitAPI = {
     getAll: (params) => api.get('/visits', { params }),
