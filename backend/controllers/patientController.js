@@ -10,7 +10,7 @@ const path = require('path');
 // Get all patients
 const getAllPatients = async (req, res) => {
     try {
-        const { page = 1, limit = 20, search } = req.query;
+        const { page = 1, limit = 20, search, paymentMethod } = req.query;
         const offset = (page - 1) * limit;
 
         const where = {};
@@ -23,6 +23,10 @@ const getAllPatients = async (req, res) => {
                 { nhimaNumber: { [Op.iLike]: `%${search}%` } },
                 { nrc: { [Op.iLike]: `%${search}%` } } // Added NRC search
             ];
+        }
+
+        if (paymentMethod) {
+            where.paymentMethod = paymentMethod;
         }
 
         const { count, rows } = await Patient.findAndCountAll({
