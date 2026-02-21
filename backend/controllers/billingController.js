@@ -421,6 +421,74 @@ const getUnpaidPatientBills = async (req, res) => {
     }
 };
 
+// Get a consolidated queue of all patients with unpaid bills across all departments
+const getPendingQueue = async (req, res) => {
+    try {
+        const { PharmacyBill, LabRequest, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill } = require('../models');
+
+        // Query all tables for 'unpaid' records
+        const [opd, pharmacy, lab, radiology, theatre, maternity, specialist] = await Promise.all([
+            OPDBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
+            PharmacyBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
+            LabRequest.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
+            RadiologyBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
+            TheatreBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
+            MaternityBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
+            SpecialistClinicBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] })
+        ]);
+
+        const queueMap = new Map();
+
+        const processRecords = (records, dept) => {
+            records.forEach(r => {
+                if (!r.patient) return;
+                const pid = r.patient.id;
+                const amount = parseFloat(r.netAmount || r.totalAmount || 0);
+
+                if (!queueMap.has(pid)) {
+                    queueMap.set(pid, {
+                        id: pid,
+                        patientNumber: r.patient.patientNumber,
+                        firstName: r.patient.firstName,
+                        lastName: r.patient.lastName,
+                        departments: new Set([dept]),
+                        totalAmount: amount,
+                        itemCount: 1,
+                        lastRequest: r.createdAt
+                    });
+                } else {
+                    const existing = queueMap.get(pid);
+                    existing.departments.add(dept);
+                    existing.totalAmount += amount;
+                    existing.itemCount += 1;
+                    if (new Date(r.createdAt) > new Date(existing.lastRequest)) {
+                        existing.lastRequest = r.createdAt;
+                    }
+                }
+            });
+        };
+
+        processRecords(opd, 'OPD');
+        processRecords(pharmacy, 'Pharmacy');
+        processRecords(lab, 'Laboratory');
+        processRecords(radiology, 'Radiology');
+        processRecords(theatre, 'Theatre');
+        processRecords(maternity, 'Maternity');
+        processRecords(specialist, 'Specialist Clinic');
+
+        // Convert Map to sorted array
+        const result = Array.from(queueMap.values()).map(p => ({
+            ...p,
+            departments: Array.from(p.departments).join(', ')
+        })).sort((a, b) => new Date(b.lastRequest) - new Date(a.lastRequest));
+
+        res.json(result);
+    } catch (error) {
+        console.error('Get pending queue error:', error);
+        res.status(500).json({ error: 'Failed to get pending cashier queue' });
+    }
+};
+
 module.exports = {
     getAllOPDBills,
     getOPDBill,
@@ -429,5 +497,6 @@ module.exports = {
     deleteOPDBill,
     getPatientBalance,
     getPatientStatement,
-    getUnpaidPatientBills
+    getUnpaidPatientBills,
+    getPendingQueue
 };

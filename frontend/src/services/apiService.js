@@ -80,7 +80,8 @@ export const billingAPI = {
     patient: {
         getBalance: (id) => api.get(`/billing/patient/${id}/balance`),
         getStatement: (id) => api.get(`/billing/patient/${id}/statement`),
-        getUnpaidBills: (id) => api.get(`/billing/patient/${id}/unpaid`)
+        getUnpaidBills: (id) => api.get(`/billing/patient/${id}/unpaid`),
+        getPendingQueue: () => api.get('/billing/pending-queue')
     }
 };
 
