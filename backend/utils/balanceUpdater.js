@@ -30,20 +30,55 @@ const updatePatientBalance = async (patientId, transaction = null) => {
         try { billModels.push(require('../models').SpecialistClinicBill); } catch (_) { }
 
         let totalBilled = 0;
+        let totalPlanSpend = 0; // Total usage against plan coverage limit
+
+        const isPrepaid = patient.paymentMethod === 'private_prepaid';
+        const start = patient.planStartDate;
+        const end = patient.planEndDate;
+
         for (const Model of billModels) {
             if (!Model || !Model.sum) continue;
             const field = Model.rawAttributes?.netAmount ? 'netAmount' : 'totalAmount';
+
+            // Standard sum for balance
             const sum = await Model.sum(field, { where: { patientId }, transaction });
             totalBilled += (sum || 0);
+
+            // Sum for plan coverage tracking (only if within dates)
+            if (isPrepaid && (start || end)) {
+                const dateWhere = { patientId };
+                if (start && end) {
+                    dateWhere.createdAt = { [require('sequelize').Op.between]: [new Date(start), new Date(new Date(end).setHours(23, 59, 59, 999))] };
+                } else if (start) {
+                    dateWhere.createdAt = { [require('sequelize').Op.gte]: new Date(start) };
+                } else if (end) {
+                    dateWhere.createdAt = { [require('sequelize').Op.lte]: new Date(new Date(end).setHours(23, 59, 59, 999)) };
+                }
+                const planSum = await Model.sum(field, { where: dateWhere, transaction });
+                totalPlanSpend += (planSum || 0);
+            }
         }
 
         // Also sum LabRequest.totalAmount (lab module uses requests not LabBills)
         const labRequestTotal = await LabRequest.sum('totalAmount', { where: { patientId }, transaction });
         totalBilled += (labRequestTotal || 0);
 
+        if (isPrepaid && (start || end)) {
+            const dateWhere = { patientId };
+            if (start && end) {
+                dateWhere.createdAt = { [require('sequelize').Op.between]: [new Date(start), new Date(new Date(end).setHours(23, 59, 59, 999))] };
+            } else if (start) {
+                dateWhere.createdAt = { [require('sequelize').Op.gte]: new Date(start) };
+            } else if (end) {
+                dateWhere.createdAt = { [require('sequelize').Op.lte]: new Date(new Date(end).setHours(23, 59, 59, 999)) };
+            }
+            const labPlanSum = await LabRequest.sum('totalAmount', { where: dateWhere, transaction });
+            totalPlanSpend += (labPlanSum || 0);
+        }
+
         let newBalance;
 
-        if (patient.paymentMethod === 'private_prepaid') {
+        if (isPrepaid) {
             // For prepaid: remaining = total credits - total billed
             // prepaidCredit is set/incremented separately on registration & top-up.
             const credit = parseFloat(patient.prepaidCredit || 0);
@@ -58,7 +93,7 @@ const updatePatientBalance = async (patientId, transaction = null) => {
         }
 
         await Patient.update(
-            { balance: newBalance },
+            { balance: newBalance, totalPlanSpend },
             { where: { id: patientId }, transaction }
         );
 

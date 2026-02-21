@@ -1,5 +1,5 @@
-const { LabTest, LabRequest, LabResult, Patient, User } = require('../models');
-const { Op } = require('sequelize');
+const { LabTest, LabRequest, LabResult, Patient, User, PrepaidPlan } = require('../models');
+const { Op, Sequelize } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 // ========== Lab Test Management ==========
@@ -73,13 +73,52 @@ const createRequest = async (req, res) => {
         const tests = await LabTest.findAll({ where: { id: testIds }, transaction: t });
         const totalAmount = tests.reduce((sum, test) => sum + parseFloat(test.price || 0), 0);
 
-        // For prepaid patients: check they have enough balance
+        // For prepaid patients: check they have enough balance, active plan, and usage within limits
         const isPrepaid = patient.paymentMethod === 'private_prepaid';
-        if (isPrepaid && parseFloat(patient.balance) < totalAmount) {
-            await t.rollback();
-            return res.status(400).json({
-                error: `Insufficient prepaid balance. Available: ZK ${parseFloat(patient.balance).toFixed(2)}, Required: ZK ${totalAmount.toFixed(2)}`
-            });
+        if (isPrepaid) {
+            // 1. Check Date Validity
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            if (patient.planStartDate && today < patient.planStartDate) {
+                await t.rollback();
+                return res.status(400).json({ error: `Membership plan not yet active. Starts on: ${patient.planStartDate}` });
+            }
+            if (patient.planEndDate && today > patient.planEndDate) {
+                await t.rollback();
+                return res.status(400).json({ error: `Membership plan has expired on ${patient.planEndDate}. Please renew.` });
+            }
+
+            // 2. Check Prepaid Balance
+            if (parseFloat(patient.balance) < totalAmount) {
+                await t.rollback();
+                return res.status(400).json({
+                    error: `Insufficient prepaid balance. Available: ZK ${parseFloat(patient.balance).toFixed(2)}, Required: ZK ${totalAmount.toFixed(2)}`
+                });
+            }
+
+            // 3. Check Overall Coverage Limit
+            if (patient.memberPlan) {
+                const plan = await PrepaidPlan.findOne({
+                    where: {
+                        [Sequelize.Op.or]: [
+                            { planKey: patient.memberPlan },
+                            { name: patient.memberPlan }
+                        ]
+                    },
+                    transaction: t
+                });
+
+                if (plan) {
+                    const currentSpend = parseFloat(patient.totalPlanSpend || 0);
+                    const limit = parseFloat(plan.coverageLimit || 0);
+                    if (currentSpend + totalAmount > limit) {
+                        await t.rollback();
+                        return res.status(400).json({
+                            error: `Coverage limit exceeded. Plan Limit: ZK ${limit.toFixed(2)}, Used: ZK ${currentSpend.toFixed(2)}, Requested: ZK ${totalAmount.toFixed(2)}`
+                        });
+                    }
+                }
+            }
         }
 
         // Generate Request Number

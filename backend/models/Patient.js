@@ -148,6 +148,20 @@ const Patient = sequelize.define('Patient', {
         allowNull: true,
         comment: 'Plan tier for private_prepaid members e.g. Basic, Standard, Premium'
     },
+    planStartDate: {
+        type: DataTypes.DATEONLY,
+        allowNull: true
+    },
+    planEndDate: {
+        type: DataTypes.DATEONLY,
+        allowNull: true
+    },
+    totalPlanSpend: {
+        type: DataTypes.DECIMAL(12, 2),
+        allowNull: false,
+        defaultValue: 0.00,
+        comment: 'Accumulated spending against the plan coverage limit'
+    },
     // Detailed Balances (Imported)
     nursingCare: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
     laboratory: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },

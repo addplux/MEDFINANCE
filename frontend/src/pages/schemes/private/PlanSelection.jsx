@@ -32,6 +32,7 @@ const PlanSelection = () => {
     const [assignPlan, setAssignPlan] = useState(null);
     const [saving, setSaving] = useState(false);
     const [memberSearch, setMemberSearch] = useState('');
+    const [assignDates, setAssignDates] = useState({}); // { memberId: { start, end } }
 
     const showMessage = (type, msg) => {
         setAlert({ type, msg });
@@ -116,12 +117,16 @@ const PlanSelection = () => {
         setShowAssignModal(true);
     };
 
-    const assignMemberToPlan = async (member, planId) => {
+    const assignMemberToPlan = async (member, planId, dates = {}) => {
         setSaving(true);
         try {
-            const fd = new FormData();
-            fd.append('memberPlan', planId || '');
-            await patientAPI.update(member.id, fd);
+            const formData = {
+                memberPlan: planId || ''
+            };
+            if (dates.start) formData.planStartDate = dates.start;
+            if (dates.end) formData.planEndDate = dates.end;
+
+            await patientAPI.update(member.id, formData);
             await loadMembers();
             showMessage('success', `${member.firstName} ${member.lastName} assigned to ${planId || 'No Plan'}.`);
         } catch {
@@ -265,23 +270,42 @@ const PlanSelection = () => {
                             {planMembers.length > 0 && (
                                 <div className="border-t border-border/50 px-5 py-3">
                                     <p className="text-xs text-text-secondary mb-2 font-medium">Enrolled Members</p>
-                                    <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                                        {planMembers.slice(0, 5).map(m => (
-                                            <div key={m.id} className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                    <div
-                                                        className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                                                        style={{ background: plan.color }}
-                                                    >
-                                                        {(m.firstName?.[0] || '') + (m.lastName?.[0] || '')}
+                                    <div className="space-y-3 max-h-48 overflow-y-auto">
+                                        {planMembers.slice(0, 10).map(m => {
+                                            const spend = parseFloat(m.totalPlanSpend || 0);
+                                            const limit = parseFloat(plan.coverageLimit || 0);
+                                            const pct = Math.min(100, (spend / limit) * 100);
+                                            const isExpired = m.planEndDate && new Date() > new Date(m.planEndDate);
+
+                                            return (
+                                                <div key={m.id} className="space-y-1">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            <div
+                                                                className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+                                                                style={{ background: isExpired ? '#ef4444' : plan.color }}
+                                                            >
+                                                                {(m.firstName?.[0] || '') + (m.lastName?.[0] || '')}
+                                                            </div>
+                                                            <span className="text-xs text-text-primary truncate max-w-[100px]">{m.firstName} {m.lastName}</span>
+                                                            {isExpired && <span className="text-[10px] text-red-400 font-bold uppercase">Expired</span>}
+                                                        </div>
+                                                        <span className="text-[10px] text-text-secondary">{fmt(spend)} used</span>
                                                     </div>
-                                                    <span className="text-xs text-text-primary">{m.firstName} {m.lastName}</span>
+                                                    <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                                                        <div
+                                                            className="h-full transition-all duration-500"
+                                                            style={{
+                                                                width: `${pct}%`,
+                                                                backgroundColor: pct > 90 ? '#ef4444' : (pct > 70 ? '#f59e0b' : plan.color)
+                                                            }}
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <span className="text-[10px] text-text-secondary">{m.patientNumber}</span>
-                                            </div>
-                                        ))}
-                                        {planMembers.length > 5 && (
-                                            <p className="text-[10px] text-text-secondary text-center pt-1">+{planMembers.length - 5} more</p>
+                                            );
+                                        })}
+                                        {planMembers.length > 10 && (
+                                            <p className="text-[10px] text-text-secondary text-center pt-1">+{planMembers.length - 10} more</p>
                                         )}
                                     </div>
                                 </div>
@@ -465,31 +489,53 @@ const PlanSelection = () => {
                                                 <p className="text-xs text-text-secondary">{m.patientNumber} · {currentPlan ? currentPlan.name + ' Plan' : 'No Plan'}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            {isOnThisPlan ? (
-                                                <span className="text-xs px-2 py-1 rounded-full text-emerald-400 bg-emerald-500/10 flex items-center gap-1">
-                                                    <CheckCircle size={11} /> Enrolled
-                                                </span>
-                                            ) : (
-                                                <button
-                                                    onClick={() => assignMemberToPlan(m, assignPlan.planKey)}
-                                                    disabled={saving}
-                                                    className="text-xs px-3 py-1.5 rounded-xl font-medium transition-all disabled:opacity-50"
-                                                    style={{ background: assignPlan.color + '22', color: assignPlan.color }}
-                                                >
-                                                    Assign
-                                                </button>
-                                            )}
-                                            {isOnThisPlan && (
-                                                <button
-                                                    onClick={() => removePlan(m)}
-                                                    disabled={saving}
-                                                    className="text-xs px-2 py-1 rounded-xl text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50"
-                                                    title="Remove from plan"
-                                                >
-                                                    <X size={13} />
-                                                </button>
-                                            )}
+                                        <div className="flex flex-col gap-2 items-end">
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex flex-col">
+                                                    <label className="text-[10px] text-text-secondary">Start</label>
+                                                    <input
+                                                        type="date"
+                                                        className="bg-surface border border-border rounded px-1.5 py-0.5 text-[10px] text-text-primary outline-none focus:border-accent"
+                                                        value={assignDates[m.id]?.start || ''}
+                                                        onChange={e => setAssignDates(prev => ({ ...prev, [m.id]: { ...prev[m.id], start: e.target.value } }))}
+                                                    />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <label className="text-[10px] text-text-secondary">End</label>
+                                                    <input
+                                                        type="date"
+                                                        className="bg-surface border border-border rounded px-1.5 py-0.5 text-[10px] text-text-primary outline-none focus:border-accent"
+                                                        value={assignDates[m.id]?.end || ''}
+                                                        onChange={e => setAssignDates(prev => ({ ...prev, [m.id]: { ...prev[m.id], end: e.target.value } }))}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                {isOnThisPlan ? (
+                                                    <span className="text-xs px-2 py-1 rounded-full text-emerald-400 bg-emerald-500/10 flex items-center gap-1">
+                                                        <CheckCircle size={11} /> Enrolled
+                                                    </span>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => assignMemberToPlan(m, assignPlan.planKey, assignDates[m.id] || {})}
+                                                        disabled={saving}
+                                                        className="text-xs px-3 py-1.5 rounded-xl font-medium transition-all disabled:opacity-50"
+                                                        style={{ background: assignPlan.color + '22', color: assignPlan.color }}
+                                                    >
+                                                        Assign
+                                                    </button>
+                                                )}
+                                                {isOnThisPlan && (
+                                                    <button
+                                                        onClick={() => removePlan(m)}
+                                                        disabled={saving}
+                                                        className="text-xs px-2 py-1 rounded-xl text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50"
+                                                        title="Remove from plan"
+                                                    >
+                                                        <X size={13} />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 );
