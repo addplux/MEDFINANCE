@@ -137,6 +137,12 @@ const Patient = sequelize.define('Patient', {
         allowNull: false,
         defaultValue: 0.00
     },
+    prepaidCredit: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0.00,
+        comment: 'Total amount ever credited/topped-up for private_prepaid patients'
+    },
     // Detailed Balances (Imported)
     nursingCare: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
     laboratory: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },

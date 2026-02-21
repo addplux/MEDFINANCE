@@ -31,6 +31,7 @@ export const patientAPI = {
     delete: (id) => api.delete(`/patients/${id}`),
     merge: (data) => api.post('/patients/merge', data),
     getVisitHistory: (id) => api.get(`/patients/${id}/visit-history`),
+    topup: (id, amount) => api.post(`/patients/${id}/topup`, { amount }),
 };
 
 // Visits

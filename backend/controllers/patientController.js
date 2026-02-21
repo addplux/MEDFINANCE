@@ -335,6 +335,33 @@ const getVisitHistory = async (req, res) => {
     }
 };
 
+
+
+// Topup Prepaid Balance
+const topupPrepaidBalance = async (req, res) => {
+    try {
+        const patient = await Patient.findByPk(req.params.id);
+        if (!patient) return res.status(404).json({ error: 'Patient not found' });
+        if (patient.paymentMethod !== 'private_prepaid') {
+            return res.status(400).json({ error: 'Patient is not on a private prepaid scheme' });
+        }
+
+        const { amount } = req.body;
+        if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+            return res.status(400).json({ error: 'A valid top-up amount is required' });
+        }
+
+        const { addPrepaidCredit } = require('../utils/balanceUpdater');
+        const newBalance = await addPrepaidCredit(patient.id, Number(amount));
+
+        const updated = await Patient.findByPk(patient.id);
+        res.json({ message: 'Balance topped up successfully', balance: newBalance, prepaidCredit: updated.prepaidCredit });
+    } catch (error) {
+        console.error('Topup error:', error);
+        res.status(500).json({ error: 'Failed to top up balance', details: error.message });
+    }
+};
+
 module.exports = {
     getAllPatients,
     getPatient,
@@ -342,5 +369,6 @@ module.exports = {
     updatePatient,
     deletePatient,
     mergePatients,
-    getVisitHistory
+    getVisitHistory,
+    topupPrepaidBalance
 };

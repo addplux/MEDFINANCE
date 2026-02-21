@@ -14,6 +14,7 @@ router.get('/:id', checkPermission('patients', 'read'), patientController.getPat
 router.get('/:id/visit-history', checkPermission('patients', 'read'), patientController.getVisitHistory);
 router.post('/', checkPermission('patients', 'write'), upload.single('photo'), patientController.createPatient);
 router.put('/:id', checkPermission('patients', 'write'), upload.single('photo'), patientController.updatePatient);
+router.post('/:id/topup', checkPermission('patients', 'write'), patientController.topupPrepaidBalance);
 router.delete('/:id', checkPermission('patients', 'delete'), patientController.deletePatient);
 
 module.exports = router;

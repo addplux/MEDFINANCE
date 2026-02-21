@@ -98,6 +98,8 @@ const MembershipRegistration = () => {
             setSaving(true);
             const fd = new FormData();
             Object.entries(form).forEach(([k, v]) => { if (v !== '') fd.append(k, v); });
+            // Also store the initial payment as prepaidCredit so the balance updater knows total credits
+            fd.set('prepaidCredit', form.balance);
             await patientAPI.create(fd);
             showAlert('success', 'Member registered successfully!');
             setShowModal(false);
@@ -118,16 +120,14 @@ const MembershipRegistration = () => {
         }
         try {
             setSaving(true);
-            const newBalance = Number(selectedMember.balance || 0) + Number(topupAmount);
-            const fd = new FormData();
-            fd.append('balance', newBalance);
-            await patientAPI.update(selectedMember.id, fd);
+            // Use the dedicated topup endpoint which increments prepaidCredit and recalculates balance
+            await patientAPI.topup(selectedMember.id, Number(topupAmount));
             showAlert('success', `Balance topped up by ZK ${Number(topupAmount).toLocaleString()} successfully!`);
             setShowTopupModal(false);
             setTopupAmount('');
             loadMembers();
-        } catch {
-            showAlert('error', 'Failed to top up balance.');
+        } catch (err) {
+            showAlert('error', err?.response?.data?.error || 'Failed to top up balance.');
         } finally {
             setSaving(false);
         }
