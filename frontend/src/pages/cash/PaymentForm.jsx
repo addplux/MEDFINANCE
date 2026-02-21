@@ -89,7 +89,7 @@ const PaymentForm = () => {
 
             // Generate the paidBills array for the backend exactly as expected
             const paidBills = stateBillsToPay.map(b => ({
-                type: b.department,
+                type: b.billType || b.department,
                 id: b.id
             }));
 

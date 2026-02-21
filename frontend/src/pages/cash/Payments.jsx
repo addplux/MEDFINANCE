@@ -56,14 +56,19 @@ const PatientLedger = () => {
         } catch (error) {
             console.error('Failed to fetch unpaid bills:', error);
             setUnpaidBills([]);
+            return [];
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSelectPatient = (patientId) => {
-        setSelectedPatientId(patientId);
-        fetchUnpaidBills(patientId);
+    const handleSelectPatient = async (id) => {
+        setSelectedPatientId(String(id));
+        const bills = await fetchUnpaidBills(id);
+        // Automatically select all bills by default for quick processing
+        if (bills && bills.length > 0) {
+            setSelectedBills(bills.map(b => b.id));
+        }
     };
 
     const handleProceedToPayment = () => {
@@ -146,7 +151,7 @@ const PatientLedger = () => {
                     onClick={() => handleSelectPatient(params.row.id)}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center gap-2 ${selectedPatientId === String(params.row.id) ? 'bg-gray-900 text-white shadow-lg' : 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-100'}`}
                 >
-                    {selectedPatientId === String(params.row.id) ? 'Selected' : 'View Bill'}
+                    {selectedPatientId === String(params.row.id) ? 'Selected' : 'Select Patient'}
                     <ArrowRight size={12} />
                 </button>
             )
@@ -410,7 +415,7 @@ const PatientLedger = () => {
                             onClick={handleProceedToPayment}
                             className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-black text-sm hover:translate-y-[-2px] hover:shadow-xl hover:shadow-gray-400 active:translate-y-[1px] transition-all flex items-center gap-3"
                         >
-                            Process Payment
+                            Process & Clear Bills
                             <ArrowRight className="w-5 h-5" />
                         </button>
                     </div>

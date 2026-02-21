@@ -94,13 +94,19 @@ const createPayment = async (req, res) => {
                 let model;
                 switch (b.type) {
                     case 'OPD': model = OPDBill; break;
-                    case 'Pharmacy': model = PharmacyBill; break;
-                    case 'Laboratory': model = LabBill; break;
+                    case 'Pharmacy':
+                    case 'PharmacyBill': model = PharmacyBill; break;
+                    case 'Laboratory':
+                    case 'LaboratoryBill': model = LabBill; break;
                     case 'LabRequest': model = LabRequest; break;
-                    case 'Radiology': model = RadiologyBill; break;
-                    case 'Theatre': model = TheatreBill; break;
-                    case 'Maternity': model = MaternityBill; break;
-                    case 'Specialist Clinic': model = SpecialistClinicBill; break;
+                    case 'Radiology':
+                    case 'RadiologyBill': model = RadiologyBill; break;
+                    case 'Theatre':
+                    case 'TheatreBill': model = TheatreBill; break;
+                    case 'Maternity':
+                    case 'MaternityBill': model = MaternityBill; break;
+                    case 'Specialist Clinic':
+                    case 'SpecialistClinicBill': model = SpecialistClinicBill; break;
                 }
                 if (model) {
                     await model.update({ paymentStatus: 'paid' }, { where: { id: b.id }, transaction: t });
