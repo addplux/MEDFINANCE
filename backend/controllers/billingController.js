@@ -340,6 +340,7 @@ const getPatientStatement = async (req, res) => {
 const getUnpaidPatientBills = async (req, res) => {
     try {
         const { id } = req.params;
+        const { LabRequest, LabTest, LabResult } = require('../models');
         const patient = await Patient.findByPk(id);
 
         if (!patient) {
@@ -361,11 +362,33 @@ const getUnpaidPatientBills = async (req, res) => {
         });
         pharmacyBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Pharmacy', description: b.medication }));
 
-        // Fetch Lab
+        // Fetch Lab Requests (lab module uses LabRequest, not LabBill)
+        const labRequests = await LabRequest.findAll({
+            where: { patientId: id, paymentStatus: 'unpaid' },
+            include: [
+                {
+                    model: LabResult,
+                    as: 'results',
+                    include: [{ model: LabTest, as: 'test', attributes: ['name'] }]
+                }
+            ]
+        });
+        labRequests.forEach(r => {
+            const testNames = r.results?.map(res => res.test?.name).filter(Boolean).join(', ') || 'Lab Tests';
+            unpaidBills.push({
+                ...r.toJSON(),
+                netAmount: r.totalAmount,
+                department: 'Laboratory',
+                description: testNames,
+                billType: 'LabRequest'
+            });
+        });
+
+        // Fetch LabBill (legacy, if any)
         const labBills = await LabBill.findAll({
             where: { patientId: id, paymentStatus: 'unpaid' }
         });
-        labBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Laboratory', description: b.testName }));
+        labBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Laboratory', description: b.testName, billType: 'Laboratory' }));
 
         // Fetch Radiology
         const radBills = await RadiologyBill.findAll({

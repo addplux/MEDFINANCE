@@ -3,7 +3,7 @@
  * Developed: 2026
  */
 
-const { Payment, BankAccount, PettyCash, Patient, User, sequelize, OPDBill, PharmacyBill, LabBill, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill } = require('../models');
+const { Payment, BankAccount, PettyCash, Patient, User, sequelize, OPDBill, PharmacyBill, LabBill, LabRequest, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill } = require('../models');
 const logAudit = require('../utils/auditLogger');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
 const { postPayment } = require('../utils/glPoster');
@@ -96,6 +96,7 @@ const createPayment = async (req, res) => {
                     case 'OPD': model = OPDBill; break;
                     case 'Pharmacy': model = PharmacyBill; break;
                     case 'Laboratory': model = LabBill; break;
+                    case 'LabRequest': model = LabRequest; break;
                     case 'Radiology': model = RadiologyBill; break;
                     case 'Theatre': model = TheatreBill; break;
                     case 'Maternity': model = MaternityBill; break;
