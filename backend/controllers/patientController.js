@@ -6,6 +6,7 @@ const {
 const { Op } = require('sequelize');
 const fs = require('fs');
 const path = require('path');
+const { updatePatientBalance } = require('../utils/balanceUpdater');
 
 // Get all patients
 const getAllPatients = async (req, res) => {
@@ -79,20 +80,22 @@ const getPatient = async (req, res) => {
 
 // Create patient
 const createPatient = async (req, res) => {
+    const t = await sequelize.transaction();
     try {
         const {
             firstName, lastName, dateOfBirth, gender, phone, email, address,
             nhimaNumber, paymentMethod, costCategory, staffId, serviceId, registeredService, ward,
-            emergencyContact, emergencyPhone, nrc, patientType, schemeId
+            emergencyContact, emergencyPhone, nrc, patientType, schemeId, initialDeposit
         } = req.body;
 
         // Validate required fields
         if (!firstName || !lastName || !dateOfBirth || !gender) {
+            await t.rollback();
             return res.status(400).json({ error: 'First name, last name, date of birth, and gender are required' });
         }
 
         // Generate patient number
-        const patientCount = await Patient.count();
+        const patientCount = await Patient.count({ transaction: t });
         const patientNumber = `P${String(patientCount + 1).padStart(6, '0')}`;
 
         // Handle photo upload
@@ -122,10 +125,32 @@ const createPatient = async (req, res) => {
             patientType: patientType || 'opd',
             schemeId: schemeId || null,
             photoUrl
-        });
+        }, { transaction: t });
 
+        // Handle initial deposit if present
+        if (initialDeposit && !isNaN(Number(initialDeposit)) && Number(initialDeposit) > 0) {
+            // Generate receipt number
+            const paymentCount = await Payment.count({ transaction: t });
+            const receiptNumber = `RCP${String(paymentCount + 1).padStart(6, '0')}`;
+
+            await Payment.create({
+                receiptNumber,
+                patientId: patient.id,
+                amount: Number(initialDeposit),
+                paymentMethod: 'cash',
+                paymentDate: new Date(),
+                notes: 'Initial registration fee / deposit',
+                receivedBy: req.user?.id || 1 // Fallback for testing
+            }, { transaction: t });
+
+            // Update balance
+            await updatePatientBalance(patient.id, t);
+        }
+
+        await t.commit();
         res.status(201).json(patient);
     } catch (error) {
+        await t.rollback();
         console.error('Create patient error:', error);
         res.status(500).json({
             error: 'Failed to create patient',

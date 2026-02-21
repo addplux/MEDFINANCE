@@ -26,7 +26,8 @@ const CreatePatient = () => {
         emergencyPhone: '',
         nextOfKinRelationship: '',
         patientType: 'opd',
-        schemeId: ''
+        schemeId: '',
+        initialDeposit: ''
     });
     const [photoFile, setPhotoFile] = useState(null);
     const [photoPreview, setPhotoPreview] = useState(null);
@@ -398,6 +399,22 @@ const CreatePatient = () => {
                             <option value="exempted">Exempted (Deprecated)</option>
                         </select>
                     </div>
+
+                    {/* Initial Deposit - Only show if billing type is Cash */}
+                    {formData.paymentMethod === 'cash' && (
+                        <div className="form-group border-l-4 border-emerald-500 pl-4 bg-emerald-50/10">
+                            <label className="form-label text-emerald-600 font-bold">Registration Fee / Deposit (ZK)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={formData.initialDeposit}
+                                onChange={(e) => setFormData({ ...formData, initialDeposit: e.target.value })}
+                                className="form-input border-emerald-200 focus:border-emerald-500"
+                                placeholder="Enter amount paid..."
+                            />
+                            <p className="text-[10px] text-emerald-600 mt-1 italic">This will create a receipt and update the patient's balance.</p>
+                        </div>
+                    )}
 
                     {/* Specific Scheme selection */}
                     {(['corporate', 'private_prepaid', 'nhima', 'scheme'].includes(formData.paymentMethod)) && (
