@@ -175,7 +175,7 @@ const PlanSelection = () => {
                     { label: 'Total Plans', value: plans.length, icon: ShieldCheck, color: '#6366f1' },
                     { label: 'Total Members', value: members.length, icon: Users, color: '#0ea5e9' },
                     { label: 'Unassigned', value: unassigned.length, icon: AlertCircle, color: '#f59e0b' },
-                    { label: 'Avg Monthly Premium', value: `ZK ${(plans.reduce((s, p) => s + p.monthlyPremium, 0) / plans.length).toFixed(0)}`, icon: DollarSign, color: '#10b981' },
+                    { label: 'Avg Monthly Premium', value: plans.length > 0 ? `ZK ${(plans.reduce((s, p) => s + Number(p.monthlyPremium), 0) / plans.length).toFixed(0)}` : 'ZK 0', icon: DollarSign, color: '#10b981' },
                 ].map(({ label, value, icon: Icon, color }) => (
                     <div key={label} className="glass-card p-4 flex items-center gap-3">
                         <div className="p-2 rounded-xl" style={{ background: color + '22' }}>
@@ -192,7 +192,7 @@ const PlanSelection = () => {
             {/* Plan Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {filteredPlans.map(plan => {
-                    const planMembers = membersOnPlan(plan.id);
+                    const planMembers = membersOnPlan(plan);
                     const isExpanded = expandedPlan === plan.id;
 
                     return (
@@ -338,7 +338,7 @@ const PlanSelection = () => {
                                                 {plans.map(plan => (
                                                     <button
                                                         key={plan.id}
-                                                        onClick={() => assignMemberToPlan(m, plan.id)}
+                                                        onClick={() => assignMemberToPlan(m, plan.planKey)}
                                                         className="text-[11px] px-2.5 py-1 rounded-lg font-medium transition-all hover:opacity-80"
                                                         style={{ background: plan.color + '22', color: plan.color }}
                                                     >
@@ -449,8 +449,8 @@ const PlanSelection = () => {
                                 <p className="text-center text-xs text-text-secondary py-6">No members found.</p>
                             )}
                             {filteredForAssign.map(m => {
-                                const currentPlan = plans.find(p => p.id === (m.memberPlan || '').toLowerCase());
-                                const isOnThisPlan = (m.memberPlan || '').toLowerCase() === assignPlan.id.toLowerCase();
+                                const currentPlan = plans.find(p => (p.planKey || '').toLowerCase() === (m.memberPlan || '').toLowerCase() || p.name.toLowerCase() === (m.memberPlan || '').toLowerCase());
+                                const isOnThisPlan = (m.memberPlan || '').toLowerCase() === (assignPlan.planKey || assignPlan.name || '').toLowerCase();
                                 return (
                                     <div key={m.id} className="flex items-center justify-between p-3 rounded-xl border border-border/50 hover:bg-white/5">
                                         <div className="flex items-center gap-3">
@@ -472,7 +472,7 @@ const PlanSelection = () => {
                                                 </span>
                                             ) : (
                                                 <button
-                                                    onClick={() => assignMemberToPlan(m, assignPlan.id)}
+                                                    onClick={() => assignMemberToPlan(m, assignPlan.planKey)}
                                                     disabled={saving}
                                                     className="text-xs px-3 py-1.5 rounded-xl font-medium transition-all disabled:opacity-50"
                                                     style={{ background: assignPlan.color + '22', color: assignPlan.color }}
