@@ -26,11 +26,21 @@ const TYPE_BADGE = {
     exempted: { label: 'Exempted', bg: 'bg-orange-100', text: 'text-orange-800' },
 };
 
-const PatientTypeBadge = ({ type }) => {
+import { Battery } from 'lucide-react';
+
+const PatientTypeBadge = ({ patient }) => {
+    const type = patient?.paymentMethod || 'cash';
     const cfg = TYPE_BADGE[type] || { label: type, bg: 'bg-gray-100', text: 'text-gray-700' };
+
     return (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.text}`}>
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.text}`}>
             {cfg.label}
+            {type === 'private_prepaid' && patient?.balance !== undefined && (
+                <span className="flex items-center gap-0.5 ml-1 pl-2 border-l border-current/20">
+                    <Battery className="w-3.5 h-3.5" />
+                    <span>ZK {Number(patient.balance).toLocaleString()}</span>
+                </span>
+            )}
         </span>
     );
 };
@@ -215,7 +225,7 @@ const Patients = () => {
                                             </span>
                                         </td>
                                         <td className="px-4 py-2 whitespace-nowrap">
-                                            <PatientTypeBadge type={patient.paymentMethod} />
+                                            <PatientTypeBadge patient={patient} />
                                         </td>
                                         <td className="px-4 py-2 whitespace-nowrap text-right">
                                             <div className="flex items-center justify-end gap-1">
@@ -279,7 +289,7 @@ const Patients = () => {
                                     <div className="flex-1 min-w-0">
                                         <div className="font-semibold text-gray-900 truncate">{patient.firstName} {patient.lastName}</div>
                                         <div className="text-xs text-gray-500">{patient.patientNumber}</div>
-                                        <PatientTypeBadge type={patient.paymentMethod} />
+                                        <PatientTypeBadge patient={patient} />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
