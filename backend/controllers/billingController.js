@@ -1,4 +1,4 @@
-const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, Patient, Service, User, sequelize, TheatreBill, MaternityBill, SpecialistClinicBill } = require('../models');
+const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, Patient, Service, User, sequelize, TheatreBill, MaternityBill, SpecialistClinicBill, LabRequest, LabTest, LabResult, Medication } = require('../models');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
 const { postChargeToGL } = require('../utils/glPoster');
 
@@ -340,13 +340,6 @@ const getPatientStatement = async (req, res) => {
 const getUnpaidPatientBills = async (req, res) => {
     try {
         const { id } = req.params;
-        const { LabRequest, LabTest, LabResult } = require('../models');
-        const patient = await Patient.findByPk(id);
-
-        if (!patient) {
-            return res.status(404).json({ error: 'Patient not found' });
-        }
-
         const unpaidBills = [];
 
         // Fetch OPD
@@ -354,13 +347,23 @@ const getUnpaidPatientBills = async (req, res) => {
             where: { patientId: id, paymentStatus: 'unpaid' },
             include: [{ association: 'service', attributes: ['name'] }]
         });
-        opdBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'OPD', description: b.service?.name }));
+        opdBills.forEach(b => unpaidBills.push({
+            ...b.toJSON(),
+            department: 'OPD',
+            description: b.service?.serviceName || b.service?.name,
+            billType: 'OPDBill'
+        }));
 
-        // Fetch Pharmacy
         const pharmacyBills = await PharmacyBill.findAll({
-            where: { patientId: id, paymentStatus: 'unpaid' }
+            where: { patientId: id, paymentStatus: 'unpaid' },
+            include: [{ association: 'medicationDetails', attributes: ['name'] }]
         });
-        pharmacyBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Pharmacy', description: b.medication }));
+        pharmacyBills.forEach(b => unpaidBills.push({
+            ...b.toJSON(),
+            department: 'Pharmacy',
+            description: b.medicationDetails?.name || 'Medication',
+            billType: 'PharmacyBill'
+        }));
 
         // Fetch Lab Requests (lab module uses LabRequest, not LabBill)
         const labRequests = await LabRequest.findAll({
@@ -388,31 +391,31 @@ const getUnpaidPatientBills = async (req, res) => {
         const labBills = await LabBill.findAll({
             where: { patientId: id, paymentStatus: 'unpaid' }
         });
-        labBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Laboratory', description: b.testName, billType: 'Laboratory' }));
+        labBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Laboratory', description: b.testName, billType: 'LabBill' }));
 
         // Fetch Radiology
         const radBills = await RadiologyBill.findAll({
             where: { patientId: id, paymentStatus: 'unpaid' }
         });
-        radBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Radiology', description: b.scanType }));
+        radBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Radiology', description: b.scanType, billType: 'RadiologyBill' }));
 
         // Fetch Theatre
         const theatreBills = await TheatreBill.findAll({
             where: { patientId: id, paymentStatus: 'unpaid' }
         });
-        theatreBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Theatre', description: b.procedureType }));
+        theatreBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Theatre', description: b.procedureType, billType: 'TheatreBill' }));
 
         // Fetch Maternity
         const matBills = await MaternityBill.findAll({
             where: { patientId: id, paymentStatus: 'unpaid' }
         });
-        matBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Maternity', description: 'Maternity Delivery' }));
+        matBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Maternity', description: 'Maternity Delivery', billType: 'MaternityBill' }));
 
         // Fetch Specialist Clinic
         const specialistBills = await SpecialistClinicBill.findAll({
             where: { patientId: id, paymentStatus: 'unpaid' }
         });
-        specialistBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Specialist Clinic', description: `Consultation (${b.clinicType})` }));
+        specialistBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Specialist Clinic', description: `Consultation (${b.clinicType})`, billType: 'SpecialistClinicBill' }));
 
         res.json(unpaidBills);
     } catch (error) {
@@ -424,7 +427,7 @@ const getUnpaidPatientBills = async (req, res) => {
 // Get a consolidated queue of all patients with unpaid bills across all departments
 const getPendingQueue = async (req, res) => {
     try {
-        const { PharmacyBill, LabRequest, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill } = require('../models');
+        // Query all tables for 'unpaid' records
 
         // Query all tables for 'unpaid' records
         const [opd, pharmacy, lab, radiology, theatre, maternity, specialist] = await Promise.all([

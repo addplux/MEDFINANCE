@@ -47,15 +47,19 @@ const PatientLedger = () => {
     };
 
     const fetchUnpaidBills = async (patientId) => {
-        if (!patientId) return;
+        if (!patientId) return [];
         try {
             setLoading(true);
             const response = await billingAPI.patient.getUnpaidBills(patientId);
-            setUnpaidBills(response.data || []);
-            setSelectedBills(response.data?.map(b => b.id) || []);
+            const bills = response.data || [];
+            const uniqueBills = bills.map(b => ({ ...b, uid: `${b.billType || b.department}-${b.id}` }));
+            setUnpaidBills(uniqueBills);
+            setSelectedBills(uniqueBills.map(b => b.uid));
+            return uniqueBills;
         } catch (error) {
             console.error('Failed to fetch unpaid bills:', error);
             setUnpaidBills([]);
+            setSelectedBills([]);
             return [];
         } finally {
             setLoading(false);
@@ -64,21 +68,23 @@ const PatientLedger = () => {
 
     const handleSelectPatient = async (id) => {
         setSelectedPatientId(String(id));
+        setUnpaidBills([]); // Clear previous data immediately
+        setSelectedBills([]);
         const bills = await fetchUnpaidBills(id);
         // Automatically select all bills by default for quick processing
         if (bills && bills.length > 0) {
-            setSelectedBills(bills.map(b => b.id));
+            setSelectedBills(bills.map(b => b.uid));
         }
     };
 
     const handleProceedToPayment = () => {
         if (selectedBills.length === 0) return;
-        const billsToPay = unpaidBills.filter(b => selectedBills.includes(b.id));
+        const billsToPay = unpaidBills.filter(b => selectedBills.includes(b.uid));
         navigate('/app/cash/payments/new', { state: { patientId: selectedPatientId, billsToPay } });
     };
 
     const totalSelectedAmount = unpaidBills
-        .filter(b => selectedBills.includes(b.id))
+        .filter(b => selectedBills.includes(b.uid))
         .reduce((sum, b) => sum + Number(b.netAmount || b.totalAmount || 0), 0);
 
     const filteredPatients = patients.filter(p =>
@@ -361,21 +367,21 @@ const PatientLedger = () => {
                                         setSelectedBills(newSelection);
                                     }}
                                     selectionModel={selectedBills}
-                                    getRowId={(row) => row.id}
+                                    getRowId={(row) => row.uid}
                                     sx={{
                                         border: 'none',
                                         '& .MuiDataGrid-columnHeaders': {
-                                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                            color: '#ffffff',
+                                            backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                                            color: '#111827',
                                             fontSize: '0.7rem',
-                                            fontWeight: 700,
+                                            fontWeight: 900,
                                             textTransform: 'uppercase',
                                             letterSpacing: '0.1em',
-                                            borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                                            borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
                                         },
                                         '& .MuiDataGrid-cell': {
-                                            borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
-                                            color: '#ffffff',
+                                            borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
+                                            color: '#111827',
                                             py: 1.5
                                         }
                                     }}
