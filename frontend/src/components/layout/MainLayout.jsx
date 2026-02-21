@@ -87,18 +87,7 @@ const MainLayout = ({ children }) => {
 
     const menuItems = [
         { path: '/app/dashboard', icon: LayoutDashboard, label: 'Home' },
-        {
-            id: 'billing',
-            icon: Users,
-            label: 'Patient',
-            submenu: [
-                { path: '/app/patients', label: 'Patient Directory' },
-                { path: '/app/visits?type=opd', label: 'OPD' },
-                { path: '/app/visits?type=inpatient', label: 'Inpatient' },
-                { path: '/app/visits?type=maternity', label: 'Maternity' },
-                { path: '/app/visits?type=emergency', label: 'Emergency' }
-            ]
-        },
+        { path: '/app/patients', icon: Users, label: 'Patient' },
         {
             isHeading: true,
             label: 'SCHEME MANAGER'
