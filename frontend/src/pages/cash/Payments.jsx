@@ -94,8 +94,8 @@ const PatientLedger = () => {
                         {params.row.firstName[0]}{params.row.lastName[0]}
                     </div>
                     <div className="truncate">
-                        <div className="font-bold text-white text-sm leading-tight">{params.row.firstName} {params.row.lastName}</div>
-                        <div className="text-[10px] text-gray-400 font-mono">{params.row.patientNumber}</div>
+                        <div className="font-bold text-gray-900 text-sm leading-tight">{params.row.firstName} {params.row.lastName}</div>
+                        <div className="text-[10px] text-gray-700 font-bold font-mono">{params.row.patientNumber}</div>
                     </div>
                 </div>
             )
@@ -107,7 +107,7 @@ const PatientLedger = () => {
             renderCell: (params) => (
                 <div className="flex flex-wrap gap-1">
                     {params.value.split(', ').map(d => (
-                        <span key={d} className="px-1.5 py-0.5 rounded-md bg-white/10 border border-white/20 text-[9px] font-black text-white uppercase tracking-wider">
+                        <span key={d} className="px-1.5 py-0.5 rounded-md bg-gray-100 border border-gray-200 text-[9px] font-black text-gray-900 uppercase tracking-wider">
                             {d}
                         </span>
                     ))}
@@ -119,7 +119,7 @@ const PatientLedger = () => {
             headerName: 'Total Due',
             flex: 1,
             renderCell: (params) => (
-                <span className="font-black text-amber-400">{fmt(params.value)}</span>
+                <span className="font-black text-gray-900">{fmt(params.value)}</span>
             )
         },
         {
@@ -129,9 +129,9 @@ const PatientLedger = () => {
             renderCell: (params) => {
                 const mins = Math.floor((new Date() - new Date(params.row.lastRequest)) / (1000 * 60));
                 return (
-                    <div className="flex items-center gap-1.5 text-text-secondary">
-                        <Clock size={12} className={mins > 60 ? 'text-red-400' : 'text-emerald-400'} />
-                        <span className="text-[11px] font-medium">{mins}m</span>
+                    <div className="flex items-center gap-1.5 text-gray-900">
+                        <Clock size={12} className={mins > 60 ? 'text-red-500' : 'text-emerald-600'} />
+                        <span className="text-[11px] font-bold">{mins}m</span>
                     </div>
                 );
             }
@@ -144,7 +144,7 @@ const PatientLedger = () => {
             renderCell: (params) => (
                 <button
                     onClick={() => handleSelectPatient(params.row.id)}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center gap-2 ${selectedPatientId === String(params.row.id) ? 'bg-orange-500 text-white' : 'bg-surface border border-border text-text-secondary hover:bg-white/5'}`}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center gap-2 ${selectedPatientId === String(params.row.id) ? 'bg-gray-900 text-white shadow-lg' : 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-100'}`}
                 >
                     {selectedPatientId === String(params.row.id) ? 'Selected' : 'View Bill'}
                     <ArrowRight size={12} />
@@ -159,14 +159,16 @@ const PatientLedger = () => {
             field: 'createdAt',
             headerName: 'Date',
             width: 100,
-            valueFormatter: (params) => new Date(params.value).toLocaleDateString()
+            renderCell: (params) => (
+                <span className="text-[10px] text-gray-700 font-bold">{new Date(params.value).toLocaleDateString()}</span>
+            )
         },
         {
             field: 'department',
             headerName: 'Dept',
             width: 100,
             renderCell: (params) => (
-                <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-white font-bold uppercase border border-white/20 tracking-wider">
+                <span className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-900 font-bold uppercase border border-gray-200 tracking-wider">
                     {params.value}
                 </span>
             )
@@ -176,7 +178,7 @@ const PatientLedger = () => {
             headerName: 'Service Description',
             flex: 1.5,
             renderCell: (params) => (
-                <span className="text-sm font-medium text-white">{params.value || 'General Bill'}</span>
+                <span className="text-sm font-bold text-gray-900">{params.value || 'General Bill'}</span>
             )
         },
         {
@@ -184,7 +186,7 @@ const PatientLedger = () => {
             headerName: 'Amount',
             flex: 1,
             renderCell: (params) => (
-                <span className="font-black text-white">
+                <span className="font-black text-gray-900">
                     {fmt(params.row.netAmount || params.row.totalAmount || 0)}
                 </span>
             )
@@ -241,20 +243,21 @@ const PatientLedger = () => {
                         sx={{
                             border: 'none',
                             '& .MuiDataGrid-columnHeaders': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                color: '#ffffff',
+                                backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                                color: '#111827',
                                 fontSize: '0.7rem',
-                                fontWeight: 700,
+                                fontWeight: 900,
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.1em',
-                                borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                                borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
                             },
                             '& .MuiDataGrid-cell': {
-                                borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+                                borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
+                                color: '#111827',
                                 py: 2
                             },
                             '& .MuiDataGrid-row:hover': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.03)'
+                                backgroundColor: 'rgba(0, 0, 0, 0.03)'
                             }
                         }}
                         components={{
@@ -391,21 +394,21 @@ const PatientLedger = () => {
             {/* Premium Sticky Footer */}
             {selectedBills.length > 0 && (
                 <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 z-50">
-                    <div className="glass-card p-4 shadow-2xl shadow-accent/20 border-accent/30 bg-surface/90 backdrop-blur-xl flex items-center justify-between">
+                    <div className="glass-card p-4 shadow-2xl shadow-gray-200 border-gray-200 bg-white/90 backdrop-blur-xl flex items-center justify-between">
                         <div className="flex items-center gap-6 pl-4">
                             <div>
-                                <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none mb-1">Items Selected</p>
-                                <p className="text-xl font-black text-text-primary">{selectedBills.length} <span className="text-xs font-medium text-text-secondary">bills</span></p>
+                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Items Selected</p>
+                                <p className="text-xl font-black text-gray-900">{selectedBills.length} <span className="text-xs font-medium text-gray-600">bills</span></p>
                             </div>
-                            <div className="h-10 w-px bg-white/10" />
+                            <div className="h-10 w-px bg-gray-200" />
                             <div>
-                                <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest leading-none mb-1">Total Payable</p>
-                                <p className="text-2xl font-black text-text-primary">{fmt(totalSelectedAmount)}</p>
+                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Total Payable</p>
+                                <p className="text-2xl font-black text-gray-900">{fmt(totalSelectedAmount)}</p>
                             </div>
                         </div>
                         <button
                             onClick={handleProceedToPayment}
-                            className="bg-accent text-white px-8 py-4 rounded-2xl font-black text-sm hover:translate-y-[-2px] hover:shadow-xl hover:shadow-accent/40 active:translate-y-[1px] transition-all flex items-center gap-3"
+                            className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-black text-sm hover:translate-y-[-2px] hover:shadow-xl hover:shadow-gray-400 active:translate-y-[1px] transition-all flex items-center gap-3"
                         >
                             Process Payment
                             <ArrowRight className="w-5 h-5" />
