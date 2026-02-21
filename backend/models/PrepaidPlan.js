@@ -10,8 +10,7 @@ const PrepaidPlan = sequelize.define('PrepaidPlan', {
     planKey: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        unique: true,
-        comment: 'Stable identifier e.g. basic, standard, premium'
+        unique: 'unique_plan_key'
     },
     name: {
         type: DataTypes.STRING(100),
@@ -45,8 +44,7 @@ const PrepaidPlan = sequelize.define('PrepaidPlan', {
     duration: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: 30,
-        comment: 'Plan duration in days'
+        defaultValue: 30
     },
     description: {
         type: DataTypes.TEXT,
