@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { patientAPI } from '../../services/apiService';
-import { Users, Plus, Search, Eye, Edit, Trash2, GitMerge, Filter } from 'lucide-react';
+import { Users, Plus, Search, Eye, Edit, Trash2, GitMerge, ClipboardList, Banknote, Building, CreditCard, Stethoscope, Gift, Siren, RefreshCw } from 'lucide-react';
 
 const PATIENT_TYPES = [
-    { value: '', label: 'All Categories' },
-    { value: 'nhima', label: 'NHIMA' },
-    { value: 'cash', label: 'Cash' },
-    { value: 'corporate', label: 'Corporate' },
-    { value: 'private_prepaid', label: 'Private Prepaid' },
-    { value: 'staff', label: 'Staff' },
-    { value: 'foc', label: 'FOC' },
-    { value: 'emergency', label: 'Emergency' },
+    { value: '', label: 'All', icon: Users },
+    { value: 'nhima', label: 'NHIMA', icon: ClipboardList },
+    { value: 'cash', label: 'Cash', icon: Banknote },
+    { value: 'corporate', label: 'Corporate', icon: Building },
+    { value: 'private_prepaid', label: 'Prepaid', icon: CreditCard },
+    { value: 'staff', label: 'Staff', icon: Stethoscope },
+    { value: 'foc', label: 'FOC', icon: Gift },
+    { value: 'emergency', label: 'Emergency', icon: Siren },
 ];
 
 const TYPE_BADGE = {
@@ -116,32 +116,41 @@ const Patients = () => {
                 </div>
             </div>
 
-            {/* Search & Filter */}
-            <div className="card p-4">
-                <div className="flex flex-wrap gap-3">
-                    <div className="relative flex-1 min-w-48">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search by name, patient ID, NHIMA, NRC or phone…"
-                            value={searchTerm}
-                            onChange={handleSearchChange}
-                            className="form-input pl-10 w-full"
-                        />
-                    </div>
-                    <div className="relative min-w-44">
-                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <select
-                            value={categoryFilter}
-                            onChange={handleCategoryChange}
-                            className="form-select pl-9 w-full"
-                        >
-                            {PATIENT_TYPES.map(t => (
-                                <option key={t.value} value={t.value}>{t.label}</option>
-                            ))}
-                        </select>
-                    </div>
+            {/* Type filter chips */}
+            <div className="card p-3 flex items-center gap-2 flex-wrap">
+                {PATIENT_TYPES.map(t => (
+                    <button
+                        key={t.value}
+                        onClick={() => {
+                            setCategoryFilter(t.value);
+                            setCurrentPage(1);
+                        }}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${categoryFilter === t.value
+                            ? 'bg-indigo-600 text-white border-indigo-600'
+                            : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-400'
+                            }`}
+                    >
+                        <t.icon className="w-3.5 h-3.5" />
+                        {t.label}
+                    </button>
+                ))}
+
+                <div className="flex-1" />
+
+                {/* Search */}
+                <div className="relative">
+                    <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Search patient…"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        className="form-input pl-8 py-1.5 text-sm w-48 sm:w-64"
+                    />
                 </div>
+                <button onClick={() => { setCurrentPage(1); loadPatients(); }} className="btn btn-secondary p-2" title="Refresh">
+                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                </button>
             </div>
 
             {/* Patients Table */}
@@ -169,7 +178,15 @@ const Patients = () => {
                                 </tr>
                             ) : patients.length === 0 ? (
                                 <tr>
-                                    <td colSpan="9" className="text-center py-10 text-gray-400 text-sm">No patients found</td>
+                                    <td colSpan="9" className="py-16 text-center">
+                                        <div className="flex flex-col items-center justify-center text-gray-400 gap-2">
+                                            <Users className="w-10 h-10" />
+                                            <p className="text-sm">No patients found.</p>
+                                            <button onClick={() => navigate('/app/patients/new')} className="btn btn-primary mt-2">
+                                                <Plus className="w-4 h-4" /> New Patient
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             ) : (
                                 patients.map((patient) => (
@@ -237,7 +254,13 @@ const Patients = () => {
                     {loading ? (
                         <div className="text-center py-8 text-gray-400 text-sm">Loading…</div>
                     ) : patients.length === 0 ? (
-                        <div className="text-center py-8 text-gray-400">No patients found</div>
+                        <div className="flex flex-col items-center justify-center py-12 text-gray-400 gap-2">
+                            <Users className="w-10 h-10" />
+                            <p className="text-sm">No patients found.</p>
+                            <button onClick={() => navigate('/app/patients/new')} className="btn btn-primary mt-2">
+                                <Plus className="w-4 h-4" /> New Patient
+                            </button>
+                        </div>
                     ) : (
                         patients.map((patient) => (
                             <div key={patient.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
