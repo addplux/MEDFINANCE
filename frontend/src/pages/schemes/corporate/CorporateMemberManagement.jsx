@@ -187,7 +187,7 @@ const CorporateMemberManagement = () => {
                         ))}
                     </select>
                     {corporateSchemes.length === 0 && (
-                        <p className="text-xs text-amber-600 mt-2">No active corporate schemes found.</p>
+                        <p className="text-xs text-amber-600 mt-2">No active corporate schemes found. Please create one under 'All Schemes'.</p>
                     )}
                 </div>
 
