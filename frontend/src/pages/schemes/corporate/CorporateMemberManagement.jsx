@@ -29,7 +29,7 @@ const CorporateMemberManagement = () => {
     const fetchSchemes = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/receivables/schemes?status=active&_t=${Date.now()}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/receivables/schemes?status=active&_t=${Date.now()}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Cache-Control': 'no-cache'
@@ -193,8 +193,8 @@ const CorporateMemberManagement = () => {
                                 key={scheme.id}
                                 onClick={() => setSelectedScheme(String(scheme.id))}
                                 className={`text-left p-5 rounded-xl border-2 transition-all shadow-sm hover:shadow-md ${isSelected
-                                        ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
-                                        : 'border-slate-200 bg-white hover:border-blue-300'
+                                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
+                                    : 'border-slate-200 bg-white hover:border-blue-300'
                                     }`}
                             >
                                 <div className="flex items-start justify-between gap-2">
@@ -316,8 +316,8 @@ const CorporateMemberManagement = () => {
                                         </td>
                                         <td className="p-4">
                                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${member.memberStatus === 'active'
-                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                    : 'bg-rose-50 text-rose-700 border-rose-200'
+                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                : 'bg-rose-50 text-rose-700 border-rose-200'
                                                 }`}>
                                                 <span className={`w-1.5 h-1.5 rounded-full ${member.memberStatus === 'active' ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
                                                 {member.memberStatus === 'active' ? 'Active' : 'Suspended'}
