@@ -37,8 +37,12 @@ const CorporateMemberManagement = () => {
             });
             if (response.ok) {
                 const data = await response.json();
-                // Filter for corporate schemes only
-                setCorporateSchemes(data.filter(s => s.schemeType === 'corporate'));
+                // Filter for corporate schemes only, handling possible snake_case or capitalization differences
+                const filtered = data.filter(s => {
+                    const type = s.schemeType || s.scheme_type || '';
+                    return type.toLowerCase() === 'corporate';
+                });
+                setCorporateSchemes(filtered);
             }
         } catch (error) {
             console.error('Failed to fetch corporate schemes:', error);
