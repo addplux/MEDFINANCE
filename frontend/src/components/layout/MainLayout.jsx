@@ -186,7 +186,7 @@ const MainLayout = ({ children }) => {
             icon: Building,
             label: 'Departments',
             submenu: [
-                { path: '/app/billing/opd/new', label: 'OPD' },
+                { path: '/app/billing/opd', label: 'OPD' },
                 { path: '/app/billing/ipd/new', label: 'IPD / Children Ward' },
                 { path: '/app/maternity/billing', label: 'Labour Ward' },
                 { path: '/app/theatre/billing', label: 'Theater' },
