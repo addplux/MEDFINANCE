@@ -222,6 +222,24 @@ const createScheme = async (req, res) => {
     }
 };
 
+// Update scheme
+const updateScheme = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const scheme = await Scheme.findByPk(id);
+
+        if (!scheme) {
+            return res.status(404).json({ error: 'Scheme not found' });
+        }
+
+        await scheme.update(req.body);
+        res.json(scheme);
+    } catch (error) {
+        console.error('Update scheme error:', error);
+        res.status(500).json({ error: 'Failed to update scheme' });
+    }
+};
+
 // Get single scheme details
 const getSchemeById = async (req, res) => {
     try {
@@ -940,6 +958,7 @@ module.exports = {
     createCorporateAccount,
     getAllSchemes,
     createScheme,
+    updateScheme,
     getSchemeById,
     getSchemeStatement,
     getSchemeMembers,

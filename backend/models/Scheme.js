@@ -35,6 +35,16 @@ const Scheme = sequelize.define('Scheme', {
         defaultValue: 0.00,
         comment: 'Discount percentage'
     },
+    creditLimit: {
+        type: DataTypes.DECIMAL(12, 2),
+        defaultValue: 0.00,
+        comment: 'Total credit allowed for this scheme'
+    },
+    outstandingBalance: {
+        type: DataTypes.DECIMAL(12, 2),
+        defaultValue: 0.00,
+        comment: 'Current unpaid balance for this scheme'
+    },
     contactPerson: {
         type: DataTypes.STRING(100),
         allowNull: true

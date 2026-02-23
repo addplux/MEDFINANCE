@@ -21,6 +21,7 @@ router.get('/services', receivablesController.getAllServices);
 // Schemes
 router.get('/schemes', receivablesController.getAllSchemes);
 router.post('/schemes', authorize('admin', 'accountant'), receivablesController.createScheme);
+router.put('/schemes/:id', authorize('admin', 'accountant'), receivablesController.updateScheme);
 router.get('/schemes/:id', receivablesController.getSchemeById);
 router.get('/schemes/:id/statement', receivablesController.getSchemeStatement);
 router.get('/schemes/:id/members', receivablesController.getSchemeMembers);
