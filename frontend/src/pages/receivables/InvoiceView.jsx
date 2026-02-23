@@ -112,38 +112,65 @@ const InvoiceView = () => {
                                     <th className="px-2 py-2 border border-gray-200 w-24">Date</th>
                                     <th className="px-2 py-2 border border-gray-200">Name</th>
                                     <th className="px-2 py-2 border border-gray-200 w-20">Man No / Policy</th>
-                                    <th className="px-2 py-2 border border-gray-200 text-right w-20">Consult</th>
-                                    <th className="px-2 py-2 border border-gray-200 text-right w-20">Drugs</th>
-                                    <th className="px-2 py-2 border border-gray-200 text-right w-20">Lab</th>
-                                    <th className="px-2 py-2 border border-gray-200 text-right w-20">Radiology</th>
-                                    <th className="px-2 py-2 border border-gray-200 text-right w-20">Other</th>
-                                    <th className="px-2 py-2 border border-gray-200 text-right w-24 bg-gray-50 font-bold">Total</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-14">Consult</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-14">Nursing</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-14">Lab</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-14">Rad</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-14">Dental</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-14">Lodge</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-14">Surg</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-14">Round</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-14">Food</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-14">Physio</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-14">Pharm</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-14">Sundry</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-14">Antenet</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-16">Other</th>
+                                    <th className="px-1 py-2 border border-gray-200 text-right w-20 bg-gray-50 font-bold">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {rows.map((row, index) => (
                                     <tr key={index} className="hover:bg-gray-50/50">
-                                        <td className="px-2 py-1.5 border border-gray-200 text-gray-500 whitespace-nowrap">{row.date}</td>
-                                        <td className="px-2 py-1.5 border border-gray-200 font-medium text-gray-900 truncate max-w-[150px]">{row.patientName}</td>
-                                        <td className="px-2 py-1.5 border border-gray-200 font-mono text-gray-500">{row.manNumber || row.policyNumber || '-'}</td>
-                                        <td className="px-2 py-1.5 border border-gray-200 text-right text-gray-700">{row.consult > 0 ? row.consult.toLocaleString() : '-'}</td>
-                                        <td className="px-2 py-1.5 border border-gray-200 text-right text-gray-700">{row.drugs > 0 ? row.drugs.toLocaleString() : '-'}</td>
-                                        <td className="px-2 py-1.5 border border-gray-200 text-right text-gray-700">{row.lab > 0 ? row.lab.toLocaleString() : '-'}</td>
-                                        <td className="px-2 py-1.5 border border-gray-200 text-right text-gray-700">{row.radiology > 0 ? row.radiology.toLocaleString() : '-'}</td>
-                                        <td className="px-2 py-1.5 border border-gray-200 text-right text-gray-700">{row.other > 0 ? row.other.toLocaleString() : '-'}</td>
-                                        <td className="px-2 py-1.5 border border-gray-200 text-right font-bold text-gray-900 bg-gray-50/50">{row.total.toLocaleString()}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-gray-500 whitespace-nowrap">{row.date}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 font-medium text-gray-900 truncate max-w-[100px]">{row.patientName}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 font-mono text-gray-500 text-[10px]">{row.manNumber || row.policyNumber || '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.consultation > 0 ? row.consultation.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.nursingCare > 0 ? row.nursingCare.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.laboratory > 0 ? row.laboratory.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.radiology > 0 ? row.radiology.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.dental > 0 ? row.dental.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.lodging > 0 ? row.lodging.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.surgicals > 0 ? row.surgicals.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.drRound > 0 ? row.drRound.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.food > 0 ? row.food.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.physio > 0 ? row.physio.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.pharmacy > 0 ? row.pharmacy.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.sundries > 0 ? row.sundries.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.antenatal > 0 ? row.antenatal.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right text-gray-700">{row.other > 0 ? row.other.toLocaleString() : '-'}</td>
+                                        <td className="px-1 py-1.5 border border-gray-200 text-right font-bold text-gray-900 bg-gray-50/50">{row.total.toLocaleString()}</td>
                                     </tr>
                                 ))}
                             </tbody>
                             <tfoot className="bg-gray-100 font-bold text-gray-800">
                                 <tr>
-                                    <td colSpan="3" className="px-3 py-3 border border-gray-200 text-right uppercase">Monthly Totals</td>
-                                    <td className="px-2 py-3 border border-gray-200 text-right">{totals.consult.toLocaleString()}</td>
-                                    <td className="px-2 py-3 border border-gray-200 text-right">{totals.drugs.toLocaleString()}</td>
-                                    <td className="px-2 py-3 border border-gray-200 text-right">{totals.lab.toLocaleString()}</td>
-                                    <td className="px-2 py-3 border border-gray-200 text-right">{totals.radiology.toLocaleString()}</td>
-                                    <td className="px-2 py-3 border border-gray-200 text-right">{totals.other.toLocaleString()}</td>
-                                    <td className="px-2 py-3 border border-gray-200 text-right text-primary-700 text-sm border-l-2 border-l-gray-300">{totals.grandTotal.toLocaleString()}</td>
+                                    <td colSpan="3" className="px-2 py-3 border border-gray-200 text-right uppercase">Monthly Totals</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.consultation.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.nursingCare.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.laboratory.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.radiology.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.dental.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.lodging.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.surgicals.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.drRound.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.food.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.physio.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.pharmacy.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.sundries.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.antenatal.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right">{totals.other.toLocaleString()}</td>
+                                    <td className="px-1 py-3 border border-gray-200 text-right text-primary-700 text-sm border-l-2 border-l-gray-300">{totals.grandTotal.toLocaleString()}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -156,23 +183,29 @@ const InvoiceView = () => {
                                 <tbody>
                                     <tr className="border-b border-gray-200">
                                         <td className="py-2 text-gray-600">Consultation</td>
-                                        <td className="py-2 text-right font-medium">{totals.consult.toLocaleString()}</td>
+                                        <td className="py-2 text-right font-medium">{totals.consultation.toLocaleString()}</td>
                                     </tr>
                                     <tr className="border-b border-gray-200">
-                                        <td className="py-2 text-gray-600">Medication / Drugs</td>
-                                        <td className="py-2 text-right font-medium">{totals.drugs.toLocaleString()}</td>
+                                        <td className="py-2 text-gray-600">Nursing Care</td>
+                                        <td className="py-2 text-right font-medium">{totals.nursingCare.toLocaleString()}</td>
                                     </tr>
                                     <tr className="border-b border-gray-200">
                                         <td className="py-2 text-gray-600">Laboratory</td>
-                                        <td className="py-2 text-right font-medium">{totals.lab.toLocaleString()}</td>
+                                        <td className="py-2 text-right font-medium">{totals.laboratory.toLocaleString()}</td>
                                     </tr>
                                     <tr className="border-b border-gray-200">
                                         <td className="py-2 text-gray-600">Radiology</td>
                                         <td className="py-2 text-right font-medium">{totals.radiology.toLocaleString()}</td>
                                     </tr>
                                     <tr className="border-b border-gray-200">
-                                        <td className="py-2 text-gray-600">Services / Other</td>
-                                        <td className="py-2 text-right font-medium">{totals.other.toLocaleString()}</td>
+                                        <td className="py-2 text-gray-600">Pharmacy / Drugs</td>
+                                        <td className="py-2 text-right font-medium">{totals.pharmacy.toLocaleString()}</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-200 font-semibold">
+                                        <td className="py-2 text-gray-900 whitespace-nowrap">Other Specialized Services (Dental, Surg, Physio...)</td>
+                                        <td className="py-2 text-right text-gray-900">
+                                            {(totals.dental + totals.lodging + totals.surgicals + totals.drRound + totals.food + totals.physio + totals.sundries + totals.antenatal + totals.other).toLocaleString()}
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td className="py-3 font-bold text-lg text-gray-900">Grand Total</td>
