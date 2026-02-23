@@ -68,6 +68,25 @@ const Scheme = sequelize.define('Scheme', {
     notes: {
         type: DataTypes.TEXT,
         allowNull: true
+    },
+    paymentTermsDays: {
+        type: DataTypes.INTEGER,
+        defaultValue: 30,
+        comment: 'Default number of days until payment is due'
+    },
+    gracePeriodDays: {
+        type: DataTypes.INTEGER,
+        defaultValue: 7,
+        comment: 'Additional days before late fees apply'
+    },
+    latePaymentRate: {
+        type: DataTypes.DECIMAL(5, 2),
+        defaultValue: 0.00,
+        comment: 'Interest rate for overdue payments (%)'
+    },
+    paymentMethod: {
+        type: DataTypes.STRING(50),
+        defaultValue: 'Bank Transfer'
     }
 }, {
     tableName: 'schemes',
