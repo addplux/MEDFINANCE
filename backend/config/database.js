@@ -14,14 +14,19 @@ const sequelize = process.env.DATABASE_URL
       ssl: {
         require: true,
         rejectUnauthorized: false
-      }
+      },
+      // Required for Supabase Transaction Pooler (port 6543)
+      // pgBouncer disables named prepared statements which are not supported
+      pgBouncer: true,
+      prepareThreshold: 0
     },
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     pool: {
-      max: 5,
+      max: 3,
       min: 0,
-      acquire: 30000,
-      idle: 10000
+      acquire: 60000,
+      idle: 10000,
+      evict: 1000
     }
   })
   : new Sequelize(
