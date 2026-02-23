@@ -83,7 +83,7 @@ const EditPatient = () => {
                 });
 
                 if (patient.photoUrl) {
-                    setPhotoPreview(`http://localhost:5000${patient.photoUrl}`);
+                    setPhotoPreview(`${import.meta.env.VITE_API_URL.replace('/api', '')}${patient.photoUrl}`);
                 }
 
                 setStaffMembers(staffRes.data);

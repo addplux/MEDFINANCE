@@ -11,7 +11,7 @@
 import { getAll, remove, updateRetries } from './offlineQueue';
 
 const MAX_RETRIES = 3;
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 /**
  * Sync all pending offline requests.

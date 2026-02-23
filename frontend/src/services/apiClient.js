@@ -13,11 +13,11 @@
 import axios from 'axios';
 import { enqueue } from './offlineQueue';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Create axios instance
 const api = axios.create({
-    baseURL: API_URL,
+    baseURL: API_URL, // This is already import.meta.env.VITE_API_URL
     headers: {
         'Content-Type': 'application/json',
     },

@@ -65,7 +65,7 @@ const MergePatients = () => {
                 </div>
                 <div className="flex gap-4">
                     {patient.photoUrl && (
-                        <img src={`http://localhost:5000${patient.photoUrl}`} alt="Patient" className="w-16 h-16 rounded-full object-cover" />
+                        <img src={`${import.meta.env.VITE_API_URL.replace('/api', '')}${patient.photoUrl}`} alt="Patient" className="w-16 h-16 rounded-full object-cover" />
                     )}
                     <div>
                         <h3 className="font-bold text-lg">{patient.firstName} {patient.lastName}</h3>
