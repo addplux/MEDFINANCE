@@ -31,8 +31,7 @@ const CorporateMemberManagement = () => {
             const token = localStorage.getItem('token');
             const response = await fetch(`${import.meta.env.VITE_API_URL}/receivables/schemes?status=active&_t=${Date.now()}`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Cache-Control': 'no-cache'
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (response.ok) {
