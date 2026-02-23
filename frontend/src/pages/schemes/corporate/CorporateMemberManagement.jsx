@@ -51,7 +51,7 @@ const CorporateMemberManagement = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/receivables/schemes/${schemeId}/members`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/receivables/schemes/${schemeId}/members`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -102,7 +102,7 @@ const CorporateMemberManagement = () => {
         setUploading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/corporate/${selectedScheme}/members/upload`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/corporate/${selectedScheme}/members/upload`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
@@ -130,7 +130,7 @@ const CorporateMemberManagement = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/corporate/${selectedScheme}/members/${patientId}/status`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/corporate/${selectedScheme}/members/${patientId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
