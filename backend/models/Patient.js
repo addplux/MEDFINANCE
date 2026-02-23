@@ -174,7 +174,8 @@ const Patient = sequelize.define('Patient', {
     physio: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
     pharmacy: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
     sundries: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
-    antenatal: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 }
+    antenatal: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+    consultation: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 }
 }, {
     tableName: 'patients',
     timestamps: true,

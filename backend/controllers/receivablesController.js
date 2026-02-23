@@ -736,44 +736,65 @@ const getSchemeInvoice = async (req, res) => {
                 matrix[key] = {
                     date,
                     patientName: `${patient.firstName} ${patient.lastName}`,
-                    manNumber: patient.schemeNumber || patient.patientNumber, // Using schemeNumber as MAN NO
+                    manNumber: patient.policyNumber || patient.patientNumber,
                     policyNumber: patient.policyNumber,
-                    consult: 0,
-                    drugs: 0,
-                    lab: 0,
+                    consultation: 0,
+                    nursingCare: 0,
+                    laboratory: 0,
                     radiology: 0,
+                    dental: 0,
+                    lodging: 0,
+                    surgicals: 0,
+                    drRound: 0,
+                    food: 0,
+                    physio: 0,
+                    pharmacy: 0,
+                    sundries: 0,
+                    antenatal: 0,
                     other: 0,
                     total: 0
                 };
             }
 
-            if (['consult', 'drugs', 'lab', 'radiology'].includes(type)) {
-                matrix[key][type] += Number(amount);
-            } else {
-                matrix[key]['other'] += Number(amount);
-            }
+            const matrixItem = matrix[key];
 
-            matrix[key].total += Number(amount);
+            // Mapping logic for service types
+            if (type === 'consult' || type === 'consultation') matrixItem.consultation += Number(amount);
+            else if (type === 'nursing' || type === 'nursingCare') matrixItem.nursingCare += Number(amount);
+            else if (type === 'lab' || type === 'laboratory') matrixItem.laboratory += Number(amount);
+            else if (type === 'radiology') matrixItem.radiology += Number(amount);
+            else if (type === 'dental') matrixItem.dental += Number(amount);
+            else if (type === 'lodging') matrixItem.lodging += Number(amount);
+            else if (type === 'surgicals') matrixItem.surgicals += Number(amount);
+            else if (type === 'drRound') matrixItem.drRound += Number(amount);
+            else if (type === 'food') matrixItem.food += Number(amount);
+            else if (type === 'physio') matrixItem.physio += Number(amount);
+            else if (type === 'drugs' || type === 'pharmacy') matrixItem.pharmacy += Number(amount);
+            else if (type === 'sundries') matrixItem.sundries += Number(amount);
+            else if (type === 'antenatal') matrixItem.antenatal += Number(amount);
+            else matrixItem.other += Number(amount);
+
+            matrixItem.total += Number(amount);
         };
 
         opdBills.forEach(b => {
             let type = 'other';
-            if (b.service) { // Map service category
-                if (b.service.category === 'opd') type = 'consult';
-                else if (b.service.category === 'laboratory') type = 'lab';
+            if (b.service) {
+                if (b.service.category === 'opd') type = 'consultation';
+                else if (b.service.category === 'laboratory') type = 'laboratory';
                 else if (b.service.category === 'radiology') type = 'radiology';
-                else if (b.service.category === 'pharmacy') type = 'drugs';
+                else if (b.service.category === 'pharmacy') type = 'pharmacy';
                 else type = 'other';
             }
             addToMatrix(b, type, b.netAmount, b.service?.serviceName);
         });
 
         pharmacyBills.forEach(b => {
-            addToMatrix(b, 'drugs', b.netAmount, 'Medication');
+            addToMatrix(b, 'pharmacy', b.netAmount, 'Medication');
         });
 
         labBills.forEach(b => {
-            addToMatrix(b, 'lab', b.netAmount, b.testName);
+            addToMatrix(b, 'laboratory', b.netAmount, b.testName);
         });
 
         radiologyBills.forEach(b => {
@@ -784,10 +805,19 @@ const getSchemeInvoice = async (req, res) => {
 
         // Calculate Column Totals
         const totals = {
-            consult: rows.reduce((s, r) => s + r.consult, 0),
-            drugs: rows.reduce((s, r) => s + r.drugs, 0),
-            lab: rows.reduce((s, r) => s + r.lab, 0),
+            consultation: rows.reduce((s, r) => s + r.consultation, 0),
+            nursingCare: rows.reduce((s, r) => s + r.nursingCare, 0),
+            laboratory: rows.reduce((s, r) => s + r.laboratory, 0),
             radiology: rows.reduce((s, r) => s + r.radiology, 0),
+            dental: rows.reduce((s, r) => s + r.dental, 0),
+            lodging: rows.reduce((s, r) => s + r.lodging, 0),
+            surgicals: rows.reduce((s, r) => s + r.surgicals, 0),
+            drRound: rows.reduce((s, r) => s + r.drRound, 0),
+            food: rows.reduce((s, r) => s + r.food, 0),
+            physio: rows.reduce((s, r) => s + r.physio, 0),
+            pharmacy: rows.reduce((s, r) => s + r.pharmacy, 0),
+            sundries: rows.reduce((s, r) => s + r.sundries, 0),
+            antenatal: rows.reduce((s, r) => s + r.antenatal, 0),
             other: rows.reduce((s, r) => s + r.other, 0),
             grandTotal: rows.reduce((s, r) => s + r.total, 0)
         };
@@ -834,39 +864,68 @@ const importSchemeMembers = async (req, res) => {
         for (const member of members) {
             const t = await sequelize.transaction(); // Start individual transaction
             try {
-                // Validate required fields
-                if (!member.firstName || !member.lastName || !member.policyNumber) {
-                    throw new Error(`Missing required fields (Name or Policy Number)`);
+                // SINOZAM Excel Compatibility: Map column aliases
+                // NAME -> firstName, lastName
+                let firstName = member.firstName;
+                let lastName = member.lastName;
+                if (member.NAME && (!firstName || !lastName)) {
+                    const parts = member.NAME.trim().split(/\s+/);
+                    firstName = parts[0];
+                    lastName = parts.slice(1).join(' ') || 'N/A';
                 }
+
+                // MAN NO -> policyNumber
+                const policyNumber = member.policyNumber || member['MAN NO'] || member.manNumber;
+
+                // Validate required fields
+                if (!firstName || !lastName || !policyNumber) {
+                    throw new Error(`Missing required fields (Name or Policy Number). Got: ${firstName} ${lastName}, Policy: ${policyNumber}`);
+                }
+
+                // Detailed Balance Aliases
+                const nursingCare = parseFloat(member.nursingCare || member.NURSING || 0);
+                const laboratory = parseFloat(member.laboratory || member.LABORAT || 0);
+                const radiology = parseFloat(member.radiology || member.RADIOLO || 0);
+                const dental = parseFloat(member.dental || member.DENTAL || 0);
+                const lodging = parseFloat(member.lodging || member.LODGING || 0);
+                const surgicals = parseFloat(member.surgicals || member.SURGICA || 0);
+                const drRound = parseFloat(member.drRound || member['DR ROUN'] || 0);
+                const food = parseFloat(member.food || member.FOOD || 0);
+                const physio = parseFloat(member.physio || member.PHYSIO || 0);
+                const pharmacy = parseFloat(member.pharmacy || member.DRUGS || 0);
+                const sundries = parseFloat(member.sundries || member.SUNDARI || 0);
+                const antenatal = parseFloat(member.antenatal || member.ANTENET || 0);
+                const consultation = parseFloat(member.consultation || member.CONSULT || 0);
+
+                // Calculate total balance for this patient row
+                const rowBalance = nursingCare + laboratory + radiology + dental + lodging +
+                    surgicals + drRound + food + physio + pharmacy +
+                    sundries + antenatal + consultation;
 
                 // Check if patient exists (by Policy Number + Scheme)
                 let patient = await Patient.findOne({
                     where: {
-                        policyNumber: member.policyNumber,
+                        policyNumber: policyNumber,
                         schemeId: id
                     },
                     transaction: t
                 });
 
-                // If not found, check by NHIMA/NRC if provided (to avoid duplicates across schemes if that's a rule, or just link)
-                // For now, we assume if they are in a different scheme, they are a new patient record (or we link them - business logic depends)
-                // Let's stick to: if NRC matches, it's the same person.
                 if (!patient && member.nrc) {
                     patient = await Patient.findOne({ where: { nrc: member.nrc }, transaction: t });
                 }
 
-                // Determine paymentMethod based on Scheme Type
                 let paymentMethod = 'scheme';
                 if (scheme.schemeType === 'corporate') {
                     paymentMethod = 'corporate';
                 }
 
                 const patientData = {
-                    firstName: member.firstName,
-                    lastName: member.lastName,
-                    dateOfBirth: member.dateOfBirth || new Date('1990-01-01'), // Default if missing
+                    firstName,
+                    lastName,
+                    dateOfBirth: member.dateOfBirth || new Date('1990-01-01'),
                     gender: member.gender ? member.gender.toLowerCase() : 'other',
-                    policyNumber: member.policyNumber,
+                    policyNumber: policyNumber,
                     schemeId: id,
                     paymentMethod,
                     memberRank: member.rank || 'principal',
@@ -878,59 +937,54 @@ const importSchemeMembers = async (req, res) => {
                     memberStatus: 'active',
                     serviceId: req.body.serviceId || null,
                     // Detailed Balances
-                    nursingCare: member.nursingCare || 0,
-                    laboratory: member.laboratory || 0,
-                    radiology: member.radiology || 0,
-                    dental: member.dental || 0,
-                    lodging: member.lodging || 0,
-                    surgicals: member.surgicals || 0,
-                    drRound: member.drRound || 0,
-                    food: member.food || 0,
-                    physio: member.physio || 0,
-                    pharmacy: member.pharmacy || 0,
-                    sundries: member.sundries || 0,
-                    antenatal: member.antenatal || 0
+                    nursingCare,
+                    laboratory,
+                    radiology,
+                    dental,
+                    lodging,
+                    surgicals,
+                    drRound,
+                    food,
+                    physio,
+                    pharmacy,
+                    sundries,
+                    antenatal,
+                    consultation,
+                    balance: rowBalance
                 };
 
                 if (patient) {
-                    // Update
                     await patient.update(patientData, { transaction: t });
                     updatedCount++;
                 } else {
-                    // Create
-                    currentPatientCount++; // Increment local count
+                    currentPatientCount++;
                     const patientNumber = `P${String(currentPatientCount).padStart(6, '0')}`;
-
                     await Patient.create({
                         ...patientData,
-                        patientNumber,
-                        balance: member.balance ? parseFloat(member.balance) : 0.00,
-                        nursingCare: member.nursingCare || 0,
-                        laboratory: member.laboratory || 0,
-                        radiology: member.radiology || 0,
-                        dental: member.dental || 0,
-                        lodging: member.lodging || 0,
-                        surgicals: member.surgicals || 0,
-                        drRound: member.drRound || 0,
-                        food: member.food || 0,
-                        physio: member.physio || 0,
-                        pharmacy: member.pharmacy || 0,
-                        sundries: member.sundries || 0,
-                        antenatal: member.antenatal || 0
+                        patientNumber
                     }, { transaction: t });
                     addedCount++;
                 }
 
-                await t.commit(); // Success for this row
+                await t.commit();
 
             } catch (err) {
-                await t.rollback(); // Fail only this row
+                if (t) await t.rollback();
                 console.error(`Failed to import member row:`, err);
                 failedCount++;
-                // Simplify error message
                 const msg = err.errors ? err.errors.map(e => e.message).join(', ') : err.message;
-                errors.push(`Error for ${member.firstName || 'Unknown'} ${member.lastName || ''}: ${msg}`);
+                errors.push(`Error for ${member.NAME || member.firstName || 'Unknown'}: ${msg}`);
             }
+        }
+
+        // POST-IMPORT: Recalculate Scheme Outstanding Balance
+        try {
+            const allPatients = await Patient.findAll({ where: { schemeId: id } });
+            const totalOutstanding = allPatients.reduce((sum, p) => sum + parseFloat(p.balance || 0), 0);
+            await scheme.update({ outstandingBalance: totalOutstanding });
+            console.log(`Updated Scheme ${id} outstandingBalance to ${totalOutstanding}`);
+        } catch (schemeErr) {
+            console.error('Failed to update scheme outstanding balance:', schemeErr);
         }
 
         res.json({
