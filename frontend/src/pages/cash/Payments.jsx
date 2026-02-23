@@ -47,17 +47,32 @@ const PatientLedger = () => {
     };
 
     const fetchUnpaidBills = async (patientId) => {
-        if (!patientId) return [];
+        if (!patientId) {
+            console.error('[Payments] fetchUnpaidBills called without patientId');
+            return [];
+        }
         try {
             setLoading(true);
+            console.log(`[Payments] Calling getUnpaidBills for ID: ${patientId}`);
             const response = await billingAPI.patient.getUnpaidBills(patientId);
+            console.log('[Payments] API RAW RESPONSE:', response);
+            console.log('[Payments] API DATA:', response.data);
             const bills = response.data || [];
-            const uniqueBills = bills.map(b => ({ ...b, uid: `${b.billType || b.department}-${b.id}` }));
+            if (bills.length === 0) {
+                console.warn(`[Payments] No unpaid bills found for patient ${patientId}`);
+            }
+
+            const uniqueBills = bills.map(b => ({
+                ...b,
+                uid: b.uid || `${b.billType || b.department || 'other'}-${b.id}`
+            }));
+
+            console.log('[Payments] Processed uniqueBills:', uniqueBills);
             setUnpaidBills(uniqueBills);
             setSelectedBills(uniqueBills.map(b => b.uid));
             return uniqueBills;
         } catch (error) {
-            console.error('Failed to fetch unpaid bills:', error);
+            console.error('[Payments] API ERROR:', error.response || error);
             setUnpaidBills([]);
             setSelectedBills([]);
             return [];
@@ -67,13 +82,16 @@ const PatientLedger = () => {
     };
 
     const handleSelectPatient = async (id) => {
+        console.log(`[Payments] handleSelectPatient triggered for ID: ${id}`);
         setSelectedPatientId(String(id));
-        setUnpaidBills([]); // Clear previous data immediately
+        setUnpaidBills([]);
         setSelectedBills([]);
         const bills = await fetchUnpaidBills(id);
-        // Automatically select all bills by default for quick processing
         if (bills && bills.length > 0) {
+            console.log(`[Payments] Setting ${bills.length} selected bills`);
             setSelectedBills(bills.map(b => b.uid));
+        } else {
+            console.log('[Payments] No bills to select');
         }
     };
 
@@ -99,17 +117,16 @@ const PatientLedger = () => {
             field: 'patient',
             headerName: 'Patient Name',
             flex: 1.5,
-            renderCell: (params) => (
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-[11px] font-bold text-orange-400 shrink-0 border border-orange-500/30">
-                        {params.row.firstName[0]}{params.row.lastName[0]}
+            renderCell: (params) => {
+                const fName = params.row.firstName || 'Unknown';
+                const lName = params.row.lastName || 'Patient';
+                return (
+                    <div className="flex flex-col">
+                        <span className="font-bold text-gray-900 text-sm">{fName} {lName}</span>
+                        <span className="text-[10px] text-gray-500 font-mono">{params.row.patientNumber || 'No ID'}</span>
                     </div>
-                    <div className="truncate">
-                        <div className="font-bold text-gray-900 text-sm leading-tight">{params.row.firstName} {params.row.lastName}</div>
-                        <div className="text-[10px] text-gray-700 font-bold font-mono">{params.row.patientNumber}</div>
-                    </div>
-                </div>
-            )
+                );
+            }
         },
         {
             field: 'departments',
@@ -117,7 +134,7 @@ const PatientLedger = () => {
             flex: 1.2,
             renderCell: (params) => (
                 <div className="flex flex-wrap gap-1">
-                    {params.value.split(', ').map(d => (
+                    {(params.value || '').split(', ').filter(Boolean).map(d => (
                         <span key={d} className="px-1.5 py-0.5 rounded-md bg-gray-100 border border-gray-200 text-[9px] font-black text-gray-900 uppercase tracking-wider">
                             {d}
                         </span>
@@ -170,9 +187,15 @@ const PatientLedger = () => {
             field: 'createdAt',
             headerName: 'Date',
             width: 100,
-            renderCell: (params) => (
-                <span className="text-[10px] text-gray-700 font-bold">{new Date(params.value).toLocaleDateString()}</span>
-            )
+            renderCell: (params) => {
+                try {
+                    const d = new Date(params.value);
+                    if (isNaN(d.getTime())) return <span className="text-[10px] text-gray-700 font-bold">N/A</span>;
+                    return <span className="text-[10px] text-gray-700 font-bold">{d.toLocaleDateString()}</span>;
+                } catch (e) {
+                    return <span className="text-[10px] text-gray-700 font-bold">Err</span>;
+                }
+            }
         },
         {
             field: 'department',
@@ -363,10 +386,10 @@ const PatientLedger = () => {
                                     loading={loading}
                                     checkboxSelection
                                     getRowHeight={() => 'auto'}
-                                    onSelectionModelChange={(newSelection) => {
+                                    onRowSelectionModelChange={(newSelection) => {
                                         setSelectedBills(newSelection);
                                     }}
-                                    selectionModel={selectedBills}
+                                    rowSelectionModel={selectedBills}
                                     getRowId={(row) => row.uid}
                                     sx={{
                                         border: 'none',

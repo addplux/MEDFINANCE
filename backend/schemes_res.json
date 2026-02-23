@@ -1,0 +1,50 @@
+[
+  {
+    "id": 2,
+    "schemeCode": "MAD01",
+    "schemeName": "Madison Health Insurance",
+    "schemeType": "insurance",
+    "billingCycle": "monthly",
+    "pricingModel": "tiered",
+    "discountRate": "0.00",
+    "contactPerson": null,
+    "phone": null,
+    "email": null,
+    "status": "active",
+    "notes": null,
+    "createdAt": "2026-02-21T11:48:29.094Z",
+    "updatedAt": "2026-02-21T11:48:29.094Z"
+  },
+  {
+    "id": 3,
+    "schemeCode": "SCH0003",
+    "schemeName": "MOPANI",
+    "schemeType": "corporate",
+    "billingCycle": "monthly",
+    "pricingModel": "standard",
+    "discountRate": "2.00",
+    "contactPerson": "Manager",
+    "phone": "260768401553",
+    "email": "gracetoy@gmail.com",
+    "status": "active",
+    "notes": "Notify",
+    "createdAt": "2026-02-23T09:02:18.084Z",
+    "updatedAt": "2026-02-23T09:02:18.084Z"
+  },
+  {
+    "id": 1,
+    "schemeCode": "NHIMA01",
+    "schemeName": "National Health Insurance (NHIMA)",
+    "schemeType": "government",
+    "billingCycle": "monthly",
+    "pricingModel": "standard",
+    "discountRate": "0.00",
+    "contactPerson": null,
+    "phone": null,
+    "email": null,
+    "status": "active",
+    "notes": null,
+    "createdAt": "2026-02-21T11:48:28.687Z",
+    "updatedAt": "2026-02-21T11:48:28.687Z"
+  }
+]

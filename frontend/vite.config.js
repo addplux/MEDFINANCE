@@ -61,7 +61,7 @@ function injectSwAssets() {
 export default defineConfig({
   plugins: [react(), injectSwAssets()],
   server: {
-    port: 5180,
+    port: 5181,
     strictPort: true,
   },
   build: {

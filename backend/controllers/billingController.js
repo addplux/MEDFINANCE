@@ -340,86 +340,136 @@ const getPatientStatement = async (req, res) => {
 const getUnpaidPatientBills = async (req, res) => {
     try {
         const { id } = req.params;
+        const patientId = Number(id);
         const unpaidBills = [];
 
-        // Fetch OPD
-        const opdBills = await OPDBill.findAll({
-            where: { patientId: id, paymentStatus: 'unpaid' },
-            include: [{ association: 'service', attributes: ['name'] }]
-        });
-        opdBills.forEach(b => unpaidBills.push({
-            ...b.toJSON(),
-            department: 'OPD',
-            description: b.service?.serviceName || b.service?.name,
-            billType: 'OPDBill'
-        }));
+        if (isNaN(patientId)) {
+            console.error('[DEBUG] Invalid patientId received:', id);
+            return res.json([]);
+        }
 
-        const pharmacyBills = await PharmacyBill.findAll({
-            where: { patientId: id, paymentStatus: 'unpaid' },
-            include: [{ association: 'medicationDetails', attributes: ['name'] }]
-        });
-        pharmacyBills.forEach(b => unpaidBills.push({
-            ...b.toJSON(),
-            department: 'Pharmacy',
-            description: b.medicationDetails?.name || 'Medication',
-            billType: 'PharmacyBill'
-        }));
+        console.log(`[DEBUG] getUnpaidPatientBills started for patientId: ${patientId}`);
 
-        // Fetch Lab Requests (lab module uses LabRequest, not LabBill)
-        const labRequests = await LabRequest.findAll({
-            where: { patientId: id, paymentStatus: 'unpaid' },
-            include: [
-                {
-                    model: LabResult,
-                    as: 'results',
-                    include: [{ model: LabTest, as: 'test', attributes: ['name'] }]
-                }
-            ]
-        });
-        labRequests.forEach(r => {
-            const testNames = r.results?.map(res => res.test?.name).filter(Boolean).join(', ') || 'Lab Tests';
-            unpaidBills.push({
-                ...r.toJSON(),
-                netAmount: r.totalAmount,
-                department: 'Laboratory',
-                description: testNames,
-                billType: 'LabRequest'
+        // Fetch IPD
+        try {
+            const ipdBills = await IPDBill.findAll({
+                where: { patientId, paymentStatus: 'unpaid' }
             });
-        });
+            console.log(`[DEBUG] IPD: found ${ipdBills.length}`);
+            ipdBills.forEach(b => unpaidBills.push({
+                ...b.toJSON(),
+                department: 'IPD',
+                description: 'Inpatient Care',
+                billType: 'IPDBill'
+            }));
+        } catch (e) {
+            console.error('[DEBUG] IPD fetch error:', e.message);
+        }
 
-        // Fetch LabBill (legacy, if any)
-        const labBills = await LabBill.findAll({
-            where: { patientId: id, paymentStatus: 'unpaid' }
-        });
-        labBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Laboratory', description: b.testName, billType: 'LabBill' }));
+        // Fetch OPD
+        try {
+            const opdBills = await OPDBill.findAll({
+                where: { patientId, paymentStatus: 'unpaid' },
+                include: [{ association: 'service' }]
+            });
+            console.log(`[DEBUG] OPD bills: found ${opdBills.length}`);
+            opdBills.forEach(b => unpaidBills.push({
+                ...b.toJSON(),
+                department: 'OPD',
+                description: b.service?.serviceName || b.service?.name || 'OPD Service',
+                billType: 'OPDBill'
+            }));
+        } catch (e) {
+            console.error('[DEBUG] OPD fetch error:', e.message);
+        }
 
-        // Fetch Radiology
-        const radBills = await RadiologyBill.findAll({
-            where: { patientId: id, paymentStatus: 'unpaid' }
-        });
-        radBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Radiology', description: b.scanType, billType: 'RadiologyBill' }));
+        // Fetch Pharmacy
+        try {
+            const pharmacyBills = await PharmacyBill.findAll({
+                where: { patientId, paymentStatus: 'unpaid' },
+                include: [{ association: 'medicationDetails' }]
+            });
+            console.log(`[DEBUG] Pharmacy bills: found ${pharmacyBills.length}`);
+            pharmacyBills.forEach(b => unpaidBills.push({
+                ...b.toJSON(),
+                department: 'Pharmacy',
+                description: b.medicationDetails?.name || 'Medication',
+                billType: 'PharmacyBill'
+            }));
+        } catch (e) {
+            console.error('[DEBUG] Pharmacy fetch error:', e.message);
+        }
 
-        // Fetch Theatre
-        const theatreBills = await TheatreBill.findAll({
-            where: { patientId: id, paymentStatus: 'unpaid' }
-        });
-        theatreBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Theatre', description: b.procedureType, billType: 'TheatreBill' }));
+        // Fetch Lab Requests
+        try {
+            const labRequests = await LabRequest.findAll({
+                where: { patientId, paymentStatus: 'unpaid' },
+                include: [
+                    {
+                        model: LabResult,
+                        as: 'results',
+                        include: [{ model: LabTest, as: 'test' }]
+                    }
+                ]
+            });
+            console.log(`[DEBUG] Lab requests: found ${labRequests.length}`);
+            labRequests.forEach(r => {
+                const testNames = r.results?.map(res => res.test?.name).filter(Boolean).join(', ') || 'Lab Tests';
+                unpaidBills.push({
+                    ...r.toJSON(),
+                    netAmount: r.totalAmount,
+                    department: 'Laboratory',
+                    description: testNames,
+                    billType: 'LabRequest'
+                });
+            });
+        } catch (e) {
+            console.error('[DEBUG] LabRequest fetch error:', e.message);
+        }
 
-        // Fetch Maternity
-        const matBills = await MaternityBill.findAll({
-            where: { patientId: id, paymentStatus: 'unpaid' }
-        });
-        matBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Maternity', description: 'Maternity Delivery', billType: 'MaternityBill' }));
+        // Fetch LabBill
+        try {
+            const labBills = await LabBill.findAll({
+                where: { patientId, paymentStatus: 'unpaid' }
+            });
+            console.log(`[DEBUG] LabBill: found ${labBills.length}`);
+            labBills.forEach(b => unpaidBills.push({
+                ...b.toJSON(),
+                department: 'Laboratory',
+                description: b.testName,
+                billType: 'LabBill'
+            }));
+        } catch (e) {
+            console.error('[DEBUG] LabBill fetch error:', e.message);
+        }
 
-        // Fetch Specialist Clinic
-        const specialistBills = await SpecialistClinicBill.findAll({
-            where: { patientId: id, paymentStatus: 'unpaid' }
-        });
-        specialistBills.forEach(b => unpaidBills.push({ ...b.toJSON(), department: 'Specialist Clinic', description: `Consultation (${b.clinicType})`, billType: 'SpecialistClinicBill' }));
+        // Fetch others with simple mapping
+        const otherDepts = [
+            { model: RadiologyBill, dept: 'Radiology', type: 'RadiologyBill', descField: 'scanType' },
+            { model: TheatreBill, dept: 'Theatre', type: 'TheatreBill', descField: 'procedureType' },
+            { model: MaternityBill, dept: 'Maternity', type: 'MaternityBill', desc: (b) => `Maternity (${b.deliveryType || 'Care'})` },
+            { model: SpecialistClinicBill, dept: 'Specialist Clinic', type: 'SpecialistClinicBill', desc: (b) => `Consultation (${b.clinicType})` }
+        ];
 
+        for (const d of otherDepts) {
+            try {
+                const bills = await d.model.findAll({ where: { patientId, paymentStatus: 'unpaid' } });
+                console.log(`[DEBUG] ${d.dept} bills: found ${bills.length}`);
+                bills.forEach(b => unpaidBills.push({
+                    ...b.toJSON(),
+                    department: d.dept,
+                    description: d.desc ? d.desc(b) : b[d.descField],
+                    billType: d.type
+                }));
+            } catch (e) {
+                console.error(`[DEBUG] ${d.dept} fetch error:`, e.message);
+            }
+        }
+
+        console.log(`[DEBUG] Total unpaid bills for P${patientId}: ${unpaidBills.length}`);
         res.json(unpaidBills);
     } catch (error) {
-        console.error('Get unpaid patient bills error:', error);
+        console.error('[DEBUG] Global fetch error:', error);
         res.status(500).json({ error: 'Failed to get unpaid patient bills' });
     }
 };

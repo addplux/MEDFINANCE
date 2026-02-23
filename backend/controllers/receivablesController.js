@@ -181,6 +181,9 @@ const getAllSchemes = async (req, res) => {
             order: [['schemeName', 'ASC']]
         });
 
+        // DEBUG: Log all schemes and their types for debugging "no corporate scheme found" issue
+        console.log('[DEBUG] All schemes from database:', JSON.stringify(schemes.map(s => ({ id: s.id, schemeName: s.schemeName, schemeType: s.schemeType, status: s.status }))));
+
         res.json(schemes);
     } catch (error) {
         console.error('Get schemes error:', error);

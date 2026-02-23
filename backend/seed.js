@@ -179,6 +179,19 @@ const seedDatabase = async () => {
             status: 'active'
         });
 
+        // Create a Corporate Scheme (linked to Zambia Sugar corporate account)
+        const corporateScheme = await Scheme.create({
+            schemeCode: 'CORP01',
+            schemeName: 'Zambia Sugar Corporate',
+            schemeType: 'corporate',
+            billingCycle: 'monthly',
+            pricingModel: 'standard',
+            status: 'active',
+            contactPerson: 'HR Manager',
+            phone: '0211123456',
+            email: 'hr@zambiasugar.com'
+        });
+
         const zamSugarCorp = await CorporateAccount.create({
             accountNumber: 'CORP-ZSUG',
             companyName: 'Zambia Sugar Plc',

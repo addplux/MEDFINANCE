@@ -37,12 +37,19 @@ const CorporateMemberManagement = () => {
             });
             if (response.ok) {
                 const data = await response.json();
+                console.log('[DEBUG] API returned schemes:', data);
                 // Filter for corporate schemes only, handling possible snake_case or capitalization differences
                 const filtered = data.filter(s => {
                     const type = s.schemeType || s.scheme_type || '';
                     return type.toLowerCase() === 'corporate';
                 });
+                console.log('[DEBUG] Filtered corporate schemes:', filtered);
+                if (filtered.length === 0) {
+                    console.warn('[DEBUG] No corporate schemes found! Available schemes:', data.map(s => ({ id: s.id, schemeName: s.schemeName, schemeType: s.schemeType })));
+                }
                 setCorporateSchemes(filtered);
+            } else {
+                console.error('API response not OK:', response.status);
             }
         } catch (error) {
             console.error('Failed to fetch corporate schemes:', error);
