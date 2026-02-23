@@ -116,6 +116,10 @@ export const receivablesAPI = {
         generateInvoice: (data) => api.post('/receivables/schemes/invoices/generate', data),
         getInvoices: (schemeId) => api.get(`/receivables/schemes/${schemeId}/invoices`),
         getInvoiceDetails: (invoiceId) => api.get(`/receivables/schemes/invoices/${invoiceId}`),
+        importMembers: (schemeId, formData) => api.post(`/receivables/schemes/${schemeId}/import`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        }),
+        updateMemberStatus: (schemeId, patientId, status) => api.put(`/receivables/schemes/${schemeId}/members/${patientId}/status`, { status }),
     },
 };
 

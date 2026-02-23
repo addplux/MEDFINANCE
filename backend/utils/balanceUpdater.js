@@ -97,6 +97,21 @@ const updatePatientBalance = async (patientId, transaction = null) => {
             { where: { id: patientId }, transaction }
         );
 
+        // PROPAGATE TO SCHEME: If patient is on a scheme, update the scheme total outstanding
+        if (patient.schemeId) {
+            const { Scheme } = require('../models');
+            const allPatients = await Patient.findAll({
+                where: { schemeId: patient.schemeId },
+                transaction
+            });
+            const schemeOutstanding = allPatients.reduce((sum, p) => sum + parseFloat(p.balance || 0), 0);
+            await Scheme.update(
+                { outstandingBalance: schemeOutstanding },
+                { where: { id: patient.schemeId }, transaction }
+            );
+            console.log(`Updated Scheme ${patient.schemeId} outstandingBalance to ${schemeOutstanding}`);
+        }
+
         return newBalance;
 
     } catch (error) {

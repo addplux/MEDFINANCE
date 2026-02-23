@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Upload, Search, Link as LinkIcon, AlertCircle, CheckCircle, XCircle, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { receivablesAPI } from '../../../services/apiService';
+import { useToast } from '../../../context/ToastContext';
 
 const CorporateMemberManagement = () => {
     const navigate = useNavigate();
+    const { addToast } = useToast();
     const [corporateSchemes, setCorporateSchemes] = useState([]);
     const [selectedScheme, setSelectedScheme] = useState('');
     const [members, setMembers] = useState([]);
@@ -28,37 +31,22 @@ const CorporateMemberManagement = () => {
 
     const fetchSchemes = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/receivables/schemes?status=active&_t=${Date.now()}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                // Show ALL scheme types — no filtering by type
-                setCorporateSchemes(data);
-            } else {
-                console.error('API response not OK:', response.status);
-            }
+            const response = await receivablesAPI.schemes.getAll({ status: 'active' });
+            setCorporateSchemes(response.data || []);
         } catch (error) {
             console.error('Failed to fetch corporate schemes:', error);
+            addToast('error', 'Failed to load schemes.');
         }
     };
 
     const fetchMembers = async (schemeId) => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/receivables/schemes/${schemeId}/members`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setMembers(data);
-            }
+            const response = await receivablesAPI.schemes.getMembers(schemeId);
+            setMembers(response.data || []);
         } catch (error) {
             console.error('Failed to fetch members:', error);
+            addToast('error', 'Failed to load member list.');
         } finally {
             setLoading(false);
         }
@@ -90,34 +78,26 @@ const CorporateMemberManagement = () => {
 
     const handleUpload = async () => {
         if (!selectedFile || !selectedScheme) {
-            alert('Please select a scheme and a file to upload.');
+            addToast('warning', 'Please select a scheme and a file to upload.');
             return;
         }
 
         const formData = new FormData();
         formData.append('file', selectedFile);
-        formData.append('schemeId', selectedScheme);
 
         setUploading(true);
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/corporate/${selectedScheme}/members/upload`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData
-            });
+            const response = await receivablesAPI.schemes.importMembers(selectedScheme, formData);
 
-            const result = await response.json();
-            if (response.ok) {
-                alert(`Upload Successful! Added/Updated: ${result.results.success}. Failed: ${result.results.failed}`);
-                setSelectedFile(null);
-                fetchMembers(selectedScheme);
-            } else {
-                alert(result.error || 'Upload failed');
-            }
+            const { results } = response.data;
+            addToast('success', `Upload successful! Added/Updated: ${results.success}.`);
+
+            setSelectedFile(null);
+            fetchMembers(selectedScheme);
         } catch (error) {
             console.error('Upload error:', error);
-            alert('An error occurred during upload.');
+            const msg = error.response?.data?.error || 'Failed to upload roster. Check column names.';
+            addToast('error', msg);
         } finally {
             setUploading(false);
         }
@@ -128,24 +108,12 @@ const CorporateMemberManagement = () => {
         if (!window.confirm(`Are you sure you want to ${newStatus === 'active' ? 'activate' : 'suspend'} this member?`)) return;
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/corporate/${selectedScheme}/members/${patientId}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ status: newStatus })
-            });
-
-            if (response.ok) {
-                setMembers(members.map(m => m.id === patientId ? { ...m, memberStatus: newStatus } : m));
-            } else {
-                alert('Failed to update status');
-            }
+            await receivablesAPI.schemes.updateMemberStatus(selectedScheme, patientId, newStatus);
+            setMembers(members.map(m => m.id === patientId ? { ...m, memberStatus: newStatus } : m));
+            addToast('success', `Member ${newStatus === 'active' ? 'activated' : 'suspended'} successfully.`);
         } catch (error) {
             console.error('Status update error:', error);
-            alert('An error occurred updating status.');
+            addToast('error', 'Failed to update member status.');
         }
     };
 

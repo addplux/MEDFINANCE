@@ -2,6 +2,13 @@ const express = require('express');
 const router = express.Router();
 const receivablesController = require('../controllers/receivablesController');
 const { authMiddleware, authorize } = require('../middleware/auth');
+const multer = require('multer');
+
+// Configure multer for memory storage
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
 
 // All receivables routes require authentication
 router.use(authMiddleware);
@@ -33,6 +40,9 @@ router.get('/schemes/:id/invoices', receivablesController.getSchemeInvoices);
 router.get('/schemes/invoices/:id', receivablesController.getSchemeInvoice);
 
 // Bulk Import
-router.post('/schemes/:id/import', authorize('admin', 'accountant'), receivablesController.importSchemeMembers);
+router.post('/schemes/:id/import', authorize('admin', 'accountant'), upload.single('file'), receivablesController.importSchemeMembers);
+
+// Update member status
+router.put('/schemes/:id/members/:patientId/status', authorize('admin', 'accountant'), receivablesController.updateMemberStatus);
 
 module.exports = router;

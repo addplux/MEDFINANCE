@@ -1,3 +1,4 @@
+const xlsx = require('xlsx');
 const { NHIMAClaim, CorporateAccount, Scheme, SchemeInvoice, Patient, User, OPDBill, PharmacyBill, LabBill, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill, Service, Payment, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const { postSchemeInvoice } = require('../utils/glPoster');
@@ -841,7 +842,16 @@ const importSchemeMembers = async (req, res) => {
     // No outer transaction - we want partial success
     try {
         const { id } = req.params; // Scheme ID
-        const { members } = req.body; // Array of member objects
+        let members = req.body.members; // Might be JSON
+
+        // If a file is uploaded, parse it
+        if (req.file) {
+            const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            members = xlsx.utils.sheet_to_json(worksheet);
+            console.log(`Parsed ${members.length} members from uploaded file for Scheme ${id}`);
+        }
 
         if (!members || !Array.isArray(members) || members.length === 0) {
             return res.status(400).json({ error: 'No members data provided' });
@@ -1004,6 +1014,30 @@ const importSchemeMembers = async (req, res) => {
     }
 };
 
+// Toggle member status
+const updateMemberStatus = async (req, res) => {
+    try {
+        const { patientId } = req.params;
+        const { status } = req.body; // 'active' or 'suspended'
+
+        if (!['active', 'suspended', 'closed'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status.' });
+        }
+
+        const patient = await Patient.findByPk(patientId);
+        if (!patient) {
+            return res.status(404).json({ error: 'Member not found.' });
+        }
+
+        await patient.update({ memberStatus: status });
+
+        res.json({ message: `Member status updated to ${status}.`, patient });
+    } catch (error) {
+        console.error('Error updating member status:', error);
+        res.status(500).json({ error: 'Failed to update member status.' });
+    }
+};
+
 module.exports = {
     getAllNHIMAClaims,
     createNHIMAClaim,
@@ -1020,7 +1054,7 @@ module.exports = {
     generateMonthlyInvoice,
     getSchemeInvoice,
     getSchemeInvoices,
-    getSchemeInvoices,
     importSchemeMembers,
-    getAllServices
+    getAllServices,
+    updateMemberStatus
 };
