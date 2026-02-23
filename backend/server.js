@@ -161,8 +161,8 @@ const startServer = async () => {
         // Sync database models
         console.log('⏳ Syncing database models...');
         try {
-            // Use alter: true to update schema, but careful on prod
-            await syncDatabase({ alter: true });
+            // Schema is already in sync — use alter: false so startup is instant
+            await syncDatabase({ alter: false });
             console.log('✅ Database synchronized successfully');
         } catch (syncError) {
             console.error('⚠️ Database synchronization failed:', syncError);
