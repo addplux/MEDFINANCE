@@ -37,17 +37,8 @@ const CorporateMemberManagement = () => {
             });
             if (response.ok) {
                 const data = await response.json();
-                console.log('[DEBUG] API returned schemes:', data);
-                // Filter for corporate schemes only, handling possible snake_case or capitalization differences
-                const filtered = data.filter(s => {
-                    const type = s.schemeType || s.scheme_type || '';
-                    return type.toLowerCase() === 'corporate';
-                });
-                console.log('[DEBUG] Filtered corporate schemes:', filtered);
-                if (filtered.length === 0) {
-                    console.warn('[DEBUG] No corporate schemes found! Available schemes:', data.map(s => ({ id: s.id, schemeName: s.schemeName, schemeType: s.schemeType })));
-                }
-                setCorporateSchemes(filtered);
+                // Show ALL scheme types — no filtering by type
+                setCorporateSchemes(data);
             } else {
                 console.error('API response not OK:', response.status);
             }
@@ -172,16 +163,16 @@ const CorporateMemberManagement = () => {
         <div className="space-y-6 animate-fade-in">
             {/* Page Header */}
             <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900">Corporate Member Management</h1>
-                <p className="text-sm text-slate-500 mt-1">Select a corporate scheme below to view and manage its members</p>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900">Scheme Member Management</h1>
+                <p className="text-sm text-slate-500 mt-1">Select a scheme below to view and manage its members</p>
             </div>
 
             {/* Corporate Schemes Cards */}
             {corporateSchemes.length === 0 ? (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-8 text-center">
-                    <p className="text-amber-700 font-semibold">No active corporate schemes found.</p>
+                    <p className="text-amber-700 font-semibold">No active schemes found.</p>
                     <p className="text-amber-600 text-sm mt-1">
-                        Please create one under <strong>'All Schemes'</strong> with type set to <strong>Corporate</strong>.
+                        Please create a scheme under <strong>'All Schemes'</strong>.
                     </p>
                 </div>
             ) : (
@@ -207,9 +198,14 @@ const CorporateMemberManagement = () => {
                                         {isSelected ? 'Selected' : 'Select'}
                                     </span>
                                 </div>
-                                <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
-                                    <span>Discount: <strong className="text-slate-700">{scheme.discountRate || 0}%</strong></span>
-                                    <span className="inline-flex items-center gap-1">
+                                <div className="mt-3 flex items-center gap-3 text-xs">
+                                    {(() => {
+                                        const t = (scheme.schemeType || scheme.scheme_type || '').toLowerCase();
+                                        const colors = { corporate: 'bg-blue-100 text-blue-700', insurance: 'bg-purple-100 text-purple-700', government: 'bg-amber-100 text-amber-700' };
+                                        return <span className={`px-2 py-0.5 rounded-full font-medium capitalize ${colors[t] || 'bg-slate-100 text-slate-600'}`}>{t || 'other'}</span>;
+                                    })()}
+                                    <span className="text-slate-500">Discount: <strong className="text-slate-700">{scheme.discountRate || 0}%</strong></span>
+                                    <span className="inline-flex items-center gap-1 text-slate-500">
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                         Active
                                     </span>
