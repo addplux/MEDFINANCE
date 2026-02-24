@@ -167,8 +167,8 @@ const MembershipRegistration = () => {
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Membership Registration</h1>
-                    <p className="text-gray-500 mt-1 text-sm">Register and manage Private Prepaid Scheme members</p>
+                    <h1 className="text-3xl font-bold text-white">Membership Registration</h1>
+                    <p className="text-white/50 mt-1 text-sm">Register and manage Private Prepaid Scheme members</p>
                 </div>
                 <button onClick={() => { setForm(emptyForm); setShowModal(true); }} className="btn btn-primary">
                     <Plus className="w-4 h-4" /> Register Member
@@ -182,8 +182,8 @@ const MembershipRegistration = () => {
                         <Users className="w-5 h-5 text-indigo-600" />
                     </div>
                     <div>
-                        <div className="text-2xl font-bold text-gray-900">{members.length}</div>
-                        <div className="text-xs text-gray-500">Total Members</div>
+                        <div className="text-2xl font-bold text-white">{members.length}</div>
+                        <div className="text-xs text-white/50">Total Members</div>
                     </div>
                 </div>
                 <div className="card p-4 flex items-center gap-3">
@@ -191,10 +191,10 @@ const MembershipRegistration = () => {
                         <Battery className="w-5 h-5 text-green-600" />
                     </div>
                     <div>
-                        <div className="text-2xl font-bold text-gray-900">
+                        <div className="text-2xl font-bold text-white">
                             ZK {members.reduce((s, m) => s + Number(m.balance || 0), 0).toLocaleString()}
                         </div>
-                        <div className="text-xs text-gray-500">Total Balance</div>
+                        <div className="text-xs text-white/50">Total Balance</div>
                     </div>
                 </div>
                 <div className="card p-4 flex items-center gap-3">
@@ -202,10 +202,10 @@ const MembershipRegistration = () => {
                         <AlertCircle className="w-5 h-5 text-red-600" />
                     </div>
                     <div>
-                        <div className="text-2xl font-bold text-gray-900">
+                        <div className="text-2xl font-bold text-white">
                             {members.filter(m => Number(m.balance || 0) <= 0).length}
                         </div>
-                        <div className="text-xs text-gray-500">Zero/Negative Balance</div>
+                        <div className="text-xs text-white/50">Zero/Negative Balance</div>
                     </div>
                 </div>
             </div>
@@ -239,7 +239,7 @@ const MembershipRegistration = () => {
             <div className="card overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="text-xs font-bold text-gray-600 uppercase bg-gray-50 border-b border-gray-200">
+                        <thead className="text-xs font-bold text-white/40 uppercase bg-white/5 border-b border-white/10">
                             <tr>
                                 <th className="px-4 py-3">Member</th>
                                 <th className="px-4 py-3">Policy #</th>
@@ -250,7 +250,7 @@ const MembershipRegistration = () => {
                                 <th className="px-4 py-3 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-white/10">
                             {loading ? (
                                 <tr><td colSpan="7" className="text-center py-10 text-gray-400 text-sm">Loading…</td></tr>
                             ) : members.length === 0 ? (
@@ -266,23 +266,23 @@ const MembershipRegistration = () => {
                                     </td>
                                 </tr>
                             ) : members.map(m => (
-                                <tr key={m.id} className="hover:bg-gray-50 transition-colors">
+                                <tr key={m.id} className="hover:bg-white/5 transition-colors">
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs flex-shrink-0">
                                                 {m.firstName?.[0]}{m.lastName?.[0]}
                                             </div>
                                             <div>
-                                                <div className="text-sm font-semibold text-gray-900">{m.firstName} {m.lastName}</div>
-                                                <div className="text-xs text-gray-500">{m.patientNumber}</div>
+                                                <div className="text-sm font-semibold text-white">{m.firstName} {m.lastName}</div>
+                                                <div className="text-xs text-white/40">{m.patientNumber}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 text-xs font-mono text-gray-700">{m.policyNumber || '—'}</td>
+                                    <td className="px-4 py-3 text-xs font-mono text-white/60">{m.policyNumber || '—'}</td>
                                     <td className="px-4 py-3">
                                         <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 capitalize">{m.memberRank || '—'}</span>
                                     </td>
-                                    <td className="px-4 py-3 text-xs text-gray-600">{m.phone || '—'}</td>
+                                    <td className="px-4 py-3 text-xs text-white/60">{m.phone || '—'}</td>
                                     <td className="px-4 py-3">
                                         <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${m.memberStatus === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                             {m.memberStatus || 'active'}
