@@ -29,7 +29,9 @@ import {
     Building,
     Beaker,
     Pill,
-    Radio
+    Radio,
+    Wrench,
+    Layers
 } from 'lucide-react';
 
 const MainLayout = ({ children }) => {
@@ -197,12 +199,16 @@ const MainLayout = ({ children }) => {
             ]
         },
         {
+            isHeading: true,
+            label: 'SETTINGS'
+        },
+        { path: '/app/setup/services', icon: Layers, label: 'Service Master' },
+        {
             id: 'setup',
-            icon: Settings,
-            label: 'Setup',
+            icon: Wrench,
+            label: 'System Setup',
             submenu: [
-                { path: '/app/setup', label: 'Tariffs' }, // Services
-                { path: '/app/setup/services', label: 'Services' },
+                { path: '/app/setup', label: 'Tariffs' },
                 { path: '/app/setup/users/new', label: 'Staff Management' },
                 { path: '/app/setup/roles', label: 'User Roles' },
                 ...(user?.role === 'admin' ? [{ path: '/app/setup/pending-approvals', label: '🔔 Pending Approvals' }] : [])
