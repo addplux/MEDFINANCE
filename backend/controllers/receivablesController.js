@@ -227,10 +227,18 @@ const getSchemeStatement = async (req, res) => {
             ...specialistBills.map(b => normalize(b, 'Specialist', `Specialist - ${b.clinicType || b.specialistName || 'Clinic'}`, 'consultationDate'))
         ];
 
-        // Sort by date descending
-        unified.sort((a, b) => new Date(b.billDate) - new Date(a.billDate));
+        // Deduplicate by billNumber (prevents double-import rows)
+        const seenBillNumbers = new Set();
+        const deduped = unified.filter(b => {
+            if (b.billNumber && seenBillNumbers.has(b.billNumber)) return false;
+            if (b.billNumber) seenBillNumbers.add(b.billNumber);
+            return true;
+        });
 
-        res.json({ scheme, bills: unified });
+        // Sort by date descending
+        deduped.sort((a, b) => new Date(b.billDate) - new Date(a.billDate));
+
+        res.json({ scheme, bills: deduped });
     } catch (error) {
         console.error('Get scheme statement error:', error);
         res.status(500).json({ error: 'Failed to generate scheme statement' });
