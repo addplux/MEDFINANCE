@@ -227,19 +227,19 @@ const SchemeDetails = () => {
                                         </tr>
                                     ) : (
                                         bills.map((bill) => (
-                                            <tr key={bill.id} className="hover:bg-white/[0.02] transition-colors group">
-                                                <td className="px-6 py-4 text-white/60 whitespace-nowrap text-xs">{bill.billDate}</td>
-                                                <td className="px-6 py-4 text-white/40 font-mono text-[10px] tracking-tight">{bill.patient?.patientNumber}</td>
+                                            <tr key={bill.id} className="hover:bg-white/[0.04] transition-colors group">
+                                                <td className="px-6 py-4 text-white whitespace-nowrap text-xs">{bill.billDate}</td>
+                                                <td className="px-6 py-4 text-white/70 font-mono text-[10px] tracking-tight">{bill.patient?.patientNumber}</td>
                                                 <td className="px-6 py-4 text-white font-bold tracking-tight">
                                                     {bill.patient?.firstName} {bill.patient?.lastName}
                                                 </td>
-                                                <td className="px-6 py-4 text-white/40 text-xs font-bold uppercase">{bill.patient?.gender}</td>
-                                                <td className="px-6 py-4 text-white/70 text-xs font-medium">
+                                                <td className="px-6 py-4 text-white/70 text-xs font-bold uppercase">{bill.patient?.gender}</td>
+                                                <td className="px-6 py-4 text-white text-xs font-medium">
                                                     {bill.service?.serviceName || 'General Service'}
-                                                    {bill.notes && <span className="text-[10px] text-white/30 block italic mt-0.5">{bill.notes}</span>}
+                                                    {bill.notes && <span className="text-[10px] text-white/60 block italic mt-0.5">{bill.notes}</span>}
                                                 </td>
-                                                <td className="px-6 py-4 text-right font-bold text-white/60 tabular-nums">{Number(bill.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                                <td className="px-6 py-4 text-right text-white/30 tabular-nums">{Number(bill.discount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                                <td className="px-6 py-4 text-right font-bold text-white tabular-nums">{Number(bill.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                                <td className="px-6 py-4 text-right text-white/50 tabular-nums">{Number(bill.discount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                                                 <td className="px-6 py-4 text-right font-black text-white tabular-nums border-r border-white/5">{Number(bill.netAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                                             </tr>
                                         ))
