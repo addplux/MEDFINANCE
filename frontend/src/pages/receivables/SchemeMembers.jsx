@@ -374,10 +374,10 @@ const SchemeMembers = ({ schemeId }) => {
 
     return (
 
-        <div className="flex flex-col h-full space-y-4 min-w-0 bg-bg-primary text-white p-6">
+        <div className="flex flex-col h-full space-y-4 min-w-0 bg-white text-gray-900 p-6">
             {/* Import Status Message */}
             {importResult && (
-                <div className={`p-4 rounded-2xl flex items-start gap-3 animate-fade-in ${importResult.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
+                <div className={`p-4 rounded-xl flex items-start gap-3 animate-fade-in ${importResult.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
                     }`}>
                     {importResult.type === 'success' ? (
                         <>
@@ -390,8 +390,8 @@ const SchemeMembers = ({ schemeId }) => {
                                     <li>Failed: {importResult.summary.failed}</li>
                                 </ul>
                                 {importResult.summary.errors?.length > 0 && (
-                                    <div className="mt-2 text-xs bg-black/40 p-3 rounded-xl border border-white/5 max-h-32 overflow-y-auto">
-                                        <p className="font-bold mb-1 uppercase tracking-widest text-[10px] text-white/40">Error Log:</p>
+                                    <div className="mt-2 text-xs bg-gray-100 p-3 rounded-xl border border-gray-200 max-h-32 overflow-y-auto">
+                                        <p className="font-bold mb-1 uppercase tracking-widest text-[10px] text-gray-500">Error Log:</p>
                                         {importResult.summary.errors.map((err, i) => <div key={i} className="mb-1">{err}</div>)}
                                     </div>
                                 )}
@@ -406,27 +406,27 @@ const SchemeMembers = ({ schemeId }) => {
                             </div>
                         </>
                     )}
-                    <button onClick={() => setImportResult(null)} className="ml-auto p-1 hover:bg-white/10 rounded-lg transition-colors">&times;</button>
+                    <button onClick={() => setImportResult(null)} className="ml-auto p-1 hover:bg-gray-200 rounded-lg transition-colors text-gray-500">&times;</button>
                 </div>
             )}
 
-            <div className="flex flex-col flex-1 glass-panel border-white/5 overflow-hidden min-w-0 rounded-[2rem] shadow-2xl">
+            <div className="flex flex-col flex-1 bg-white border border-slate-200 overflow-hidden min-w-0 rounded-2xl shadow-sm">
                 {/* Header / Filters (Suno Style) */}
-                <div className="p-6 border-b border-white/5 flex flex-wrap gap-6 items-center flex-shrink-0 bg-white/[0.02]">
+                <div className="p-4 border-b border-slate-200 flex flex-wrap gap-4 items-center flex-shrink-0 bg-slate-50">
                     {/* Search & Filter */}
                     <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
                         <form onSubmit={handleSearch} className="flex items-center gap-3 w-full sm:w-auto">
                             <div className="relative flex-1 sm:w-80 group">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors w-4 h-4" />
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors w-4 h-4" />
                                 <input
                                     type="text"
                                     placeholder="Search members..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-full text-sm focus:ring-2 focus:ring-primary/20 focus:bg-white/10 transition-all w-full placeholder-white/20 font-bold tracking-tight text-white"
+                                    className="pl-11 pr-4 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all w-full placeholder-slate-400 font-medium text-slate-800"
                                 />
                             </div>
-                            <button type="submit" className="px-6 py-3 bg-white text-black hover:scale-105 active:scale-95 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-lg">
+                            <button type="submit" className="px-5 py-2.5 bg-slate-900 text-white hover:bg-slate-800 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-sm">
                                 Search
                             </button>
                         </form>
@@ -435,14 +435,14 @@ const SchemeMembers = ({ schemeId }) => {
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
-                                className="w-full sm:w-auto px-6 py-3 bg-white/5 border border-white/10 rounded-full text-xs font-black text-white/60 focus:ring-2 focus:ring-white/10 cursor-pointer appearance-none uppercase tracking-widest hover:bg-white/10 transition-all pr-12"
+                                className="w-full sm:w-auto px-5 py-2.5 bg-white border border-slate-300 rounded-full text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-200 cursor-pointer appearance-none uppercase tracking-wider hover:bg-slate-50 transition-all pr-10"
                             >
                                 <option value="all" className="bg-bg-primary">All Status</option>
                                 <option value="active" className="bg-bg-primary">Active</option>
                                 <option value="suspended" className="bg-bg-primary">Suspended</option>
                                 <option value="closed" className="bg-bg-primary">Closed</option>
                             </select>
-                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 pointer-events-none" />
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                         </div>
                     </div>
 
@@ -450,14 +450,14 @@ const SchemeMembers = ({ schemeId }) => {
                     <div className="flex gap-3 w-full md:w-auto justify-end ml-auto">
                         <button
                             onClick={handleDownloadTemplate}
-                            className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/5 rounded-full text-xs font-black uppercase tracking-widest transition-all"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-300 rounded-full text-xs font-semibold uppercase tracking-wider transition-all"
                             title="Download CSV Template"
                         >
                             <Download className="w-4 h-4" />
                             <span className="hidden lg:inline">Template</span>
                         </button>
 
-                        <label className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary/80 hover:scale-105 active:scale-95 text-white rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(255,0,204,0.3)] cursor-pointer ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <label className={`flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-semibold uppercase tracking-wider transition-all shadow-sm cursor-pointer ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
                             <input
                                 type="file"
                                 onChange={handleFileSelect}
@@ -488,75 +488,45 @@ const SchemeMembers = ({ schemeId }) => {
                         density="compact"
                         sx={{
                             border: 0,
-                            color: '#FFFFFF',
-                            backgroundColor: 'transparent',
+                            backgroundColor: '#ffffff',
                             fontFamily: 'inherit',
-                            '& .MuiDataGrid-main': {
-                                backgroundColor: 'transparent',
-                            },
                             '& .MuiDataGrid-columnHeaders': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                                color: 'rgba(255, 255, 255, 0.6)',
-                                fontWeight: '900',
-                                textTransform: 'uppercase',
-                                fontSize: '10px',
-                                letterSpacing: '0.1em',
-                                borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-                                minHeight: '48px !important',
-                            },
-                            '& .MuiDataGrid-columnHeader': {
-                                color: 'rgba(255, 255, 255, 0.6)',
+                                backgroundColor: '#f8fafc',
+                                borderBottom: '1px solid #e2e8f0',
                             },
                             '& .MuiDataGrid-columnHeaderTitle': {
-                                color: 'rgba(255, 255, 255, 0.6)',
-                                fontWeight: 900,
-                                fontSize: '10px',
+                                color: '#374151',
+                                fontWeight: 700,
+                                fontSize: '11px',
                                 textTransform: 'uppercase',
-                                letterSpacing: '0.1em',
+                                letterSpacing: '0.05em',
                             },
-                            '& .MuiDataGrid-iconButtonContainer button': {
-                                color: 'rgba(255, 255, 255, 0.3)',
-                            },
-                            '& .MuiDataGrid-sortIcon': {
-                                color: 'rgba(255, 255, 255, 0.3)',
+                            '& .MuiDataGrid-columnHeader': {
+                                color: '#374151',
                             },
                             '& .MuiDataGrid-cell': {
-                                borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+                                borderBottom: '1px solid #f1f5f9',
                                 fontSize: '13px',
-                                fontWeight: '600',
-                                color: 'rgba(255, 255, 255, 0.8)',
+                                color: '#1e293b',
                             },
                             '& .MuiDataGrid-row:hover': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                                backgroundColor: '#f8fafc',
                             },
                             '& .MuiDataGrid-footerContainer': {
-                                borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-                                color: 'rgba(255, 255, 255, 0.4)',
-                                backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                                '& .MuiTablePagination-root': {
-                                    color: 'inherit',
-                                },
-                                '& .MuiIconButton-root': {
-                                    color: 'white',
-                                    opacity: 0.5,
-                                    '&:hover': { opacity: 1 },
-                                },
+                                borderTop: '1px solid #e2e8f0',
+                                backgroundColor: '#f8fafc',
+                                color: '#64748b',
+                            },
+                            '& .MuiTablePagination-root': {
+                                color: '#64748b',
+                            },
+                            '& .MuiIconButton-root': {
+                                color: '#64748b',
                             },
                             '& .MuiDataGrid-virtualScroller': {
-                                '&::-webkit-scrollbar': {
-                                    width: '8px',
-                                    height: '8px',
-                                },
-                                '&::-webkit-scrollbar-track': {
-                                    background: 'transparent',
-                                },
-                                '&::-webkit-scrollbar-thumb': {
-                                    background: 'rgba(255, 255, 255, 0.1)',
-                                    borderRadius: '10px',
-                                },
-                                '&::-webkit-scrollbar-thumb:hover': {
-                                    background: 'rgba(255, 255, 255, 0.2)',
-                                },
+                                '&::-webkit-scrollbar': { width: '6px', height: '6px' },
+                                '&::-webkit-scrollbar-track': { background: '#f1f5f9' },
+                                '&::-webkit-scrollbar-thumb': { background: '#cbd5e1', borderRadius: '6px' },
                             },
                         }}
                     />
