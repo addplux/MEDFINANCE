@@ -204,10 +204,11 @@ const getSchemeStatement = async (req, res) => {
         ]);
 
         // Normalise all bills into a unified shape
-        const normalize = (bill, type, serviceName, dateField = 'billDate', amtField = 'totalAmount') => ({
+        const normalize = (bill, type, serviceName, dateField = 'billDate', amtField = 'totalAmount', notes = null) => ({
             id: `${type}-${bill.id}`,
             billType: type,
             serviceName,
+            notes: notes || bill.notes || null,
             billDate: bill[dateField] || bill.billDate || bill.createdAt,
             patient: patientMap[bill.patientId],
             totalAmount: parseFloat(bill[amtField] || bill.totalAmount || bill.amount || 0),
@@ -217,7 +218,7 @@ const getSchemeStatement = async (req, res) => {
         });
 
         const unified = [
-            ...opdBills.map(b => normalize(b, 'OPD', b.service?.serviceName || 'OPD Consultation')),
+            ...opdBills.map(b => normalize(b, 'OPD', b.service?.serviceName || 'OPD Consultation', 'billDate', 'totalAmount', b.notes)),
             ...pharmacyBills.map(b => normalize(b, 'Pharmacy', 'Pharmacy / Drugs')),
             ...labBills.map(b => normalize(b, 'Laboratory', b.testName || 'Laboratory Test', 'billDate', 'amount')),
             ...radiologyBills.map(b => normalize(b, 'Radiology', b.scanType || 'Radiology Scan', 'billDate', 'amount')),

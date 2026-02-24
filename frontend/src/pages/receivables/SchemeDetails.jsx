@@ -251,7 +251,36 @@ const SchemeDetails = () => {
                                                     })()}
                                                 </td>
                                                 <td className="px-6 py-4 text-white text-xs font-medium">
-                                                    {bill.serviceName || bill.service?.serviceName || 'General Service'}
+                                                    {(() => {
+                                                        // If this was an Excel/scheme import bill, parse the notes breakdown
+                                                        if (bill.notes && bill.notes.startsWith('Scheme import:')) {
+                                                            const labelMap = {
+                                                                nursing: 'Nursing', consult: 'Consultation', dental: 'Dental',
+                                                                lodge: 'Lodgement', surg: 'Surgery', drRound: 'Dr Round',
+                                                                food: 'Food/Diet', physio: 'Physiotherapy',
+                                                                pharmacy: 'Pharmacy', sundries: 'Sundries', antenatal: 'Antenatal'
+                                                            };
+                                                            const raw = bill.notes.replace('Scheme import:', '').trim();
+                                                            const parts = raw.split(',').map(s => s.trim()).filter(Boolean);
+                                                            const nonZero = parts
+                                                                .map(p => { const [k, v] = p.split('='); return { key: k?.trim(), val: parseFloat(v || 0) }; })
+                                                                .filter(x => x.val > 0);
+                                                            if (nonZero.length > 0) {
+                                                                return (
+                                                                    <div className="space-y-0.5">
+                                                                        {nonZero.map(({ key, val }) => (
+                                                                            <div key={key} className="flex items-center gap-1.5">
+                                                                                <span className="text-white/50 text-[9px] font-black uppercase tracking-widest">{labelMap[key] || key}:</span>
+                                                                                <span className="text-white font-bold">K{val.toLocaleString()}</span>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                );
+                                                            }
+                                                        }
+                                                        // Non-import bill: show service name directly
+                                                        return bill.serviceName || bill.service?.serviceName || 'General Service';
+                                                    })()}
                                                 </td>
                                                 <td className="px-6 py-4 text-right font-bold text-white tabular-nums">{Number(bill.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                                                 <td className="px-6 py-4 text-right text-white/50 tabular-nums">{Number(bill.discount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
