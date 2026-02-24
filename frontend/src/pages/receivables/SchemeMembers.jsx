@@ -496,13 +496,29 @@ const SchemeMembers = ({ schemeId }) => {
                             },
                             '& .MuiDataGrid-columnHeaders': {
                                 backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                                color: 'rgba(255, 255, 255, 0.4)',
+                                color: 'rgba(255, 255, 255, 0.6)',
                                 fontWeight: '900',
                                 textTransform: 'uppercase',
                                 fontSize: '10px',
                                 letterSpacing: '0.1em',
-                                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                                borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
                                 minHeight: '48px !important',
+                            },
+                            '& .MuiDataGrid-columnHeader': {
+                                color: 'rgba(255, 255, 255, 0.6)',
+                            },
+                            '& .MuiDataGrid-columnHeaderTitle': {
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                fontWeight: 900,
+                                fontSize: '10px',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.1em',
+                            },
+                            '& .MuiDataGrid-iconButtonContainer button': {
+                                color: 'rgba(255, 255, 255, 0.3)',
+                            },
+                            '& .MuiDataGrid-sortIcon': {
+                                color: 'rgba(255, 255, 255, 0.3)',
                             },
                             '& .MuiDataGrid-cell': {
                                 borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
