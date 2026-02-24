@@ -130,8 +130,8 @@ const CorporateMemberManagement = () => {
         <div className="space-y-6 animate-fade-in">
             {/* Page Header */}
             <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900">Scheme Member Management</h1>
-                <p className="text-sm text-slate-500 mt-1">Select a scheme below to view and manage its members</p>
+                <h1 className="text-2xl font-bold tracking-tight text-white">Scheme Member Management</h1>
+                <p className="text-sm text-white/50 mt-1">Select a scheme below to view and manage its members</p>
             </div>
 
             {/* Corporate Schemes Cards */}
@@ -151,16 +151,16 @@ const CorporateMemberManagement = () => {
                                 key={scheme.id}
                                 onClick={() => setSelectedScheme(String(scheme.id))}
                                 className={`text-left p-5 rounded-xl border-2 transition-all shadow-sm hover:shadow-md ${isSelected
-                                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
-                                    : 'border-slate-200 bg-white hover:border-blue-300'
+                                    ? 'border-primary bg-primary/10 ring-2 ring-primary/30'
+                                    : 'border-white/10 bg-white/5 hover:border-white/30'
                                     }`}
                             >
                                 <div className="flex items-start justify-between gap-2">
                                     <div>
-                                        <p className="font-bold text-slate-800 text-base">{scheme.schemeName || 'Unnamed Scheme'}</p>
-                                        <p className="text-xs text-slate-500 mt-0.5 font-mono">{scheme.schemeCode}</p>
+                                        <p className="font-bold text-white text-base">{scheme.schemeName || 'Unnamed Scheme'}</p>
+                                        <p className="text-xs text-white/40 mt-0.5 font-mono">{scheme.schemeCode}</p>
                                     </div>
-                                    <span className={`shrink-0 text-xs px-2 py-1 rounded-full font-medium ${isSelected ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-600'
+                                    <span className={`shrink-0 text-xs px-2 py-1 rounded-full font-medium ${isSelected ? 'bg-primary text-white' : 'bg-white/10 text-white/60'
                                         }`}>
                                         {isSelected ? 'Selected' : 'Select'}
                                     </span>
@@ -171,8 +171,8 @@ const CorporateMemberManagement = () => {
                                         const colors = { corporate: 'bg-blue-100 text-blue-700', insurance: 'bg-purple-100 text-purple-700', government: 'bg-amber-100 text-amber-700' };
                                         return <span className={`px-2 py-0.5 rounded-full font-medium capitalize ${colors[t] || 'bg-slate-100 text-slate-600'}`}>{t || 'other'}</span>;
                                     })()}
-                                    <span className="text-slate-500">Discount: <strong className="text-slate-700">{scheme.discountRate || 0}%</strong></span>
-                                    <span className="inline-flex items-center gap-1 text-slate-500">
+                                    <span className="text-white/50">Discount: <strong className="text-white/80">{scheme.discountRate || 0}%</strong></span>
+                                    <span className="inline-flex items-center gap-1 text-white/50">
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                         Active
                                     </span>
@@ -185,9 +185,9 @@ const CorporateMemberManagement = () => {
 
             {/* Upload Section — only visible when a scheme is selected */}
             {selectedScheme && (
-                <div className="p-6 bg-white shadow-sm border border-slate-200 rounded-xl">
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Upload Roster for <span className="text-blue-600">{selectedSchemeName}</span> (Excel)
+                <div className="p-6 bg-white/5 shadow-sm border border-white/10 rounded-xl">
+                    <label className="block text-sm font-semibold text-white/80 mb-2">
+                        Upload Roster for <span className="text-primary">{selectedSchemeName}</span> (Excel)
                     </label>
                     <div className="flex flex-col sm:flex-row gap-4 items-center">
                         <div className="flex-1 w-full">
