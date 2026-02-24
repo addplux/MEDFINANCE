@@ -425,7 +425,7 @@ const MainLayout = ({ children }) => {
             )}
 
             {/* Main Content */}
-            <div className={`flex-1 flex flex-col transition-all duration-500 bg-bg-primary ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'} `}>
+            <div className={`flex-1 flex flex-col transition-all duration-500 bg-bg-primary ${sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'} `}>
                 {/* Mobile Header */}
                 <header className="lg:hidden h-16 bg-black/40 backdrop-blur-xl border-b border-white/5 px-6 flex items-center justify-between sticky top-0 z-20">
                     <button
@@ -446,8 +446,8 @@ const MainLayout = ({ children }) => {
                 {/* Desktop Top Nav Component could go here if needed, but currently keeping it clean */}
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-auto bg-bg-primary">
-                    <div className="p-6 lg:p-10 max-w-[1600px] mx-auto">
+                <main className="flex-1 overflow-x-auto overflow-y-auto bg-bg-primary custom-scrollbar">
+                    <div className="p-6 lg:p-10 max-w-[1600px]">
                         {children}
                     </div>
                 </main>
