@@ -761,6 +761,13 @@ const importSchemeMembers = async (req, res) => {
             return res.status(404).json({ error: 'Scheme not found' });
         }
 
+        // Resolve import user id (for createdBy FK)
+        const importUserId = req.user?.id || 1;
+
+        // Resolve a default service for OPD import bills
+        let defaultService = await Service.findOne({ where: { status: 'active' } });
+        const defaultServiceId = defaultService ? defaultService.id : null;
+
         let addedCount = 0;
         let updatedCount = 0;
         let failedCount = 0;
@@ -862,17 +869,104 @@ const importSchemeMembers = async (req, res) => {
                     balance: rowBalance
                 };
 
+                let savedPatient;
+                const isNew = !patient;
+
                 if (patient) {
                     await patient.update(patientData, { transaction: t });
+                    savedPatient = patient;
                     updatedCount++;
                 } else {
                     currentPatientCount++;
                     const patientNumber = `P${String(currentPatientCount).padStart(6, '0')}`;
-                    await Patient.create({
+                    savedPatient = await Patient.create({
                         ...patientData,
                         patientNumber
                     }, { transaction: t });
                     addedCount++;
+                }
+
+                // ── AUTO-CREATE DEPARTMENT BILLING RECORDS ──
+                // Use findOrCreate so re-imports update rather than duplicate
+                const billDate = new Date().toISOString().slice(0, 10);
+                const billBase = `IMP-${scheme.schemeCode}-${String(policyNumber).replace(/\s/g, '')}`;
+
+                // 1. Lab Bill
+                if (laboratory > 0) {
+                    const labBillNum = `${billBase}-LAB`;
+                    const [labBill] = await LabBill.findOrCreate({
+                        where: { billNumber: labBillNum },
+                        defaults: {
+                            billNumber: labBillNum,
+                            patientId: savedPatient.id,
+                            testName: 'Scheme Import — Laboratory',
+                            testCode: 'IMP-LAB',
+                            amount: laboratory,
+                            netAmount: laboratory,
+                            billDate,
+                            status: 'completed',
+                            paymentStatus: 'claimed',
+                            createdBy: importUserId
+                        },
+                        transaction: t
+                    });
+                    if (!isNew) {
+                        await labBill.update({ amount: laboratory, netAmount: laboratory, patientId: savedPatient.id }, { transaction: t });
+                    }
+                }
+
+                // 2. Radiology Bill
+                if (radiology > 0) {
+                    const radBillNum = `${billBase}-RAD`;
+                    const [radBill] = await RadiologyBill.findOrCreate({
+                        where: { billNumber: radBillNum },
+                        defaults: {
+                            billNumber: radBillNum,
+                            patientId: savedPatient.id,
+                            scanType: 'Scheme Import — Radiology',
+                            scanCode: 'IMP-RAD',
+                            amount: radiology,
+                            netAmount: radiology,
+                            billDate,
+                            status: 'completed',
+                            paymentStatus: 'claimed',
+                            createdBy: importUserId
+                        },
+                        transaction: t
+                    });
+                    if (!isNew) {
+                        await radBill.update({ amount: radiology, netAmount: radiology, patientId: savedPatient.id }, { transaction: t });
+                    }
+                }
+
+                // 3. OPD Bill — covers nursing, consultation, lodging, dental, surgicals,
+                //    drRound, food, physio, pharmacy, sundries, antenatal
+                const opdAmount = nursingCare + consultation + dental + lodging + surgicals +
+                    drRound + food + physio + pharmacy + sundries + antenatal;
+                if (opdAmount > 0 && defaultServiceId) {
+                    const opdBillNum = `${billBase}-OPD`;
+                    const [opdBill] = await OPDBill.findOrCreate({
+                        where: { billNumber: opdBillNum },
+                        defaults: {
+                            billNumber: opdBillNum,
+                            patientId: savedPatient.id,
+                            serviceId: defaultServiceId,
+                            quantity: 1,
+                            unitPrice: opdAmount,
+                            totalAmount: opdAmount,
+                            netAmount: opdAmount,
+                            billDate,
+                            status: 'pending',
+                            paymentStatus: 'claimed',
+                            paymentMethod: 'credit',
+                            notes: `Scheme import: nursing=${nursingCare}, consult=${consultation}, dental=${dental}, lodge=${lodging}, surg=${surgicals}, drRound=${drRound}, food=${food}, physio=${physio}, pharmacy=${pharmacy}, sundries=${sundries}, antenatal=${antenatal}`,
+                            createdBy: importUserId
+                        },
+                        transaction: t
+                    });
+                    if (!isNew) {
+                        await opdBill.update({ unitPrice: opdAmount, totalAmount: opdAmount, netAmount: opdAmount, patientId: savedPatient.id }, { transaction: t });
+                    }
                 }
 
                 await t.commit();
