@@ -489,6 +489,7 @@ const SchemeMembers = ({ schemeId }) => {
                         sx={{
                             border: 0,
                             color: '#FFFFFF',
+                            backgroundColor: 'transparent',
                             fontFamily: 'inherit',
                             '& .MuiDataGrid-main': {
                                 backgroundColor: 'transparent',
