@@ -26,8 +26,8 @@ const CreateOPDBill = () => {
     const loadData = async () => {
         try {
             const [patientsRes, servicesRes] = await Promise.all([
-                patientAPI.getAll({ limit: 100 }),
-                setupAPI.services.getAll({ category: 'opd' })
+                patientAPI.getAll({ limit: 1000 }),
+                setupAPI.services.getAll({ isActive: true, limit: 500 })
             ]);
             setPatients(patientsRes.data.data || []);
             setServices(servicesRes.data || []);
@@ -155,11 +155,23 @@ const CreateOPDBill = () => {
                             required
                         >
                             <option value="">Select Service</option>
-                            {services.map(service => (
-                                <option key={service.id} value={service.id}>
-                                    {service.serviceName} - K{service.price}
-                                </option>
-                            ))}
+                            {(() => {
+                                const grouped = services.reduce((acc, svc) => {
+                                    const cat = svc.category || 'Other';
+                                    if (!acc[cat]) acc[cat] = [];
+                                    acc[cat].push(svc);
+                                    return acc;
+                                }, {});
+                                return Object.entries(grouped).map(([cat, svcs]) => (
+                                    <optgroup key={cat} label={cat.toUpperCase()}>
+                                        {svcs.map(svc => (
+                                            <option key={svc.id} value={svc.id}>
+                                                {svc.serviceName} — K{Number(svc.price).toFixed(2)}
+                                            </option>
+                                        ))}
+                                    </optgroup>
+                                ));
+                            })()}
                         </select>
                         {errors.serviceId && (
                             <p className="text-red-500 text-sm mt-1">{errors.serviceId}</p>
