@@ -434,7 +434,7 @@ const MainLayout = ({ children }) => {
                 {/* Desktop Top Nav Component could go here if needed, but currently keeping it clean */}
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-x-auto overflow-y-auto bg-gray-50 custom-scrollbar">
+                <main className="flex-1 overflow-x-auto overflow-y-auto bg-bg-primary custom-scrollbar">
                     <div className="p-6 max-w-[1600px]">
                         {children}
                     </div>
