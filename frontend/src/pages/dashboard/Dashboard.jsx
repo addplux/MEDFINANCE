@@ -169,12 +169,12 @@ const Dashboard = () => {
                     <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
                     <p className="text-sm text-gray-500 mt-0.5">{today} — Real-time hospital performance</p>
                 </div>
-                <div className="flex items-center gap-4">
-                    <span className="flex items-center gap-1.5 text-sm font-medium text-emerald-600">
+                <div className="flex items-center gap-8">
+                    <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         System Online
                     </span>
-                    <span className="text-sm text-gray-500 font-medium">{totalPatients} Registered Patients</span>
+                    <span className="text-xs text-blue-600 font-semibold">{totalPatients} Registered Patients</span>
                     <button onClick={load} className="p-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                         <RefreshCw className="w-4 h-4 text-gray-500" />
                     </button>
