@@ -236,7 +236,6 @@ const SchemeDetails = () => {
                                                 <td className="px-6 py-4 text-white/70 text-xs font-bold uppercase">{bill.patient?.gender}</td>
                                                 <td className="px-6 py-4 text-white text-xs font-medium">
                                                     {bill.service?.serviceName || 'General Service'}
-                                                    {bill.notes && <span className="text-[10px] text-white/60 block italic mt-0.5">{bill.notes}</span>}
                                                 </td>
                                                 <td className="px-6 py-4 text-right font-bold text-white tabular-nums">{Number(bill.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                                                 <td className="px-6 py-4 text-right text-white/50 tabular-nums">{Number(bill.discount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
