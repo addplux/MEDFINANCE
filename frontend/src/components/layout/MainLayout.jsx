@@ -292,7 +292,7 @@ const MainLayout = ({ children }) => {
                                 return (
                                     <div
                                         key={`heading-${index}`}
-                                        className={`px-3 py-4 mt-4 text-[10px] font-black text-white/20 uppercase tracking-[0.2em] ${sidebarCollapsed ? 'text-center' : ''}`}
+                                        className={`px-3 pt-5 pb-1 text-[11px] font-semibold text-white/30 uppercase tracking-widest ${sidebarCollapsed ? 'text-center' : ''}`}
                                     >
                                         {sidebarCollapsed ? '⋯' : item.label}
                                     </div>
@@ -311,32 +311,27 @@ const MainLayout = ({ children }) => {
                                         <button
                                             onClick={() => toggleMenu(item.id)}
                                             className={`
-                                                w-full flex items-center gap-4 px-4 py-3 rounded-2xl
-                                                transition-all duration-300 group
+                                                w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+                                                transition-all duration-200 group text-sm font-medium
                                                 ${hasActiveChild
-                                                    ? 'bg-white/5 text-white shadow-lg'
-                                                    : 'text-text-secondary hover:bg-white/[0.03] hover:text-white'
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'text-white/60 hover:bg-white/5 hover:text-white'
                                                 }
                                                 ${sidebarCollapsed ? 'justify-center' : ''}
                                             `}
                                         >
-                                            <div className={`
-                                                p-2 rounded-xl transition-all duration-300
-                                                ${hasActiveChild ? 'bg-primary/20 text-primary shadow-[0_0_15px_rgba(255,0,204,0.3)]' : 'bg-white/5 group-hover:bg-white/10'}
-                                            `}>
-                                                <Icon className="w-5 h-5 flex-shrink-0" />
-                                            </div>
+                                            <Icon className="w-4 h-4 flex-shrink-0" />
                                             {!sidebarCollapsed && (
                                                 <>
-                                                    <span className="flex-1 text-left font-bold text-sm tracking-tight">{item.label}</span>
-                                                    <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
+                                                    <span className="flex-1 text-left">{item.label}</span>
+                                                    <ChevronRight className={`w-3.5 h-3.5 transition-transform duration-200 opacity-50 ${isExpanded ? 'rotate-90' : ''}`} />
                                                 </>
                                             )}
                                         </button>
 
                                         {/* Submenu items */}
                                         {isExpanded && !sidebarCollapsed && (
-                                            <div className="mt-2 ml-10 space-y-1 border-l border-white/5 pl-4">
+                                            <div className="mt-1 ml-7 space-y-0.5 border-l border-white/10 pl-3">
                                                 {item.submenu.map((subItem) => {
                                                     const isActive = location.pathname === subItem.path;
                                                     return (
@@ -347,11 +342,11 @@ const MainLayout = ({ children }) => {
                                                                 setSidebarOpen(false);
                                                             }}
                                                             className={`
-                                                                w-full flex items-center px-4 py-2.5 rounded-xl
-                                                                transition-all duration-300 text-[13px] font-semibold
+                                                                w-full flex items-center px-3 py-2 rounded-lg
+                                                                transition-all duration-200 text-[13px] font-medium
                                                                 ${isActive
-                                                                    ? 'text-primary'
-                                                                    : 'text-text-secondary hover:text-white'
+                                                                    ? 'text-blue-400'
+                                                                    : 'text-white/40 hover:text-white'
                                                                 }
                                                             `}
                                                         >
@@ -375,22 +370,17 @@ const MainLayout = ({ children }) => {
                                         setSidebarOpen(false);
                                     }}
                                     className={`
-                                        w-full flex items-center gap-4 px-4 py-3 rounded-2xl
-                                        transition-all duration-300 group
+                                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+                                        transition-all duration-200 text-sm font-medium group
                                         ${active
-                                            ? 'bg-white/5 text-white shadow-lg'
-                                            : 'text-text-secondary hover:bg-white/[0.03] hover:text-white'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'text-white/60 hover:bg-white/5 hover:text-white'
                                         }
                                         ${sidebarCollapsed ? 'justify-center' : ''}
                                     `}
                                 >
-                                    <div className={`
-                                        p-2 rounded-xl transition-all duration-300
-                                        ${active ? 'bg-primary/20 text-primary shadow-[0_0_15px_rgba(255,0,204,0.3)]' : 'bg-white/5 group-hover:bg-white/10'}
-                                    `}>
-                                        <Icon className="w-5 h-5 flex-shrink-0" />
-                                    </div>
-                                    {!sidebarCollapsed && <span className="font-bold text-sm tracking-tight">{item.label}</span>}
+                                    <Icon className="w-4 h-4 flex-shrink-0" />
+                                    {!sidebarCollapsed && <span>{item.label}</span>}
                                 </button>
                             );
                         })}
@@ -402,15 +392,13 @@ const MainLayout = ({ children }) => {
                     <button
                         onClick={handleLogout}
                         className={`
-                            w-full flex items-center gap-4 px-4 py-3 rounded-2xl
-                            text-sm font-bold text-text-secondary hover:bg-red-500/10 hover:text-red-500
-                            transition-all duration-300
+                            w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+                            text-sm font-medium text-white/40 hover:bg-red-500/10 hover:text-red-400
+                            transition-all duration-200
                             ${sidebarCollapsed ? 'justify-center' : ''}
                         `}
                     >
-                        <div className="p-2 bg-white/5 rounded-xl group-hover:bg-red-500/20">
-                            <LogOut className="w-5 h-5 flex-shrink-0" />
-                        </div>
+                        <LogOut className="w-4 h-4 flex-shrink-0" />
                         {!sidebarCollapsed && <span>Logout</span>}
                     </button>
                 </div>
@@ -446,8 +434,8 @@ const MainLayout = ({ children }) => {
                 {/* Desktop Top Nav Component could go here if needed, but currently keeping it clean */}
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-x-auto overflow-y-auto bg-bg-primary custom-scrollbar">
-                    <div className="p-6 lg:p-10 max-w-[1600px]">
+                <main className="flex-1 overflow-x-auto overflow-y-auto bg-gray-50 custom-scrollbar">
+                    <div className="p-6 max-w-[1600px]">
                         {children}
                     </div>
                 </main>
