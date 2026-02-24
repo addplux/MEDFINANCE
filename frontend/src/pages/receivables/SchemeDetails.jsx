@@ -278,8 +278,14 @@ const SchemeDetails = () => {
                                                                 );
                                                             }
                                                         }
-                                                        // Non-import bill: show service name directly
-                                                        return bill.serviceName || bill.service?.serviceName || 'General Service';
+                                                        // Non-import bill: show service name. If name was auto-set by import, clean it up
+                                                        const rawName = bill.serviceName || bill.service?.serviceName || '';
+                                                        if (/scheme.?import/i.test(rawName)) {
+                                                            // e.g. "Scheme Import — Laboratory" → use dept-specific label
+                                                            const deptLabel = { Laboratory: 'Laboratory Test', Radiology: 'Radiology Scan', Theatre: 'Theatre / Surgery', Maternity: 'Maternity', Pharmacy: 'Pharmacy / Drugs' };
+                                                            return deptLabel[bill.billType] || bill.billType || 'Service';
+                                                        }
+                                                        return rawName || 'General Service';
                                                     })()}
                                                 </td>
                                                 <td className="px-6 py-4 text-right font-bold text-white tabular-nums">{Number(bill.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
