@@ -26,7 +26,6 @@ const BankAccount = require('./BankAccount');
 const PettyCash = require('./PettyCash');
 const Department = require('./Department');
 const Budget = require('./Budget');
-const Asset = require('./Asset');
 const AuditLog = require('./AuditLog');
 const Organization = require('./Organization');
 const PayrollDeduction = require('./PayrollDeduction');
@@ -182,14 +181,10 @@ PettyCash.belongsTo(User, { foreignKey: 'approvedBy', as: 'approver' });
 
 // Department and Budget relationships
 Department.hasMany(Budget, { foreignKey: 'departmentId', as: 'budgets' });
-Department.hasMany(Asset, { foreignKey: 'departmentId', as: 'assets' });
 Department.belongsTo(User, { foreignKey: 'managerId', as: 'manager' });
 
 Budget.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
 
-// Asset relationships
-Asset.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
-Asset.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 
 // Audit Log relationships
 AuditLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
@@ -272,7 +267,6 @@ module.exports = {
     PettyCash,
     Department,
     Budget,
-    Asset,
     AuditLog,
     Organization,
     PayrollDeduction,

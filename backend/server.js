@@ -87,7 +87,7 @@ app.get('/api', (req, res) => {
             ledger: '/api/ledger/*',
             cash: '/api/cash/*',
             budgets: '/api/budgets/*',
-            assets: '/api/assets/*',
+            reports: '/api/reports/*',
             reports: '/api/reports/*',
             setup: '/api/setup/*'
         }
@@ -106,7 +106,6 @@ app.use('/api/ledger', require('./routes/ledger'));
 app.use('/api/cash', require('./routes/cash'));
 app.use('/api/budgets', require('./routes/budgets'));
 app.use('/api/funds', require('./routes/funds'));
-app.use('/api/assets', require('./routes/assets'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/setup', require('./routes/setup'));
 app.use('/api/roles', require('./routes/roleRoutes'));

@@ -72,9 +72,6 @@ import JournalEntries from './pages/ledger/JournalEntries';
 import JournalEntryForm from './pages/ledger/JournalEntryForm';
 import TrialBalance from './pages/ledger/TrialBalance';
 
-// Assets
-import Assets from './pages/assets/Assets';
-import AssetForm from './pages/assets/AssetForm';
 
 // Funds
 import Funds from './pages/funds/Funds';
@@ -267,9 +264,6 @@ function App() {
                         <Route path="funds/:id/edit" element={<FundForm />} />
                         <Route path="funds/:id" element={<Funds />} />
 
-                        <Route path="assets" element={<Assets />} />
-                        <Route path="assets/new" element={<AssetForm />} />
-                        <Route path="assets/:id/edit" element={<AssetForm />} />
 
                         <Route path="reports" element={<Reports />} />
 

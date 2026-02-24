@@ -170,7 +170,6 @@ const MainLayout = ({ children }) => {
                 { path: '/app/funds/retention', label: 'Retention Fund' }
             ]
         },
-        { path: '/app/assets', icon: Package, label: 'Assets' },
         {
             id: 'payroll_medical',
             icon: Stethoscope,

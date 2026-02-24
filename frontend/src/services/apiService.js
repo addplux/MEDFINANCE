@@ -213,15 +213,6 @@ export const fundAPI = {
     }
 };
 
-// Assets
-export const assetAPI = {
-    getAll: (params) => api.get('/assets', { params }),
-    getById: (id) => api.get(`/assets/${id}`),
-    create: (data) => api.post('/assets', data),
-    update: (id, data) => api.put(`/assets/${id}`, data),
-    delete: (id) => api.delete(`/assets/${id}`),
-    depreciation: (id) => api.get(`/assets/${id}/depreciation`),
-};
 
 // Reports
 export const reportsAPI = {
