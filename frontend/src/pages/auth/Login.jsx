@@ -54,134 +54,127 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
-            {/* Background Glow Effects */}
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary-600/20 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-accent-600/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden">
+            {/* Background Glow Effects - Subtle Slate/Teal */}
+            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-slate-200/50 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-teal-50/50 rounded-full blur-[120px] pointer-events-none" />
 
             <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center relative z-10">
                 {/* Left Side-Branding */}
                 <div className="hidden lg:block p-8">
                     <button
                         onClick={() => navigate('/')}
-                        className="flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
+                        className="flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-8 transition-colors font-medium"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Back to Home
                     </button>
 
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-accent-600 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(14,165,233,0.3)]">
+                    <div className="flex items-center gap-4 mb-10">
+                        <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center shadow-xl shadow-slate-200">
                             <Activity className="w-10 h-10 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold text-white tracking-tight drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+                            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
                                 {orgName}
                             </h1>
-                            <p className="text-gray-400">Medical Finance Management</p>
+                            <p className="text-slate-500 font-medium">Medical Finance Management</p>
                         </div>
                     </div>
 
-                    <h2 className="text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
-                        Welcome Back
+                    <h2 className="text-6xl font-serif font-bold mb-8 text-slate-900 leading-tight">
+                        Professional <br />
+                        Financial Care
                     </h2>
-                    <p className="text-lg text-gray-400 mb-8 max-w-md leading-relaxed">
-                        Sign in to access your medical finance dashboard and manage all your operations in one place.
+                    <p className="text-xl text-slate-600 mb-12 max-w-md leading-relaxed font-light">
+                        The ultimate platform for modern healthcare facilities to manage billing, accounting, and operations.
                     </p>
 
                     <div className="space-y-6">
                         <div className="flex items-center gap-4 group">
-                            <div className="w-10 h-10 bg-primary-500/10 border border-primary-500/20 rounded-lg flex items-center justify-center group-hover:bg-primary-500/20 transition-colors">
-                                <Activity className="w-5 h-5 text-primary-400" />
+                            <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center group-hover:scale-110 transition-all duration-300">
+                                <Activity className="w-6 h-6 text-teal-600" />
                             </div>
-                            <span className="text-gray-300 group-hover:text-white transition-colors">Complete Billing System</span>
+                            <span className="text-slate-700 font-medium font-serif text-lg">Clinical Precision</span>
                         </div>
                         <div className="flex items-center gap-4 group">
-                            <div className="w-10 h-10 bg-accent-500/10 border border-accent-500/20 rounded-lg flex items-center justify-center group-hover:bg-accent-500/20 transition-colors">
-                                <Activity className="w-5 h-5 text-accent-400" />
+                            <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center group-hover:scale-110 transition-all duration-300">
+                                <Building className="w-6 h-6 text-slate-600" />
                             </div>
-                            <span className="text-gray-300 group-hover:text-white transition-colors">Financial Management</span>
-                        </div>
-                        <div className="flex items-center gap-4 group">
-                            <div className="w-10 h-10 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
-                                <Activity className="w-5 h-5 text-emerald-400" />
-                            </div>
-                            <span className="text-gray-300 group-hover:text-white transition-colors">Advanced Reporting</span>
+                            <span className="text-slate-700 font-medium font-serif text-lg">Enterprise Ready</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Right Side-Login Form (Glassmorphism) */}
                 <div className="w-full">
-                    <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-8 lg:p-10 shadow-2xl relative overflow-hidden">
-                        {/* Inner glow */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32"></div>
-
-                        <div className="lg:hidden mb-8 text-center">
-                            <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary-600 to-accent-600 rounded-xl mb-4 shadow-lg">
-                                <Activity className="w-7 h-7 text-white" />
+                    <div className="bg-white border border-slate-200 rounded-3xl p-8 lg:p-12 shadow-2xl shadow-slate-200/50 relative overflow-hidden">
+                        <div className="lg:hidden mb-10 text-center">
+                            <div className="inline-flex items-center justify-center w-14 h-14 bg-slate-900 rounded-2xl mb-4 shadow-lg">
+                                <Activity className="w-8 h-8 text-white" />
                             </div>
-                            <h1 className="text-2xl font-bold text-white">{orgName}</h1>
+                            <h1 className="text-2xl font-bold text-slate-900">{orgName}</h1>
                         </div>
 
-                        <h2 className="text-2xl font-bold mb-2 text-white">Sign In</h2>
-                        <p className="text-gray-400 mb-8">Enter your credentials to access your account</p>
+                        <h2 className="text-3xl font-bold mb-2 text-slate-900 font-serif">Sign In</h2>
+                        <p className="text-slate-500 mb-10">Enter your credentials to access the system</p>
 
                         {error && (
-                            <div className="bg-red-500/10 border border-red-500/20 text-red-200 px-4 py-3 rounded-lg mb-6 flex items-start gap-3">
+                            <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl mb-8 flex items-start gap-3">
                                 <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                                <span className="text-sm">{error}</span>
+                                <span className="text-sm font-medium">{error}</span>
                             </div>
                         )}
 
                         <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
                             {/* Hospital Type Selection */}
+                            {/* Institution Type Selection */}
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-300">Institution Type</label>
+                                <label className="text-sm font-semibold text-slate-700 ml-1">Institution Type</label>
                                 <div className="relative">
-                                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+                                    <Building className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
                                     <select
                                         name="hospitalType"
                                         value={formData.hospitalType}
                                         onChange={handleChange}
-                                        className="w-full bg-black/40 border border-white/10 rounded-lg pl-11 pr-10 py-3 text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all hover:bg-black/60 appearance-none"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-10 py-3.5 text-slate-900 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all hover:bg-slate-100 appearance-none font-medium"
                                         required
                                     >
-                                        <option value="" className="bg-gray-900 text-gray-400">Select Organization Type</option>
-                                        <option value="Government" className="bg-gray-900">Government Hospital</option>
-                                        <option value="Mission / NGO" className="bg-gray-900">Mission / NGO</option>
-                                        <option value="Private Hospital" className="bg-gray-900">Private Hospital</option>
+                                        <option value="" className="text-slate-400">Select Organization Type</option>
+                                        <option value="Government">Government Hospital</option>
+                                        <option value="Mission / NGO">Mission / NGO</option>
+                                        <option value="Private Hospital">Private Hospital</option>
                                     </select>
-                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-300">Email Address</label>
+                                <label className="text-sm font-semibold text-slate-700 ml-1">Email Address</label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                     <input
                                         type="email"
                                         name="email"
                                         value={formData.email}
                                         onChange={handleChange}
-                                        className="w-full bg-black/40 border border-white/10 rounded-lg pl-11 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all hover:bg-black/60"
-                                        placeholder="you@example.com"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all hover:bg-slate-100 font-medium"
+                                        placeholder="you@hospital.com"
                                         required
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-300">Password</label>
+                                <label className="text-sm font-semibold text-slate-700 ml-1">Password</label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                     <input
                                         type="password"
                                         name="password"
                                         value={formData.password}
                                         onChange={handleChange}
-                                        className="w-full bg-black/40 border border-white/10 rounded-lg pl-11 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all hover:bg-black/60"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all hover:bg-slate-100 font-medium"
                                         placeholder="••••••••"
                                         required
                                     />
@@ -191,19 +184,19 @@ const Login = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-500 hover:to-accent-500 text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-primary-600/25 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg shadow-slate-200 transition-all transform hover:-translate-y-0.5 active:scale-[0.98] mt-4"
                             >
-                                {loading ? 'Signing in...' : 'Sign In'}
+                                {loading ? 'Signing in...' : 'Sign In to Dashboard'}
                             </button>
 
-                            <p className="text-center text-sm text-gray-500">
+                            <p className="text-center text-sm text-slate-500 pt-2">
                                 Don't have an account?{' '}
                                 <button
                                     type="button"
                                     onClick={() => navigate('/register')}
-                                    className="text-primary-400 hover:text-primary-300 font-medium transition-colors"
+                                    className="text-teal-600 hover:text-teal-700 font-bold transition-colors"
                                 >
-                                    Sign Up
+                                    Contact Administration
                                 </button>
                             </p>
                         </form>

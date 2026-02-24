@@ -59,10 +59,10 @@ const LandingPage = () => {
             <header className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-border-color">
                 <div className="container mx-auto px-6 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg shadow-slate-200">
                             <Activity className="w-6 h-6 text-white" />
                         </div>
-                        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent font-serif tracking-tight">
+                        <h1 className="text-2xl font-bold text-slate-900 font-serif tracking-tight">
                             MEDFINANCE360
                         </h1>
                     </div>
@@ -86,35 +86,35 @@ const LandingPage = () => {
 
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 px-6 container mx-auto text-center z-10">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-900/30 border border-primary-500/30 text-primary-300 rounded-full text-sm font-medium mb-8 animate-fade-in shadow-[0_0_15px_rgba(14,165,233,0.3)]">
-                    <Zap className="w-4 h-4" />
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 border border-slate-200 text-slate-600 rounded-full text-sm font-medium mb-8 animate-fade-in">
+                    <Zap className="w-4 h-4 text-teal-600" />
                     Complete Medical Finance Management
                 </div>
 
-                <h2 className="text-5xl md:text-6xl font-serif font-bold mb-8 leading-tight tracking-tight">
+                <h2 className="text-5xl md:text-7xl font-serif font-bold mb-8 leading-tight tracking-tight text-slate-900">
                     Streamline Your <br />
-                    <span className="bg-gradient-to-r from-primary-400 via-accent-400 to-primary-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+                    <span className="text-teal-600">
                         Medical Finance
                     </span>
                 </h2>
 
-                <p className="text-xl md:text-2xl text-text-secondary mb-12 max-w-2xl mx-auto font-light leading-relaxed">
+                <p className="text-xl md:text-2xl text-slate-600 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
                     All-in-one platform for billing, accounting, budgeting, and financial reporting.
-                    Built specifically for healthcare facilities in Zambia.
+                    Built specifically for modern healthcare facilities.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                     <button
                         onClick={() => navigate('/login')}
-                        className="btn btn-primary px-8 py-4 text-base rounded-full shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:-translate-y-1 transition-all duration-300"
+                        className="btn btn-primary px-10 py-4 text-lg rounded-full shadow-xl shadow-slate-200 hover:-translate-y-1 transition-all duration-300"
                     >
                         Get Started
                         <ArrowRight className="w-5 h-5" />
                     </button>
-                    <button className="px-8 py-4 text-base font-medium text-text-primary hover:text-white transition-colors flex items-center gap-2 group">
+                    <button className="px-10 py-4 text-lg font-medium text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-2 group">
                         Watch Demo
-                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                            <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent ml-1" />
+                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+                            <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-slate-900 border-b-[5px] border-b-transparent ml-1" />
                         </div>
                     </button>
                 </div>
@@ -158,13 +158,13 @@ const LandingPage = () => {
                     {features.map((feature, index) => (
                         <div
                             key={index}
-                            className="glass p-5 md:p-8 rounded-2xl hover:bg-white/5 transition-all duration-300 group border border-white/5 hover:border-primary-500/30"
+                            className="bg-white p-5 md:p-8 rounded-2xl hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group border border-slate-100"
                         >
-                            <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-xl flex items-center justify-center mb-4 md:mb-6 text-primary-400 group-hover:scale-110 group-hover:text-primary-300 transition-all duration-300">
+                            <div className="w-12 h-12 md:w-14 md:h-14 bg-slate-50 rounded-xl flex items-center justify-center mb-4 md:mb-6 text-teal-600 group-hover:scale-110 transition-all duration-300">
                                 {feature.icon}
                             </div>
-                            <h4 className="text-xl font-bold mb-3 font-serif">{feature.title}</h4>
-                            <p className="text-text-secondary leading-relaxed">{feature.description}</p>
+                            <h4 className="text-xl font-bold mb-3 font-serif text-slate-900">{feature.title}</h4>
+                            <p className="text-slate-600 leading-relaxed">{feature.description}</p>
                         </div>
                     ))}
                 </div>
@@ -200,45 +200,45 @@ const LandingPage = () => {
                                 {
                                     title: 'Real-time Analytics',
                                     description: 'Track revenue, expenses, and cash flow instantly with live dashboards.',
-                                    icon: <BarChart3 className="w-6 h-6 text-accent-400" />
+                                    icon: <BarChart3 className="w-6 h-6 text-teal-600" />
                                 },
                                 {
                                     title: 'Bank-Grade Security',
                                     description: 'Your financial data is protected with enterprise-level encryption and role-based access.',
-                                    icon: <Shield className="w-6 h-6 text-primary-400" />
+                                    icon: <Shield className="w-6 h-6 text-slate-600" />
                                 },
                                 {
                                     title: 'Automated Billing',
                                     description: 'Reduce errors and save time with automated invoice generation and claims processing.',
-                                    icon: <Zap className="w-6 h-6 text-yellow-400" />
+                                    icon: <Zap className="w-6 h-6 text-teal-500" />
                                 },
                                 {
                                     title: 'Seamless Integration',
                                     description: 'Connects effortlessly with existing hospital information systems and banking platforms.',
-                                    icon: <Activity className="w-6 h-6 text-emerald-400" />
+                                    icon: <Activity className="w-6 h-6 text-emerald-600" />
                                 },
                                 {
                                     title: 'Audit Ready',
                                     description: 'Maintain complete financial transparency with detailed audit trails for every transaction.',
-                                    icon: <FileText className="w-6 h-6 text-rose-400" />
+                                    icon: <FileText className="w-6 h-6 text-rose-600" />
                                 },
                                 {
                                     title: 'Multi-User Support',
                                     description: 'Collaborate effectively with tailored roles for admins, accountants, and billing staff.',
-                                    icon: <Users className="w-6 h-6 text-indigo-400" />
+                                    icon: <Users className="w-6 h-6 text-indigo-600" />
                                 }
                             ].map((benefit, index) => (
                                 <div
                                     key={index}
-                                    className="glass p-6 rounded-2xl border border-white/5 hover:bg-white/5 transition-all duration-300 hover:-translate-y-1 group"
+                                    className="bg-white p-6 rounded-2xl border border-slate-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
                                 >
                                     <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                        <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                                             {benefit.icon}
                                         </div>
                                         <div>
-                                            <h4 className="text-lg font-bold mb-2 font-serif text-white">{benefit.title}</h4>
-                                            <p className="text-sm text-text-secondary leading-relaxed">
+                                            <h4 className="text-lg font-bold mb-2 font-serif text-slate-900">{benefit.title}</h4>
+                                            <p className="text-sm text-slate-600 leading-relaxed">
                                                 {benefit.description}
                                             </p>
                                         </div>
@@ -252,18 +252,18 @@ const LandingPage = () => {
 
             {/* CTA Section */}
             <section className="container mx-auto px-6 py-24 text-center relative z-10">
-                <div className="glass-panel max-w-4xl mx-auto p-12 rounded-3xl border border-white/10 relative overflow-hidden">
-                    <div className="absolute inset-0 mesh-gradient opacity-30" />
-                    <div className="relative z-10">
+                <div className="bg-slate-900 max-w-4xl mx-auto p-12 rounded-3xl relative overflow-hidden shadow-2xl">
+                    <div className="absolute inset-0 bg-gradient-to-br from-teal-500/20 to-transparent pointer-events-none" />
+                    <div className="relative z-10 text-white">
                         <h3 className="text-4xl md:text-5xl font-serif font-bold mb-6">
                             Ready to Transform Your Finance?
                         </h3>
-                        <p className="text-lg text-text-secondary mb-10 max-w-xl mx-auto">
+                        <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto font-light">
                             Join healthcare facilities across Zambia using MEDFINANCE360 to streamline operations.
                         </p>
                         <button
                             onClick={() => navigate('/login')}
-                            className="btn btn-primary btn-lg rounded-full px-10 py-4 text-lg shadow-xl shadow-primary-500/20 hover:shadow-primary-500/40"
+                            className="btn bg-white text-slate-900 hover:bg-slate-100 btn-lg rounded-full px-10 py-4 text-lg font-bold"
                         >
                             Get Started Today
                             <ArrowRight className="w-5 h-5" />
