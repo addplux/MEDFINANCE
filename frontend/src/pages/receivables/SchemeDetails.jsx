@@ -212,6 +212,7 @@ const SchemeDetails = () => {
                                         <th className="px-6 py-4 bg-transparent">Patient No.</th>
                                         <th className="px-6 py-4 bg-transparent">Patient Name</th>
                                         <th className="px-6 py-4 bg-transparent">Sex</th>
+                                        <th className="px-6 py-4 bg-transparent">Dept</th>
                                         <th className="px-6 py-4 bg-transparent">Service / Description</th>
                                         <th className="px-6 py-4 text-right bg-transparent">Amount</th>
                                         <th className="px-6 py-4 text-right bg-transparent">Discount</th>
@@ -234,8 +235,23 @@ const SchemeDetails = () => {
                                                     {bill.patient?.firstName} {bill.patient?.lastName}
                                                 </td>
                                                 <td className="px-6 py-4 text-white/70 text-xs font-bold uppercase">{bill.patient?.gender}</td>
+                                                <td className="px-6 py-4">
+                                                    {(() => {
+                                                        const badges = {
+                                                            OPD: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+                                                            Pharmacy: 'bg-green-500/20 text-green-300 border-green-500/30',
+                                                            Laboratory: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+                                                            Radiology: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+                                                            Theatre: 'bg-red-500/20 text-red-300 border-red-500/30',
+                                                            Maternity: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
+                                                            Specialist: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
+                                                        };
+                                                        const cls = badges[bill.billType] || 'bg-white/10 text-white/60 border-white/10';
+                                                        return <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${cls}`}>{bill.billType || 'OPD'}</span>;
+                                                    })()}
+                                                </td>
                                                 <td className="px-6 py-4 text-white text-xs font-medium">
-                                                    {bill.service?.serviceName || 'General Service'}
+                                                    {bill.serviceName || bill.service?.serviceName || 'General Service'}
                                                 </td>
                                                 <td className="px-6 py-4 text-right font-bold text-white tabular-nums">{Number(bill.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                                                 <td className="px-6 py-4 text-right text-white/50 tabular-nums">{Number(bill.discount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
@@ -246,7 +262,7 @@ const SchemeDetails = () => {
                                 </tbody>
                                 <tfoot className="bg-white/5 font-black border-t border-white/10 sticky bottom-0 z-10 shadow-2xl">
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-6 text-right text-white/40 uppercase tracking-[0.2em] text-[10px]">Grand Total</td>
+                                        <td colSpan="6" className="px-6 py-6 text-right text-white/40 uppercase tracking-[0.2em] text-[10px]">Grand Total</td>
                                         <td className="px-6 py-6 text-right text-primary bg-transparent text-lg tabular-nums">{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                                         <td className="px-6 py-6 text-right text-white/30 bg-transparent tabular-nums">{totalDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                                         <td className="px-6 py-6 text-right text-white text-xl bg-transparent tabular-nums border-r border-white/5">{netAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>

@@ -153,7 +153,7 @@ const getSchemeById = async (req, res) => {
     }
 };
 
-// Get scheme statement (bills)
+// Get scheme statement (bills) - aggregated from ALL billing sources
 const getSchemeStatement = async (req, res) => {
     try {
         const { id } = req.params;
@@ -162,40 +162,74 @@ const getSchemeStatement = async (req, res) => {
         const scheme = await Scheme.findByPk(id);
         if (!scheme) return res.status(404).json({ error: 'Scheme not found' });
 
-        // Filter bills by date and scheme payment
-        const where = {
-            // paymentMethod: ['insurance', 'credit'] // simplistic check
-        };
+        // Build patient ID filter - patients belonging to this scheme
+        const schemePatients = await Patient.findAll({
+            where: { schemeId: id },
+            attributes: ['id', 'firstName', 'lastName', 'patientNumber', 'gender']
+        });
+        const patientIds = schemePatients.map(p => p.id);
+        const patientMap = {};
+        schemePatients.forEach(p => { patientMap[p.id] = p; });
 
-        if (startDate && endDate) {
-            where.billDate = { [Op.between]: [startDate, endDate] };
+        if (patientIds.length === 0) {
+            return res.json({ scheme, bills: [] });
         }
 
-        // Find bills for patients appearing in this scheme
-        const bills = await OPDBill.findAll({
-            where,
-            include: [
-                {
-                    model: Patient,
-                    as: 'patient',
-                    where: { schemeId: id }, // Only bills for patients in this scheme
-                    attributes: ['id', 'firstName', 'lastName', 'patientNumber', 'gender']
-                },
-                {
-                    model: Service,
-                    as: 'service',
-                    attributes: ['serviceName']
-                },
-                {
-                    model: User,
-                    as: 'creator',
-                    attributes: ['firstName', 'lastName']
-                }
-            ],
-            order: [['billDate', 'DESC']]
+        // Date filter helper
+        const dateWhere = (field) => startDate && endDate
+            ? { [Op.between]: [startDate, endDate] }
+            : undefined;
+
+        const baseWhere = (dateField) => {
+            const w = { patientId: { [Op.in]: patientIds } };
+            if (startDate && endDate) w[dateField] = { [Op.between]: [startDate, endDate] };
+            return w;
+        };
+
+        // Query all 7 sources simultaneously
+        const [
+            opdBills, pharmacyBills, labBills,
+            radiologyBills, theatreBills, maternityBills, specialistBills
+        ] = await Promise.all([
+            OPDBill.findAll({
+                where: baseWhere('billDate'),
+                include: [{ model: Service, as: 'service', attributes: ['serviceName', 'category'] }]
+            }),
+            PharmacyBill.findAll({ where: baseWhere('billDate') }),
+            LabBill.findAll({ where: baseWhere('billDate') }),
+            RadiologyBill.findAll({ where: baseWhere('billDate') }),
+            TheatreBill.findAll({ where: baseWhere('procedureDate') }),
+            MaternityBill.findAll({ where: baseWhere('admissionDate') }),
+            SpecialistClinicBill.findAll({ where: baseWhere('consultationDate') })
+        ]);
+
+        // Normalise all bills into a unified shape
+        const normalize = (bill, type, serviceName, dateField = 'billDate', amtField = 'totalAmount') => ({
+            id: `${type}-${bill.id}`,
+            billType: type,
+            serviceName,
+            billDate: bill[dateField] || bill.billDate || bill.createdAt,
+            patient: patientMap[bill.patientId],
+            totalAmount: parseFloat(bill[amtField] || bill.totalAmount || bill.amount || 0),
+            discount: parseFloat(bill.discount || 0),
+            netAmount: parseFloat(bill.netAmount || bill[amtField] || bill.totalAmount || bill.amount || 0),
+            billNumber: bill.billNumber
         });
 
-        res.json({ scheme, bills });
+        const unified = [
+            ...opdBills.map(b => normalize(b, 'OPD', b.service?.serviceName || 'OPD Consultation')),
+            ...pharmacyBills.map(b => normalize(b, 'Pharmacy', 'Pharmacy / Drugs')),
+            ...labBills.map(b => normalize(b, 'Laboratory', b.testName || 'Laboratory Test', 'billDate', 'amount')),
+            ...radiologyBills.map(b => normalize(b, 'Radiology', b.scanType || 'Radiology Scan', 'billDate', 'amount')),
+            ...theatreBills.map(b => normalize(b, 'Theatre', b.procedureType || 'Theatre / Surgery', 'procedureDate')),
+            ...maternityBills.map(b => normalize(b, 'Maternity', `Maternity (${b.deliveryType || 'delivery'})`, 'admissionDate')),
+            ...specialistBills.map(b => normalize(b, 'Specialist', `Specialist - ${b.clinicType || b.specialistName || 'Clinic'}`, 'consultationDate'))
+        ];
+
+        // Sort by date descending
+        unified.sort((a, b) => new Date(b.billDate) - new Date(a.billDate));
+
+        res.json({ scheme, bills: unified });
     } catch (error) {
         console.error('Get scheme statement error:', error);
         res.status(500).json({ error: 'Failed to generate scheme statement' });
