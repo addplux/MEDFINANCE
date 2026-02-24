@@ -915,8 +915,12 @@ const importSchemeMembers = async (req, res) => {
 
                 // ── AUTO-CREATE DEPARTMENT BILLING RECORDS ──
                 // Use findOrCreate so re-imports update rather than duplicate
+                // Bill number format: IM-{5chrScheme}-{5chrPolicy}-{3chrSuffix} = max 17 chars (fits VARCHAR 20)
                 const billDate = new Date().toISOString().slice(0, 10);
-                const billBase = `IMP-${scheme.schemeCode}-${String(policyNumber).replace(/\s/g, '')}`;
+                const schemeTag = scheme.schemeCode.replace(/\s/g, '').slice(0, 5).toUpperCase();
+                const policyTag = String(policyNumber).replace(/\s/g, '').slice(0, 5).toUpperCase();
+                const billBase = `IM-${schemeTag}-${policyTag}`; // e.g. IM-MAD01-C1115 (14 chars)
+
 
                 // 1. Lab Bill
                 if (laboratory > 0) {
@@ -970,18 +974,19 @@ const importSchemeMembers = async (req, res) => {
                 // Each non-zero billing category becomes its own OPDBill linked to the
                 // specific service, enabling real per-service tracking in corporate statements.
                 const opdCategories = [
-                    { key: 'consultation', amount: consultation, suffix: 'CONSULT', label: 'Consultation' },
-                    { key: 'nursing', amount: nursingCare, suffix: 'NURSING', label: 'Nursing Care' },
-                    { key: 'dental', amount: dental, suffix: 'DENTAL', label: 'Dental' },
-                    { key: 'lodging', amount: lodging, suffix: 'LODGING', label: 'Lodging/Ward' },
-                    { key: 'surgicals', amount: surgicals, suffix: 'SURG', label: 'Surgicals/Theatre' },
-                    { key: 'drRound', amount: drRound, suffix: 'DRROUND', label: "Doctor's Round" },
-                    { key: 'food', amount: food, suffix: 'FOOD', label: 'Food/Diet' },
-                    { key: 'physio', amount: physio, suffix: 'PHYSIO', label: 'Physiotherapy' },
-                    { key: 'pharmacy', amount: pharmacy, suffix: 'PHARM', label: 'Pharmacy' },
-                    { key: 'sundries', amount: sundries, suffix: 'SUNDRY', label: 'Sundries/Dressing' },
+                    { key: 'consultation', amount: consultation, suffix: 'CNS', label: 'Consultation' },
+                    { key: 'nursing', amount: nursingCare, suffix: 'NRS', label: 'Nursing Care' },
+                    { key: 'dental', amount: dental, suffix: 'DEN', label: 'Dental' },
+                    { key: 'lodging', amount: lodging, suffix: 'LDG', label: 'Lodging/Ward' },
+                    { key: 'surgicals', amount: surgicals, suffix: 'SRG', label: 'Surgicals/Theatre' },
+                    { key: 'drRound', amount: drRound, suffix: 'DRR', label: "Doctor's Round" },
+                    { key: 'food', amount: food, suffix: 'FOD', label: 'Food/Diet' },
+                    { key: 'physio', amount: physio, suffix: 'PHY', label: 'Physiotherapy' },
+                    { key: 'pharmacy', amount: pharmacy, suffix: 'PHM', label: 'Pharmacy' },
+                    { key: 'sundries', amount: sundries, suffix: 'SDR', label: 'Sundries/Dressing' },
                     { key: 'antenatal', amount: antenatal, suffix: 'ANT', label: 'Antenatal Care' },
                 ];
+
 
                 for (const cat of opdCategories) {
                     if (cat.amount <= 0) continue;
