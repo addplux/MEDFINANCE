@@ -103,8 +103,8 @@ const Patients = () => {
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Patients</h1>
-                    <p className="text-gray-500 mt-1 text-sm">{total.toLocaleString()} patient{total !== 1 ? 's' : ''} registered</p>
+                    <h1 className="text-3xl font-bold text-white">Patients</h1>
+                    <p className="text-white/50 mt-1 text-sm">{total.toLocaleString()} patient{total !== 1 ? 's' : ''} registered</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <button
@@ -135,7 +135,7 @@ const Patients = () => {
                         }}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${categoryFilter === t.value
                             ? 'bg-indigo-600 text-white border-indigo-600'
-                            : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-400'
+                            : 'bg-white/5 text-white/60 border-white/10 hover:border-indigo-400 hover:text-white'
                             }`}
                     >
                         <t.icon className="w-3.5 h-3.5" />
@@ -166,7 +166,7 @@ const Patients = () => {
                 {/* Desktop */}
                 <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="text-xs font-bold text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+                        <thead className="text-xs font-bold text-white/40 uppercase bg-white/5 border-b border-white/10">
                             <tr>
                                 <th className="px-4 py-3 whitespace-nowrap">Photo</th>
                                 <th className="px-4 py-3 whitespace-nowrap">Patient No.</th>
@@ -179,7 +179,7 @@ const Patients = () => {
                                 <th className="px-4 py-3 whitespace-nowrap text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-white/10">
                             {loading ? (
                                 <tr>
                                     <td colSpan="9" className="text-center py-10 text-gray-400 text-sm">Loading…</td>
@@ -198,7 +198,7 @@ const Patients = () => {
                                 </tr>
                             ) : (
                                 patients.map((patient) => (
-                                    <tr key={patient.id} className="hover:bg-gray-50 transition-colors">
+                                    <tr key={patient.id} className="hover:bg-white/5 transition-colors">
                                         <td className="px-4 py-2">
                                             {patient.photoUrl ? (
                                                 <img
@@ -212,13 +212,13 @@ const Patients = () => {
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-xs font-bold text-gray-800">{patient.patientNumber}</td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-xs font-semibold text-gray-900">{patient.firstName} {patient.lastName}</td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-xs text-gray-600 capitalize">{patient.gender}</td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-xs text-gray-600">{patient.phone || '—'}</td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-xs text-gray-600">{patient.nrc || '—'}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap text-xs font-bold text-white">{patient.patientNumber}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap text-xs font-semibold text-white">{patient.firstName} {patient.lastName}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap text-xs text-white/60 capitalize">{patient.gender}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap text-xs text-white/60">{patient.phone || '—'}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap text-xs text-white/60">{patient.nrc || '—'}</td>
                                         <td className="px-4 py-2 whitespace-nowrap">
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-600">
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-white/10 text-white">
                                                 {patient.totalVisits || 0}
                                             </span>
                                         </td>
@@ -313,8 +313,8 @@ const Patients = () => {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
-                        <div className="text-sm text-gray-500">
+                    <div className="px-4 py-3 border-t border-white/10 flex items-center justify-between">
+                        <div className="text-sm text-white/50">
                             Page {currentPage} of {totalPages}
                         </div>
                         <div className="flex gap-2">
