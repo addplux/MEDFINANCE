@@ -374,7 +374,7 @@ const SchemeMembers = ({ schemeId }) => {
 
     return (
 
-        <div className="flex flex-col h-full space-y-4 min-w-0 bg-bg-primary text-white p-6">
+        <div className="flex flex-col space-y-4 min-w-0 bg-bg-primary text-white p-6 overflow-x-auto custom-scrollbar">
             {/* Import Status Message */}
             {importResult && (
                 <div className={`p-4 rounded-2xl flex items-start gap-3 animate-fade-in ${importResult.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
@@ -410,7 +410,7 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
             )}
 
-            <div className="flex flex-col flex-1 glass-panel border-white/5 overflow-hidden min-w-0 rounded-[2rem] shadow-2xl">
+            <div className="flex flex-col glass-panel border-white/5 min-w-[1200px] rounded-[2rem] shadow-2xl">
                 {/* Header / Filters (Suno Style) */}
                 <div className="p-6 border-b border-white/5 flex flex-wrap gap-6 items-center flex-shrink-0 bg-white/[0.02]">
                     {/* Search & Filter */}
@@ -475,8 +475,8 @@ const SchemeMembers = ({ schemeId }) => {
                     </div>
                 </div>
 
-                {/* Table - Fixed Scroll Container */}
-                <div className="flex-1 w-full relative flex flex-col min-h-[400px] overflow-hidden">
+                {/* Table - Fixed Height Container */}
+                <div className="w-full relative flex flex-col min-h-[400px] h-[600px]">
                     <DataGrid
                         rows={members}
                         columns={columns}

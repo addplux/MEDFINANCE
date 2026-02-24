@@ -26,7 +26,10 @@ import {
     FileCheck,
     Activity,
     Calculator,
-    Building
+    Building,
+    Beaker,
+    Pill,
+    Radio
 } from 'lucide-react';
 
 const MainLayout = ({ children }) => {
@@ -164,31 +167,33 @@ const MainLayout = ({ children }) => {
                 { path: '/app/payroll/medical', label: 'Staff Balances' } // Both link to same page with tabs
             ]
         },
-        { path: '/app/lab/dashboard', icon: Activity, label: 'Laboratory' },
+        {
+            isHeading: true,
+            label: 'DEPARTMENTAL QUEUES'
+        },
+        { path: '/app/opd/dashboard', icon: Stethoscope, label: 'OPD Queue' },
+        { path: '/app/lab/dashboard', icon: Beaker, label: 'Laboratory' },
+        { path: '/app/pharmacy/dashboard', icon: Pill, label: 'Pharmacy' },
+        { path: '/app/radiology/dashboard', icon: Radio, label: 'Radiology' },
         {
             id: 'departments',
             icon: Building,
-            label: 'Departments',
+            label: 'Other Clinics',
             submenu: [
-                { path: '/app/billing/opd', label: 'OPD' },
                 { path: '/app/billing/ipd/new', label: 'IPD / Children Ward' },
                 { path: '/app/maternity/billing', label: 'Labour Ward' },
                 { path: '/app/theatre/billing', label: 'Theater' },
-                { path: '/app/billing/radiology/new', label: 'Scan / Radiology' },
-                { path: '/app/billing/lab/new', label: 'Lab' },
                 { path: '/app/billing/physiology/new', label: 'Physiology' },
-                { path: '/app/billing/pharmacy/new', label: 'Pharmacy' },
                 { path: '/app/billing/dental/new', label: 'Dental' }
             ]
         },
         {
             id: 'pharmacy',
             icon: Package,
-            label: 'Pharmacy',
+            label: 'Pharmacy Inventory',
             submenu: [
-                { path: '/app/pharmacy/inventory', label: 'Inventory' },
-                { path: '/app/pharmacy/grn', label: 'Receive Stock (GRN)' },
-                { path: '/app/pharmacy/dispense', label: 'Dispense' }
+                { path: '/app/pharmacy/inventory', label: 'Inventory list' },
+                { path: '/app/pharmacy/grn', label: 'Receive Stock (GRN)' }
             ]
         },
         {

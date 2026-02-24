@@ -41,7 +41,6 @@
   body {
     @apply bg-bg-primary text-text-primary antialiased;
     font-family: 'Inter', sans-serif;
-    overflow-x: hidden;
   }
 
   /* Typography */
@@ -210,7 +209,7 @@
   }
 
   .glass-panel {
-    @apply bg-black/40 backdrop-blur-2xl border border-white/5 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)];
+    @apply bg-black/40 backdrop-blur-2xl border border-white/5 shadow-[0_8px_32px_0_rgba(0, 0, 0, 0.8)];
   }
 
   .glass-card {
@@ -522,8 +521,8 @@
 
   /* Custom Scrollbar Styles */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
@@ -531,12 +530,15 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--bg-tertiary);
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--border-color);
+    background: rgba(255, 255, 255, 0.25);
+    background-clip: padding-box;
   }
 
   /* Firefox */

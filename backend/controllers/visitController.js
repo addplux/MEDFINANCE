@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Visit, Patient, Scheme, Department, User, PatientMovement } = require('../models');
+const { Visit, Patient, Scheme, Department, User, PatientMovement, OPDBill, PharmacyBill, LabBill, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill } = require('../models');
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -114,8 +114,55 @@ const getAllVisits = async (req, res) => {
             offset: (parseInt(page) - 1) * parseInt(limit)
         });
 
+        // Enhance visits with daily check-in counts and billing summary
+        const today = new Date();
+        const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+
+        const enhancedVisits = await Promise.all(rows.map(async (v) => {
+            const plainVisit = v.get({ plain: true });
+
+            // Daily Check-in Count
+            const dayCount = await Visit.count({
+                where: {
+                    patientId: plainVisit.patientId,
+                    createdAt: { [Op.gte]: startOfDay }
+                }
+            });
+            plainVisit.dailyCheckInCount = dayCount;
+
+            // Simple Billing Aggregation for the day (Scan all bill types)
+            // Note: In a production app, we'd want a more efficient way to query these
+            const billModels = [OPDBill, PharmacyBill, LabBill, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill];
+            let totalBilledToday = 0;
+            let pendingBills = 0;
+
+            for (const Model of billModels) {
+                const bills = await Model.findAll({
+                    where: {
+                        patientId: plainVisit.patientId,
+                        createdAt: { [Op.gte]: startOfDay }
+                    }
+                });
+                bills.forEach(b => {
+                    const amount = parseFloat(b.netAmount || b.amount || b.totalAmount || 0);
+                    totalBilledToday += amount;
+                    if (b.paymentStatus === 'unpaid' || b.status === 'pending') {
+                        pendingBills++;
+                    }
+                });
+            }
+
+            plainVisit.billingSummary = {
+                totalAmount: totalBilledToday,
+                pendingCount: pendingBills,
+                status: pendingBills > 0 ? 'pending' : (totalBilledToday > 0 ? 'cleared' : 'none')
+            };
+
+            return plainVisit;
+        }));
+
         res.json({
-            visits: rows,
+            visits: enhancedVisits,
             total: count,
             page: parseInt(page),
             totalPages: Math.ceil(count / parseInt(limit))

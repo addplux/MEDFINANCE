@@ -120,6 +120,9 @@ import MaternityBillForm from './pages/maternity/MaternityBillForm';
 import SpecialistClinics from './pages/specialist/SpecialistClinics';
 import SpecialistClinicForm from './pages/specialist/SpecialistClinicForm';
 
+// Shared Components
+import DepartmentDashboard from './pages/shared/DepartmentDashboard';
+
 // Admin
 import PendingApprovals from './pages/setup/PendingApprovals';
 
@@ -253,14 +256,19 @@ function App() {
 
                         <Route path="payroll/medical" element={<PayrollMedical />} />
 
+                        <Route path="lab/dashboard" element={<DepartmentDashboard title="Laboratory" departmentId={1} />} />
+                        <Route path="lab/tests" element={<LabTests />} />
+                        <Route path="lab/request" element={<LabRequestForm />} />
+                        <Route path="lab/results/:id" element={<LabResultEntry />} />
+
+                        <Route path="pharmacy/dashboard" element={<DepartmentDashboard title="Pharmacy" departmentId={2} />} />
                         <Route path="pharmacy/inventory" element={<PharmacyInventory />} />
                         <Route path="pharmacy/grn" element={<GoodsReceivedNote />} />
                         <Route path="pharmacy/dispense" element={<Dispense />} />
 
-                        <Route path="lab/dashboard" element={<LabDashboard />} />
-                        <Route path="lab/tests" element={<LabTests />} />
-                        <Route path="lab/request" element={<LabRequestForm />} />
-                        <Route path="lab/results/:id" element={<LabResultEntry />} />
+                        <Route path="radiology/dashboard" element={<DepartmentDashboard title="Radiology" departmentId={3} />} />
+
+                        <Route path="opd/dashboard" element={<DepartmentDashboard title="OPD" departmentId={4} />} />
 
                         <Route path="theatre/billing" element={<TheatreBilling />} />
                         <Route path="theatre/billing/new" element={<TheatreBillForm />} />
