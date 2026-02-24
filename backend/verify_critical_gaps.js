@@ -33,12 +33,15 @@ const verifyGapImplementation = async () => {
         // 1. Verify Exempted Patient
         console.log('\n--- Verifying Exempted Patient ---');
         // Check if enum allows 'exempted' (Simulated by creating one)
+        // 1. Verify Patient Creation
+        console.log('\n--- Verifying Patient Creation ---');
         try {
             const adminUser = await User.findOne({ where: { role: 'admin' } });
             // IF no admin, just find ANY user to act as creator if needed, or skip user check if model allows
             // But Patient creation doesn't require user strictly in model, but let's see.
             // Model: Patient.js
 
+            // For STANDARD patients (cash, corporate, etc.):
             const patient = await Patient.create({
                 firstName: 'TestExempt',
                 lastName: 'Patient',
@@ -134,7 +137,7 @@ const verifyGapImplementation = async () => {
         console.log('\n--- Verifying Claims Aging Report ---');
         try {
             // We need to pass query parameters
-            const req = mockReq({}, { payerType: 'nhima' });
+            const req = mockReq({}, { payerType: 'corporate' });
             const res = mockRes();
             await reportsController.getClaimsAging(req, res);
             console.log('Claims Aging Status:', res.statusCode || 200);

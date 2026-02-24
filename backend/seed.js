@@ -161,15 +161,6 @@ const seedDatabase = async () => {
         console.log('✅ Departments created');
 
         // 4. Create Schemes & Corporate Accounts
-        const nhimaScheme = await Scheme.create({
-            schemeCode: 'NHIMA01',
-            schemeName: 'National Health Insurance (NHIMA)',
-            schemeType: 'government',
-            billingCycle: 'monthly',
-            pricingModel: 'standard',
-            status: 'active'
-        });
-
         const madisonScheme = await Scheme.create({
             schemeCode: 'MAD01',
             schemeName: 'Madison Health Insurance',
@@ -214,20 +205,6 @@ const seedDatabase = async () => {
                 phone: '0977112233',
                 patientType: 'opd',
                 paymentMethod: 'cash',
-                costCategory: 'standard',
-                balance: 0.00
-            },
-            {
-                patientNumber: 'PT-000002',
-                firstName: 'Grace',
-                lastName: 'Mutale',
-                dateOfBirth: '1990-11-20',
-                gender: 'female',
-                phone: '0966445566',
-                patientType: 'opd',
-                paymentMethod: 'nhima',
-                nhimaNumber: 'NHM-987654321',
-                schemeId: nhimaScheme.id,
                 costCategory: 'standard',
                 balance: 0.00
             },

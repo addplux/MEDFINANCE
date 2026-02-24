@@ -115,7 +115,6 @@ const FundForm = () => {
                                     required
                                 >
                                     <option value="general">General Fund</option>
-                                    <option value="nhima">NHIMA Fund</option>
                                     <option value="donor">Donor Fund</option>
                                     <option value="retention">Retention Fund</option>
                                 </select>

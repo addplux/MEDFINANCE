@@ -1,6 +1,6 @@
 const {
     Patient, OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill,
-    TheatreBill, MaternityBill, SpecialistClinicBill, NHIMAClaim,
+    TheatreBill, MaternityBill, SpecialistClinicBill,
     Payment, LabRequest, Visit, sequelize
 } = require('../models');
 const { Op } = require('sequelize');
@@ -21,7 +21,6 @@ const getAllPatients = async (req, res) => {
                 { lastName: { [Op.iLike]: `%${search}%` } },
                 { patientNumber: { [Op.iLike]: `%${search}%` } },
                 { policyNumber: { [Op.iLike]: `%${search}%` } },
-                { nhimaNumber: { [Op.iLike]: `%${search}%` } },
                 { nrc: { [Op.iLike]: `%${search}%` } } // Added NRC search
             ];
         }
@@ -84,7 +83,7 @@ const createPatient = async (req, res) => {
     try {
         const {
             firstName, lastName, dateOfBirth, gender, phone, email, address,
-            nhimaNumber, paymentMethod, costCategory, staffId, serviceId, registeredService, ward,
+            paymentMethod, costCategory, staffId, serviceId, registeredService, ward,
             emergencyContact, emergencyPhone, nrc, patientType, schemeId, initialDeposit
         } = req.body;
 
@@ -113,7 +112,6 @@ const createPatient = async (req, res) => {
             phone,
             email,
             address,
-            nhimaNumber,
             paymentMethod: paymentMethod || 'cash',
             costCategory: costCategory || 'standard',
             staffId: (paymentMethod === 'staff' && staffId) ? staffId : null,
@@ -287,7 +285,7 @@ const mergePatients = async (req, res) => {
         const relatedModels = [
             OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill,
             TheatreBill, MaternityBill, SpecialistClinicBill,
-            NHIMAClaim, Payment, LabRequest
+            Payment, LabRequest
         ];
 
         // Update all related records

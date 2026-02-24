@@ -39,11 +39,6 @@ const Service = sequelize.define('Service', {
         allowNull: false,
         defaultValue: 0.00
     },
-    nhimaPrice: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-        defaultValue: 0.00
-    },
     corporatePrice: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,

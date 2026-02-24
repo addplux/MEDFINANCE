@@ -87,18 +87,6 @@ export const billingAPI = {
 
 // Receivables
 export const receivablesAPI = {
-    nhima: {
-        getAll: (params) => api.get('/receivables/nhima', { params }),
-        getById: (id) => api.get(`/receivables/nhima/${id}`),
-        create: (data) => api.post('/receivables/nhima', data),
-        update: (id, data) => api.put(`/receivables/nhima/${id}`, data),
-        delete: (id) => api.delete(`/receivables/nhima/${id}`),
-        // Vetting & Batching
-        getPendingVetting: () => api.get('/nhima-claims/vetting/pending'),
-        vetClaim: (id, data) => api.put(`/nhima-claims/${id}/vet`, data),
-        createBatch: (data) => api.post('/nhima-claims/batches', data),
-        getBatches: () => api.get('/nhima-claims/batches'),
-    },
     corporate: {
         getAll: (params) => api.get('/receivables/corporate', { params }),
         getById: (id) => api.get(`/receivables/corporate/${id}`),

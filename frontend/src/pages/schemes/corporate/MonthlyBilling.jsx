@@ -61,7 +61,7 @@ const MonthlyBilling = () => {
     const fetchCorporateSchemes = async () => {
         setLoading(true);
         try {
-            // Fetch schemes and optionally filter by 'corporate' or 'nhima' if needed.
+            // Fetch schemes and optionally filter by 'corporate' if needed.
             // For now, grabbing all schemes since this might handle both.
             const response = await receivablesAPI.schemes.getAll();
             setSchemes(response.data || []);

@@ -19,7 +19,7 @@ const ARReminderLog = sequelize.define('ARReminderLog', {
     paymentMethod: {
         type: DataTypes.STRING(30),
         allowNull: true,
-        comment: 'e.g., private, nhima, corporate, cash'
+        comment: 'e.g., cash, corporate, scheme, staff'
     },
     agingBucket: {
         type: DataTypes.INTEGER,

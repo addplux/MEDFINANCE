@@ -13,10 +13,6 @@ const upload = multer({
 // All receivables routes require authentication
 router.use(authMiddleware);
 
-// NHIMA Claims
-router.get('/nhima', receivablesController.getAllNHIMAClaims);
-router.post('/nhima', authorize('admin', 'accountant'), receivablesController.createNHIMAClaim);
-router.put('/nhima/:id', authorize('admin', 'accountant'), receivablesController.updateNHIMAClaim);
 
 // Corporate Accounts
 router.get('/corporate', receivablesController.getAllCorporateAccounts);

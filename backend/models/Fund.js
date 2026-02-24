@@ -7,6 +7,7 @@ const Fund = sequelize.define('Fund', {
         primaryKey: true,
         autoIncrement: true
     },
+    // Create LabBill records if the patient is on a scheme (corporate, scheme)
     fundCode: {
         type: DataTypes.STRING(20),
         allowNull: false,
@@ -17,7 +18,7 @@ const Fund = sequelize.define('Fund', {
         allowNull: false
     },
     fundType: {
-        type: DataTypes.ENUM('nhima', 'donor', 'retention', 'general'),
+        type: DataTypes.ENUM('donor', 'retention', 'general'),
         allowNull: false,
         defaultValue: 'general'
     },

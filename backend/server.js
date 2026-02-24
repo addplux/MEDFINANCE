@@ -121,7 +121,6 @@ app.use('/api/debug', require('./routes/debug'));
 app.use('/api/sync', require('./routes/sync'));
 app.use('/api/patient-movements', require('./routes/patientMovements'));
 app.use('/api/visits', require('./routes/visits'));
-app.use('/api/nhima-claims', require('./routes/nhimaClaims'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/prepaid-plans', require('./routes/prepaidPlans'));
 app.use('/api/utilisation', require('./routes/utilisation'));

@@ -137,7 +137,7 @@ const SchemeForm = () => {
                                     value={formData.schemeName}
                                     onChange={handleChange}
                                     className="form-input"
-                                    placeholder="e.g., NHIMA Standard"
+                                    placeholder="e.g., Corporate Standard"
                                     required
                                 />
                             </div>

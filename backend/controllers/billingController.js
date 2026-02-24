@@ -82,10 +82,9 @@ const createOPDBill = async (req, res) => {
         // Determine unit price based on patient's payment method
         let unitPrice = parseFloat(service.price); // Base fallback
 
-        const tier = patient.paymentMethod; // e.g., 'cash', 'nhima', 'corporate', 'scheme', 'staff'
+        const tier = patient.paymentMethod; // e.g., 'cash', 'corporate', 'scheme', 'staff'
 
         if (tier === 'cash' && service.cashPrice > 0) unitPrice = parseFloat(service.cashPrice);
-        else if (tier === 'nhima' && service.nhimaPrice > 0) unitPrice = parseFloat(service.nhimaPrice);
         else if (tier === 'corporate' && service.corporatePrice > 0) unitPrice = parseFloat(service.corporatePrice);
         else if (tier === 'scheme' && service.schemePrice > 0) unitPrice = parseFloat(service.schemePrice);
         else if (tier === 'staff' && service.staffPrice > 0) unitPrice = parseFloat(service.staffPrice);

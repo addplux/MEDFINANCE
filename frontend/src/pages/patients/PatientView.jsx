@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 
 const TYPE_BADGE = {
-    nhima: { label: 'NHIMA', bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' },
     cash: { label: 'Cash', bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
     corporate: { label: 'Corporate', bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-200' },
     private_prepaid: { label: 'Private Prepaid', bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
@@ -223,13 +222,6 @@ const PatientView = () => {
                     <InfoRow icon={Clipboard} label="Member Rank" value={patient.memberRank} />
                 </Section>
 
-                {/* NHIMA / Scheme details - Only if applicable */}
-                {(patient.paymentMethod === 'nhima' || patient.nhimaNumber) && (
-                    <Section title="NHIMA Details">
-                        <InfoRow icon={Shield} label="NHIMA Number" value={patient.nhimaNumber} />
-                        <InfoRow icon={Clipboard} label="Policy Number" value={patient.policyNumber} />
-                    </Section>
-                )}
 
                 {(patient.paymentMethod === 'corporate' || patient.paymentMethod === 'scheme' || patient.policyNumber) && (
                     <Section title="Scheme / Corporate Details">

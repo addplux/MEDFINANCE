@@ -17,7 +17,6 @@ const ServiceForm = () => {
         tariffType: 'Low Cost',
         price: '',
         cashPrice: '',
-        nhimaPrice: '',
         corporatePrice: '',
         schemePrice: '',
         staffPrice: '',
@@ -163,17 +162,6 @@ const ServiceForm = () => {
                                     type="number"
                                     name="cashPrice"
                                     value={formData.cashPrice}
-                                    onChange={handleChange}
-                                    className="form-input form-input-sm"
-                                    placeholder="Leave 0 for Base"
-                                />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-xs font-semibold text-text-secondary">NHIMA Price</label>
-                                <input
-                                    type="number"
-                                    name="nhimaPrice"
-                                    value={formData.nhimaPrice}
                                     onChange={handleChange}
                                     className="form-input form-input-sm"
                                     placeholder="Leave 0 for Base"

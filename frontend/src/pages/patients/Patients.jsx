@@ -5,7 +5,6 @@ import { Users, Plus, Search, Eye, Edit, Trash2, GitMerge, ClipboardList, Bankno
 
 const PATIENT_TYPES = [
     { value: '', label: 'All', icon: Users },
-    { value: 'nhima', label: 'NHIMA', icon: ClipboardList },
     { value: 'cash', label: 'Cash', icon: Banknote },
     { value: 'corporate', label: 'Corporate', icon: Building },
     { value: 'private_prepaid', label: 'Prepaid', icon: CreditCard },
@@ -15,7 +14,6 @@ const PATIENT_TYPES = [
 ];
 
 const TYPE_BADGE = {
-    nhima: { label: 'NHIMA', bg: 'bg-blue-100', text: 'text-blue-800' },
     cash: { label: 'Cash', bg: 'bg-green-100', text: 'text-green-800' },
     corporate: { label: 'Corporate', bg: 'bg-purple-100', text: 'text-purple-800' },
     private_prepaid: { label: 'Private Prepaid', bg: 'bg-yellow-100', text: 'text-yellow-800' },

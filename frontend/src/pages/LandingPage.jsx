@@ -29,7 +29,7 @@ const LandingPage = () => {
         {
             icon: <FileText className="w-8 h-8" />,
             title: 'Accounts Management',
-            description: 'Track receivables, payables, NHIMA claims, and corporate accounts'
+            description: 'Track receivables, payables, scheme invoices, and corporate accounts'
         },
         {
             icon: <TrendingUp className="w-8 h-8" />,
@@ -51,106 +51,99 @@ const LandingPage = () => {
 
 
     return (
-        <div className="min-h-screen bg-bg-primary overflow-x-hidden">
+        <div className="min-h-screen bg-bg-primary overflow-x-hidden text-white">
             {/* Mesh Gradient Background */}
-            <div className="fixed inset-0 mesh-gradient opacity-20 pointer-events-none" />
+            <div className="fixed inset-0 opacity-20 pointer-events-none overflow-hidden">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/30 blur-[120px] rounded-full animate-pulse" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/30 blur-[120px] rounded-full animate-pulse delay-1000" />
+            </div>
 
             {/* Header */}
-            <header className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-border-color">
-                <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg shadow-slate-200">
-                            <Activity className="w-6 h-6 text-white" />
+            <header className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-white/5 bg-black/40 backdrop-blur-2xl">
+                <div className="container mx-auto px-8 h-24 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-tr from-primary to-accent rounded-2xl flex items-center justify-center shadow-2xl shadow-primary/40">
+                            <Activity className="w-7 h-7 text-white" />
                         </div>
-                        <h1 className="text-2xl font-bold text-slate-900 font-serif tracking-tight">
-                            MEDFINANCE360
+                        <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic">
+                            MEDFINANCE<span className="text-primary font-light">360</span>
                         </h1>
                     </div>
-                    <div className="flex items-center gap-8">
-                        <button className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors hidden md:block px-2">
+                    <div className="flex items-center gap-10">
+                        <button className="text-sm font-bold text-white/60 hover:text-white transition-all hidden md:block uppercase tracking-widest">
                             Features
                         </button>
-                        <button className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors hidden md:block px-2">
+                        <button className="text-sm font-bold text-white/60 hover:text-white transition-all hidden md:block uppercase tracking-widest">
                             Pricing
                         </button>
                         <button
                             onClick={() => navigate('/login')}
-                            className="btn btn-primary"
+                            className="group relative px-8 py-3 bg-white text-black font-black uppercase tracking-widest text-sm rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.3)]"
                         >
-                            Sign In
-                            <ArrowRight className="w-4 h-4" />
+                            <span className="relative z-10 flex items-center gap-2">
+                                Sign In
+                                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                            </span>
                         </button>
                     </div>
                 </div>
             </header>
 
             {/* Hero Section */}
-            <section className="relative pt-32 pb-20 px-6 container mx-auto text-center z-10">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 border border-slate-200 text-slate-600 rounded-full text-sm font-medium mb-8 animate-fade-in">
-                    <Zap className="w-4 h-4 text-teal-600" />
-                    Complete Medical Finance Management
+            <section className="relative pt-48 pb-32 px-8 container mx-auto text-center z-10">
+                <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-white/5 border border-white/10 text-white rounded-full text-xs font-black uppercase tracking-[0.2em] mb-12 animate-fade-in shadow-2xl">
+                    <Zap className="w-4 h-4 text-accent animate-pulse" />
+                    Complete Medical Finance OS
                 </div>
 
-                <h2 className="text-5xl md:text-7xl font-serif font-bold mb-8 leading-tight tracking-tight text-slate-900">
-                    Streamline Your <br />
-                    <span className="text-teal-600">
-                        Medical Finance
+                <h2 className="text-6xl md:text-9xl font-black mb-10 leading-[0.9] tracking-tighter text-white animate-fade-in">
+                    EVOLVE YOUR <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary to-accent">
+                        FINANCE
                     </span>
                 </h2>
 
-                <p className="text-xl md:text-2xl text-slate-600 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
-                    All-in-one platform for billing, accounting, budgeting, and financial reporting.
-                    Built specifically for modern healthcare facilities.
+                <p className="text-xl md:text-2xl text-white/40 mb-16 max-w-2xl mx-auto font-medium leading-relaxed tracking-tight">
+                    The next-generation platform for billing, analytics, and hospital growth.
+                    Built for speed. Engineered for precision.
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                     <button
                         onClick={() => navigate('/login')}
-                        className="btn btn-primary px-10 py-4 text-lg rounded-full shadow-xl shadow-slate-200 hover:-translate-y-1 transition-all duration-300"
+                        className="group relative px-12 py-5 bg-gradient-to-r from-primary to-primary/80 text-white font-black uppercase tracking-widest text-lg rounded-[2rem] shadow-[0_20px_50px_rgba(255,0,204,0.3)] hover:-translate-y-1 transition-all duration-500"
                     >
                         Get Started
-                        <ArrowRight className="w-5 h-5" />
                     </button>
-                    <button className="px-10 py-4 text-lg font-medium text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-2 group">
+                    <button className="px-12 py-5 text-lg font-black text-white/60 hover:text-white transition-all flex items-center gap-3 group uppercase tracking-widest">
                         Watch Demo
-                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-slate-200 transition-colors">
-                            <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-slate-900 border-b-[5px] border-b-transparent ml-1" />
+                        <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-all shadow-xl">
+                            <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-1" />
                         </div>
                     </button>
                 </div>
 
                 {/* Main Dashboard Preview (Mockup) */}
-                {/* Main Hero Video (Animated) */}
-                <div className="mt-16 relative mx-auto max-w-sm z-10">
+                <div className="mt-24 relative mx-auto max-w-5xl z-10">
                     <div className="relative animate-float">
-                        <div className="absolute inset-0 bg-primary-500/10 blur-[100px] rounded-full pointer-events-none" />
-                        <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-                            <video
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                className="w-full h-auto"
-                            >
-                                <source src="/hero-video.mp4" type="video/mp4" />
-                                Your browser does not support the video tag.
-                            </video>
+                        <div className="absolute inset-x-0 -top-20 h-64 bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
+                        <div className="relative z-10 rounded-[2.5rem] p-3 bg-white/5 border border-white/10 backdrop-blur-3xl shadow-2xl overflow-hidden">
+                            <div className="rounded-[2rem] overflow-hidden bg-black/40 aspect-[16/9] flex items-center justify-center border border-white/5">
+                                <Activity className="w-20 h-20 text-white/10 animate-pulse" />
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                {/* Stats */}
-
             </section>
 
             {/* Features Section */}
-            <section className="container mx-auto px-6 py-24 relative z-10">
-                <div className="text-center mb-20">
-                    <h3 className="text-3xl md:text-5xl font-serif font-bold mb-6">
-                        Everything You Need in One Platform
+            <section className="container mx-auto px-8 py-32 relative z-10">
+                <div className="text-left mb-24 max-w-4xl">
+                    <h3 className="text-4xl md:text-6xl font-black mb-8 leading-tight tracking-tighter uppercase">
+                        Core <span className="text-white/20">Modules</span>
                     </h3>
-                    <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-                        Comprehensive modules designed to handle all aspects of medical finance management
+                    <p className="text-xl text-white/40 max-w-2xl font-medium tracking-tight">
+                        Powering every department with military-grade precision and liquid-smooth interfaces.
                     </p>
                 </div>
 
@@ -158,115 +151,41 @@ const LandingPage = () => {
                     {features.map((feature, index) => (
                         <div
                             key={index}
-                            className="bg-white p-5 md:p-8 rounded-2xl hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group border border-slate-100"
+                            className="group p-10 rounded-[2rem] bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 transition-all duration-500 shadow-2xl"
                         >
-                            <div className="w-12 h-12 md:w-14 md:h-14 bg-slate-50 rounded-xl flex items-center justify-center mb-4 md:mb-6 text-teal-600 group-hover:scale-110 transition-all duration-300">
+                            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-8 text-primary group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(255,0,204,0.3)] transition-all duration-500">
                                 {feature.icon}
                             </div>
-                            <h4 className="text-xl font-bold mb-3 font-serif text-slate-900">{feature.title}</h4>
-                            <p className="text-slate-600 leading-relaxed">{feature.description}</p>
+                            <h4 className="text-2xl font-black mb-4 uppercase tracking-tight">{feature.title}</h4>
+                            <p className="text-white/40 font-medium leading-relaxed tracking-tight group-hover:text-white/60 transition-colors">
+                                {feature.description}
+                            </p>
                         </div>
                     ))}
                 </div>
             </section>
 
-            {/* Modules Section */}
-            <section className="py-24 relative z-10 overflow-hidden">
-                {/* Background glow */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-accent-600/20 blur-[100px] rounded-full pointer-events-none" />
-
-                <div className="container mx-auto px-6 relative">
-                    <div className="text-center mb-16">
-                        <h3 className="text-3xl md:text-4xl font-serif font-bold mb-4">
-                            10 Powerful Modules
-                        </h3>
-                        <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-                            Integrated modules that work seamlessly together
-                        </p>
-                    </div>
-
-                    <div className="container mx-auto px-6 relative">
-                        <div className="text-center mb-16">
-                            <h3 className="text-3xl md:text-4xl font-serif font-bold mb-4">
-                                Why Choose MEDFINANCE360?
-                            </h3>
-                            <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-                                Designed to modernize healthcare financial operations
-                            </p>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {[
-                                {
-                                    title: 'Real-time Analytics',
-                                    description: 'Track revenue, expenses, and cash flow instantly with live dashboards.',
-                                    icon: <BarChart3 className="w-6 h-6 text-teal-600" />
-                                },
-                                {
-                                    title: 'Bank-Grade Security',
-                                    description: 'Your financial data is protected with enterprise-level encryption and role-based access.',
-                                    icon: <Shield className="w-6 h-6 text-slate-600" />
-                                },
-                                {
-                                    title: 'Automated Billing',
-                                    description: 'Reduce errors and save time with automated invoice generation and claims processing.',
-                                    icon: <Zap className="w-6 h-6 text-teal-500" />
-                                },
-                                {
-                                    title: 'Seamless Integration',
-                                    description: 'Connects effortlessly with existing hospital information systems and banking platforms.',
-                                    icon: <Activity className="w-6 h-6 text-emerald-600" />
-                                },
-                                {
-                                    title: 'Audit Ready',
-                                    description: 'Maintain complete financial transparency with detailed audit trails for every transaction.',
-                                    icon: <FileText className="w-6 h-6 text-rose-600" />
-                                },
-                                {
-                                    title: 'Multi-User Support',
-                                    description: 'Collaborate effectively with tailored roles for admins, accountants, and billing staff.',
-                                    icon: <Users className="w-6 h-6 text-indigo-600" />
-                                }
-                            ].map((benefit, index) => (
-                                <div
-                                    key={index}
-                                    className="bg-white p-6 rounded-2xl border border-slate-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
-                                >
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                                            {benefit.icon}
-                                        </div>
-                                        <div>
-                                            <h4 className="text-lg font-bold mb-2 font-serif text-slate-900">{benefit.title}</h4>
-                                            <p className="text-sm text-slate-600 leading-relaxed">
-                                                {benefit.description}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             {/* CTA Section */}
-            <section className="container mx-auto px-6 py-24 text-center relative z-10">
-                <div className="bg-slate-900 max-w-4xl mx-auto p-12 rounded-3xl relative overflow-hidden shadow-2xl">
-                    <div className="absolute inset-0 bg-gradient-to-br from-teal-500/20 to-transparent pointer-events-none" />
-                    <div className="relative z-10 text-white">
-                        <h3 className="text-4xl md:text-5xl font-serif font-bold mb-6">
-                            Ready to Transform Your Finance?
+            <section className="container mx-auto px-8 py-32 text-center relative z-10">
+                <div className="bg-gradient-to-br from-white/[0.03] to-transparent max-w-6xl mx-auto p-20 rounded-[3rem] relative overflow-hidden border border-white/5 shadow-2xl">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 blur-[100px] rounded-full" />
+                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/10 blur-[100px] rounded-full" />
+
+                    <div className="relative z-10">
+                        <h3 className="text-5xl md:text-7xl font-black mb-10 tracking-tighter uppercase leading-none">
+                            READY TO <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent font-black">
+                                UPGRADE?
+                            </span>
                         </h3>
-                        <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto font-light">
-                            Join healthcare facilities across Zambia using MEDFINANCE360 to streamline operations.
+                        <p className="text-xl text-white/40 mb-16 max-w-xl mx-auto font-medium tracking-tight">
+                            Join the elite healthcare facilities running on the future of medical finance.
                         </p>
                         <button
                             onClick={() => navigate('/login')}
-                            className="btn bg-white text-slate-900 hover:bg-slate-100 btn-lg rounded-full px-10 py-4 text-lg font-bold"
+                            className="group relative px-16 py-6 bg-white text-black font-black uppercase tracking-[0.2em] text-lg rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)]"
                         >
                             Get Started Today
-                            <ArrowRight className="w-5 h-5" />
                         </button>
                     </div>
                 </div>

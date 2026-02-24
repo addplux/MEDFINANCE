@@ -384,9 +384,9 @@ const getCollectionSummary = async (req, res) => {
 // Get outstanding claims aging report
 const getClaimsAging = async (req, res) => {
     try {
-        const { payerType } = req.query; // 'nhima', 'corporate', 'scheme', or undefined for all
+        const { payerType } = req.query; // 'corporate', 'scheme', or undefined for all
 
-        const paymentMethods = payerType ? [payerType] : ['nhima', 'corporate', 'scheme'];
+        const paymentMethods = payerType ? [payerType] : ['corporate', 'scheme'];
 
         // 1. Get all patients who have used these payment methods
         const patients = await Patient.findAll({

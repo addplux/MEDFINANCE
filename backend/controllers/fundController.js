@@ -70,7 +70,6 @@ const createFund = async (req, res) => {
         // Generate fund code
         const fundCount = await Fund.count({ where: { fundType } });
         const typePrefix = {
-            'nhima': 'NHI',
             'donor': 'DNR',
             'retention': 'RET',
             'general': 'GEN'

@@ -27,7 +27,7 @@ const getAllServices = async (req, res) => {
 // Create service
 const createService = async (req, res) => {
     try {
-        const { serviceName, category, department, price, cashPrice, nhimaPrice, corporatePrice, schemePrice, staffPrice, description } = req.body;
+        const { serviceName, category, department, price, cashPrice, corporatePrice, schemePrice, staffPrice, description } = req.body;
 
         if (!serviceName || !category || price === undefined || price === null) {
             return res.status(400).json({ error: 'Service name, category, and price are required' });
@@ -67,7 +67,6 @@ const createService = async (req, res) => {
             department,
             price,
             cashPrice: cashPrice || price,
-            nhimaPrice: nhimaPrice || price,
             corporatePrice: corporatePrice || price,
             schemePrice: schemePrice || price,
             staffPrice: staffPrice || price,

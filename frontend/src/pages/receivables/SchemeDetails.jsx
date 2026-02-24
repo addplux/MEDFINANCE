@@ -232,7 +232,6 @@ const SchemeDetails = () => {
                                                 <td className="px-4 py-3 text-gray-600 font-mono text-xs">{bill.patient?.patientNumber}</td>
                                                 <td className="px-4 py-3 text-gray-900 font-medium">
                                                     {bill.patient?.firstName} {bill.patient?.lastName}
-                                                    <div className="text-[10px] text-gray-400 sm:hidden">{bill.patient?.nhimaNumber}</div>
                                                 </td>
                                                 <td className="px-4 py-3 text-gray-500 capitalize">{bill.patient?.gender}</td>
                                                 <td className="px-4 py-3 text-gray-600">

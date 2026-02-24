@@ -4,7 +4,7 @@ const { Patient, OPDBill, PharmacyBill, LabBill, RadiologyBill,
 /**
  * Recalculates and updates the balance for a specific patient.
  *
- * For STANDARD patients (cash, nhima, corporate, etc.):
+ * For STANDARD patients (cash, corporate, etc.):
  *   balance = totalBilled - totalPaid  (outstanding debt)
  *
  * For PRIVATE PREPAID patients:

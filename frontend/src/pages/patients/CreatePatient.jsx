@@ -14,7 +14,6 @@ const CreatePatient = () => {
         phone: '',
         email: '',
         address: '',
-        nhimaNumber: '',
         paymentMethod: 'cash',
         costCategory: 'standard',
         staffId: '',
@@ -388,7 +387,6 @@ const CreatePatient = () => {
                             required
                         >
                             <option value="cash">Cash</option>
-                            <option value="nhima">NHIMA</option>
                             <option value="corporate">Corporate</option>
                             <option value="private_prepaid">Private Prepaid</option>
                             <option value="staff">Staff</option>
@@ -417,7 +415,7 @@ const CreatePatient = () => {
                     )}
 
                     {/* Specific Scheme selection */}
-                    {(['corporate', 'private_prepaid', 'nhima', 'scheme'].includes(formData.paymentMethod)) && (
+                    {(['corporate', 'private_prepaid', 'scheme'].includes(formData.paymentMethod)) && (
                         <div className="form-group">
                             <label className="form-label">Specific Scheme</label>
                             <select
@@ -455,19 +453,6 @@ const CreatePatient = () => {
                         </div>
                     )}
 
-                    {/* NHIMA Number-Only show if billing type is NHIMA */}
-                    {formData.paymentMethod === 'nhima' && (
-                        <div className="form-group">
-                            <label className="form-label">NHIMA Number *</label>
-                            <input
-                                type="text"
-                                value={formData.nhimaNumber}
-                                onChange={(e) => setFormData({ ...formData, nhimaNumber: e.target.value })}
-                                className="form-input"
-                                required
-                            />
-                        </div>
-                    )}
 
                     {/* Address */}
                     <div className="form-group md:col-span-2">

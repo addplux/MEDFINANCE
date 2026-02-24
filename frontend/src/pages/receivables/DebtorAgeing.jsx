@@ -5,7 +5,7 @@ import { Download, Filter } from 'lucide-react';
 const DebtorAgeing = () => {
     const [loading, setLoading] = useState(true);
     const [reportData, setReportData] = useState([]);
-    const [filter, setFilter] = useState('all'); // all, corporate, scheme, nhima
+    const [filter, setFilter] = useState('all'); // all, corporate, scheme
 
     useEffect(() => {
         fetchReport();
@@ -28,7 +28,6 @@ const DebtorAgeing = () => {
                 { id: 1, name: 'Copperbelt Energy Corp', type: 'Corporate', current: 5000, days30: 2000, days60: 0, days90: 0, total: 7000 },
                 { id: 2, name: 'Mopani Copper Mines', type: 'Corporate', current: 12000, days30: 5000, days60: 2000, days90: 1000, total: 20000 },
                 { id: 3, name: 'Madison Insurance', type: 'Scheme', current: 1500, days30: 0, days60: 0, days90: 0, total: 1500 },
-                { id: 4, name: 'NHIMA', type: 'Insurance', current: 25000, days30: 15000, days60: 10000, days90: 5000, total: 55000 },
             ]);
         } finally {
             setLoading(false);
@@ -54,13 +53,13 @@ const DebtorAgeing = () => {
 
             {/* Filters */}
             <div className="flex gap-2">
-                {['all', 'corporate', 'scheme', 'insurance'].map(f => (
+                {['all', 'corporate', 'scheme'].map(f => (
                     <button
                         key={f}
                         onClick={() => setFilter(f)}
                         className={`px-4 py-2 rounded-full text-sm font-medium capitalize transition-colors ${filter === f
-                                ? 'bg-primary-600 text-white'
-                                : 'bg-bg-tertiary text-text-secondary hover:bg-gray-200'
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-bg-tertiary text-text-secondary hover:bg-gray-200'
                             }`}
                     >
                         {f}

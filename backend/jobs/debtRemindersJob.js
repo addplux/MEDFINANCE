@@ -15,7 +15,7 @@ const checkAndSendReminders = async () => {
 
     try {
         // 1. Get all patients who might have balances (we only target external payers and patients)
-        const paymentMethods = ['nhima', 'corporate', 'scheme', 'cash'];
+        const paymentMethods = ['corporate', 'scheme', 'cash'];
         const patients = await Patient.findAll({
             where: {
                 paymentMethod: {

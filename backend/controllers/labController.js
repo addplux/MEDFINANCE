@@ -147,9 +147,9 @@ const createRequest = async (req, res) => {
         );
         await Promise.all(resultPromises);
 
-        // Create LabBill records if the patient is on a scheme (corporate, scheme, nhima)
+        // Create LabBill records if the patient is on a scheme (corporate, scheme)
         // This allows these bills to be picked up by the receivables invoicing module
-        const schemeTypes = ['corporate', 'scheme', 'nhima'];
+        const schemeTypes = ['corporate', 'scheme'];
         if (schemeTypes.includes(patient.paymentMethod)) {
             const billPromises = tests.map(async (test) => {
                 const billCount = await LabBill.count({ transaction: t });

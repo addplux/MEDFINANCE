@@ -43,11 +43,6 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.TEXT,
         allowNull: true
     },
-    nhimaNumber: {
-        type: DataTypes.STRING(50),
-        allowNull: true,
-        unique: true
-    },
     photoUrl: {
         type: DataTypes.STRING(255),
         allowNull: true
@@ -70,7 +65,7 @@ const Patient = sequelize.define('Patient', {
         defaultValue: 'opd'
     },
     paymentMethod: {
-        type: DataTypes.ENUM('cash', 'nhima', 'corporate', 'scheme', 'staff', 'exempted', 'private_prepaid', 'emergency', 'foc'),
+        type: DataTypes.ENUM('cash', 'corporate', 'scheme', 'staff', 'exempted', 'private_prepaid', 'emergency', 'foc'),
         allowNull: false,
         defaultValue: 'cash'
     },

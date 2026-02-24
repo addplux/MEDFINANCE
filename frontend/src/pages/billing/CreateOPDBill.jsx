@@ -45,7 +45,6 @@ const CreateOPDBill = () => {
         if (patient && service) {
             const tier = patient.paymentMethod;
             if (tier === 'cash' && service.cashPrice > 0) price = service.cashPrice;
-            else if (tier === 'nhima' && service.nhimaPrice > 0) price = service.nhimaPrice;
             else if (tier === 'corporate' && service.corporatePrice > 0) price = service.corporatePrice;
             else if (tier === 'scheme' && service.schemePrice > 0) price = service.schemePrice;
             else if (tier === 'staff' && service.staffPrice > 0) price = service.staffPrice;

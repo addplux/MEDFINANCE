@@ -8,42 +8,54 @@ export default {
         extend: {
             colors: {
                 primary: {
-                    50: '#f8fafc',
-                    100: '#f1f5f9',
-                    200: '#e2e8f0',
-                    300: '#cbd5e1',
-                    400: '#94a3b8',
-                    500: '#64748b',
-                    600: '#475569',
-                    700: '#334155',
-                    800: '#1e293b',
-                    900: '#0f172a',
+                    DEFAULT: '#FF00CC', // Vibrant Pink
+                    50: '#ffe5f9',
+                    100: '#ffccf3',
+                    200: '#ff99e7',
+                    300: '#ff66db',
+                    400: '#ff33cf',
+                    500: '#FF00CC',
+                    600: '#cc00a3',
+                    700: '#99007a',
+                    800: '#660052',
+                    900: '#330029',
                 },
                 accent: {
-                    50: '#f0fdfa',
-                    100: '#ccfbf1',
-                    200: '#99f6e4',
-                    300: '#5eead4',
-                    400: '#2dd4bf',
-                    500: '#14b8a6',
-                    600: '#0d9488',
-                    700: '#0f766e',
-                    800: '#115e59',
-                    900: '#134e4a',
+                    DEFAULT: '#00EAFF', // Electric Cyan
+                    50: '#e5fdff',
+                    100: '#ccfaff',
+                    200: '#99f5ff',
+                    300: '#66f0ff',
+                    400: '#33ebff',
+                    500: '#00EAFF',
+                    600: '#00bbcc',
+                    700: '#008c99',
+                    800: '#005e66',
+                    900: '#002f33',
+                },
+                highlight: {
+                    DEFAULT: '#FF9500', // Vivid Orange
+                    50: '#fff4e5',
+                    100: '#ffe9cc',
+                    200: '#ffd399',
+                    300: '#ffbd66',
+                    400: '#ffa733',
+                    500: '#FF9500',
                 },
                 bg: {
-                    primary: '#ffffff',
-                    secondary: '#f8fafc',
-                    tertiary: '#f1f5f9',
+                    primary: '#080808', // Deep Black
+                    secondary: '#121212', // Dark Charcoal
+                    tertiary: '#1A1A1A', // Slate Gray
+                    elevated: '#242424',
                 },
                 text: {
-                    primary: '#0f172a',
-                    secondary: '#475569',
-                    tertiary: '#94a3b8',
+                    primary: '#FFFFFF',
+                    secondary: '#A1A1A1',
+                    tertiary: '#717171',
                 },
                 border: {
-                    color: '#e2e8f0',
-                    hover: '#cbd5e1',
+                    color: '#2A2A2A',
+                    hover: '#3A3A3A',
                 }
             },
             fontFamily: {

@@ -33,20 +33,7 @@ import CreateVisit from './pages/visits/CreateVisit';
 import VisitDetail from './pages/visits/VisitDetail';
 
 // Receivables
-import ReceivablesNHIMAClaims from './pages/receivables/NHIMAClaims';
 
-// NHIMA
-import EligibilityCheck from './pages/nhima/EligibilityCheck';
-import ClaimsVetting from './pages/nhima/ClaimsVetting';
-import NHIMAClaimsSubmission from './pages/nhima/ClaimsSubmission';
-import ClaimsTracking from './pages/nhima/ClaimsTracking';
-import Reconciliation from './pages/nhima/Reconciliation';
-
-// Scheme Manager - NHIMA
-import Tariffs from './pages/nhima/Tariffs';
-import ClaimGeneration from './pages/nhima/ClaimGeneration';
-import VettingStatus from './pages/nhima/VettingStatus';
-import BatchSubmission from './pages/nhima/BatchSubmission';
 
 // Scheme Manager - Private Prepaid
 import MembershipRegistration from './pages/schemes/private/MembershipRegistration';
@@ -201,17 +188,6 @@ function App() {
                         <Route path="visits" element={<Visits />} />
                         <Route path="visits/new" element={<CreateVisit />} />
                         <Route path="visits/:id" element={<VisitDetail />} />
-                        <Route path="nhima/eligibility" element={<EligibilityCheck />} />
-                        <Route path="nhima/vetting" element={<ClaimsVetting />} />
-                        <Route path="nhima/submission" element={<NHIMAClaimsSubmission />} />
-                        <Route path="nhima/tracking" element={<ClaimsTracking />} />
-                        <Route path="nhima/reconciliation" element={<Reconciliation />} />
-
-                        {/* Scheme Manager - NHIMA */}
-                        <Route path="nhima/tariffs" element={<Tariffs />} />
-                        <Route path="nhima/claims" element={<ClaimGeneration />} />
-                        <Route path="nhima/vetting-status" element={<VettingStatus />} />
-                        <Route path="nhima/batches" element={<BatchSubmission />} />
 
                         {/* Scheme Manager - Private Prepaid */}
                         <Route path="schemes/private/members" element={<MembershipRegistration />} />
@@ -226,7 +202,6 @@ function App() {
                         <Route path="schemes/corporate/terms" element={<PaymentTerms />} />
                         <Route path="schemes/corporate/billing" element={<MonthlyBilling />} />
 
-                        <Route path="receivables/nhima" element={<ReceivablesNHIMAClaims />} />
                         <Route path="receivables/corporate" element={<CorporateAccounts />} />
                         <Route path="receivables/corporate/new" element={<CorporateAccountForm />} />
                         <Route path="receivables/corporate/:id/edit" element={<CorporateAccountForm />} />

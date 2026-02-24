@@ -1,109 +1,8 @@
 const xlsx = require('xlsx');
-const { NHIMAClaim, CorporateAccount, Scheme, SchemeInvoice, Patient, User, OPDBill, PharmacyBill, LabBill, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill, Service, Payment, sequelize } = require('../models');
+const { CorporateAccount, Scheme, SchemeInvoice, Patient, User, OPDBill, PharmacyBill, LabBill, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill, Service, Payment, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const { postSchemeInvoice } = require('../utils/glPoster');
 
-// ========== NHIMA Claims ==========
-
-// Get all NHIMA claims
-const getAllNHIMAClaims = async (req, res) => {
-    try {
-        const { page = 1, limit = 20, status } = req.query;
-        const offset = (page - 1) * limit;
-
-        const where = {};
-        if (status) where.status = status;
-
-        const { count, rows } = await NHIMAClaim.findAndCountAll({
-            where,
-            limit: parseInt(limit),
-            offset: parseInt(offset),
-            order: [['createdAt', 'DESC']],
-            include: [
-                { association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber', 'nhimaNumber'] },
-                { association: 'creator', attributes: ['id', 'firstName', 'lastName'] }
-            ]
-        });
-
-        res.json({
-            total: count,
-            page: parseInt(page),
-            totalPages: Math.ceil(count / limit),
-            data: rows
-        });
-    } catch (error) {
-        console.error('Get NHIMA claims error:', error);
-        res.status(500).json({ error: 'Failed to get NHIMA claims' });
-    }
-};
-
-// Create NHIMA claim
-const createNHIMAClaim = async (req, res) => {
-    try {
-        const { patientId, claimAmount, submissionDate, notes } = req.body;
-
-        if (!patientId || !claimAmount) {
-            return res.status(400).json({ error: 'Patient and claim amount are required' });
-        }
-
-        // Get patient to verify NHIMA number
-        const patient = await Patient.findByPk(patientId);
-        if (!patient || !patient.nhimaNumber) {
-            return res.status(400).json({ error: 'Patient must have a valid NHIMA number' });
-        }
-
-        // Generate claim number
-        const claimCount = await NHIMAClaim.count();
-        const claimNumber = `NHIMA${String(claimCount + 1).padStart(6, '0')}`;
-
-        const claim = await NHIMAClaim.create({
-            claimNumber,
-            patientId,
-            nhimaNumber: patient.nhimaNumber,
-            claimAmount,
-            submissionDate: submissionDate || new Date(),
-            notes,
-            createdBy: req.user.id
-        });
-
-        const createdClaim = await NHIMAClaim.findByPk(claim.id, {
-            include: [
-                { association: 'patient' },
-                { association: 'creator', attributes: ['id', 'firstName', 'lastName'] }
-            ]
-        });
-
-        res.status(201).json(createdClaim);
-    } catch (error) {
-        console.error('Create NHIMA claim error:', error);
-        res.status(500).json({ error: 'Failed to create NHIMA claim' });
-    }
-};
-
-// Update NHIMA claim
-const updateNHIMAClaim = async (req, res) => {
-    try {
-        const claim = await NHIMAClaim.findByPk(req.params.id);
-
-        if (!claim) {
-            return res.status(404).json({ error: 'NHIMA claim not found' });
-        }
-
-        await claim.update(req.body);
-
-        const updatedClaim = await NHIMAClaim.findByPk(claim.id, {
-            include: [
-                { association: 'patient' },
-                { association: 'creator', attributes: ['id', 'firstName', 'lastName'] }
-            ]
-        });
-
-        res.json(updatedClaim);
-    } catch (error) {
-        console.error('Update NHIMA claim error:', error);
-        res.status(500).json({ error: 'Failed to update NHIMA claim' });
-    }
-};
 
 // ========== Corporate Accounts ==========
 
@@ -280,7 +179,7 @@ const getSchemeStatement = async (req, res) => {
                     model: Patient,
                     as: 'patient',
                     where: { schemeId: id }, // Only bills for patients in this scheme
-                    attributes: ['id', 'firstName', 'lastName', 'patientNumber', 'gender', 'nhimaNumber']
+                    attributes: ['id', 'firstName', 'lastName', 'patientNumber', 'gender']
                 },
                 {
                     model: Service,
@@ -1039,9 +938,6 @@ const updateMemberStatus = async (req, res) => {
 };
 
 module.exports = {
-    getAllNHIMAClaims,
-    createNHIMAClaim,
-    updateNHIMAClaim,
     getAllCorporateAccounts,
     createCorporateAccount,
     getAllSchemes,

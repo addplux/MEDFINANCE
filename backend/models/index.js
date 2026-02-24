@@ -10,8 +10,6 @@ const IPDBill = require('./IPDBill');
 const PharmacyBill = require('./PharmacyBill');
 const LabBill = require('./LabBill');
 const RadiologyBill = require('./RadiologyBill');
-const NHIMAClaim = require('./NHIMAClaim');
-const ClaimBatch = require('./ClaimBatch');
 const CorporateAccount = require('./CorporateAccount');
 const Scheme = require('./Scheme');
 const SchemeInvoice = require('./SchemeInvoice');
@@ -90,7 +88,6 @@ Patient.hasMany(RadiologyBill, { foreignKey: 'patientId', as: 'radiologyBills' }
 Patient.hasMany(TheatreBill, { foreignKey: 'patientId', as: 'theatreBills' });
 Patient.hasMany(MaternityBill, { foreignKey: 'patientId', as: 'maternityBills' });
 Patient.hasMany(SpecialistClinicBill, { foreignKey: 'patientId', as: 'specialistClinicBills' });
-Patient.hasMany(NHIMAClaim, { foreignKey: 'patientId', as: 'nhimaClaims' });
 Patient.hasMany(Payment, { foreignKey: 'patientId', as: 'payments' });
 Patient.hasMany(ARReminderLog, { foreignKey: 'patientId', as: 'arReminderLogs' });
 ARReminderLog.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
@@ -125,13 +122,6 @@ MaternityBill.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 
 SpecialistClinicBill.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 
-// NHIMA Claims
-
-NHIMAClaim.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
-NHIMAClaim.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
-NHIMAClaim.belongsTo(ClaimBatch, { foreignKey: 'batchId', as: 'batch' });
-ClaimBatch.hasMany(NHIMAClaim, { foreignKey: 'batchId', as: 'claims' });
-ClaimBatch.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 
 // Supplier and Invoice relationships
 Supplier.hasMany(Invoice, { foreignKey: 'supplierId', as: 'invoices' });
@@ -251,8 +241,6 @@ module.exports = {
     PharmacyBill,
     LabBill,
     RadiologyBill,
-    NHIMAClaim,
-    ClaimBatch,
     CorporateAccount,
     Scheme,
     SchemeInvoice,
