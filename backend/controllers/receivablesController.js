@@ -765,7 +765,7 @@ const importSchemeMembers = async (req, res) => {
         const importUserId = req.user?.id || 1;
 
         // Resolve a default service for OPD import bills
-        let defaultService = await Service.findOne({ where: { status: 'active' } });
+        let defaultService = await Service.findOne({ where: { isActive: true } });
         const defaultServiceId = defaultService ? defaultService.id : null;
 
         let addedCount = 0;
