@@ -764,9 +764,36 @@ const importSchemeMembers = async (req, res) => {
         // Resolve import user id (for createdBy FK)
         const importUserId = req.user?.id || 1;
 
-        // Resolve a default service for OPD import bills
-        let defaultService = await Service.findOne({ where: { isActive: true } });
-        const defaultServiceId = defaultService ? defaultService.id : null;
+        // ── SERVICE AUTO-DETECTION MAP ──
+        // Load all active services once, then match each billing category
+        // to its specific service by scanning name/category keywords.
+        const allActiveServices = await Service.findAll({ where: { isActive: true } });
+
+        const matchService = (...keywords) => {
+            const kw = keywords.map(k => k.toLowerCase());
+            return allActiveServices.find(s => {
+                const name = (s.serviceName || '').toLowerCase();
+                const cat = (s.category || '').toLowerCase();
+                return kw.some(k => name.includes(k) || cat.includes(k));
+            }) || null;
+        };
+
+        const serviceMap = {
+            consultation: matchService('consult', 'opd', 'outpatient'),
+            nursing: matchService('nurs', 'nursing'),
+            dental: matchService('dental'),
+            lodging: matchService('lodg', 'accommodat', 'bed', 'ward'),
+            surgicals: matchService('surg', 'theatre', 'theater', 'operat'),
+            drRound: matchService('doctor', 'dr round', 'round', 'physician'),
+            food: matchService('food', 'diet', 'meal'),
+            physio: matchService('physio'),
+            pharmacy: matchService('pharm', 'drug', 'medicine', 'dispensary'),
+            sundries: matchService('sundry', 'sundries', 'misc', 'dressing'),
+            antenatal: matchService('antenatal', 'maternal', 'ante natal', 'postnatal'),
+        };
+
+        // Fallback: if a category has no matched service, use any active OPD service
+        const fallbackService = matchService('opd', 'outpatient', 'general') || allActiveServices[0] || null;
 
         let addedCount = 0;
         let updatedCount = 0;
@@ -939,35 +966,57 @@ const importSchemeMembers = async (req, res) => {
                     }
                 }
 
-                // 3. OPD Bill — covers nursing, consultation, lodging, dental, surgicals,
-                //    drRound, food, physio, pharmacy, sundries, antenatal
-                const opdAmount = nursingCare + consultation + dental + lodging + surgicals +
-                    drRound + food + physio + pharmacy + sundries + antenatal;
-                if (opdAmount > 0 && defaultServiceId) {
-                    const opdBillNum = `${billBase}-OPD`;
-                    const [opdBill] = await OPDBill.findOrCreate({
-                        where: { billNumber: opdBillNum },
+                // 3. Per-Service OPD Bills — auto-detect each category's matching service
+                // Each non-zero billing category becomes its own OPDBill linked to the
+                // specific service, enabling real per-service tracking in corporate statements.
+                const opdCategories = [
+                    { key: 'consultation', amount: consultation, suffix: 'CONSULT', label: 'Consultation' },
+                    { key: 'nursing', amount: nursingCare, suffix: 'NURSING', label: 'Nursing Care' },
+                    { key: 'dental', amount: dental, suffix: 'DENTAL', label: 'Dental' },
+                    { key: 'lodging', amount: lodging, suffix: 'LODGING', label: 'Lodging/Ward' },
+                    { key: 'surgicals', amount: surgicals, suffix: 'SURG', label: 'Surgicals/Theatre' },
+                    { key: 'drRound', amount: drRound, suffix: 'DRROUND', label: "Doctor's Round" },
+                    { key: 'food', amount: food, suffix: 'FOOD', label: 'Food/Diet' },
+                    { key: 'physio', amount: physio, suffix: 'PHYSIO', label: 'Physiotherapy' },
+                    { key: 'pharmacy', amount: pharmacy, suffix: 'PHARM', label: 'Pharmacy' },
+                    { key: 'sundries', amount: sundries, suffix: 'SUNDRY', label: 'Sundries/Dressing' },
+                    { key: 'antenatal', amount: antenatal, suffix: 'ANT', label: 'Antenatal Care' },
+                ];
+
+                for (const cat of opdCategories) {
+                    if (cat.amount <= 0) continue;
+                    const svc = serviceMap[cat.key] || fallbackService;
+                    if (!svc) continue; // Skip if no service at all in the system
+
+                    const catBillNum = `${billBase}-${cat.suffix}`;
+                    const [catBill] = await OPDBill.findOrCreate({
+                        where: { billNumber: catBillNum },
                         defaults: {
-                            billNumber: opdBillNum,
+                            billNumber: catBillNum,
                             patientId: savedPatient.id,
-                            serviceId: defaultServiceId,
+                            serviceId: svc.id,
                             quantity: 1,
-                            unitPrice: opdAmount,
-                            totalAmount: opdAmount,
-                            netAmount: opdAmount,
+                            unitPrice: cat.amount,
+                            totalAmount: cat.amount,
+                            netAmount: cat.amount,
                             billDate,
                             status: 'pending',
                             paymentStatus: 'claimed',
                             paymentMethod: 'credit',
-                            notes: `Scheme import: nursing=${nursingCare}, consult=${consultation}, dental=${dental}, lodge=${lodging}, surg=${surgicals}, drRound=${drRound}, food=${food}, physio=${physio}, pharmacy=${pharmacy}, sundries=${sundries}, antenatal=${antenatal}`,
+                            notes: `Scheme import — ${cat.label} for ${firstName} ${lastName} (${policyNumber})`,
                             createdBy: importUserId
                         },
                         transaction: t
                     });
                     if (!isNew) {
-                        await opdBill.update({ unitPrice: opdAmount, totalAmount: opdAmount, netAmount: opdAmount, patientId: savedPatient.id }, { transaction: t });
+                        await catBill.update({
+                            unitPrice: cat.amount, totalAmount: cat.amount,
+                            netAmount: cat.amount, patientId: savedPatient.id,
+                            serviceId: svc.id
+                        }, { transaction: t });
                     }
                 }
+
 
                 await t.commit();
 
