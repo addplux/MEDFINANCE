@@ -1,4 +1,4 @@
-const { LabTest, LabRequest, LabResult, Patient, User, PrepaidPlan } = require('../models');
+const { LabTest, LabRequest, LabResult, Patient, User, PrepaidPlan, LabBill } = require('../models');
 const { Op, Sequelize } = require('sequelize');
 const { sequelize } = require('../config/database');
 
@@ -146,6 +146,29 @@ const createRequest = async (req, res) => {
             }, { transaction: t })
         );
         await Promise.all(resultPromises);
+
+        // Create LabBill records if the patient is on a scheme (corporate, scheme, nhima)
+        // This allows these bills to be picked up by the receivables invoicing module
+        const schemeTypes = ['corporate', 'scheme', 'nhima'];
+        if (schemeTypes.includes(patient.paymentMethod)) {
+            const billPromises = tests.map(async (test) => {
+                const billCount = await LabBill.count({ transaction: t });
+                const billNumber = `LB${String(billCount + 1).padStart(6, '0')}-${Math.floor(Math.random() * 1000)}`;
+
+                return LabBill.create({
+                    billNumber,
+                    patientId,
+                    testName: test.name,
+                    testCode: test.code,
+                    amount: test.price,
+                    netAmount: test.price,
+                    status: 'pending',
+                    paymentStatus: 'unpaid',
+                    createdBy: req.user.id
+                }, { transaction: t });
+            });
+            await Promise.all(billPromises);
+        }
 
         await t.commit();
 
