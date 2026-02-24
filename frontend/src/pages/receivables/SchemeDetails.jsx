@@ -64,48 +64,48 @@ const SchemeDetails = () => {
     }
 
     return (
-        <div className="min-h-screen flex flex-col bg-gray-50/50 overflow-x-auto">
+        <div className="min-h-screen flex flex-col bg-bg-primary overflow-x-auto text-white">
             {/* Header */}
-            <div className="flex-shrink-0 print:hidden bg-white border-b border-gray-200 px-4 md:px-6 py-4 mb-4">
+            <div className="flex-shrink-0 print:hidden bg-black/40 backdrop-blur-xl border-b border-white/5 px-4 md:px-6 py-4 mb-4">
                 <div className="flex flex-wrap items-center justify-between gap-4 w-full">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => navigate('/app/receivables/schemes')}
-                            className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"
+                            className="p-2 hover:bg-white/5 rounded-full transition-colors text-white/40 hover:text-white"
                         >
                             <ArrowLeft className="w-5 h-5" />
                         </button>
                         <div>
                             {scheme ? (
                                 <>
-                                    <h1 className="text-xl font-bold text-gray-900 font-sans tracking-tight">{scheme.schemeName}</h1>
-                                    <p className="text-sm text-gray-500 font-medium">Scheme Code: {scheme.schemeCode}</p>
+                                    <h1 className="text-xl font-black text-white font-sans tracking-tight uppercase">{scheme.schemeName}</h1>
+                                    <p className="text-[10px] text-white/40 font-black uppercase tracking-[0.2em]">Scheme Code: {scheme.schemeCode}</p>
                                 </>
                             ) : (
-                                <div className="animate-pulse h-8 w-48 bg-gray-200 rounded"></div>
+                                <div className="animate-pulse h-8 w-48 bg-white/5 rounded-xl"></div>
                             )}
                         </div>
                     </div>
 
                     {/* Tabs (Suno Style - Text with Underline) */}
-                    <div className="flex gap-6 border-b border-transparent">
+                    <div className="flex gap-6 border-b border-white/5">
                         <button
                             onClick={() => setActiveTab('statement')}
-                            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'statement' ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-800'
+                            className={`pb-2 text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${activeTab === 'statement' ? 'border-primary text-primary shadow-[0_10px_20px_rgba(255,0,204,0.1)]' : 'border-transparent text-white/40 hover:text-white'
                                 }`}
                         >
                             Statement
                         </button>
                         <button
                             onClick={() => setActiveTab('members')}
-                            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'members' ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-800'
+                            className={`pb-2 text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${activeTab === 'members' ? 'border-primary text-primary shadow-[0_10px_20px_rgba(255,0,204,0.1)]' : 'border-transparent text-white/40 hover:text-white'
                                 }`}
                         >
                             Members
                         </button>
                         <button
                             onClick={() => setActiveTab('invoices')}
-                            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'invoices' ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-800'
+                            className={`pb-2 text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${activeTab === 'invoices' ? 'border-primary text-primary shadow-[0_10px_20px_rgba(255,0,204,0.1)]' : 'border-transparent text-white/40 hover:text-white'
                                 }`}
                         >
                             Invoices
@@ -116,28 +116,28 @@ const SchemeDetails = () => {
                     {activeTab === 'statement' && (
                         <div className="flex flex-wrap items-center gap-3">
                             {/* Date Picker Pill */}
-                            <div className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200">
+                            <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 shadow-inner group hover:bg-white/10 transition-all">
                                 <input
                                     type="date"
                                     name="startDate"
                                     value={dateRange.startDate}
                                     onChange={handleDateChange}
-                                    className="bg-transparent border-none text-xs font-medium focus:ring-0 text-gray-700 p-0 w-24"
+                                    className="bg-transparent border-none text-[10px] font-black uppercase tracking-tighter focus:ring-0 text-white/60 p-0 w-24 cursor-pointer"
                                 />
-                                <span className="text-gray-400">-</span>
+                                <span className="text-white/20 font-black">-</span>
                                 <input
                                     type="date"
                                     name="endDate"
                                     value={dateRange.endDate}
                                     onChange={handleDateChange}
-                                    className="bg-transparent border-none text-xs font-medium focus:ring-0 text-gray-700 p-0 w-24"
+                                    className="bg-transparent border-none text-[10px] font-black uppercase tracking-tighter focus:ring-0 text-white/60 p-0 w-24 cursor-pointer"
                                 />
 
-                                <div className="h-4 w-px bg-gray-300 mx-2" />
+                                <div className="h-4 w-px bg-white/10 mx-2" />
 
                                 <button
                                     onClick={fetchStatement}
-                                    className="text-gray-500 hover:text-gray-900 transition-colors"
+                                    className="text-white/40 hover:text-primary transition-all p-1"
                                     title="Refresh"
                                 >
                                     <Calendar className="w-4 h-4" />
@@ -147,7 +147,7 @@ const SchemeDetails = () => {
                             {/* Print Button (Pill Style) */}
                             <button
                                 onClick={handlePrint}
-                                className="flex items-center gap-1.5 px-4 py-1.5 bg-gray-900 hover:bg-black text-white rounded-full text-xs font-bold transition-colors shadow-sm"
+                                className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-primary to-primary/80 hover:scale-105 active:scale-95 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(255,0,204,0.3)]"
                                 title="Print Statement"
                             >
                                 <Printer className="w-3.5 h-3.5" />
@@ -164,20 +164,20 @@ const SchemeDetails = () => {
                 {/* Opening Balances Summary (If available) - Fixed at top of content if present */}
                 <div className="flex-shrink-0">
                     {scheme && scheme.openingBalances && scheme.openingBalances.total > 0 && (
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6 print:hidden">
-                            <h2 className="text-lg font-bold text-gray-800 mb-4">Opening Balance Breakdown</h2>
+                        <div className="bg-white/[0.02] rounded-[2.5rem] shadow-2xl border border-white/5 p-8 mb-8 print:hidden backdrop-blur-md">
+                            <h2 className="text-xl font-black text-white mb-6 uppercase tracking-tighter">Opening Balance Breakdown</h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 {Object.entries(scheme.openingBalances).map(([key, value]) => (
                                     key !== 'total' && value > 0 && (
-                                        <div key={key} className="bg-gray-50 p-3 rounded-md border border-gray-100">
-                                            <p className="text-xs text-gray-500 uppercase font-semibold">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
-                                            <p className="text-lg font-bold text-gray-900">{Number(value).toLocaleString()}</p>
+                                        <div key={key} className="bg-white/5 p-4 rounded-2xl border border-white/10 shadow-inner group hover:bg-white/10 transition-all">
+                                            <p className="text-[10px] text-white/40 uppercase font-black tracking-widest mb-1">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
+                                            <p className="text-xl font-black text-white tabular-nums">{Number(value).toLocaleString()}</p>
                                         </div>
                                     )
                                 ))}
-                                <div className="bg-primary-50 p-3 rounded-md border border-primary-100 col-span-2 md:col-span-1">
-                                    <p className="text-xs text-primary-600 uppercase font-semibold">Total Balance</p>
-                                    <p className="text-xl font-bold text-primary-700">{Number(scheme.openingBalances.total).toLocaleString()}</p>
+                                <div className="bg-primary/10 p-4 rounded-2xl border border-primary/20 col-span-2 md:col-span-1 shadow-[0_0_20px_rgba(255,0,204,0.1)]">
+                                    <p className="text-[10px] text-primary uppercase font-black tracking-widest mb-1">Total Balance</p>
+                                    <p className="text-2xl font-black text-primary tabular-nums">{Number(scheme.openingBalances.total).toLocaleString()}</p>
                                 </div>
                             </div>
                         </div>
@@ -185,40 +185,40 @@ const SchemeDetails = () => {
                 </div>
 
                 {activeTab === 'statement' ? (
-                    <div className="flex-1 flex flex-col min-h-0 bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden print:shadow-none print:border-none print:p-4" ref={componentRef}>
+                    <div className="flex-1 flex flex-col min-h-0 bg-white/[0.01] shadow-2xl border border-white/5 rounded-[3rem] overflow-hidden print:shadow-none print:border-none print:p-4 backdrop-blur-sm" ref={componentRef}>
 
                         {/* Statement Header - Fixed */}
-                        <div className="flex-shrink-0 flex justify-between items-start p-8 pb-4 border-b border-gray-100">
+                        <div className="flex-shrink-0 flex justify-between items-start p-10 pb-6 border-b border-white/5 bg-white/[0.02]">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-1">SCHEME BILLING STATEMENT</h2>
-                                <p className="text-gray-500 text-sm">Statement Period: {new Date(dateRange.startDate).toLocaleDateString()} to {new Date(dateRange.endDate).toLocaleDateString()}</p>
+                                <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter">SCHEME BILLING STATEMENT</h2>
+                                <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Statement Period: {new Date(dateRange.startDate).toLocaleDateString()} to {new Date(dateRange.endDate).toLocaleDateString()}</p>
                             </div>
                             {scheme && (
                                 <div className="text-right">
-                                    <h3 className="text-lg font-bold text-primary-700">{scheme.schemeName}</h3>
-                                    <p className="text-gray-600 text-sm">Code: {scheme.schemeCode}</p>
-                                    <p className="text-gray-600 text-sm capitalize">{scheme.schemeType} Scheme</p>
-                                    {scheme.contactPerson && <p className="text-gray-500 text-xs mt-1">Attn: {scheme.contactPerson}</p>}
+                                    <h3 className="text-xl font-black text-primary uppercase tracking-tighter">{scheme.schemeName}</h3>
+                                    <p className="text-white/60 text-xs font-bold tracking-tight">Code: {scheme.schemeCode}</p>
+                                    <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.2em] mt-1">{scheme.schemeType} Scheme</p>
+                                    {scheme.contactPerson && <p className="text-white/30 text-[10px] font-bold mt-2 italic">Attn: {scheme.contactPerson}</p>}
                                 </div>
                             )}
                         </div>
 
                         {/* Bill Table - Scrollable */}
-                        <div className="flex-1 overflow-auto p-8 pt-0">
+                        <div className="flex-1 overflow-auto p-10 pt-0 custom-scrollbar">
                             <table className="w-full text-sm text-left relative">
-                                <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-y border-gray-200 sticky top-0 z-10 shadow-sm">
+                                <thead className="text-[10px] text-white/40 uppercase font-black tracking-widest bg-white/[0.03] border-y border-white/5 sticky top-0 z-10">
                                     <tr>
-                                        <th className="px-4 py-3 font-semibold bg-gray-50">Date</th>
-                                        <th className="px-4 py-3 font-semibold bg-gray-50">Patient No.</th>
-                                        <th className="px-4 py-3 font-semibold bg-gray-50">Patient Name</th>
-                                        <th className="px-4 py-3 font-semibold bg-gray-50">Sex</th>
-                                        <th className="px-4 py-3 font-semibold bg-gray-50">Service / Description</th>
-                                        <th className="px-4 py-3 font-semibold text-right bg-gray-50">Amount</th>
-                                        <th className="px-4 py-3 font-semibold text-right bg-gray-50">Discount</th>
-                                        <th className="px-4 py-3 font-semibold text-right bg-gray-50">Net Amount</th>
+                                        <th className="px-6 py-4 bg-transparent">Date</th>
+                                        <th className="px-6 py-4 bg-transparent">Patient No.</th>
+                                        <th className="px-6 py-4 bg-transparent">Patient Name</th>
+                                        <th className="px-6 py-4 bg-transparent">Sex</th>
+                                        <th className="px-6 py-4 bg-transparent">Service / Description</th>
+                                        <th className="px-6 py-4 text-right bg-transparent">Amount</th>
+                                        <th className="px-6 py-4 text-right bg-transparent">Discount</th>
+                                        <th className="px-6 py-4 text-right bg-transparent border-r border-white/5">Net Amount</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100">
+                                <tbody className="divide-y divide-white/5">
                                     {bills.length === 0 ? (
                                         <tr>
                                             <td colSpan="8" className="px-4 py-8 text-center text-gray-400 italic">
@@ -227,44 +227,44 @@ const SchemeDetails = () => {
                                         </tr>
                                     ) : (
                                         bills.map((bill) => (
-                                            <tr key={bill.id} className="hover:bg-gray-50/50">
-                                                <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{bill.billDate}</td>
-                                                <td className="px-4 py-3 text-gray-600 font-mono text-xs">{bill.patient?.patientNumber}</td>
-                                                <td className="px-4 py-3 text-gray-900 font-medium">
+                                            <tr key={bill.id} className="hover:bg-white/[0.02] transition-colors group">
+                                                <td className="px-6 py-4 text-white/60 whitespace-nowrap text-xs">{bill.billDate}</td>
+                                                <td className="px-6 py-4 text-white/40 font-mono text-[10px] tracking-tight">{bill.patient?.patientNumber}</td>
+                                                <td className="px-6 py-4 text-white font-bold tracking-tight">
                                                     {bill.patient?.firstName} {bill.patient?.lastName}
                                                 </td>
-                                                <td className="px-4 py-3 text-gray-500 capitalize">{bill.patient?.gender}</td>
-                                                <td className="px-4 py-3 text-gray-600">
+                                                <td className="px-6 py-4 text-white/40 text-xs font-bold uppercase">{bill.patient?.gender}</td>
+                                                <td className="px-6 py-4 text-white/70 text-xs font-medium">
                                                     {bill.service?.serviceName || 'General Service'}
-                                                    {bill.notes && <span className="text-xs text-gray-400 block truncate max-w-[200px]">{bill.notes}</span>}
+                                                    {bill.notes && <span className="text-[10px] text-white/30 block italic mt-0.5">{bill.notes}</span>}
                                                 </td>
-                                                <td className="px-4 py-3 text-right font-medium text-gray-600">{Number(bill.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                                <td className="px-4 py-3 text-right text-gray-500">{Number(bill.discount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                                <td className="px-4 py-3 text-right font-bold text-gray-900">{Number(bill.netAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                                <td className="px-6 py-4 text-right font-bold text-white/60 tabular-nums">{Number(bill.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                                <td className="px-6 py-4 text-right text-white/30 tabular-nums">{Number(bill.discount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                                <td className="px-6 py-4 text-right font-black text-white tabular-nums border-r border-white/5">{Number(bill.netAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                                             </tr>
                                         ))
                                     )}
                                 </tbody>
-                                <tfoot className="bg-gray-50 font-bold border-t-2 border-gray-200 sticky bottom-0 z-10 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+                                <tfoot className="bg-white/5 font-black border-t border-white/10 sticky bottom-0 z-10 shadow-2xl">
                                     <tr>
-                                        <td colSpan="5" className="px-4 py-4 text-right text-gray-700 uppercase tracking-wider text-xs">Grand Total</td>
-                                        <td className="px-4 py-4 text-right text-primary-700 bg-gray-50">{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                        <td className="px-4 py-4 text-right text-gray-600 bg-gray-50">{totalDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                        <td className="px-4 py-4 text-right text-primary-700 text-base bg-gray-50">{netAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                        <td colSpan="5" className="px-6 py-6 text-right text-white/40 uppercase tracking-[0.2em] text-[10px]">Grand Total</td>
+                                        <td className="px-6 py-6 text-right text-primary bg-transparent text-lg tabular-nums">{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                        <td className="px-6 py-6 text-right text-white/30 bg-transparent tabular-nums">{totalDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                        <td className="px-6 py-6 text-right text-white text-xl bg-transparent tabular-nums border-r border-white/5">{netAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
 
                         {/* Footer / Signature Area - Fixed at bottom of card */}
-                        <div className="flex-shrink-0 mt-auto p-8 pt-4 flex justify-between items-end border-t border-gray-100 print:flex hidden">
-                            <div className="text-xs text-gray-400">
+                        <div className="flex-shrink-0 mt-auto p-12 pt-8 flex justify-between items-end border-t border-white/5 print:flex hidden">
+                            <div className="text-[10px] text-white/20 font-black uppercase tracking-widest">
                                 <p>Generated on {new Date().toLocaleString()}</p>
                                 <p>MEDFINANCE360 v1.0</p>
                             </div>
                             <div className="text-center">
-                                <div className="w-48 border-b-2 border-gray-300 mb-2"></div>
-                                <p className="text-xs font-bold text-gray-500 uppercase">Authorized Signature</p>
+                                <div className="w-64 border-b border-primary/40 mb-3 shadow-[0_5px_15px_rgba(255,0,204,0.2)]"></div>
+                                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Authorized Signature / Stamp</p>
                             </div>
                         </div>
                     </div>

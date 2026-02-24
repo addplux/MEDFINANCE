@@ -476,7 +476,7 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
 
                 {/* Table - Fixed Height Container */}
-                <div className="w-full relative flex flex-col min-h-[400px] h-[600px]">
+                <div className="w-full relative flex flex-col min-h-[400px] h-[600px] bg-black/40 rounded-[2rem] border border-white/5 overflow-hidden">
                     <DataGrid
                         rows={members}
                         columns={columns}
@@ -486,6 +486,7 @@ const SchemeMembers = ({ schemeId }) => {
                         }}
                         disableRowSelectionOnClick
                         density="compact"
+                        className="border-none"
                         sx={{
                             border: 0,
                             color: '#FFFFFF',
@@ -494,23 +495,31 @@ const SchemeMembers = ({ schemeId }) => {
                                 backgroundColor: 'transparent',
                             },
                             '& .MuiDataGrid-columnHeaders': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                                color: 'rgba(255, 255, 255, 0.4)',
+                                backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                                borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                                minHeight: '56px !important',
+                            },
+                            '& .MuiDataGrid-columnHeaderTitle': {
+                                color: '#FFFFFF',
                                 fontWeight: '900',
                                 textTransform: 'uppercase',
                                 fontSize: '10px',
-                                letterSpacing: '0.1em',
-                                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                                minHeight: '48px !important',
+                                letterSpacing: '0.15em',
                             },
                             '& .MuiDataGrid-cell': {
-                                borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
-                                fontSize: '13px',
-                                fontWeight: '600',
+                                borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                                fontSize: '12px',
+                                fontWeight: '500',
                                 color: 'rgba(255, 255, 255, 0.8)',
                             },
                             '& .MuiDataGrid-row:hover': {
                                 backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                            },
+                            '& .MuiDataGrid-row.Mui-selected': {
+                                backgroundColor: 'rgba(255, 0, 204, 0.08) !important',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 0, 204, 0.12) !important',
+                                },
                             },
                             '& .MuiDataGrid-footerContainer': {
                                 borderTop: '1px solid rgba(255, 255, 255, 0.05)',
