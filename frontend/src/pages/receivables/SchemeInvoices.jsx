@@ -132,8 +132,8 @@ const SchemeInvoices = ({ schemeId }) => {
 
             {/* Generate Modal */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-md overflow-y-auto py-8 animate-fade-in">
-                    <div className="bg-bg-secondary border border-white/10 rounded-[3rem] shadow-[0_32px_120px_rgba(0,0,0,0.8)] w-full max-w-lg flex flex-col my-auto p-2">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md overflow-y-auto py-4 animate-fade-in">
+                    <div className="bg-bg-secondary border border-white/10 rounded-[3rem] shadow-[0_32px_120px_rgba(0,0,0,0.8)] w-full max-w-xl flex flex-col my-auto p-2">
                         <div className="p-8">
                             <h3 className="text-2xl font-black text-white mb-1 uppercase tracking-tighter">GENERATE INVOICE</h3>
                             <p className="text-white/40 text-xs font-black uppercase tracking-widest mb-6">Select billing period</p>
