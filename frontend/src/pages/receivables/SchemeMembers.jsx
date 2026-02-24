@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, FileText, Search, Edit, Upload, Download, AlertCircle, CheckCircle } from 'lucide-react';
+import { Users, FileText, Search, Edit, Upload, Download, AlertCircle, CheckCircle, ChevronDown, Activity, ChevronRight, X } from 'lucide-react';
 import api from '../../services/apiClient';
 import { DataGrid } from '@mui/x-data-grid';
 import * as XLSX from 'xlsx';
@@ -374,25 +374,25 @@ const SchemeMembers = ({ schemeId }) => {
 
     return (
 
-        <div className="flex flex-col h-full space-y-4 min-w-0">
+        <div className="flex flex-col h-full space-y-4 min-w-0 bg-bg-primary text-white p-6">
             {/* Import Status Message */}
             {importResult && (
-                <div className={`p-4 rounded-lg flex items-start gap-3 ${importResult.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+                <div className={`p-4 rounded-2xl flex items-start gap-3 animate-fade-in ${importResult.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
                     }`}>
                     {importResult.type === 'success' ? (
                         <>
                             <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                             <div>
-                                <h4 className="font-semibold">Import Successful</h4>
-                                <ul className="text-sm mt-1 list-disc list-inside">
+                                <h4 className="font-black uppercase tracking-tight">Import Successful</h4>
+                                <ul className="text-sm mt-1 font-medium tracking-tight">
                                     <li>Added: {importResult.summary.added}</li>
                                     <li>Updated: {importResult.summary.updated}</li>
                                     <li>Failed: {importResult.summary.failed}</li>
                                 </ul>
                                 {importResult.summary.errors?.length > 0 && (
-                                    <div className="mt-2 text-xs text-red-600 bg-white p-2 rounded border border-red-100 max-h-32 overflow-y-auto">
-                                        <p className="font-semibold mb-1">Errors:</p>
-                                        {importResult.summary.errors.map((err, i) => <div key={i}>{err}</div>)}
+                                    <div className="mt-2 text-xs bg-black/40 p-3 rounded-xl border border-white/5 max-h-32 overflow-y-auto">
+                                        <p className="font-bold mb-1 uppercase tracking-widest text-[10px] text-white/40">Error Log:</p>
+                                        {importResult.summary.errors.map((err, i) => <div key={i} className="mb-1">{err}</div>)}
                                     </div>
                                 )}
                             </div>
@@ -401,60 +401,63 @@ const SchemeMembers = ({ schemeId }) => {
                         <>
                             <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                             <div>
-                                <h4 className="font-semibold">Import Failed</h4>
-                                <p className="text-sm">{importResult.message}</p>
+                                <h4 className="font-black uppercase tracking-tight">System Error</h4>
+                                <p className="text-sm font-medium tracking-tight">{importResult.message}</p>
                             </div>
                         </>
                     )}
-                    <button onClick={() => setImportResult(null)} className="ml-auto hover:text-gray-900">&times;</button>
+                    <button onClick={() => setImportResult(null)} className="ml-auto p-1 hover:bg-white/10 rounded-lg transition-colors">&times;</button>
                 </div>
             )}
 
-            <div className="flex flex-col flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden min-w-0">
+            <div className="flex flex-col flex-1 glass-panel border-white/5 overflow-hidden min-w-0 rounded-[2rem] shadow-2xl">
                 {/* Header / Filters (Suno Style) */}
-                <div className="p-3 border-b border-gray-100 flex flex-wrap gap-4 items-center flex-shrink-0">
+                <div className="p-6 border-b border-white/5 flex flex-wrap gap-6 items-center flex-shrink-0 bg-white/[0.02]">
                     {/* Search & Filter */}
-                    <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center">
-                        <form onSubmit={handleSearch} className="flex items-center gap-2 w-full sm:w-auto">
-                            <div className="relative flex-1 sm:w-64">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
+                        <form onSubmit={handleSearch} className="flex items-center gap-3 w-full sm:w-auto">
+                            <div className="relative flex-1 sm:w-80 group">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors w-4 h-4" />
                                 <input
                                     type="text"
-                                    placeholder="Search name, policy, NRC..."
+                                    placeholder="Search members..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-9 pr-4 py-2 bg-gray-100 border-none rounded-full text-sm focus:ring-2 focus:ring-gray-200 focus:bg-white transition-all w-full placeholder-gray-500 font-medium"
+                                    className="pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-full text-sm focus:ring-2 focus:ring-primary/20 focus:bg-white/10 transition-all w-full placeholder-white/20 font-bold tracking-tight text-white"
                                 />
                             </div>
-                            <button type="submit" className="px-4 py-2 bg-gray-900 hover:bg-black text-white rounded-full text-xs font-bold transition-colors shadow-sm">
+                            <button type="submit" className="px-6 py-3 bg-white text-black hover:scale-105 active:scale-95 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-lg">
                                 Search
                             </button>
                         </form>
 
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="px-4 py-2 bg-gray-100 border-none rounded-full text-sm font-medium text-gray-700 focus:ring-2 focus:ring-gray-200 cursor-pointer"
-                        >
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="suspended">Suspended</option>
-                            <option value="closed">Closed</option>
-                        </select>
+                        <div className="relative w-full sm:w-auto">
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="w-full sm:w-auto px-6 py-3 bg-white/5 border border-white/10 rounded-full text-xs font-black text-white/60 focus:ring-2 focus:ring-white/10 cursor-pointer appearance-none uppercase tracking-widest hover:bg-white/10 transition-all pr-12"
+                            >
+                                <option value="all" className="bg-bg-primary">All Status</option>
+                                <option value="active" className="bg-bg-primary">Active</option>
+                                <option value="suspended" className="bg-bg-primary">Suspended</option>
+                                <option value="closed" className="bg-bg-primary">Closed</option>
+                            </select>
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 pointer-events-none" />
+                        </div>
                     </div>
 
                     {/* Import Actions */}
-                    <div className="flex gap-2 w-full md:w-auto justify-end">
+                    <div className="flex gap-3 w-full md:w-auto justify-end ml-auto">
                         <button
                             onClick={handleDownloadTemplate}
-                            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-bold transition-colors"
+                            className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/5 rounded-full text-xs font-black uppercase tracking-widest transition-all"
                             title="Download CSV Template"
                         >
-                            <Download className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">Template</span>
+                            <Download className="w-4 h-4" />
+                            <span className="hidden lg:inline">Template</span>
                         </button>
 
-                        <label className={`flex items-center gap-2 px-4 py-2 bg-gray-900 hover:bg-black text-white rounded-full text-xs font-bold transition-colors shadow-sm cursor-pointer ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <label className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary/80 hover:scale-105 active:scale-95 text-white rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(255,0,204,0.3)] cursor-pointer ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
                             <input
                                 type="file"
                                 onChange={handleFileSelect}
@@ -465,15 +468,15 @@ const SchemeMembers = ({ schemeId }) => {
                             {importing ? (
                                 <span className="loading loading-spinner loading-xs"></span>
                             ) : (
-                                <Upload className="w-3.5 h-3.5" />
+                                <Upload className="w-4 h-4" />
                             )}
-                            <span>Import Members</span>
+                            <span>Import</span>
                         </label>
                     </div>
                 </div>
 
-                {/* Table */}
-                <div className="flex-1 overflow-hidden bg-white w-full relative flex flex-col min-h-0">
+                {/* Table - Fixed Scroll Container */}
+                <div className="flex-1 w-full relative flex flex-col min-h-[400px] overflow-hidden">
                     <DataGrid
                         rows={members}
                         columns={columns}
@@ -485,13 +488,58 @@ const SchemeMembers = ({ schemeId }) => {
                         density="compact"
                         sx={{
                             border: 0,
+                            color: '#FFFFFF',
+                            fontFamily: 'inherit',
+                            '& .MuiDataGrid-main': {
+                                backgroundColor: 'transparent',
+                            },
                             '& .MuiDataGrid-columnHeaders': {
-                                backgroundColor: '#f3f4f6',
-                                color: '#374151',
-                                fontWeight: 'bold',
+                                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                                color: 'rgba(255, 255, 255, 0.4)',
+                                fontWeight: '900',
                                 textTransform: 'uppercase',
-                                fontSize: '0.75rem',
-                                borderBottom: '1px solid #e5e7eb',
+                                fontSize: '10px',
+                                letterSpacing: '0.1em',
+                                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                                minHeight: '48px !important',
+                            },
+                            '& .MuiDataGrid-cell': {
+                                borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: 'rgba(255, 255, 255, 0.8)',
+                            },
+                            '& .MuiDataGrid-row:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                            },
+                            '& .MuiDataGrid-footerContainer': {
+                                borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                                color: 'rgba(255, 255, 255, 0.4)',
+                                backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                                '& .MuiTablePagination-root': {
+                                    color: 'inherit',
+                                },
+                                '& .MuiIconButton-root': {
+                                    color: 'white',
+                                    opacity: 0.5,
+                                    '&:hover': { opacity: 1 },
+                                },
+                            },
+                            '& .MuiDataGrid-virtualScroller': {
+                                '&::-webkit-scrollbar': {
+                                    width: '8px',
+                                    height: '8px',
+                                },
+                                '&::-webkit-scrollbar-track': {
+                                    background: 'transparent',
+                                },
+                                '&::-webkit-scrollbar-thumb': {
+                                    background: 'rgba(255, 255, 255, 0.1)',
+                                    borderRadius: '10px',
+                                },
+                                '&::-webkit-scrollbar-thumb:hover': {
+                                    background: 'rgba(255, 255, 255, 0.2)',
+                                },
                             },
                         }}
                     />
@@ -499,132 +547,119 @@ const SchemeMembers = ({ schemeId }) => {
             </div>
             {/* Modal for Column Mapping */}
             {showMappingModal && (
-
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-7xl max-h-[90vh] flex flex-col">
-                        <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
-                            <h3 className="font-semibold text-lg text-gray-800">Map File Columns</h3>
-                            <button onClick={() => setShowMappingModal(false)} className="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 z-50 animate-fade-in">
+                    <div className="bg-bg-secondary border border-white/5 rounded-[3rem] shadow-[0_32px_120px_rgba(0,0,0,0.8)] w-full max-w-7xl max-h-[90vh] flex flex-col overflow-hidden text-white">
+                        <div className="px-10 py-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                            <div>
+                                <h3 className="font-black text-3xl uppercase tracking-tighter">MAP COLUMNS</h3>
+                                <p className="text-white/40 text-xs font-bold uppercase tracking-widest mt-1">Initialize member data structure</p>
+                            </div>
+                            <button onClick={() => setShowMappingModal(false)} className="p-3 hover:bg-white/5 rounded-2xl text-white/40 hover:text-white transition-all text-2xl font-black">&times;</button>
                         </div>
 
-                        <div className="p-6 overflow-y-auto flex-1">
-                            <div className="bg-blue-50 text-blue-800 p-3 rounded-md text-sm mb-6 flex items-start gap-2">
-                                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                                <p>Please select the columns from your uploaded file that match the required fields below.</p>
+                        <div className="p-10 overflow-y-auto flex-1 space-y-10 custom-scrollbar">
+                            <div className="bg-primary/10 text-primary p-6 rounded-[2rem] text-sm flex items-start gap-4 border border-primary/20 shadow-[0_0_30px_rgba(255,0,204,0.1)]">
+                                <AlertCircle className="w-6 h-6 shrink-0" />
+                                <p className="font-bold tracking-tight">Verify that the file headers match our system requirements. Required fields are marked with an asterisk.</p>
                             </div>
 
                             {/* Global Service Selection */}
-                            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                <label className="block text-sm font-bold text-gray-700 mb-2">
-                                    Assign Service / Department (Optional)
+                            <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[2.5rem]">
+                                <label className="block text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-4 ml-2">
+                                    Assign Service / Department
                                 </label>
-                                <select
-                                    className="select select-bordered select-sm w-full max-w-xs"
-                                    value={selectedService}
-                                    onChange={(e) => setSelectedService(e.target.value)}
-                                >
-                                    <option value="">-- No Specific Service --</option>
-                                    {services.map(s => (
-                                        <option key={s.id} value={s.id}>{s.serviceName} {s.department ? `(${s.department})` : ''}</option>
-                                    ))}
-                                </select>
-                                <p className="text-xs text-gray-500 mt-1">Select a service (e.g., Radiology, Theatre) to assign to all imported members.</p>
+                                <div className="relative max-w-md group">
+                                    <select
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer hover:bg-white/10 transition-all uppercase tracking-widest"
+                                        value={selectedService}
+                                        onChange={(e) => setSelectedService(e.target.value)}
+                                    >
+                                        <option value="" className="bg-bg-primary">-- Auto-Detect Service --</option>
+                                        {services.map(s => (
+                                            <option key={s.id} value={s.id} className="bg-bg-primary">{s.serviceName} {s.department ? `(${s.department})` : ''}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 pointer-events-none" />
+                                </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                 {/* Name Mapping */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                        Full Name Column <span className="text-red-500">*</span>
+                                <div className="space-y-3">
+                                    <label className="block text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-2">
+                                        Full Name Column <span className="text-primary">*</span>
                                     </label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                                        value={columnMapping.fullName || columnMapping.firstName}
-                                        onChange={(e) => setColumnMapping({ ...columnMapping, fullName: e.target.value, firstName: '' })}
-                                    >
-                                        <option value="">-- Select Column --</option>
-                                        {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
-                                    </select>
-                                    <p className="text-xs text-gray-500 mt-1">Select the column containing the member's name (e.g. "Employee Name").</p>
+                                    <div className="relative group">
+                                        <select
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer hover:bg-white/10 transition-all"
+                                            value={columnMapping.fullName || columnMapping.firstName}
+                                            onChange={(e) => setColumnMapping({ ...columnMapping, fullName: e.target.value, firstName: '' })}
+                                        >
+                                            <option value="" className="bg-bg-primary text-white/40">Select Column</option>
+                                            {csvHeaders.map((h, i) => <option key={i} value={h} className="bg-bg-primary">{h}</option>)}
+                                        </select>
+                                        <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 pointer-events-none" />
+                                    </div>
                                 </div>
 
                                 {/* Policy Mapping */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                        Policy / Man Number <span className="text-red-500">*</span>
+                                <div className="space-y-3">
+                                    <label className="block text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-2">
+                                        Policy / Man Number <span className="text-primary">*</span>
                                     </label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                                        value={columnMapping.policyNumber}
-                                        onChange={(e) => setColumnMapping({ ...columnMapping, policyNumber: e.target.value })}
-                                    >
-                                        <option value="">-- Select Column --</option>
-                                        {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
-                                    </select>
-                                </div>
-
-                                {/* "Consultation" Mapping (Dummy/Validation) */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                        Consultation
-                                    </label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                                        value={columnMapping.consultation}
-                                        onChange={(e) => setColumnMapping({ ...columnMapping, consultation: e.target.value })}
-                                    >
-                                        <option value="">-- Select Column --</option>
-                                        {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
-                                    </select>
-                                </div>
-
-                                {/* "Total" Mapping (Balances) */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                        Total Bill / Balance
-                                    </label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                                        value={columnMapping.total}
-                                        onChange={(e) => setColumnMapping({ ...columnMapping, total: e.target.value })}
-                                    >
-                                        <option value="">-- Select Column --</option>
-                                        {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
-                                    </select>
+                                    <div className="relative group">
+                                        <select
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer hover:bg-white/10 transition-all"
+                                            value={columnMapping.policyNumber}
+                                            onChange={(e) => setColumnMapping({ ...columnMapping, policyNumber: e.target.value })}
+                                        >
+                                            <option value="" className="bg-bg-primary text-white/40">Select Column</option>
+                                            {csvHeaders.map((h, i) => <option key={i} value={h} className="bg-bg-primary">{h}</option>)}
+                                        </select>
+                                        <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 pointer-events-none" />
+                                    </div>
                                 </div>
                             </div>
 
-                            <h4 className="font-semibold text-sm mt-6 mb-3 text-gray-700">Financial Components (Optional)</h4>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {['nursingCare', 'laboratory', 'radiology', 'dental', 'lodging', 'surgicals', 'drRound', 'food', 'physio', 'pharmacy', 'sundries', 'antenatal'].map(field => (
-                                    <div key={field}>
-                                        <label className="block text-xs font-semibold text-gray-700 mb-1 capitalize">
-                                            {field.replace(/([A-Z])/g, ' $1').trim()}
-                                        </label>
-                                        <select
-                                            className="w-full border border-gray-300 rounded-md p-1.5 text-xs bg-white text-gray-900"
-                                            value={columnMapping[field]}
-                                            onChange={(e) => setColumnMapping({ ...columnMapping, [field]: e.target.value })}
-                                        >
-                                            <option value="">(Skip)</option>
-                                            {csvHeaders.map((h, i) => <option key={i} value={h}>{h}</option>)}
-                                        </select>
-                                    </div>
-                                ))}
+                            <div className="pt-6 border-t border-white/5">
+                                <h4 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-8 text-center">FINANCIAL ENGINE MAPPING</h4>
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                                    {['consultation', 'total', 'nursingCare', 'laboratory', 'radiology', 'dental', 'lodging', 'surgicals', 'drRound', 'food', 'physio', 'pharmacy', 'sundries', 'antenatal'].map(field => (
+                                        <div key={field} className="space-y-2">
+                                            <label className="block text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">
+                                                {field.replace(/([A-Z])/g, ' $1').trim()}
+                                            </label>
+                                            <div className="relative">
+                                                <select
+                                                    className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white/70 hover:bg-white/5 hover:border-white/10 transition-all appearance-none"
+                                                    value={columnMapping[field]}
+                                                    onChange={(e) => setColumnMapping({ ...columnMapping, [field]: e.target.value })}
+                                                >
+                                                    <option value="" className="bg-bg-primary">(SKIP)</option>
+                                                    {csvHeaders.map((h, i) => <option key={i} value={h} className="bg-bg-primary">{h}</option>)}
+                                                </select>
+                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-3 h-3 text-white/10 pointer-events-none" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
                             {/* Preview Section */}
-                            <div className="mt-8">
-                                <h4 className="font-semibold text-sm mb-2 text-gray-700">File Preview (First 10 Rows)</h4>
-                                <div className="overflow-x-auto border border-gray-200 rounded-md bg-gray-50">
+                            <div className="pt-10">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h4 className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-2">DATA PREVIEW</h4>
+                                    <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black text-white/20">FIRST 10 RECORDS</span>
+                                </div>
+                                <div className="overflow-x-auto rounded-[2rem] border border-white/10 bg-black/20 custom-scrollbar shadow-inner">
                                     <table className="w-full text-xs text-left">
-                                        <thead className="bg-gray-100 border-b border-gray-200 text-gray-600 font-semibold uppercase">
-                                            <tr>{csvHeaders.map((h, i) => <th key={i} className="px-3 py-2 whitespace-nowrap">{h}</th>)}</tr>
+                                        <thead className="bg-white/[0.03] border-b border-white/5 text-white/40 font-black uppercase tracking-widest">
+                                            <tr>{csvHeaders.map((h, i) => <th key={i} className="px-6 py-4 whitespace-nowrap">{h}</th>)}</tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-200 bg-white">
+                                        <tbody className="divide-y divide-white/5">
                                             {csvPreview.map((row, i) => (
-                                                <tr key={i}>
-                                                    {row.map((cell, j) => <td key={j} className="px-3 py-2 whitespace-nowrap text-gray-600">{cell}</td>)}
+                                                <tr key={i} className="hover:bg-white/[0.02] transition-colors">
+                                                    {row.map((cell, j) => <td key={j} className="px-6 py-4 whitespace-nowrap text-white/60 font-medium">{cell}</td>)}
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -632,19 +667,20 @@ const SchemeMembers = ({ schemeId }) => {
                                 </div>
                             </div>
                         </div>
-                        <div className="p-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-lg">
+
+                        <div className="px-10 py-8 border-t border-white/5 flex justify-end gap-5 bg-white/[0.02]">
                             <button
                                 onClick={() => setShowMappingModal(false)}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                                className="px-8 py-4 text-xs font-black uppercase tracking-widest text-white/40 hover:text-white transition-all"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={processImport}
-                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                className="px-12 py-4 bg-white text-black font-black uppercase tracking-widest text-xs rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)] disabled:opacity-20"
                                 disabled={importing || !(columnMapping.policyNumber && (columnMapping.firstName || columnMapping.fullName))}
                             >
-                                {importing ? 'Importing...' : 'Import Members'}
+                                {importing ? 'Processing Architecture...' : 'EXECUTE IMPORT'}
                             </button>
                         </div>
                     </div>
