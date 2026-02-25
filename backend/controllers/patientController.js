@@ -402,49 +402,85 @@ const uploadPrepaidLedger = async (req, res) => {
         const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
         let currentSchemeCostCategory = 'standard';
-        let currentMemberName = null;
-        let currentBalance = 0;
+        let currentMember = null;
         const membersToCreate = [];
 
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
             if (!row || row.length === 0) continue;
 
-            const colA = row[0] ? String(row[0]).trim() : '';
-            const colB = row[1] ? String(row[1]).trim() : '';
-            const colC = row[2] ? String(row[2]).trim() : '';
+            const rowStr = row.map(cell => String(cell || '').trim().toUpperCase()).join(' ');
 
-            // Detect Scheme Type
-            if (colA.includes('HIGH COST') || colC.includes('HIGH COST')) {
-                currentSchemeCostCategory = 'high_cost';
-            } else if (colA.includes('LOW COST') || colC.includes('LOW COST')) {
-                currentSchemeCostCategory = 'low_cost';
+            // Detect Scheme Category
+            if (rowStr.includes('HIGH COST')) currentSchemeCostCategory = 'high_cost';
+            if (rowStr.includes('LOW COST')) currentSchemeCostCategory = 'low_cost';
+
+            // Detect Scheme No.
+            // e.g., SCH.NO. 20170729 or SCH. NO. 1234
+            const schMatch = rowStr.match(/SCH\.?\s*NO\.?\s*([A-Z0-9_-]+)/);
+            if (schMatch) {
+                if (currentMember && currentMember.name) {
+                    membersToCreate.push(currentMember);
+                }
+                currentMember = {
+                    schemeNo: schMatch[1],
+                    name: null,
+                    balance: 0,
+                    costCategory: currentSchemeCostCategory
+                };
+                continue;
             }
 
-            // Detect Member Name Name Row (No Date, No Ledger, Has Client Details, Not a Header)
-            if (!colA && !colB && colC &&
-                !colC.includes('CLIENTS DETAILS') &&
-                !colC.includes('SCH.NO') &&
-                !colC.includes('LEDGER') &&
-                !colC.includes('HIGH COST') &&
-                !colC.includes('LOW COST')) {
+            if (!currentMember) continue;
 
-                if (currentMemberName) {
-                    membersToCreate.push({ name: currentMemberName, costCategory: currentSchemeCostCategory, balance: currentBalance });
+            // We are inside a member's block
+            // Filter non-empty cells
+            const cells = row.map(c => String(c || '').trim()).filter(c => c);
+            if (cells.length === 0) continue;
+
+            // Header row check
+            if (rowStr.includes('CLIENTS DETAILS') || rowStr.includes('LEDGER NO')) continue;
+
+            // Find right-most valid number for balance
+            let rowBalance = null;
+            for (let j = row.length - 1; j >= 0; j--) {
+                const val = String(row[j] || '').replace(/,/g, '').trim();
+                // Check if it's a valid number and NOT a date like '01.01.19'
+                if (val && !isNaN(Number(val)) && !/^\d{2}[\.\/]\d{2}[\.\/]\d{2,4}$/.test(val)) {
+                    rowBalance = Number(val);
+                    break;
                 }
-                currentMemberName = colC;
-                currentBalance = 0; // reset for new member
-            } else if (currentMemberName && colC && colC !== 'CLIENTS DETAILS' && !colC.includes('LEDGER') && !colC.includes('SCH.NO')) {
-                // Transaction Row
-                const balStr = row[5] ? String(row[5]).replace(/,/g, '').trim() : '';
-                if (balStr && !isNaN(Number(balStr))) {
-                    currentBalance = Number(balStr);
+            }
+
+            if (rowBalance !== null) {
+                currentMember.balance = rowBalance;
+            }
+
+            // Detect Name (first text cell that doesn't contain transaction keywords and has no date)
+            if (!currentMember.name) {
+                const txKeywords = ['BAL B/F', 'BALANCE', 'MEMBERSHIP', 'CONSULTATION', 'PHARMACY', 'LABORATORY', 'X-RAY', 'CASH', 'PAYMENT', 'RECEIPT', 'DRUGS', 'B/F', 'BROUGHT FORWARD'];
+
+                const candidateTextCells = cells.filter(c => {
+                    const cleanC = c.replace(/,/g, '');
+                    const isNum = !isNaN(Number(cleanC));
+                    const isDate = /^\d{2}[\.\/]\d{2}[\.\/]\d{2,4}$/.test(c);
+                    return !isNum && !isDate;
+                });
+
+                if (candidateTextCells.length > 0) {
+                    const candidate = candidateTextCells[0];
+                    const candidateUpper = candidate.toUpperCase();
+
+                    const isTx = txKeywords.some(kw => candidateUpper.includes(kw));
+                    if (!isTx && candidate.length > 2) {
+                        currentMember.name = candidate;
+                    }
                 }
             }
         }
 
-        if (currentMemberName) {
-            membersToCreate.push({ name: currentMemberName, costCategory: currentSchemeCostCategory, balance: currentBalance });
+        if (currentMember && currentMember.name) {
+            membersToCreate.push(currentMember);
         }
 
         if (membersToCreate.length === 0) {
@@ -459,11 +495,17 @@ const uploadPrepaidLedger = async (req, res) => {
             const nameParts = member.name.split(' ');
             const firstName = nameParts[0];
             const lastName = nameParts.slice(1).join(' ') || 'Unknown';
-            patientCount++;
-            const patientNumber = `P${String(patientCount).padStart(6, '0')}`;
+
+            // Map Scheme No to Patient No as requested
+            let targetPatientNumber = member.schemeNo;
+            const existing = await Patient.findOne({ where: { patientNumber: targetPatientNumber }, transaction: t });
+            if (existing) {
+                patientCount++;
+                targetPatientNumber = `${member.schemeNo}-${patientCount}`;
+            }
 
             const patient = await Patient.create({
-                patientNumber,
+                patientNumber: targetPatientNumber,
                 firstName,
                 lastName,
                 dateOfBirth: new Date('1990-01-01'), // Default since it's not in the sheet
@@ -472,6 +514,7 @@ const uploadPrepaidLedger = async (req, res) => {
                 costCategory: member.costCategory,
                 patientType: 'opd',
                 schemeId: req.body.schemeId ? Number(req.body.schemeId) : null,
+                policyNumber: member.schemeNo, // Store in policy number as well
                 balance: member.balance,
                 prepaidCredit: member.balance > 0 ? member.balance : 0 // Fallback
             }, { transaction: t });
