@@ -281,6 +281,14 @@ export const labAPI = {
     }
 };
 
+// Radiology
+export const radiologyAPI = {
+    requests: {
+        getAll: (params) => api.get('/radiology/requests', { params }),
+        create: (data) => api.post('/radiology/requests', data),
+    },
+};
+
 // Theatre Billing
 export const theatreAPI = {
     bills: {

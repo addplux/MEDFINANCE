@@ -108,6 +108,9 @@ import LabTests from './pages/lab/LabTests';
 import LabRequestForm from './pages/lab/LabRequestForm';
 import LabResultEntry from './pages/lab/LabResultEntry';
 
+// Radiology
+import RadiologyRequestForm from './pages/radiology/RadiologyRequestForm';
+
 // Theatre
 import TheatreBilling from './pages/theatre/TheatreBilling';
 import TheatreBillForm from './pages/theatre/TheatreBillForm';
@@ -266,7 +269,8 @@ function App() {
                         <Route path="pharmacy/grn" element={<GoodsReceivedNote />} />
                         <Route path="pharmacy/dispense" element={<Dispense />} />
 
-                        <Route path="radiology/dashboard" element={<DepartmentDashboard title="Radiology" departmentId={3} />} />
+                        <Route path="radiology/dashboard" element={<DepartmentDashboard title="Radiology" departmentId={3} type="radiology" />} />
+                        <Route path="radiology/request" element={<RadiologyRequestForm />} />
 
                         <Route path="opd/dashboard" element={<DepartmentDashboard title="OPD" departmentId={4} />} />
 

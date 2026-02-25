@@ -112,6 +112,7 @@ app.use('/api/roles', require('./routes/roleRoutes'));
 app.use('/api/payroll', require('./routes/payroll'));
 app.use('/api/pharmacy', require('./routes/pharmacy'));
 app.use('/api/lab', require('./routes/lab'));
+app.use('/api/radiology', require('./routes/radiologyRoutes'));
 app.use('/api/theatre', require('./routes/theatreRoutes'));
 app.use('/api/maternity', require('./routes/maternityRoutes'));
 app.use('/api/specialist-clinics', require('./routes/specialistClinicRoutes'));
