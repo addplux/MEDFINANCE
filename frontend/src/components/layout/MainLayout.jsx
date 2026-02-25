@@ -184,7 +184,7 @@ const MainLayout = ({ children }) => {
             submenu: [
                 { path: '/app/billing/ipd/new', label: 'IPD / Children Ward' },
                 { path: '/app/maternity/billing', label: 'Labour Ward' },
-                { path: '/app/theatre/billing', label: 'Theater' },
+                { path: '/app/theatre/dashboard', label: 'Theater' },
                 { path: '/app/physiology/dashboard', label: 'Physiotherapy' },
                 { path: '/app/dental/dashboard', label: 'Dental' }
             ]

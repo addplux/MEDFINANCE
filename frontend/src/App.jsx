@@ -270,7 +270,7 @@ function App() {
 
                         <Route path="opd/dashboard" element={<DepartmentDashboard title="OPD" departmentId={4} />} />
 
-                        <Route path="theatre/billing" element={<TheatreBilling />} />
+                        <Route path="theatre/dashboard" element={<DepartmentDashboard title="Theatre" departmentId={7} />} />
                         <Route path="theatre/billing/new" element={<TheatreBillForm />} />
                         <Route path="theatre/billing/:id/edit" element={<TheatreBillForm />} />
 
