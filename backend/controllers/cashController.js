@@ -142,7 +142,11 @@ const createPayment = async (req, res) => {
     } catch (error) {
         await t.rollback();
         console.error('Create payment error:', error);
-        res.status(500).json({ error: 'Failed to create payment' });
+        res.status(500).json({
+            error: 'Failed to create payment',
+            detail: error.message,
+            fields: error.errors?.map(e => ({ field: e.path, message: e.message }))
+        });
     }
 };
 

@@ -127,7 +127,11 @@ const PaymentForm = () => {
             navigate('/app/cash/payments');
         } catch (error) {
             console.error('Error saving payment:', error);
-            alert('Failed to save payment');
+            const serverMsg = error.response?.data?.error
+                || error.response?.data?.message
+                || error.message
+                || 'Unknown error';
+            alert(`Failed to save payment:\n\n${serverMsg}`);
         } finally {
             setLoading(false);
         }
