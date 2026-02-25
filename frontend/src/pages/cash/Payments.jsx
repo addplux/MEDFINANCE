@@ -5,9 +5,18 @@ import {
     Search, ArrowRight, AlertCircle, Clock, CheckCircle,
     Receipt, UserPlus, RefreshCw, Filter, Wallet, Info
 } from 'lucide-react';
-import { DataGrid } from '@mui/x-data-grid';
 
 const fmt = (n) => `ZK ${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+const DEPT_COLORS = {
+    OPD: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    Pharmacy: 'bg-green-500/20 text-green-300 border-green-500/30',
+    Laboratory: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+    Radiology: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+    Theatre: 'bg-red-500/20 text-red-300 border-red-500/30',
+    Maternity: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
+    IPD: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+};
 
 const PatientLedger = () => {
     const navigate = useNavigate();
@@ -32,6 +41,7 @@ const PatientLedger = () => {
             setPendingQueue(response.data || []);
         } catch (error) {
             console.error('Failed to fetch pending queue:', error);
+            setPendingQueue([]);
         } finally {
             setQueueLoading(false);
         }
@@ -47,28 +57,16 @@ const PatientLedger = () => {
     };
 
     const fetchUnpaidBills = async (patientId) => {
-        if (!patientId) {
-            console.error('[Payments] fetchUnpaidBills called without patientId');
-            return [];
-        }
+        if (!patientId) return [];
         try {
             setLoading(true);
-            console.log(`[Payments] Calling getUnpaidBills for ID: ${patientId}`);
             const response = await billingAPI.patient.getUnpaidBills(patientId);
-            console.log('[Payments] API RAW RESPONSE:', response);
-            console.log('[Payments] API DATA:', response.data);
             const bills = response.data || [];
-            if (bills.length === 0) {
-                console.warn(`[Payments] No unpaid bills found for patient ${patientId}`);
-            }
-
             let uidCounter = 0;
             const uniqueBills = bills.map(b => ({
                 ...b,
                 uid: b.uid || `${b.billType || b.department || 'other'}-${b.id}-${uidCounter++}`
             }));
-
-            console.log('[Payments] Processed uniqueBills:', uniqueBills);
             setUnpaidBills(uniqueBills);
             setSelectedBills(uniqueBills.map(b => b.uid));
             return uniqueBills;
@@ -83,16 +81,12 @@ const PatientLedger = () => {
     };
 
     const handleSelectPatient = async (id) => {
-        console.log(`[Payments] handleSelectPatient triggered for ID: ${id}`);
         setSelectedPatientId(String(id));
         setUnpaidBills([]);
         setSelectedBills([]);
         const bills = await fetchUnpaidBills(id);
         if (bills && bills.length > 0) {
-            console.log(`[Payments] Setting ${bills.length} selected bills`);
             setSelectedBills(bills.map(b => b.uid));
-        } else {
-            console.log('[Payments] No bills to select');
         }
     };
 
@@ -100,6 +94,20 @@ const PatientLedger = () => {
         if (selectedBills.length === 0) return;
         const billsToPay = unpaidBills.filter(b => selectedBills.includes(b.uid));
         navigate('/app/cash/payments/new', { state: { patientId: selectedPatientId, billsToPay } });
+    };
+
+    const toggleBill = (uid) => {
+        setSelectedBills(prev =>
+            prev.includes(uid) ? prev.filter(x => x !== uid) : [...prev, uid]
+        );
+    };
+
+    const toggleAll = () => {
+        if (selectedBills.length === unpaidBills.length) {
+            setSelectedBills([]);
+        } else {
+            setSelectedBills(unpaidBills.map(b => b.uid));
+        }
     };
 
     const totalSelectedAmount = unpaidBills
@@ -112,125 +120,9 @@ const PatientLedger = () => {
         (p.patientNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase())
     );
 
-    // Columns for Live Queue
-    const queueColumns = [
-        {
-            field: 'patient',
-            headerName: 'Patient Name',
-            flex: 1.5,
-            renderCell: (params) => {
-                const fName = params.row.firstName || 'Unknown';
-                const lName = params.row.lastName || 'Patient';
-                return (
-                    <div className="flex flex-col">
-                        <span className="font-bold text-gray-900 text-sm">{fName} {lName}</span>
-                        <span className="text-[10px] text-gray-500 font-mono">{params.row.patientNumber || 'No ID'}</span>
-                    </div>
-                );
-            }
-        },
-        {
-            field: 'departments',
-            headerName: 'Departments',
-            flex: 1.2,
-            renderCell: (params) => (
-                <div className="flex flex-wrap gap-1">
-                    {(params.value || '').split(', ').filter(Boolean).map(d => (
-                        <span key={d} className="px-1.5 py-0.5 rounded-md bg-gray-100 border border-gray-200 text-[9px] font-black text-gray-900 uppercase tracking-wider">
-                            {d}
-                        </span>
-                    ))}
-                </div>
-            )
-        },
-        {
-            field: 'totalAmount',
-            headerName: 'Total Due',
-            flex: 1,
-            renderCell: (params) => (
-                <span className="font-black text-gray-900">{fmt(params.value)}</span>
-            )
-        },
-        {
-            field: 'wait_time',
-            headerName: 'Waiting',
-            flex: 0.8,
-            renderCell: (params) => {
-                const mins = Math.floor((new Date() - new Date(params.row.lastRequest)) / (1000 * 60));
-                return (
-                    <div className="flex items-center gap-1.5 text-gray-900">
-                        <Clock size={12} className={mins > 60 ? 'text-red-500' : 'text-emerald-600'} />
-                        <span className="text-[11px] font-bold">{mins}m</span>
-                    </div>
-                );
-            }
-        },
-        {
-            field: 'action',
-            headerName: '',
-            sortable: false,
-            width: 120,
-            renderCell: (params) => (
-                <button
-                    onClick={() => handleSelectPatient(params.row.id)}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center gap-2 ${selectedPatientId === String(params.row.id) ? 'bg-gray-900 text-white shadow-lg' : 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-100'}`}
-                >
-                    {selectedPatientId === String(params.row.id) ? 'Selected' : 'Select Patient'}
-                    <ArrowRight size={12} />
-                </button>
-            )
-        }
-    ];
-
-    // Columns for Detailed Bills
-    const billColumns = [
-        {
-            field: 'createdAt',
-            headerName: 'Date',
-            width: 100,
-            renderCell: (params) => {
-                try {
-                    const d = new Date(params.value);
-                    if (isNaN(d.getTime())) return <span className="text-[10px] text-gray-700 font-bold">N/A</span>;
-                    return <span className="text-[10px] text-gray-700 font-bold">{d.toLocaleDateString()}</span>;
-                } catch (e) {
-                    return <span className="text-[10px] text-gray-700 font-bold">Err</span>;
-                }
-            }
-        },
-        {
-            field: 'department',
-            headerName: 'Dept',
-            width: 100,
-            renderCell: (params) => (
-                <span className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-900 font-bold uppercase border border-gray-200 tracking-wider">
-                    {params.value}
-                </span>
-            )
-        },
-        {
-            field: 'description',
-            headerName: 'Service Description',
-            flex: 1.5,
-            renderCell: (params) => (
-                <span className="text-sm font-bold text-gray-900">{params.value || 'General Bill'}</span>
-            )
-        },
-        {
-            field: 'amount',
-            headerName: 'Amount',
-            flex: 1,
-            renderCell: (params) => (
-                <span className="font-black text-gray-900">
-                    {fmt(params.row.netAmount || params.row.totalAmount || 0)}
-                </span>
-            )
-        }
-    ];
-
     return (
         <div className="space-y-6 pb-32 animate-fade-in">
-            {/* Header Section */}
+            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-black text-text-primary tracking-tight flex items-center gap-3">
@@ -241,18 +133,16 @@ const PatientLedger = () => {
                     </h1>
                     <p className="text-sm text-text-secondary mt-1 ml-14">Unified billing engine tracking all active hospital departments</p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={fetchPendingQueue}
-                        className="btn bg-surface border border-border p-3 rounded-2xl hover:bg-white/5 group transition-all"
-                        title="Refresh Queue"
-                    >
-                        <RefreshCw size={20} className={`text-text-secondary group-hover:text-accent ${queueLoading ? 'animate-spin' : ''}`} />
-                    </button>
-                </div>
+                <button
+                    onClick={fetchPendingQueue}
+                    className="btn bg-surface border border-border p-3 rounded-2xl hover:bg-white/5 group transition-all"
+                    title="Refresh Queue"
+                >
+                    <RefreshCw size={20} className={`text-text-secondary group-hover:text-accent ${queueLoading ? 'animate-spin' : ''}`} />
+                </button>
             </div>
 
-            {/* Live Queue Container */}
+            {/* Live Queue Card */}
             <div className="glass-card overflow-hidden border-orange-500/20 relative">
                 <div className="absolute top-0 right-0 p-4">
                     <div className="flex items-center gap-2 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20">
@@ -260,77 +150,93 @@ const PatientLedger = () => {
                         <span className="text-[10px] font-black text-orange-400 uppercase tracking-widest">Live Flow</span>
                     </div>
                 </div>
-
                 <div className="p-6 pb-2 border-b border-white/5">
-                    <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                        Active Unpaid Patients
-                    </h2>
+                    <h2 className="text-lg font-bold text-text-primary">Active Unpaid Patients</h2>
                     <p className="text-xs text-text-secondary mb-4 italic">Patients waiting at the cashier desk for settlement</p>
                 </div>
-
-                <div className="h-[450px] w-full">
-                    <DataGrid
-                        rows={pendingQueue}
-                        columns={queueColumns}
-                        loading={queueLoading}
-                        disableSelectionOnClick
-                        getRowHeight={() => 'auto'}
-                        getRowId={(row) => row.id ?? row.patientId ?? String(Math.random())}
-                        sx={{
-                            border: 'none',
-                            '& .MuiDataGrid-columnHeaders': {
-                                backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                                color: '#111827',
-                                fontSize: '0.7rem',
-                                fontWeight: 900,
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.1em',
-                                borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
-                            },
-                            '& .MuiDataGrid-cell': {
-                                borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-                                color: '#111827',
-                                py: 2
-                            },
-                            '& .MuiDataGrid-row:hover': {
-                                backgroundColor: 'rgba(0, 0, 0, 0.03)'
-                            }
-                        }}
-                        components={{
-                            NoRowsOverlay: () => (
-                                <div className="flex flex-col items-center justify-center h-full space-y-3 p-8">
-                                    <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
-                                        <CheckCircle size={32} className="text-emerald-500" />
-                                    </div>
-                                    <h3 className="text-lg font-bold text-text-primary">Queue Clear</h3>
-                                    <p className="text-sm text-text-secondary">All processed patients have been cleared.</p>
-                                </div>
-                            )
-                        }}
-                    />
+                <div className="overflow-x-auto">
+                    {queueLoading ? (
+                        <div className="flex items-center justify-center h-32 text-text-secondary text-sm">Loading queue...</div>
+                    ) : pendingQueue.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-40 space-y-3">
+                            <div className="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
+                                <CheckCircle size={28} className="text-emerald-500" />
+                            </div>
+                            <h3 className="text-base font-bold text-text-primary">Queue Clear</h3>
+                            <p className="text-xs text-text-secondary">All processed patients have been cleared.</p>
+                        </div>
+                    ) : (
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="text-[10px] font-black uppercase tracking-widest text-white/40 border-b border-white/5 bg-white/[0.02]">
+                                    <th className="px-6 py-3 text-left">Patient</th>
+                                    <th className="px-6 py-3 text-left">Departments</th>
+                                    <th className="px-6 py-3 text-right">Total Due</th>
+                                    <th className="px-6 py-3 text-left">Waiting</th>
+                                    <th className="px-6 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {pendingQueue.map((row, i) => {
+                                    const mins = Math.floor((new Date() - new Date(row.lastRequest)) / (1000 * 60));
+                                    const rowId = row.id || row.patientId || i;
+                                    return (
+                                        <tr key={rowId} className="hover:bg-white/[0.03] transition-colors">
+                                            <td className="px-6 py-4">
+                                                <p className="font-bold text-white text-sm">{row.firstName || 'Unknown'} {row.lastName || ''}</p>
+                                                <p className="text-[10px] text-white/40 font-mono">{row.patientNumber || 'No ID'}</p>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-wrap gap-1">
+                                                    {(row.departments || '').split(', ').filter(Boolean).map(d => (
+                                                        <span key={d} className={`px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${DEPT_COLORS[d] || 'bg-white/10 text-white/60 border-white/10'}`}>{d}</span>
+                                                    ))}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-right font-black text-white">{fmt(row.totalAmount || 0)}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-1.5">
+                                                    <Clock size={12} className={mins > 60 ? 'text-red-400' : 'text-emerald-400'} />
+                                                    <span className="text-xs font-bold text-white/70">{mins}m</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <button
+                                                    onClick={() => handleSelectPatient(rowId)}
+                                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1.5 ${selectedPatientId === String(rowId) ? 'bg-accent text-white shadow-lg' : 'bg-white/10 border border-white/10 text-white/70 hover:bg-white/20'}`}
+                                                >
+                                                    {selectedPatientId === String(rowId) ? 'Selected ✓' : 'Select Patient'}
+                                                    <ArrowRight size={11} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </div>
 
+            {/* Search + Bills Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* Manual Search Sidebar */}
                 <div className="lg:col-span-1 space-y-4">
                     <div className="glass-card p-6 border-indigo-500/10 bg-indigo-500/5">
                         <h3 className="text-xs font-black text-accent uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <Filter size={14} />
-                            Manual Search
+                            <Filter size={14} /> Manual Search
                         </h3>
                         <div className="space-y-4">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                 <input
                                     type="text"
-                                    placeholder="Search Master Patient List..."
+                                    placeholder="Search patient..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-xs outline-none focus:border-accent transition-all text-white placeholder:text-gray-500"
                                 />
                             </div>
-
                             <div className="form-group border border-border bg-surface rounded-xl overflow-hidden px-2">
                                 <select
                                     value={selectedPatientId}
@@ -349,10 +255,9 @@ const PatientLedger = () => {
                                     ))}
                                 </select>
                             </div>
-
-                            <div className="p-4 bg-accent/5 rounded-2xl border border-accent/10 mt-6">
+                            <div className="p-4 bg-accent/5 rounded-2xl border border-accent/10 mt-4">
                                 <div className="flex gap-3">
-                                    <Info size={16} className="text-accent shrink-0 mt-0.5" />
+                                    <Info size={15} className="text-accent shrink-0 mt-0.5" />
                                     <p className="text-[10px] text-gray-400 leading-relaxed">
                                         Use manual search if a patient presented a request slip but isn't visible in the live flow yet.
                                     </p>
@@ -362,91 +267,118 @@ const PatientLedger = () => {
                     </div>
                 </div>
 
-                {/* Detailed View - Table 2 */}
+                {/* Detailed Bills */}
                 <div className="lg:col-span-3">
                     {selectedPatientId ? (
                         <div className="glass-card overflow-hidden border-accent/20">
-                            <div className="p-5 border-b border-white/5 flex justify-between items-center bg-white/2">
+                            <div className="p-5 border-b border-white/5 flex justify-between items-center">
                                 <div>
                                     <h2 className="font-bold text-text-primary flex items-center gap-2">
-                                        <Receipt size={18} className="text-accent" />
-                                        Detailed Bill Breakdown
+                                        <Receipt size={18} className="text-accent" /> Detailed Bill Breakdown
                                     </h2>
-                                    <p className="text-[10px] text-text-secondary mt-0.5 uppercase tracking-widest">Select items to include in this receipt</p>
+                                    <p className="text-[10px] text-text-secondary mt-0.5 uppercase tracking-widest">Check items to include in this receipt</p>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-black bg-accent/10 text-accent px-3 py-1 rounded-full border border-accent/20">
-                                        {unpaidBills.length} PENDING ITEMS
-                                    </span>
+                                <span className="text-[10px] font-black bg-accent/10 text-accent px-3 py-1 rounded-full border border-accent/20">
+                                    {unpaidBills.length} PENDING
+                                </span>
+                            </div>
+                            {loading ? (
+                                <div className="flex items-center justify-center h-40 text-text-secondary text-sm">Loading bills...</div>
+                            ) : unpaidBills.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center h-40 space-y-2">
+                                    <AlertCircle size={28} className="text-white/20" />
+                                    <p className="text-sm text-text-secondary">No unpaid bills found for this patient.</p>
                                 </div>
-                            </div>
-
-                            <div className="h-[450px] w-full">
-                                <DataGrid
-                                    rows={unpaidBills}
-                                    columns={billColumns}
-                                    loading={loading}
-                                    checkboxSelection
-                                    getRowHeight={() => 'auto'}
-                                    onRowSelectionModelChange={(newSelection) => {
-                                        setSelectedBills(newSelection);
-                                    }}
-                                    rowSelectionModel={selectedBills}
-                                    getRowId={(row) => row.uid}
-                                    sx={{
-                                        border: 'none',
-                                        '& .MuiDataGrid-columnHeaders': {
-                                            backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                                            color: '#111827',
-                                            fontSize: '0.7rem',
-                                            fontWeight: 900,
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.1em',
-                                            borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
-                                        },
-                                        '& .MuiDataGrid-cell': {
-                                            borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-                                            color: '#111827',
-                                            py: 1.5
-                                        }
-                                    }}
-                                />
-                            </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm">
+                                        <thead>
+                                            <tr className="text-[10px] font-black uppercase tracking-widest text-white/40 border-b border-white/5 bg-white/[0.02]">
+                                                <th className="px-4 py-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedBills.length === unpaidBills.length && unpaidBills.length > 0}
+                                                        onChange={toggleAll}
+                                                        className="rounded"
+                                                    />
+                                                </th>
+                                                <th className="px-4 py-3 text-left">Date</th>
+                                                <th className="px-4 py-3 text-left">Dept</th>
+                                                <th className="px-4 py-3 text-left">Description</th>
+                                                <th className="px-4 py-3 text-right">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-white/5">
+                                            {unpaidBills.map((bill) => {
+                                                const isChecked = selectedBills.includes(bill.uid);
+                                                const badgeCls = DEPT_COLORS[bill.department] || 'bg-white/10 text-white/60 border-white/10';
+                                                const dateVal = bill.billDate || bill.procedureDate || bill.admissionDate || bill.consultationDate || bill.createdAt;
+                                                return (
+                                                    <tr
+                                                        key={bill.uid}
+                                                        className={`transition-colors cursor-pointer ${isChecked ? 'bg-accent/5' : 'hover:bg-white/[0.03]'}`}
+                                                        onClick={() => toggleBill(bill.uid)}
+                                                    >
+                                                        <td className="px-4 py-4" onClick={e => e.stopPropagation()}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isChecked}
+                                                                onChange={() => toggleBill(bill.uid)}
+                                                                className="rounded"
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 py-4 text-white/60 text-xs">
+                                                            {dateVal ? new Date(dateVal).toLocaleDateString() : '—'}
+                                                        </td>
+                                                        <td className="px-4 py-4">
+                                                            <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${badgeCls}`}>
+                                                                {bill.department}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-4 text-white font-medium text-xs">{bill.description || 'General Bill'}</td>
+                                                        <td className="px-4 py-4 text-right font-black text-white">{fmt(bill.netAmount || bill.totalAmount || 0)}</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                         </div>
                     ) : (
-                        <div className="glass-card h-[400px] flex flex-col items-center justify-center text-center p-12 border-dashed border-2 border-white/5 bg-white/1">
+                        <div className="glass-card h-[400px] flex flex-col items-center justify-center text-center p-12 border-dashed border-2 border-white/5">
                             <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center mb-6 border border-white/5">
                                 <UserPlus className="text-white/20" size={32} />
                             </div>
                             <h3 className="text-lg font-bold text-text-primary">Selection Required</h3>
                             <p className="text-xs text-text-secondary max-w-xs mt-2">
-                                Choose a patient record to verify outstanding departmental balances and generate receipts.
+                                Choose a patient from the queue above or use manual search to load their outstanding bills.
                             </p>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Premium Sticky Footer */}
+            {/* Sticky Footer */}
             {selectedBills.length > 0 && (
                 <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 z-50">
-                    <div className="glass-card p-4 shadow-2xl shadow-gray-200 border-gray-200 bg-white/90 backdrop-blur-xl flex items-center justify-between">
+                    <div className="glass-card p-4 shadow-2xl border-white/10 bg-black/60 backdrop-blur-xl flex items-center justify-between">
                         <div className="flex items-center gap-6 pl-4">
                             <div>
-                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Items Selected</p>
-                                <p className="text-xl font-black text-gray-900">{selectedBills.length} <span className="text-xs font-medium text-gray-600">bills</span></p>
+                                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Items Selected</p>
+                                <p className="text-xl font-black text-white">{selectedBills.length} <span className="text-xs font-medium text-white/50">bills</span></p>
                             </div>
-                            <div className="h-10 w-px bg-gray-200" />
+                            <div className="h-10 w-px bg-white/10" />
                             <div>
-                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Total Payable</p>
-                                <p className="text-2xl font-black text-gray-900">{fmt(totalSelectedAmount)}</p>
+                                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Total Payable</p>
+                                <p className="text-2xl font-black text-white">{fmt(totalSelectedAmount)}</p>
                             </div>
                         </div>
                         <button
                             onClick={handleProceedToPayment}
-                            className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-black text-sm hover:translate-y-[-2px] hover:shadow-xl hover:shadow-gray-400 active:translate-y-[1px] transition-all flex items-center gap-3"
+                            className="bg-accent text-white px-8 py-4 rounded-2xl font-black text-sm hover:opacity-90 hover:translate-y-[-2px] hover:shadow-xl transition-all flex items-center gap-3"
                         >
-                            Process & Clear Bills
+                            Process &amp; Clear Bills
                             <ArrowRight className="w-5 h-5" />
                         </button>
                     </div>
