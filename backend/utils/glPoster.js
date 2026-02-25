@@ -127,27 +127,16 @@ const postPayment = async (payment, t) => {
             description: `Payment for Account`
         }, { transaction: t });
 
-        // 4. Update Account Balances
-        // Asset (Cash) increases with Debit
-        await cashAccount.increment('balance', { by: payment.amount, transaction: t });
-        // Asset (AR) decreases with Credit (so we add a negative, or logic handles it?)
-        // Wait, 'balance' in database is usually a signed value or context dependent?
-        // In this system, Assets: Debit +, Credit -. 
-        // So crediting AR reduces its balance.
-        // sequelize increment adds. So we add -(amount).
-        // Let's check ledgerController logic:
-        // "For asset... debit increases balance... balanceChange = debit - credit"
-        // So if credit is 100, balanceChange is -100.
-        // Account update: balance + balanceChange.
 
+        // 4. Update Account Balances (Cash debit +, AR credit -)
         await cashAccount.increment('balance', { by: payment.amount, transaction: t });
         await arAccount.increment('balance', { by: -payment.amount, transaction: t });
 
         console.log(`GL Posted: Payment ${payment.receiptNumber}`);
 
     } catch (error) {
-        console.error('Failed to post Payment to GL:', error);
-        throw error;
+        console.error('Failed to post Payment to GL:', error.message);
+        // Do not rethrow — GL posting failure is non-fatal
     }
 };
 

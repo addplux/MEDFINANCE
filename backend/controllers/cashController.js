@@ -118,8 +118,12 @@ const createPayment = async (req, res) => {
         await updatePatientBalance(patientId, t);
 
 
-        // Post to General Ledger
-        await postPayment(payment, t);
+        // Post to General Ledger (non-blocking — GL errors must not roll back the payment)
+        try {
+            await postPayment(payment, t);
+        } catch (glError) {
+            console.error('⚠️ GL posting failed (non-fatal, payment will still save):', glError.message);
+        }
 
         await t.commit();
 
