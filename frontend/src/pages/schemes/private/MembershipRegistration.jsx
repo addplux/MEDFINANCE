@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { patientAPI, receivablesAPI } from '../../../services/apiService';
 import {
     Users, Plus, Search, Battery, RefreshCw, Eye, Edit,
-    PlusCircle, X, CheckCircle, AlertCircle, CreditCard, Calendar
+    PlusCircle, X, CheckCircle, AlertCircle, CreditCard, Calendar, Upload
 } from 'lucide-react';
 
 const MEMBER_RANKS = ['principal', 'spouse', 'child', 'dependant', 'other'];
@@ -31,6 +31,9 @@ const MembershipRegistration = () => {
     const [selectedScheme, setSelectedScheme] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [showTopupModal, setShowTopupModal] = useState(false);
+    const [showUploadModal, setShowUploadModal] = useState(false);
+    const [uploadFile, setUploadFile] = useState(null);
+    const [uploadSchemeId, setUploadSchemeId] = useState('');
     const [selectedMember, setSelectedMember] = useState(null);
     const [topupAmount, setTopupAmount] = useState('');
     const [form, setForm] = useState(emptyForm);
@@ -112,6 +115,34 @@ const MembershipRegistration = () => {
         }
     };
 
+    const handleUploadLedger = async (e) => {
+        e.preventDefault();
+        if (!uploadFile) {
+            showAlert('error', 'Please select an Excel or CSV file first.');
+            return;
+        }
+
+        try {
+            setSaving(true);
+            const fd = new FormData();
+            fd.append('file', uploadFile);
+            if (uploadSchemeId) {
+                fd.append('schemeId', uploadSchemeId);
+            }
+
+            const res = await patientAPI.uploadPrepaidLedger(fd);
+            showAlert('success', res.data.message || 'Ledger uploaded successfully!');
+            setShowUploadModal(false);
+            setUploadFile(null);
+            setUploadSchemeId('');
+            loadMembers();
+        } catch (err) {
+            showAlert('error', err?.response?.data?.error || 'Failed to upload ledger.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const handleTopup = async (e) => {
         e.preventDefault();
         if (!topupAmount || isNaN(Number(topupAmount)) || Number(topupAmount) <= 0) {
@@ -170,9 +201,14 @@ const MembershipRegistration = () => {
                     <h1 className="text-3xl font-bold text-white">Membership Registration</h1>
                     <p className="text-white/50 mt-1 text-sm">Register and manage Private Prepaid Scheme members</p>
                 </div>
-                <button onClick={() => { setForm(emptyForm); setShowModal(true); }} className="btn btn-primary">
-                    <Plus className="w-4 h-4" /> Register Member
-                </button>
+                <div className="flex gap-2">
+                    <button onClick={() => setShowUploadModal(true)} className="btn btn-secondary bg-white/10 hover:bg-white/20 border-white/10 text-white">
+                        <Upload className="w-4 h-4" /> Upload Ledger
+                    </button>
+                    <button onClick={() => { setForm(emptyForm); setShowModal(true); }} className="btn btn-primary">
+                        <Plus className="w-4 h-4" /> Register Member
+                    </button>
+                </div>
             </div>
 
             {/* Stats Row */}
@@ -285,8 +321,8 @@ const MembershipRegistration = () => {
                                     </td>
                                     <td className="px-4 py-3">
                                         <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${m.costCategory === 'high_cost' ? 'bg-purple-100 text-purple-700' :
-                                                m.costCategory === 'low_cost' ? 'bg-emerald-100 text-emerald-700' :
-                                                    'bg-gray-100 text-gray-700'
+                                            m.costCategory === 'low_cost' ? 'bg-emerald-100 text-emerald-700' :
+                                                'bg-gray-100 text-gray-700'
                                             }`}>
                                             {m.costCategory ? m.costCategory.replace('_', ' ') : 'Standard'}
                                         </span>
@@ -447,6 +483,52 @@ const MembershipRegistration = () => {
                                 <button type="submit" disabled={saving} className="btn btn-primary">
                                     {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                                     {saving ? 'Registering…' : 'Register Member'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Upload Ledger Modal */}
+            {showUploadModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-900">Upload Prepaid Ledger</h2>
+                                <p className="text-xs text-gray-500">Bulk upload members and opening balances from Excel</p>
+                            </div>
+                            <button onClick={() => setShowUploadModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+                        </div>
+
+                        <form onSubmit={handleUploadLedger} className="p-6 space-y-6">
+                            <div>
+                                <label className="form-label">Link to Scheme (Optional)</label>
+                                <select value={uploadSchemeId} onChange={e => setUploadSchemeId(e.target.value)} className="form-select w-full">
+                                    <option value="">Do not link to a specific scheme</option>
+                                    {schemes.map(s => <option key={s.id} value={s.id}>{s.schemeName}</option>)}
+                                </select>
+                                <p className="text-xs text-gray-400 mt-1">If selected, all uploaded members will belong to this scheme.</p>
+                            </div>
+
+                            <div>
+                                <label className="form-label">Ledger File (Excel or CSV)</label>
+                                <input
+                                    type="file"
+                                    accept=".xlsx, .xls, .csv"
+                                    onChange={(e) => setUploadFile(e.target.files[0])}
+                                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-lg p-2"
+                                    required
+                                />
+                                <p className="text-xs text-gray-400 mt-2">File must match the exported visual format containing "SCH.NO." and "BALANCE" rows.</p>
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button type="button" onClick={() => setShowUploadModal(false)} className="btn btn-secondary">Cancel</button>
+                                <button type="submit" disabled={saving} className="btn btn-primary">
+                                    {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                    {saving ? 'Uploading…' : 'Upload Ledger'}
                                 </button>
                             </div>
                         </form>

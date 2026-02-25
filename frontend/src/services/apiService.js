@@ -32,6 +32,11 @@ export const patientAPI = {
     merge: (data) => api.post('/patients/merge', data),
     getVisitHistory: (id) => api.get(`/patients/${id}/visit-history`),
     topup: (id, amount) => api.post(`/patients/${id}/topup`, { amount }),
+    uploadPrepaidLedger: (formData) => api.post('/patients/upload-prepaid-ledger', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    }),
 };
 
 // Prepaid Plans

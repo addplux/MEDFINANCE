@@ -361,6 +361,7 @@ const getVisitHistory = async (req, res) => {
 
 
 // Topup Prepaid Balance
+// Topup Prepaid Balance
 const topupPrepaidBalance = async (req, res) => {
     try {
         const patient = await Patient.findByPk(req.params.id);
@@ -385,6 +386,111 @@ const topupPrepaidBalance = async (req, res) => {
     }
 };
 
+// Bulk Upload Prepaid Ledger
+const uploadPrepaidLedger = async (req, res) => {
+    const t = await sequelize.transaction();
+    try {
+        if (!req.file) {
+            await t.rollback();
+            return res.status(400).json({ error: 'No Excel file provided.' });
+        }
+
+        const xlsx = require('xlsx');
+        const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+
+        let currentSchemeCostCategory = 'standard';
+        let currentMemberName = null;
+        let currentBalance = 0;
+        const membersToCreate = [];
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            if (!row || row.length === 0) continue;
+
+            const colA = row[0] ? String(row[0]).trim() : '';
+            const colB = row[1] ? String(row[1]).trim() : '';
+            const colC = row[2] ? String(row[2]).trim() : '';
+
+            // Detect Scheme Type
+            if (colA.includes('HIGH COST') || colC.includes('HIGH COST')) {
+                currentSchemeCostCategory = 'high_cost';
+            } else if (colA.includes('LOW COST') || colC.includes('LOW COST')) {
+                currentSchemeCostCategory = 'low_cost';
+            }
+
+            // Detect Member Name Name Row (No Date, No Ledger, Has Client Details, Not a Header)
+            if (!colA && !colB && colC &&
+                !colC.includes('CLIENTS DETAILS') &&
+                !colC.includes('SCH.NO') &&
+                !colC.includes('LEDGER') &&
+                !colC.includes('HIGH COST') &&
+                !colC.includes('LOW COST')) {
+
+                if (currentMemberName) {
+                    membersToCreate.push({ name: currentMemberName, costCategory: currentSchemeCostCategory, balance: currentBalance });
+                }
+                currentMemberName = colC;
+                currentBalance = 0; // reset for new member
+            } else if (currentMemberName && colC && colC !== 'CLIENTS DETAILS' && !colC.includes('LEDGER') && !colC.includes('SCH.NO')) {
+                // Transaction Row
+                const balStr = row[5] ? String(row[5]).replace(/,/g, '').trim() : '';
+                if (balStr && !isNaN(Number(balStr))) {
+                    currentBalance = Number(balStr);
+                }
+            }
+        }
+
+        if (currentMemberName) {
+            membersToCreate.push({ name: currentMemberName, costCategory: currentSchemeCostCategory, balance: currentBalance });
+        }
+
+        if (membersToCreate.length === 0) {
+            await t.rollback();
+            return res.status(400).json({ error: 'No members could be parsed from the uploaded Excel file.' });
+        }
+
+        let patientCount = await Patient.count({ transaction: t });
+        const createdPatients = [];
+
+        for (const member of membersToCreate) {
+            const nameParts = member.name.split(' ');
+            const firstName = nameParts[0];
+            const lastName = nameParts.slice(1).join(' ') || 'Unknown';
+            patientCount++;
+            const patientNumber = `P${String(patientCount).padStart(6, '0')}`;
+
+            const patient = await Patient.create({
+                patientNumber,
+                firstName,
+                lastName,
+                dateOfBirth: new Date('1990-01-01'), // Default since it's not in the sheet
+                gender: 'other', // Default
+                paymentMethod: 'private_prepaid',
+                costCategory: member.costCategory,
+                patientType: 'opd',
+                schemeId: req.body.schemeId ? Number(req.body.schemeId) : null,
+                balance: member.balance,
+                prepaidCredit: member.balance > 0 ? member.balance : 0 // Fallback
+            }, { transaction: t });
+
+            createdPatients.push(patient);
+        }
+
+        await t.commit();
+        res.status(200).json({
+            message: `Successfully uploaded and registered ${createdPatients.length} members.`,
+            count: createdPatients.length
+        });
+    } catch (error) {
+        await t.rollback();
+        console.error('Upload Ledger error:', error);
+        res.status(500).json({ error: 'Failed to process ledger upload', details: error.message });
+    }
+};
+
 module.exports = {
     getAllPatients,
     getPatient,
@@ -393,5 +499,6 @@ module.exports = {
     deletePatient,
     mergePatients,
     getVisitHistory,
-    topupPrepaidBalance
+    topupPrepaidBalance,
+    uploadPrepaidLedger
 };
