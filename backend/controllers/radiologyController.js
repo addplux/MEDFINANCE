@@ -80,10 +80,12 @@ exports.createRequest = async (req, res) => {
             scanType: services.map(s => s.serviceName).join(', '),
             priority: priority || 'routine',
             clinicalNotes,
-            price: totalAmount,
+            amount: totalAmount,
+            netAmount: totalAmount,
+            createdBy: req.user.id,
             status: 'pending',
             paymentStatus: 'pending',
-            date: new Date()
+            billDate: new Date()
         }, { transaction });
 
         // Post to General Ledger as Pending Revenue (using 4000 as placeholder revenue account)
