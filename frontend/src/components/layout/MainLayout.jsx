@@ -195,6 +195,7 @@ const MainLayout = ({ children }) => {
             label: 'Pharmacy Inventory',
             submenu: [
                 { path: '/app/pharmacy/inventory', label: 'Inventory list' },
+                { path: '/app/pharmacy/dispense', label: 'Dispense Drugs' },
                 { path: '/app/pharmacy/grn', label: 'Receive Stock (GRN)' }
             ]
         },
