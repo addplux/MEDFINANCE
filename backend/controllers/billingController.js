@@ -432,12 +432,17 @@ const getUnpaidPatientBills = async (req, res) => {
                 where: { patientId, paymentStatus: 'unpaid' }
             });
             console.log(`[DEBUG] LabBill: found ${labBills.length}`);
-            labBills.forEach(b => unpaidBills.push({
-                ...b.toJSON(),
-                department: 'Laboratory',
-                description: b.testName,
-                billType: 'LabBill'
-            }));
+            labBills.forEach(b => {
+                const bj = b.toJSON();
+                unpaidBills.push({
+                    ...bj,
+                    totalAmount: bj.amount || bj.totalAmount || 0,
+                    netAmount: bj.netAmount || bj.amount || 0,
+                    department: 'Laboratory',
+                    description: b.testName || 'Lab Test',
+                    billType: 'LabBill'
+                });
+            });
         } catch (e) {
             console.error('[DEBUG] LabBill fetch error:', e.message);
         }

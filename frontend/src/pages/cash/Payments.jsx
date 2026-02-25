@@ -62,9 +62,10 @@ const PatientLedger = () => {
                 console.warn(`[Payments] No unpaid bills found for patient ${patientId}`);
             }
 
+            let uidCounter = 0;
             const uniqueBills = bills.map(b => ({
                 ...b,
-                uid: b.uid || `${b.billType || b.department || 'other'}-${b.id}`
+                uid: b.uid || `${b.billType || b.department || 'other'}-${b.id}-${uidCounter++}`
             }));
 
             console.log('[Payments] Processed uniqueBills:', uniqueBills);
@@ -274,6 +275,7 @@ const PatientLedger = () => {
                         loading={queueLoading}
                         disableSelectionOnClick
                         getRowHeight={() => 'auto'}
+                        getRowId={(row) => row.id ?? row.patientId ?? String(Math.random())}
                         sx={{
                             border: 'none',
                             '& .MuiDataGrid-columnHeaders': {
