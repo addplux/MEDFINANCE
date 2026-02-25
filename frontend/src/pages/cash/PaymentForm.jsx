@@ -15,11 +15,11 @@ const PaymentForm = () => {
     const statePatientId = location.state?.patientId ? String(location.state.patientId) : '';
     const stateBillsToPay = location.state?.billsToPay || [];
 
-    // Derive bill type label from all selected bills' departments
+    // Derive bill type — null for multiple depts (allowNull: true in DB)
     const uniqueDepts = [...new Set(stateBillsToPay.map(b => b.department).filter(Boolean))];
     const derivedBillType = uniqueDepts.length === 1
         ? uniqueDepts[0].toLowerCase()
-        : uniqueDepts.length > 1 ? 'multiple' : '';
+        : null;  // send null rather than 'multiple' to avoid ENUM constraint
 
     const prefilledAmount = stateBillsToPay
         .reduce((sum, b) => sum + Number(b.netAmount || b.totalAmount || 0), 0)
@@ -127,11 +127,14 @@ const PaymentForm = () => {
             navigate('/app/cash/payments');
         } catch (error) {
             console.error('Error saving payment:', error);
-            const serverMsg = error.response?.data?.error
-                || error.response?.data?.message
+            const errData = error.response?.data;
+            const serverMsg = [errData?.detail || errData?.error, errData?.detail && errData?.error !== errData?.detail ? null : null]
+                .filter(Boolean).join(': ')
+                || errData?.error
                 || error.message
                 || 'Unknown error';
-            alert(`Failed to save payment:\n\n${serverMsg}`);
+            const detailMsg = errData?.detail && errData.detail !== errData?.error ? `\n\nDetail: ${errData.detail}` : '';
+            alert(`Failed to save payment:\n${errData?.error || error.message}${detailMsg}`);
         } finally {
             setLoading(false);
         }
