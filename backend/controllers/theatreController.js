@@ -50,13 +50,20 @@ exports.createTheatreBill = async (req, res) => {
 
         // Setup Visit to put patient in Theatre Queue if no existing visit provided
         if (!visitId && patientId) {
+            // Find Theatre department ID dynamically
+            const theatreDept = await require('../models').Department.findOne({
+                where: { name: 'Theatre' },
+                transaction
+            });
+            const actualDeptId = theatreDept ? theatreDept.id : null;
+
             const visitNumber = await generateVisitNumber(transaction);
             const visit = await Visit.create({
                 visitNumber,
                 patientId,
                 visitType: 'opd',
                 schemeId,
-                departmentId: 7, // Theatre Department
+                departmentId: actualDeptId,
                 status: 'active',
                 notes: notes,
             }, { transaction });
