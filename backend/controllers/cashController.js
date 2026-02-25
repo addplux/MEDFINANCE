@@ -93,10 +93,12 @@ const createPayment = async (req, res) => {
             for (const b of billsToProcess) {
                 let model;
                 switch (b.type) {
-                    case 'OPD': model = OPDBill; break;
+                    case 'OPD':
+                    case 'OPDBill': model = OPDBill; break;
                     case 'Pharmacy':
                     case 'PharmacyBill': model = PharmacyBill; break;
                     case 'Laboratory':
+                    case 'LabBill':
                     case 'LaboratoryBill': model = LabBill; break;
                     case 'LabRequest': model = LabRequest; break;
                     case 'Radiology':
@@ -106,6 +108,7 @@ const createPayment = async (req, res) => {
                     case 'Maternity':
                     case 'MaternityBill': model = MaternityBill; break;
                     case 'Specialist Clinic':
+                    case 'Specialist':
                     case 'SpecialistClinicBill': model = SpecialistClinicBill; break;
                 }
                 if (model) {
