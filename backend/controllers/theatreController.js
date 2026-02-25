@@ -52,7 +52,7 @@ exports.createTheatreBill = async (req, res) => {
         if (!visitId && patientId) {
             // Find Theatre department ID dynamically
             const theatreDept = await require('../models').Department.findOne({
-                where: { name: 'Theatre' },
+                where: { departmentName: 'Theatre' },
                 transaction
             });
             const actualDeptId = theatreDept ? theatreDept.id : null;
