@@ -1,4 +1,4 @@
-const { TheatreBill, Patient } = require('../models');
+const { TheatreBill, Patient, Visit, sequelize } = require('../models');
 const { postChargeToGL } = require('../utils/glPoster');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
 
@@ -21,22 +21,43 @@ const generateBillNumber = async () => {
     return `${prefix}${year}${month}${sequence.toString().padStart(4, '0')}`;
 };
 
-// Create theatre bill
+// Create theatre bill (and request visit)
 exports.createTheatreBill = async (req, res) => {
+    const transaction = await sequelize.transaction();
     try {
+        const { patientId, schemeId, notes } = req.body;
+
+        let visitId = req.body.visitId;
+
+        // Setup Visit to put patient in Theatre Queue if no existing visit provided
+        if (!visitId && patientId) {
+            const visit = await Visit.create({
+                patientId,
+                visitType: 'outpatient',
+                schemeId,
+                departmentId: 7, // Theatre Department
+                status: 'active',
+                notes: notes,
+            }, { transaction });
+            visitId = visit.id;
+        }
+
         const billNumber = await generateBillNumber();
         const bill = await TheatreBill.create({
             ...req.body,
-            billNumber
-        });
+            billNumber,
+            visitId
+        }, { transaction });
 
-        if (req.body.patientId) {
-            await updatePatientBalance(req.body.patientId);
+        if (patientId) {
+            await updatePatientBalance(patientId, transaction);
         }
-        await postChargeToGL(bill, '4000');
+        await postChargeToGL(bill, '4000', transaction);
 
+        await transaction.commit();
         res.status(201).json(bill);
     } catch (error) {
+        await transaction.rollback();
         console.error('Error creating theatre bill:', error);
         res.status(500).json({ error: 'Failed to create theatre bill' });
     }
@@ -110,6 +131,36 @@ exports.updateTheatreBill = async (req, res) => {
     } catch (error) {
         console.error('Error updating theatre bill:', error);
         res.status(500).json({ error: 'Failed to update theatre bill' });
+    }
+};
+
+// Complete operation and clear from queue
+exports.completeOperation = async (req, res) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const bill = await TheatreBill.findByPk(req.params.id);
+        if (!bill) {
+            await transaction.rollback();
+            return res.status(404).json({ error: 'Theatre bill not found' });
+        }
+
+        // Close out the associated visit to remove patient from the queue
+        if (bill.visitId) {
+            const visit = await Visit.findByPk(bill.visitId);
+            if (visit) {
+                await visit.update({ status: 'completed' }, { transaction });
+            }
+        }
+
+        // Add the current completion date
+        await bill.update({ procedureDate: new Date() }, { transaction });
+
+        await transaction.commit();
+        res.json({ message: 'Operation marked as complete and cleared from queue', bill });
+    } catch (error) {
+        await transaction.rollback();
+        console.error('Error completing theatre operation:', error);
+        res.status(500).json({ error: 'Failed to complete theatre operation' });
     }
 };
 

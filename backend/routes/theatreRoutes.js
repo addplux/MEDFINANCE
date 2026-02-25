@@ -11,6 +11,7 @@ router.post('/bills', theatreController.createTheatreBill);
 router.get('/bills', theatreController.getAllTheatreBills);
 router.get('/bills/:id', theatreController.getTheatreBillById);
 router.put('/bills/:id', theatreController.updateTheatreBill);
+router.put('/bills/:id/complete', theatreController.completeOperation);
 router.delete('/bills/:id', theatreController.deleteTheatreBill);
 
 // Revenue statistics

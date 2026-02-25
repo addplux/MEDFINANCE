@@ -288,7 +288,8 @@ export const theatreAPI = {
         getAll: (params) => api.get('/theatre/bills', { params }),
         getById: (id) => api.get(`/theatre/bills/${id}`),
         update: (id, data) => api.put(`/theatre/bills/${id}`, data),
-        delete: (id) => api.delete(`/theatre/bills/${id}`)
+        delete: (id) => api.delete(`/theatre/bills/${id}`),
+        completeOperation: (id) => api.put(`/theatre/bills/${id}/complete`)
     },
     revenue: () => api.get('/theatre/revenue')
 };

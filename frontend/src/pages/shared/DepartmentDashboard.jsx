@@ -193,6 +193,25 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                         <ChevronRight className="w-4 h-4 text-white/40" />
                                     </div>
                                 </div>
+
+                                {/* Quick Actions for Theatre/Maternity */}
+                                {(type === 'theatre' || type === 'maternity') && (
+                                    <div className="mt-3 pt-3 border-t border-white/5 flex justify-end">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (window.confirm(`Are you sure you want to mark this ${type} visit as complete? This will remove the patient from the queue.`)) {
+                                                    visitAPI.update(v.id, { status: 'completed' })
+                                                        .then(() => loadData())
+                                                        .catch(err => alert('Failed to complete visit.'));
+                                                }
+                                            }}
+                                            className="px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 text-green-500 rounded-lg text-xs font-bold transition-colors border border-green-500/20"
+                                        >
+                                            Complete {type === 'theatre' ? 'Surgery' : 'Visit'}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
