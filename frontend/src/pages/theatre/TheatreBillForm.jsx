@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { theatreAPI, patientAPI } from '../../services/apiService';
+import { theatreAPI, patientAPI, setupAPI } from '../../services/apiService';
 import { Save, X } from 'lucide-react';
 
 const TheatreBillForm = () => {
@@ -18,13 +18,44 @@ const TheatreBillForm = () => {
         consumables: 0,
         notes: ''
     });
+    const [services, setServices] = useState([]);
+
+    React.useEffect(() => {
+        const loadServices = async () => {
+            try {
+                const res = await setupAPI.services.getAll();
+                const allServices = res?.data?.data || res?.data || [];
+                // Filter specifically for the newly seeded Theatre services
+                setServices(allServices.filter(s => s.department === 'Theatre' || s.category === 'theatre'));
+            } catch (err) {
+                console.error("Failed to load services", err);
+            }
+        };
+        loadServices();
+    }, []);
+
+    const handleServiceSelect = (e) => {
+        const serviceName = e.target.value;
+        const selected = services.find(s => s.serviceName === serviceName);
+
+        setFormData(prev => ({
+            ...prev,
+            procedureType: serviceName,
+            theatreCharges: selected ? selected.price : prev.theatreCharges
+        }));
+    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             setLoading(true);
-            await theatreAPI.bills.create(formData);
-            navigate('/app/theatre/billing');
+            const payload = { ...formData };
+            if (payload.procedureType === 'Other' && payload.customProcedure) {
+                payload.procedureType = payload.customProcedure;
+            }
+            await theatreAPI.bills.create(payload);
+            navigate('/app/theatre/dashboard');
         } catch (error) {
             console.error('Error creating theatre bill:', error);
             alert('Failed to create theatre bill');
@@ -73,13 +104,27 @@ const TheatreBillForm = () => {
 
                     <div className="form-group md:col-span-2">
                         <label className="label">Procedure Type *</label>
-                        <input
-                            type="text"
-                            className="form-input"
+                        <select
+                            className="form-select w-full"
                             value={formData.procedureType}
-                            onChange={(e) => setFormData({ ...formData, procedureType: e.target.value })}
+                            onChange={handleServiceSelect}
                             required
-                        />
+                        >
+                            <option value="">-- Select Surgical Procedure --</option>
+                            {services.map(s => (
+                                <option key={s.id} value={s.serviceName}>{s.serviceName}</option>
+                            ))}
+                            <option value="Other">Other (Custom Procedure)</option>
+                        </select>
+                        {formData.procedureType === 'Other' && (
+                            <input
+                                type="text"
+                                className="form-input mt-2"
+                                placeholder="Specify custom procedure"
+                                onChange={(e) => setFormData({ ...formData, customProcedure: e.target.value })}
+                                required
+                            />
+                        )}
                     </div>
 
                     <div className="form-group">
