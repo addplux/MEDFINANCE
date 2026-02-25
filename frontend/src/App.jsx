@@ -282,6 +282,12 @@ function App() {
                         <Route path="specialist-clinics/billing/new" element={<SpecialistClinicForm />} />
                         <Route path="specialist-clinics/billing/:id/edit" element={<SpecialistClinicForm />} />
 
+                        <Route path="physiology/dashboard" element={<DepartmentDashboard title="Physiotherapy" departmentId={5} />} />
+                        <Route path="physiology/billing/new" element={<SpecialistClinicForm defaultClinicType="Physiotherapy" />} />
+
+                        <Route path="dental/dashboard" element={<DepartmentDashboard title="Dental" departmentId={6} />} />
+                        <Route path="dental/billing/new" element={<SpecialistClinicForm defaultClinicType="Dental" />} />
+
                         <Route path="setup" element={<Setup />} />
                         <Route path="setup/pending-approvals" element={<PendingApprovals />} />
                         <Route path="*" element={<Navigate to="/app/dashboard" replace />} />

@@ -185,8 +185,8 @@ const MainLayout = ({ children }) => {
                 { path: '/app/billing/ipd/new', label: 'IPD / Children Ward' },
                 { path: '/app/maternity/billing', label: 'Labour Ward' },
                 { path: '/app/theatre/billing', label: 'Theater' },
-                { path: '/app/billing/physiology/new', label: 'Physiology' },
-                { path: '/app/billing/dental/new', label: 'Dental' }
+                { path: '/app/physiology/dashboard', label: 'Physiotherapy' },
+                { path: '/app/dental/dashboard', label: 'Dental' }
             ]
         },
         {
