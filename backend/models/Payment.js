@@ -25,7 +25,7 @@ const Payment = sequelize.define('Payment', {
         allowNull: false
     },
     paymentMethod: {
-        type: DataTypes.ENUM('cash', 'card', 'mobile_money', 'bank_transfer', 'cheque'),
+        type: DataTypes.ENUM('cash', 'card', 'mobile_money', 'bank_transfer', 'cheque', 'insurance'),
         allowNull: false
     },
     referenceNumber: {
@@ -38,7 +38,7 @@ const Payment = sequelize.define('Payment', {
         defaultValue: DataTypes.NOW
     },
     billType: {
-        type: DataTypes.ENUM('opd', 'ipd', 'pharmacy', 'laboratory', 'radiology', 'other'),
+        type: DataTypes.ENUM('opd', 'ipd', 'pharmacy', 'laboratory', 'radiology', 'theatre', 'maternity', 'specialist', 'multiple', 'other'),
         allowNull: true
     },
     billId: {

@@ -166,6 +166,14 @@ const startServer = async () => {
             console.error('⚠️ Database synchronization failed:', syncError);
         }
 
+        // Run one-time migrations (safe, idempotent)
+        try {
+            const runPaymentEnumMigration = require('./migrations/addPaymentEnums');
+            await runPaymentEnumMigration();
+        } catch (migErr) {
+            console.error('⚠️ Migration runner error (non-fatal):', migErr.message);
+        }
+
         // Auto-seed if database is empty
         try {
             const userCount = await User.count();
