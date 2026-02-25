@@ -126,7 +126,7 @@ const Dispense = () => {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-100px)]">
             {/* Left Panel: Selection */}
-            <div className="lg:col-span-2 space-y-6 overflow-y-auto pr-2">
+            <div className="lg:col-span-2 space-y-6 pr-2">
                 <div className="card p-6">
                     <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                         <User className="w-5 h-5" /> Select Patient
