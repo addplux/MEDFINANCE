@@ -270,11 +270,11 @@ function App() {
 
                         <Route path="opd/dashboard" element={<DepartmentDashboard title="OPD" departmentId={4} />} />
 
-                        <Route path="theatre/dashboard" element={<DepartmentDashboard title="Theatre" departmentId={7} />} />
+                        <Route path="theatre/dashboard" element={<DepartmentDashboard title="Theatre" departmentId={7} type="theatre" />} />
                         <Route path="theatre/billing/new" element={<TheatreBillForm />} />
                         <Route path="theatre/billing/:id/edit" element={<TheatreBillForm />} />
 
-                        <Route path="maternity/billing" element={<MaternityBilling />} />
+                        <Route path="maternity/billing" element={<DepartmentDashboard title="Maternity" departmentId={6} type="maternity" />} />
                         <Route path="maternity/billing/new" element={<MaternityBillForm />} />
                         <Route path="maternity/billing/:id/edit" element={<MaternityBillForm />} />
 

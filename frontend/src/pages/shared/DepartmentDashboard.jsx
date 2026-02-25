@@ -89,6 +89,14 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                     <button onClick={loadData} className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-all border border-white/5">
                         <RefreshCw className={`w-4 h-4 text-white/60 ${loading ? 'animate-spin' : ''}`} />
                     </button>
+                    {(type === 'theatre' || type === 'maternity') && (
+                        <button
+                            onClick={() => navigate(`/app/${type}/billing/new`)}
+                            className="btn btn-primary ml-2 px-4 py-2 text-xs"
+                        >
+                            + New {title} Bill
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -103,8 +111,8 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                         key={f.id}
                         onClick={() => setFilter(f.id)}
                         className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${filter === f.id
-                                ? 'bg-white text-black border-white'
-                                : 'bg-white/5 text-white/40 border-white/5 hover:border-white/20'
+                            ? 'bg-white text-black border-white'
+                            : 'bg-white/5 text-white/40 border-white/5 hover:border-white/20'
                             }`}
                     >
                         {f.label}
@@ -169,12 +177,12 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                     {/* Billing Status */}
                                     <div className="flex items-center gap-1.5">
                                         <div className={`w-1.5 h-1.5 rounded-full ${v.billingSummary?.status === 'pending' ? 'bg-primary shadow-[0_0_8px_rgba(255,0,204,0.6)] animate-pulse' :
-                                                v.billingSummary?.status === 'cleared' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' :
-                                                    'bg-white/10'
+                                            v.billingSummary?.status === 'cleared' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' :
+                                                'bg-white/10'
                                             }`} />
                                         <span className={`text-[9px] font-black uppercase tracking-widest ${v.billingSummary?.status === 'pending' ? 'text-primary' :
-                                                v.billingSummary?.status === 'cleared' ? 'text-green-500' :
-                                                    'text-white/20'
+                                            v.billingSummary?.status === 'cleared' ? 'text-green-500' :
+                                                'text-white/20'
                                             }`}>
                                             {v.billingSummary?.status === 'pending' ? `K${v.billingSummary.totalAmount} UNPAID` :
                                                 v.billingSummary?.status === 'cleared' ? 'BILL CLEARED' : 'NO BILL'}
