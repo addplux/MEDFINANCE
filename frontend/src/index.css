@@ -254,9 +254,9 @@
   .form-select:focus,
   .form-textarea:focus {
     outline: none;
-    background-color: #ffffff;
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.1);
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary-color, #14b8a6);
+    box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
   }
 
   .form-input::placeholder,
@@ -271,16 +271,8 @@
 
   /* Ensure dropdown options have proper text color */
   .form-select option {
-    color: #1a1a1a;
-    background-color: #ffffff;
-  }
-
-  /* Dark mode support for select options */
-  @media (prefers-color-scheme: dark) {
-    .form-select option {
-      color: #ffffff;
-      background-color: #1a1a1a;
-    }
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
   }
 
   .search-box {
