@@ -492,7 +492,7 @@ const MembershipRegistration = () => {
 
             {/* Upload Ledger Modal */}
             {showUploadModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 bg-black/50">
                     <div className="bg-[#1E1E1E] border border-white/10 rounded-2xl shadow-xl w-full max-w-md">
                         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
                             <div>
@@ -538,7 +538,7 @@ const MembershipRegistration = () => {
 
             {/* Top Up Modal */}
             {showTopupModal && selectedMember && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 bg-black/50">
                     <div className="bg-[#1E1E1E] border border-white/10 rounded-2xl shadow-xl w-full max-w-md">
                         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
                             <div>
