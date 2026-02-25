@@ -256,7 +256,7 @@ function App() {
 
                         <Route path="payroll/medical" element={<PayrollMedical />} />
 
-                        <Route path="lab/dashboard" element={<DepartmentDashboard title="Laboratory" departmentId={1} />} />
+                        <Route path="lab/dashboard" element={<DepartmentDashboard title="Laboratory" departmentId={1} type="lab" />} />
                         <Route path="lab/tests" element={<LabTests />} />
                         <Route path="lab/request" element={<LabRequestForm />} />
                         <Route path="lab/results/:id" element={<LabResultEntry />} />
