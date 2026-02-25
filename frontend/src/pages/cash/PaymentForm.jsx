@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ArrowLeft, Save, Wallet } from 'lucide-react';
+import { ArrowLeft, Save, Wallet, User, CheckCircle } from 'lucide-react';
 import { cashAPI, patientAPI } from '../../services/apiService';
 import { useAuth } from '../../context/AuthContext';
 
@@ -11,34 +11,55 @@ const PaymentForm = () => {
     const { user } = useAuth();
     const isEdit = Boolean(id);
 
-    // State from Ledger
-    const statePatientId = location.state?.patientId || '';
+    // State passed from the Payments/Ledger page
+    const statePatientId = location.state?.patientId ? String(location.state.patientId) : '';
     const stateBillsToPay = location.state?.billsToPay || [];
-    const prefilledAmount = stateBillsToPay.reduce((sum, b) => sum + Number(b.netAmount || b.totalAmount || 0), 0).toString();
+
+    // Derive bill type label from all selected bills' departments
+    const uniqueDepts = [...new Set(stateBillsToPay.map(b => b.department).filter(Boolean))];
+    const derivedBillType = uniqueDepts.length === 1
+        ? uniqueDepts[0].toLowerCase()
+        : uniqueDepts.length > 1 ? 'multiple' : '';
+
+    const prefilledAmount = stateBillsToPay
+        .reduce((sum, b) => sum + Number(b.netAmount || b.totalAmount || 0), 0)
+        .toString();
 
     const [loading, setLoading] = useState(false);
     const [patients, setPatients] = useState([]);
+    const [selectedPatient, setSelectedPatient] = useState(null);
     const [formData, setFormData] = useState({
         patientId: statePatientId,
         amount: prefilledAmount,
         paymentMethod: 'cash',
         referenceNumber: '',
         paymentDate: new Date().toISOString().split('T')[0],
-        billType: stateBillsToPay.length === 1 ? stateBillsToPay[0].department.toLowerCase() : 'multiple',
+        billType: derivedBillType,
         billId: stateBillsToPay.length === 1 ? stateBillsToPay[0].id : '',
         notes: ''
     });
 
     useEffect(() => {
         loadPatients();
-        if (isEdit) {
-            fetchPayment();
-        }
+        if (isEdit) fetchPayment();
     }, [id]);
+
+    // When patients list loads, find the pre-selected patient and auto-fill method
+    useEffect(() => {
+        if (!patients.length || !formData.patientId) return;
+        const found = patients.find(p => String(p.id) === String(formData.patientId));
+        if (!found) return;
+        setSelectedPatient(found);
+
+        // Auto-select payment method if patient is on a corporate scheme
+        if (found.schemeId || found.Scheme) {
+            setFormData(prev => ({ ...prev, paymentMethod: 'insurance' }));
+        }
+    }, [patients, formData.patientId]);
 
     const loadPatients = async () => {
         try {
-            const response = await patientAPI.getAll();
+            const response = await patientAPI.getAll({ limit: 2000 });
             setPatients(response.data.data || response.data || []);
         } catch (error) {
             console.error('Error loading patients:', error);
@@ -70,35 +91,32 @@ const PaymentForm = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        // When patient changes manually, look up scheme
+        if (name === 'patientId') {
+            const found = patients.find(p => String(p.id) === String(value));
+            setSelectedPatient(found || null);
+            if (found && (found.schemeId || found.Scheme)) {
+                setFormData(prev => ({ ...prev, patientId: value, paymentMethod: 'insurance' }));
+                return;
+            }
+        }
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!formData.patientId || !formData.amount) {
             alert('Patient and amount are required');
             return;
         }
-
         try {
             setLoading(true);
-
-            // Generate the paidBills array for the backend exactly as expected
-            const paidBills = stateBillsToPay.map(b => ({
-                type: b.billType || b.department,
-                id: b.id
-            }));
-
+            const paidBills = stateBillsToPay.map(b => ({ type: b.billType || b.department, id: b.id }));
             const payload = {
                 ...formData,
                 receivedBy: user?.id,
                 paidBills: paidBills.length > 0 ? paidBills : undefined
             };
-
             if (isEdit) {
                 await cashAPI.payments.update(id, payload);
                 alert('Payment updated successfully');
@@ -116,66 +134,77 @@ const PaymentForm = () => {
     };
 
     if (loading && isEdit) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="text-lg">Loading...</div>
-            </div>
-        );
+        return <div className="flex items-center justify-center min-h-screen text-white">Loading...</div>;
     }
+
+    const isFromLedger = stateBillsToPay.length > 0 && !isEdit;
 
     return (
         <div className="page-container">
             <div className="page-header">
                 <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => navigate('/app/cash/payments')}
-                        className="btn btn-secondary"
-                    >
+                    <button onClick={() => navigate('/app/cash/payments')} className="btn btn-secondary">
                         <ArrowLeft size={18} />
                     </button>
                     <div>
-                        <h1 className="page-title">
-                            {isEdit ? 'Edit Payment' : 'New Payment Receipt'}
-                        </h1>
-                        <p className="page-subtitle">
-                            {isEdit ? 'Update payment information' : 'Record a new payment receipt'}
-                        </p>
+                        <h1 className="page-title">{isEdit ? 'Edit Payment' : 'New Payment Receipt'}</h1>
+                        <p className="page-subtitle">{isEdit ? 'Update payment information' : 'Record a new payment receipt'}</p>
                     </div>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit} className="card p-6">
                 <div className="space-y-6">
-                    {/* Bills Summary (If coming from Ledger) */}
-                    {stateBillsToPay.length > 0 && !isEdit && (
-                        <div className="bg-blue-50 text-blue-900 p-4 rounded-lg border border-blue-100 flex justify-between items-center">
+
+                    {/* Bills Summary Banner */}
+                    {isFromLedger && (
+                        <div className="bg-accent/10 border border-accent/20 p-4 rounded-xl flex justify-between items-center">
                             <div>
-                                <h4 className="font-semibold flex items-center gap-2">
-                                    <span className="badge badge-primary">{stateBillsToPay.length}</span>
+                                <h4 className="font-semibold text-white flex items-center gap-2">
+                                    <CheckCircle size={16} className="text-accent" />
+                                    <span className="bg-accent text-white text-xs font-black px-2 py-0.5 rounded-full">{stateBillsToPay.length}</span>
                                     Bills Selected for Settlement
                                 </h4>
-                                <p className="text-sm mt-1 text-blue-700">
-                                    {stateBillsToPay.map(b => b.department).join(', ')}
-                                </p>
+                                <div className="flex gap-2 mt-2 flex-wrap">
+                                    {uniqueDepts.map(d => (
+                                        <span key={d} className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-white/10 text-white border border-white/10">{d}</span>
+                                    ))}
+                                </div>
                             </div>
                             <div className="text-right">
-                                <div className="text-sm text-blue-700">Total Settlement</div>
-                                <div className="text-2xl font-bold">K {Number(prefilledAmount).toLocaleString()}</div>
+                                <div className="text-xs text-white/50 uppercase tracking-widest">Total Settlement</div>
+                                <div className="text-2xl font-black text-white">K {Number(prefilledAmount).toLocaleString()}</div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Patient Info Banner (when pre-selected from ledger) */}
+                    {selectedPatient && (
+                        <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                            <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
+                                <User size={18} className="text-accent" />
+                            </div>
+                            <div>
+                                <p className="font-black text-white">{selectedPatient.firstName} {selectedPatient.lastName}</p>
+                                <p className="text-[10px] text-white/50 font-mono">{selectedPatient.patientNumber}
+                                    {selectedPatient.schemeId || selectedPatient.Scheme
+                                        ? <span className="ml-2 text-emerald-400 font-black uppercase tracking-widest">[Corporate Scheme Member]</span>
+                                        : null}
+                                </p>
                             </div>
                         </div>
                     )}
 
                     {/* Payment Information */}
                     <div>
-                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <Wallet size={20} />
-                            Payment Information
+                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
+                            <Wallet size={20} /> Payment Information
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                            {/* Patient */}
                             <div className="form-group">
-                                <label className="form-label">
-                                    Patient <span className="text-error">*</span>
-                                </label>
+                                <label className="form-label">Patient <span className="text-error">*</span></label>
                                 <select
                                     name="patientId"
                                     value={formData.patientId}
@@ -184,19 +213,17 @@ const PaymentForm = () => {
                                     required
                                 >
                                     <option value="">Select Patient</option>
-                                    {(patients || []).map(patient => (
-                                        <option key={patient.id} value={patient.id}>
-                                            {patient.firstName || ''} {patient.lastName || ''}
-                                            {patient.dateOfBirth ? ` (${new Date(patient.dateOfBirth).getFullYear()})` : ''}
+                                    {patients.map(p => (
+                                        <option key={p.id} value={String(p.id)}>
+                                            {p.patientNumber} — {p.firstName} {p.lastName}
                                         </option>
                                     ))}
                                 </select>
                             </div>
 
+                            {/* Amount */}
                             <div className="form-group">
-                                <label className="form-label">
-                                    Amount (K) <span className="text-error">*</span>
-                                </label>
+                                <label className="form-label">Amount (K) <span className="text-error">*</span></label>
                                 <input
                                     type="number"
                                     name="amount"
@@ -210,10 +237,9 @@ const PaymentForm = () => {
                                 />
                             </div>
 
+                            {/* Payment Method — auto-set to insurance for scheme members */}
                             <div className="form-group">
-                                <label className="form-label">
-                                    Payment Method <span className="text-error">*</span>
-                                </label>
+                                <label className="form-label">Payment Method <span className="text-error">*</span></label>
                                 <select
                                     name="paymentMethod"
                                     value={formData.paymentMethod}
@@ -226,9 +252,14 @@ const PaymentForm = () => {
                                     <option value="mobile_money">Mobile Money</option>
                                     <option value="bank_transfer">Bank Transfer</option>
                                     <option value="cheque">Cheque</option>
+                                    <option value="insurance">Corporate Scheme / Insurance</option>
                                 </select>
+                                {(selectedPatient?.schemeId || selectedPatient?.Scheme) && (
+                                    <p className="text-[10px] text-emerald-400 mt-1">✓ Auto-set: patient is a corporate scheme member</p>
+                                )}
                             </div>
 
+                            {/* Reference Number */}
                             <div className="form-group">
                                 <label className="form-label">Reference Number</label>
                                 <input
@@ -241,10 +272,9 @@ const PaymentForm = () => {
                                 />
                             </div>
 
+                            {/* Payment Date */}
                             <div className="form-group">
-                                <label className="form-label">
-                                    Payment Date <span className="text-error">*</span>
-                                </label>
+                                <label className="form-label">Payment Date <span className="text-error">*</span></label>
                                 <input
                                     type="date"
                                     name="paymentDate"
@@ -255,24 +285,37 @@ const PaymentForm = () => {
                                 />
                             </div>
 
+                            {/* Bill Type — auto-filled from ledger, editable for direct entry */}
                             <div className="form-group">
                                 <label className="form-label">Bill Type</label>
-                                <select
-                                    name="billType"
-                                    value={formData.billType}
-                                    onChange={handleChange}
-                                    className="form-select"
-                                >
-                                    <option value="">Select Type</option>
-                                    <option value="opd">OPD</option>
-                                    <option value="ipd">IPD</option>
-                                    <option value="pharmacy">Pharmacy</option>
-                                    <option value="laboratory">Laboratory</option>
-                                    <option value="radiology">Radiology</option>
-                                    <option value="other">Other</option>
-                                </select>
+                                {isFromLedger ? (
+                                    <div className="form-input bg-white/5 border border-white/10 flex items-center gap-2 flex-wrap min-h-[42px]">
+                                        {uniqueDepts.map(d => (
+                                            <span key={d} className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-accent/20 text-accent border border-accent/20">{d}</span>
+                                        ))}
+                                        {uniqueDepts.length === 0 && <span className="text-white/30 text-xs">—</span>}
+                                    </div>
+                                ) : (
+                                    <select
+                                        name="billType"
+                                        value={formData.billType}
+                                        onChange={handleChange}
+                                        className="form-select"
+                                    >
+                                        <option value="">Select Type</option>
+                                        <option value="opd">OPD</option>
+                                        <option value="ipd">IPD</option>
+                                        <option value="pharmacy">Pharmacy</option>
+                                        <option value="laboratory">Laboratory</option>
+                                        <option value="radiology">Radiology</option>
+                                        <option value="theatre">Theatre</option>
+                                        <option value="maternity">Maternity</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                )}
                             </div>
 
+                            {/* Notes */}
                             <div className="form-group md:col-span-2">
                                 <label className="form-label">Notes</label>
                                 <textarea
@@ -289,19 +332,10 @@ const PaymentForm = () => {
 
                     {/* Actions */}
                     <div className="flex justify-end gap-3 pt-4 border-t border-border-color">
-                        <button
-                            type="button"
-                            onClick={() => navigate('/app/cash/payments')}
-                            className="btn btn-secondary"
-                            disabled={loading}
-                        >
+                        <button type="button" onClick={() => navigate('/app/cash/payments')} className="btn btn-secondary" disabled={loading}>
                             Cancel
                         </button>
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            disabled={loading}
-                        >
+                        <button type="submit" className="btn btn-primary" disabled={loading}>
                             <Save size={18} className="mr-2" />
                             {loading ? 'Saving...' : isEdit ? 'Update Payment' : 'Record Payment'}
                         </button>
