@@ -35,7 +35,7 @@ const PaymentForm = () => {
         referenceNumber: '',
         paymentDate: new Date().toISOString().split('T')[0],
         billType: derivedBillType,
-        billId: stateBillsToPay.length === 1 ? stateBillsToPay[0].id : '',
+        billId: stateBillsToPay.length === 1 ? stateBillsToPay[0].id : null,
         notes: ''
     });
 
