@@ -403,7 +403,10 @@ const uploadPrepaidLedger = async (req, res) => {
 
         let currentSchemeCostCategory = 'standard';
         let currentMember = null;
+        let pendingName = null;
         const membersToCreate = [];
+
+        const txKeywords = ['BAL B/F', 'BALANCE', 'MEMBERSHIP', 'CONSULTATION', 'PHARMACY', 'LABORATORY', 'X-RAY', 'CASH', 'PAYMENT', 'RECEIPT', 'DRUGS', 'B/F', 'BROUGHT FORWARD', 'CLIENTS', 'DETAILS', 'LEDGER', 'DATE'];
 
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
@@ -415,66 +418,63 @@ const uploadPrepaidLedger = async (req, res) => {
             if (rowStr.includes('HIGH COST')) currentSchemeCostCategory = 'high_cost';
             if (rowStr.includes('LOW COST')) currentSchemeCostCategory = 'low_cost';
 
-            // Detect Scheme No.
-            // e.g., SCH.NO. 20170729 or SCH. NO. 1234
-            const schMatch = rowStr.match(/SCH\.?\s*NO\.?\s*([A-Z0-9_-]+)/);
-            if (schMatch) {
-                if (currentMember && currentMember.name) {
-                    membersToCreate.push(currentMember);
-                }
-                currentMember = {
-                    schemeNo: schMatch[1],
-                    name: null,
-                    balance: 0,
-                    costCategory: currentSchemeCostCategory
-                };
-                continue;
-            }
-
-            if (!currentMember) continue;
-
-            // We are inside a member's block
             // Filter non-empty cells
             const cells = row.map(c => String(c || '').trim()).filter(c => c);
             if (cells.length === 0) continue;
 
-            // Header row check
-            if (rowStr.includes('CLIENTS DETAILS') || rowStr.includes('LEDGER NO')) continue;
+            // Try to detect a Name if it's not a strong transaction row
+            const candidateTextCells = cells.filter(c => {
+                const cleanC = c.replace(/,/g, '');
+                const isNum = !isNaN(Number(cleanC));
+                const isDate = /^\d{2}[\.\/]\d{2}[\.\/]\d{2,4}$/.test(c);
+                return !isNum && !isDate;
+            });
 
-            // Find right-most valid number for balance
-            let rowBalance = null;
-            for (let j = row.length - 1; j >= 0; j--) {
-                const val = String(row[j] || '').replace(/,/g, '').trim();
-                // Check if it's a valid number and NOT a date like '01.01.19'
-                if (val && !isNaN(Number(val)) && !/^\d{2}[\.\/]\d{2}[\.\/]\d{2,4}$/.test(val)) {
-                    rowBalance = Number(val);
-                    break;
+            if (candidateTextCells.length > 0) {
+                const candidate = candidateTextCells[0];
+                const candidateUpper = candidate.toUpperCase();
+
+                const isTx = txKeywords.some(kw => candidateUpper.includes(kw));
+                const isSchemeNo = candidateUpper.includes('SCH');
+
+                // If it's not a transaction keyword, not a number, and not a header, not a SCH NO
+                if (!isTx && !isSchemeNo && !candidateUpper.includes('HIGH COST LEDGERS FOR SCHEME MEMBERS') && !candidateUpper.includes('LOW COST LEDGERS FOR SCHEME MEMBERS') && candidate.length > 2) {
+                    // It's likely a Name
+                    pendingName = candidate;
                 }
             }
 
-            if (rowBalance !== null) {
-                currentMember.balance = rowBalance;
+            // Detect Scheme No.
+            const schMatch = rowStr.match(/SCH\.?\s*NO\.?\s*([A-Z0-9_-]+)/);
+            if (schMatch) {
+                if (currentMember) {
+                    membersToCreate.push(currentMember);
+                }
+
+                currentMember = {
+                    schemeNo: schMatch[1],
+                    name: pendingName || 'Unknown',
+                    balance: 0,
+                    costCategory: currentSchemeCostCategory
+                };
+                pendingName = null; // Reset pending name
+                continue;
             }
 
-            // Detect Name (first text cell that doesn't contain transaction keywords and has no date)
-            if (!currentMember.name) {
-                const txKeywords = ['BAL B/F', 'BALANCE', 'MEMBERSHIP', 'CONSULTATION', 'PHARMACY', 'LABORATORY', 'X-RAY', 'CASH', 'PAYMENT', 'RECEIPT', 'DRUGS', 'B/F', 'BROUGHT FORWARD'];
-
-                const candidateTextCells = cells.filter(c => {
-                    const cleanC = c.replace(/,/g, '');
-                    const isNum = !isNaN(Number(cleanC));
-                    const isDate = /^\d{2}[\.\/]\d{2}[\.\/]\d{2,4}$/.test(c);
-                    return !isNum && !isDate;
-                });
-
-                if (candidateTextCells.length > 0) {
-                    const candidate = candidateTextCells[0];
-                    const candidateUpper = candidate.toUpperCase();
-
-                    const isTx = txKeywords.some(kw => candidateUpper.includes(kw));
-                    if (!isTx && candidate.length > 2) {
-                        currentMember.name = candidate;
+            // If we have a currentMember, look for balances
+            if (currentMember) {
+                // Find right-most valid number for balance
+                let rowBalance = null;
+                for (let j = row.length - 1; j >= 0; j--) {
+                    const val = String(row[j] || '').replace(/,/g, '').trim();
+                    if (val && !isNaN(Number(val)) && !/^\d{2}[\.\/]\d{2}[\.\/]\d{2,4}$/.test(val)) {
+                        rowBalance = Number(val);
+                        break;
                     }
+                }
+
+                if (rowBalance !== null) {
+                    currentMember.balance = rowBalance;
                 }
             }
         }
