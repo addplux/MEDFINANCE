@@ -80,7 +80,7 @@ exports.createTheatreBill = async (req, res) => {
     } catch (error) {
         await transaction.rollback();
         console.error('Error creating theatre bill:', error);
-        res.status(500).json({ error: 'Failed to create theatre bill' });
+        res.status(500).json({ error: 'Failed to create theatre bill', details: error.message });
     }
 };
 

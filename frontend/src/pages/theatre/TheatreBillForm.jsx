@@ -67,7 +67,8 @@ const TheatreBillForm = () => {
             navigate('/app/theatre/dashboard');
         } catch (error) {
             console.error('Error creating theatre bill:', error);
-            alert('Failed to create theatre bill');
+            const detailMsg = error.response?.data?.details ? `: ${error.response.data.details}` : '';
+            alert(`Failed to create theatre bill${detailMsg}`);
         } finally {
             setLoading(false);
         }
