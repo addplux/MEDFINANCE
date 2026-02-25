@@ -54,7 +54,7 @@ exports.createTheatreBill = async (req, res) => {
             const visit = await Visit.create({
                 visitNumber,
                 patientId,
-                visitType: 'outpatient',
+                visitType: 'opd',
                 schemeId,
                 departmentId: 7, // Theatre Department
                 status: 'active',
