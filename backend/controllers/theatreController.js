@@ -1,4 +1,5 @@
 const { TheatreBill, Patient, Visit, sequelize } = require('../models');
+const { Op } = require('sequelize');
 const { postChargeToGL } = require('../utils/glPoster');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
 
@@ -21,6 +22,24 @@ const generateBillNumber = async () => {
     return `${prefix}${year}${month}${sequence.toString().padStart(4, '0')}`;
 };
 
+// Generate unique visit number
+const generateVisitNumber = async (transaction) => {
+    const today = new Date();
+    const datePart = [
+        today.getFullYear(),
+        String(today.getMonth() + 1).padStart(2, '0'),
+        String(today.getDate()).padStart(2, '0')
+    ].join('');
+
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const count = await Visit.count({
+        where: { createdAt: { [Op.gte]: startOfDay } },
+        transaction
+    });
+    const seq = String(count + 1).padStart(4, '0');
+    return `VIS-${datePart}-${seq}`;
+};
+
 // Create theatre bill (and request visit)
 exports.createTheatreBill = async (req, res) => {
     const transaction = await sequelize.transaction();
@@ -31,7 +50,9 @@ exports.createTheatreBill = async (req, res) => {
 
         // Setup Visit to put patient in Theatre Queue if no existing visit provided
         if (!visitId && patientId) {
+            const visitNumber = await generateVisitNumber(transaction);
             const visit = await Visit.create({
+                visitNumber,
                 patientId,
                 visitType: 'outpatient',
                 schemeId,
