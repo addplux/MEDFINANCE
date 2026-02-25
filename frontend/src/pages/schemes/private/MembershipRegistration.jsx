@@ -244,6 +244,7 @@ const MembershipRegistration = () => {
                                 <th className="px-4 py-3">Member</th>
                                 <th className="px-4 py-3">Policy #</th>
                                 <th className="px-4 py-3">Rank</th>
+                                <th className="px-4 py-3">Scheme Type</th>
                                 <th className="px-4 py-3">Phone</th>
                                 <th className="px-4 py-3">Status</th>
                                 <th className="px-4 py-3">Balance</th>
@@ -281,6 +282,14 @@ const MembershipRegistration = () => {
                                     <td className="px-4 py-3 text-xs font-mono text-white/60">{m.policyNumber || '—'}</td>
                                     <td className="px-4 py-3">
                                         <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 capitalize">{m.memberRank || '—'}</span>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${m.costCategory === 'high_cost' ? 'bg-purple-100 text-purple-700' :
+                                                m.costCategory === 'low_cost' ? 'bg-emerald-100 text-emerald-700' :
+                                                    'bg-gray-100 text-gray-700'
+                                            }`}>
+                                            {m.costCategory ? m.costCategory.replace('_', ' ') : 'Standard'}
+                                        </span>
                                     </td>
                                     <td className="px-4 py-3 text-xs text-white/60">{m.phone || '—'}</td>
                                     <td className="px-4 py-3">
@@ -394,6 +403,14 @@ const MembershipRegistration = () => {
                                         <label className="form-label">Member Rank</label>
                                         <select name="memberRank" value={form.memberRank} onChange={handleFormChange} className="form-select">
                                             {MEMBER_RANKS.map(r => <option key={r} value={r} className="capitalize">{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="form-label">Scheme Type</label>
+                                        <select name="costCategory" value={form.costCategory} onChange={handleFormChange} className="form-select">
+                                            <option value="standard">Standard</option>
+                                            <option value="high_cost">High Cost</option>
+                                            <option value="low_cost">Low Cost</option>
                                         </select>
                                     </div>
                                     <div>
