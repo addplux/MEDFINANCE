@@ -83,8 +83,8 @@ const TheatreBillForm = () => {
         <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-text-primary">New Theatre Bill</h1>
-                    <p className="text-text-secondary">Create a new surgical procedure bill</p>
+                    <h1 className="text-2xl font-bold text-text-primary">New Theatre Request</h1>
+                    <p className="text-text-secondary">Create a clinical request and surgical bill</p>
                 </div>
             </div>
 
@@ -291,7 +291,7 @@ const TheatreBillForm = () => {
                         className="btn btn-primary flex items-center gap-2"
                     >
                         <Save className="w-4 h-4" />
-                        {loading ? 'Saving...' : 'Save Bill'}
+                        {loading ? 'Submitting...' : 'Submit Request'}
                     </button>
                 </div>
             </form>

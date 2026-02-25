@@ -94,7 +94,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                             onClick={() => navigate(`/app/${type}/billing/new`)}
                             className="btn btn-primary ml-2 px-4 py-2 text-xs"
                         >
-                            + New {title} Bill
+                            + New {title} Request
                         </button>
                     )}
                 </div>
