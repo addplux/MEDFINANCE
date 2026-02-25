@@ -55,7 +55,8 @@ exports.createTheatreBill = async (req, res) => {
                 where: { departmentName: 'Theatre' },
                 transaction
             });
-            const actualDeptId = theatreDept ? theatreDept.id : null;
+            // If the DB doesn't have 'Theatre' defined, fallback to 7 to match frontend routing
+            const actualDeptId = theatreDept ? theatreDept.id : 7;
 
             const visitNumber = await generateVisitNumber(transaction);
             const visit = await Visit.create({
