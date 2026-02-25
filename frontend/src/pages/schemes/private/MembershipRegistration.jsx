@@ -493,13 +493,13 @@ const MembershipRegistration = () => {
             {/* Upload Ledger Modal */}
             {showUploadModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                    <div className="bg-[#1E1E1E] border border-white/10 rounded-2xl shadow-xl w-full max-w-md">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
                             <div>
-                                <h2 className="text-lg font-bold text-gray-900">Upload Prepaid Ledger</h2>
-                                <p className="text-xs text-gray-500">Bulk upload members and opening balances from Excel</p>
+                                <h2 className="text-lg font-bold text-white">Upload Prepaid Ledger</h2>
+                                <p className="text-xs text-white/50">Bulk upload members and opening balances from Excel</p>
                             </div>
-                            <button onClick={() => setShowUploadModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+                            <button onClick={() => setShowUploadModal(false)} className="p-2 hover:bg-white/5 text-white/50 hover:text-white rounded-lg"><X className="w-5 h-5" /></button>
                         </div>
 
                         <form onSubmit={handleUploadLedger} className="p-6 space-y-6">
@@ -509,7 +509,7 @@ const MembershipRegistration = () => {
                                     <option value="">Do not link to a specific scheme</option>
                                     {schemes.map(s => <option key={s.id} value={s.id}>{s.schemeName}</option>)}
                                 </select>
-                                <p className="text-xs text-gray-400 mt-1">If selected, all uploaded members will belong to this scheme.</p>
+                                <p className="text-xs text-white/40 mt-1">If selected, all uploaded members will belong to this scheme.</p>
                             </div>
 
                             <div>
@@ -518,10 +518,10 @@ const MembershipRegistration = () => {
                                     type="file"
                                     accept=".xlsx, .xls, .csv"
                                     onChange={(e) => setUploadFile(e.target.files[0])}
-                                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-lg p-2"
+                                    className="block w-full text-sm text-white/50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white/5 file:text-white hover:file:bg-white/10 cursor-pointer border border-white/10 rounded-lg p-2 bg-[#080808]"
                                     required
                                 />
-                                <p className="text-xs text-gray-400 mt-2">File must match the exported visual format containing "SCH.NO." and "BALANCE" rows.</p>
+                                <p className="text-xs text-white/40 mt-2">File must match the exported visual format containing "SCH.NO." and "BALANCE" rows.</p>
                             </div>
 
                             <div className="flex justify-end gap-3 pt-2">
@@ -539,19 +539,19 @@ const MembershipRegistration = () => {
             {/* Top Up Modal */}
             {showTopupModal && selectedMember && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                    <div className="bg-[#1E1E1E] border border-white/10 rounded-2xl shadow-xl w-full max-w-md">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
                             <div>
-                                <h2 className="text-lg font-bold text-gray-900">Top Up Balance</h2>
-                                <p className="text-xs text-gray-500">Add credit for {selectedMember.firstName} {selectedMember.lastName}</p>
+                                <h2 className="text-lg font-bold text-white">Top Up Balance</h2>
+                                <p className="text-xs text-white/50">Add credit for {selectedMember.firstName} {selectedMember.lastName}</p>
                             </div>
-                            <button onClick={() => setShowTopupModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+                            <button onClick={() => setShowTopupModal(false)} className="p-2 hover:bg-white/5 text-white/50 hover:text-white rounded-lg"><X className="w-5 h-5" /></button>
                         </div>
                         <form onSubmit={handleTopup} className="p-6 space-y-4">
-                            <div className={`flex items-center gap-3 p-3 rounded-lg border ${balanceBg(selectedMember.balance)}`}>
+                            <div className={`flex items-center gap-3 p-3 rounded-lg border border-white/10 bg-white/5`}>
                                 <Battery className={`w-6 h-6 ${balanceColor(selectedMember.balance)}`} />
                                 <div>
-                                    <div className="text-xs text-gray-500">Current Balance</div>
+                                    <div className="text-xs text-white/50">Current Balance</div>
                                     <div className={`text-xl font-bold ${balanceColor(selectedMember.balance)}`}>
                                         ZK {Number(selectedMember.balance || 0).toLocaleString()}
                                     </div>
@@ -560,7 +560,7 @@ const MembershipRegistration = () => {
                             <div>
                                 <label className="form-label">Top-Up Amount (ZK)</label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-sm">ZK</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 font-semibold text-sm">ZK</span>
                                     <input
                                         type="number" min="1" step="0.01"
                                         value={topupAmount} onChange={e => setTopupAmount(e.target.value)}
@@ -572,11 +572,11 @@ const MembershipRegistration = () => {
                                 </div>
                             </div>
                             {topupAmount && !isNaN(Number(topupAmount)) && (
-                                <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-700">
-                                    New balance will be: <strong>ZK {(Number(selectedMember.balance || 0) + Number(topupAmount)).toLocaleString()}</strong>
+                                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 text-sm text-green-400">
+                                    New balance will be: <strong className="text-white">ZK {(Number(selectedMember.balance || 0) + Number(topupAmount)).toLocaleString()}</strong>
                                 </div>
                             )}
-                            <div className="flex justify-end gap-3 pt-2">
+                            <div className="flex justify-end gap-3 pt-4">
                                 <button type="button" onClick={() => setShowTopupModal(false)} className="btn btn-secondary">Cancel</button>
                                 <button type="submit" disabled={saving} className="btn btn-primary">
                                     {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <PlusCircle className="w-4 h-4" />}
