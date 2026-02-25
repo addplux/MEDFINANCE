@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { theatreAPI, patientAPI, setupAPI } from '../../services/apiService';
-import { Save, X } from 'lucide-react';
+import { Save, X, User } from 'lucide-react';
 
 const TheatreBillForm = () => {
     const navigate = useNavigate();
@@ -19,19 +19,28 @@ const TheatreBillForm = () => {
         notes: ''
     });
     const [services, setServices] = useState([]);
+    const [patients, setPatients] = useState([]);
+    const [patientSearch, setPatientSearch] = useState('');
+    const [showPatientList, setShowPatientList] = useState(false);
+    const [selectedPatientName, setSelectedPatientName] = useState('');
 
     React.useEffect(() => {
-        const loadServices = async () => {
+        const loadInitialData = async () => {
             try {
-                const res = await setupAPI.services.getAll();
-                const allServices = res?.data?.data || res?.data || [];
-                // Filter specifically for the newly seeded Theatre services
+                const [servicesRes, patientsRes] = await Promise.all([
+                    setupAPI.services.getAll(),
+                    patientAPI.getAll()
+                ]);
+
+                const allServices = servicesRes?.data?.data || servicesRes?.data || [];
                 setServices(allServices.filter(s => s.department === 'Theatre' || s.category === 'theatre'));
+
+                setPatients(patientsRes?.data?.data || patientsRes?.data || []);
             } catch (err) {
-                console.error("Failed to load services", err);
+                console.error("Failed to load initial data", err);
             }
         };
-        loadServices();
+        loadInitialData();
     }, []);
 
     const handleServiceSelect = (e) => {
@@ -80,15 +89,71 @@ const TheatreBillForm = () => {
 
             <form onSubmit={handleSubmit} className="card p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="form-group">
-                        <label className="label">Patient ID *</label>
-                        <input
-                            type="number"
-                            className="form-input"
-                            value={formData.patientId}
-                            onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-                            required
-                        />
+                    <div className="form-group relative">
+                        <label className="label">Patient *</label>
+                        {formData.patientId ? (
+                            <div className="flex items-center gap-2 p-3 bg-bg-tertiary rounded-lg border border-border-color">
+                                <User className="w-4 h-4 text-primary" />
+                                <span className="flex-1 font-medium">{selectedPatientName}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setFormData({ ...formData, patientId: '' });
+                                        setSelectedPatientName('');
+                                        setPatientSearch('');
+                                    }}
+                                    className="text-text-secondary hover:text-error transition-colors text-lg leading-none"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <input
+                                    type="text"
+                                    className="form-input w-full"
+                                    placeholder="Search patient by name or ID..."
+                                    value={patientSearch}
+                                    onChange={e => { setPatientSearch(e.target.value); setShowPatientList(true); }}
+                                    onFocus={() => setShowPatientList(true)}
+                                    required
+                                />
+                                {showPatientList && (
+                                    <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-bg-secondary border border-border-color rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                                        {(patients || [])
+                                            .filter(p =>
+                                                !patientSearch ||
+                                                `${p.firstName} ${p.lastName}`.toLowerCase().includes(patientSearch.toLowerCase()) ||
+                                                (p.patientNumber || '').toLowerCase().includes(patientSearch.toLowerCase())
+                                            )
+                                            .slice(0, 20)
+                                            .map(p => (
+                                                <button
+                                                    key={p.id}
+                                                    type="button"
+                                                    className="w-full text-left px-4 py-2.5 hover:bg-primary/10 text-sm flex items-center gap-2 transition-colors"
+                                                    onMouseDown={() => {
+                                                        setFormData({ ...formData, patientId: p.id });
+                                                        setSelectedPatientName(`${p.patientNumber ? p.patientNumber + ' — ' : ''}${p.firstName} ${p.lastName}`);
+                                                        setPatientSearch('');
+                                                        setShowPatientList(false);
+                                                    }}
+                                                >
+                                                    <span className="text-xs text-text-secondary w-20 shrink-0">{p.patientNumber}</span>
+                                                    <span className="font-medium">{p.firstName} {p.lastName}</span>
+                                                </button>
+                                            ))}
+                                        {patients.filter(p =>
+                                            !patientSearch ||
+                                            `${p.firstName} ${p.lastName}`.toLowerCase().includes(patientSearch.toLowerCase()) ||
+                                            (p.patientNumber || '').toLowerCase().includes(patientSearch.toLowerCase())
+                                        ).length === 0 && (
+                                                <div className="px-4 py-3 text-sm text-text-secondary">No patients found</div>
+                                            )}
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </div>
 
                     <div className="form-group">
