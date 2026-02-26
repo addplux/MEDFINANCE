@@ -133,7 +133,7 @@ const Patients = () => {
                             setCategoryFilter(t.value);
                             setCurrentPage(1);
                         }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${categoryFilter === t.value
+                        className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-semibold border transition-colors ${categoryFilter === t.value
                             ? 'bg-indigo-600 text-white border-indigo-600'
                             : 'bg-white/5 text-white/60 border-white/10 hover:border-indigo-400 hover:text-white'
                             }`}
@@ -153,10 +153,10 @@ const Patients = () => {
                         placeholder="Search patient…"
                         value={searchTerm}
                         onChange={handleSearchChange}
-                        className="form-input pl-8 py-1.5 text-sm w-48 sm:w-64"
+                        className="form-input rounded-full pl-8 py-2 text-sm w-48 sm:w-64 bg-white/5 border-white/10 text-white placeholder:text-gray-500"
                     />
                 </div>
-                <button onClick={() => { setCurrentPage(1); loadPatients(); }} className="btn btn-secondary p-2" title="Refresh">
+                <button onClick={() => { setCurrentPage(1); loadPatients(); }} className="btn btn-secondary rounded-full p-2" title="Refresh">
                     <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 </button>
             </div>
@@ -166,7 +166,7 @@ const Patients = () => {
                 {/* Desktop */}
                 <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="text-xs font-bold text-white/40 uppercase bg-white/5 border-b border-white/10">
+                        <thead className="text-[10px] uppercase font-bold text-white/40 tracking-wider bg-white/5 border-b border-white/10">
                             <tr>
                                 <th className="px-4 py-3 whitespace-nowrap">Photo</th>
                                 <th className="px-4 py-3 whitespace-nowrap">Patient No.</th>
@@ -226,24 +226,24 @@ const Patients = () => {
                                             <PatientTypeBadge patient={patient} />
                                         </td>
                                         <td className="px-4 py-2 whitespace-nowrap text-right">
-                                            <div className="flex items-center justify-end gap-1">
+                                            <div className="flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => navigate(`/app/patients/${patient.id}`)}
-                                                    className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded transition-colors"
+                                                    className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-full transition-colors"
                                                     title="View Master Record"
                                                 >
                                                     <Eye className="w-4 h-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => navigate(`/app/patients/${patient.id}/edit`)}
-                                                    className="p-1.5 hover:bg-green-50 text-gray-400 hover:text-green-600 rounded transition-colors"
+                                                    className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-full transition-colors"
                                                     title="Edit"
                                                 >
                                                     <Edit className="w-4 h-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(patient.id)}
-                                                    className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded transition-colors"
+                                                    className="p-2 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded-full transition-colors"
                                                     title="Delete"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -295,15 +295,15 @@ const Patients = () => {
                                     <div><span className="text-gray-400">Phone: </span>{patient.phone || '—'}</div>
                                     <div><span className="text-gray-400">NRC: </span>{patient.nrc || '—'}</div>
                                 </div>
-                                <div className="pt-2 border-t border-gray-100 flex gap-2">
-                                    <button onClick={() => navigate(`/app/patients/${patient.id}`)} className="btn btn-sm btn-secondary flex-1 justify-center">
-                                        <Eye className="w-3 h-3 mr-1" /> View
+                                <div className="pt-3 border-t border-gray-100 flex gap-3">
+                                    <button onClick={() => navigate(`/app/patients/${patient.id}`)} className="btn btn-sm btn-secondary rounded-full flex-1 justify-center">
+                                        <Eye className="w-3.5 h-3.5 mr-1" /> View
                                     </button>
-                                    <button onClick={() => navigate(`/app/patients/${patient.id}/edit`)} className="btn btn-sm btn-secondary flex-1 justify-center">
-                                        <Edit className="w-3 h-3 mr-1" /> Edit
+                                    <button onClick={() => navigate(`/app/patients/${patient.id}/edit`)} className="btn btn-sm btn-secondary rounded-full flex-1 justify-center">
+                                        <Edit className="w-3.5 h-3.5 mr-1" /> Edit
                                     </button>
-                                    <button onClick={() => handleDelete(patient.id)} className="btn btn-sm btn-danger flex-1 justify-center">
-                                        <Trash2 className="w-3 h-3 mr-1" /> Delete
+                                    <button onClick={() => handleDelete(patient.id)} className="btn btn-sm btn-danger rounded-full flex-1 justify-center">
+                                        <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
                                     </button>
                                 </div>
                             </div>

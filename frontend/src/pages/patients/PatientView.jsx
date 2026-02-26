@@ -22,7 +22,7 @@ const InfoRow = ({ icon: Icon, label, value }) => (
         <div className="flex items-start gap-3 py-2">
             <Icon className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
             <div>
-                <p className="text-xs text-gray-400 leading-none mb-0.5">{label}</p>
+                <p className="text-[10px] uppercase tracking-wider text-gray-400 leading-none mb-0.5">{label}</p>
                 <p className="text-sm font-medium text-white">{value}</p>
             </div>
         </div>
@@ -30,8 +30,8 @@ const InfoRow = ({ icon: Icon, label, value }) => (
 );
 
 const Section = ({ title, children }) => (
-    <div className="card p-5 space-y-1">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">{title}</h3>
+    <div className="card p-6 space-y-2">
+        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4">{title}</h3>
         {children}
     </div>
 );
@@ -145,10 +145,10 @@ const PatientView = () => {
                     {/* Identity */}
                     <div className="flex-1 text-center sm:text-left space-y-2">
                         <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                            <h2 className="text-2xl font-bold text-white">
+                            <h2 className="text-3xl font-bold text-white">
                                 {patient.firstName} {patient.lastName}
                             </h2>
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold border ${badge.bg} ${badge.text} ${badge.border}`}>
+                            <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-bold border ${badge.bg} ${badge.text} ${badge.border}`}>
                                 {badge.label}
                             </span>
                         </div>
@@ -169,26 +169,26 @@ const PatientView = () => {
                     </div>
 
                     {/* Balance & Visit Summary */}
-                    <div className="flex-shrink-0 flex flex-col gap-2 min-w-[180px]">
-                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 text-center">
-                            <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Outstanding Balance</p>
-                            <p className={`text-2xl font-bold mt-1 ${parseFloat(patient.balance) > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    <div className="flex-shrink-0 flex flex-col gap-3 min-w-[200px]">
+                        <div className="bg-gray-50 rounded-2xl p-5 border border-gray-200 text-center shadow-sm">
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Outstanding Balance</p>
+                            <p className={`text-3xl font-bold mt-2 ${parseFloat(patient.balance) > 0 ? 'text-red-600' : 'text-green-600'}`}>
                                 ZMW {parseFloat(patient.balance || 0).toLocaleString('en-ZM', { minimumFractionDigits: 2 })}
                             </p>
                         </div>
                         <div
-                            className="bg-indigo-50 rounded-xl p-3 border border-indigo-100 text-center cursor-pointer hover:bg-indigo-100 transition-colors"
+                            className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100 text-center cursor-pointer hover:bg-indigo-100 transition-colors shadow-sm"
                             onClick={() => navigate(`/app/visits?search=${patient.patientNumber}`)}
                         >
                             <p className="text-[10px] text-white font-bold uppercase tracking-wider">Total Hospital Visits</p>
-                            <p className="text-xl font-bold text-white">{patient.totalVisits || 0}</p>
+                            <p className="text-2xl font-bold text-white mt-1">{patient.totalVisits || 0}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Details grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
                 {/* Contact Info */}
                 <Section title="Contact Information">
@@ -269,7 +269,7 @@ const PatientView = () => {
                         </div>
                         <button
                             onClick={() => navigate(`/app/visits?search=${patient.patientNumber}`)}
-                            className="w-full py-2 px-3 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2"
+                            className="w-full py-2.5 px-4 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2 mt-2"
                         >
                             <Clipboard className="w-3.5 h-3.5" />
                             View Encounter History
@@ -284,10 +284,10 @@ const PatientView = () => {
             </div>
 
             {/* Visit History shortcut */}
-            <div className="card p-5 flex items-center justify-between gap-4">
+            <div className="card p-6 flex flex-col sm:flex-row items-center justify-between gap-6 mt-4">
                 <div>
-                    <h3 className="font-semibold text-white">Patient Visit History</h3>
-                    <p className="text-sm text-gray-500">View all OPD, IPD, Lab, Pharmacy and other billing records for this patient.</p>
+                    <h3 className="text-lg font-bold text-white">Patient Visit History</h3>
+                    <p className="text-sm text-gray-500 mt-1">View all OPD, IPD, Lab, Pharmacy and other billing records for this patient.</p>
                 </div>
                 <button
                     onClick={() => navigate(`/app/patients/${id}/history`)}
