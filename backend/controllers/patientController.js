@@ -407,6 +407,7 @@ const uploadPrepaidLedger = async (req, res) => {
         const membersToCreate = [];
 
         const txKeywords = ['BAL B/F', 'BALANCE', 'MEMBERSHIP', 'CONSULTATION', 'PHARMACY', 'LABORATORY', 'X-RAY', 'CASH', 'PAYMENT', 'RECEIPT', 'DRUGS', 'B/F', 'BROUGHT FORWARD', 'CLIENTS', 'DETAILS', 'LEDGER', 'DATE'];
+        const statusKeywords = ['ACTIVE', 'SUSPENDED', 'CLOSED', 'DECEASED', 'INACTIVE', 'MALE', 'FEMALE'];
 
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
@@ -431,16 +432,20 @@ const uploadPrepaidLedger = async (req, res) => {
             });
 
             if (candidateTextCells.length > 0) {
-                const candidate = candidateTextCells[0];
-                const candidateUpper = candidate.toUpperCase();
+                // Look for the first valid candidate that isn't a status or transaction keyword
+                for (const candidate of candidateTextCells) {
+                    const candidateUpper = candidate.toUpperCase();
 
-                const isTx = txKeywords.some(kw => candidateUpper.includes(kw));
-                const isSchemeNo = candidateUpper.includes('SCH');
+                    const isTx = txKeywords.some(kw => candidateUpper.includes(kw));
+                    const isSchemeNo = candidateUpper.includes('SCH');
+                    const isStatus = statusKeywords.includes(candidateUpper);
 
-                // If it's not a transaction keyword, not a number, and not a header, not a SCH NO
-                if (!isTx && !isSchemeNo && !candidateUpper.includes('HIGH COST LEDGERS FOR SCHEME MEMBERS') && !candidateUpper.includes('LOW COST LEDGERS FOR SCHEME MEMBERS') && candidate.length > 2) {
-                    // It's likely a Name
-                    pendingName = candidate;
+                    // If it's not a transaction keyword, not a number, not a header, not a SCH NO, and not a STATUS
+                    if (!isTx && !isSchemeNo && !isStatus && !candidateUpper.includes('HIGH COST LEDGERS FOR SCHEME MEMBERS') && !candidateUpper.includes('LOW COST LEDGERS FOR SCHEME MEMBERS') && candidate.length > 2) {
+                        // It's likely a Name
+                        pendingName = candidate;
+                        break;
+                    }
                 }
             }
 
