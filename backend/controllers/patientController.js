@@ -404,10 +404,9 @@ const uploadPrepaidLedger = async (req, res) => {
         let currentSchemeCostCategory = 'standard';
         let currentMember = null;
         let pendingName = null;
-        const membersToCreate = [];
-
-        const txKeywords = ['BAL B/F', 'BALANCE', 'MEMBERSHIP', 'CONSULTATION', 'PHARMACY', 'LABORATORY', 'X-RAY', 'CASH', 'PAYMENT', 'RECEIPT', 'DRUGS', 'B/F', 'BROUGHT FORWARD', 'CLIENTS', 'DETAILS', 'LEDGER', 'DATE'];
-        const statusKeywords = ['ACTIVE', 'SUSPENDED', 'CLOSED', 'DECEASED', 'INACTIVE', 'MALE', 'FEMALE'];
+        const txKeywords = ['BAL B/F', 'BALANCE', 'MEMBERSHIP', 'CONSULTATION', 'PHARMACY', 'LABORATORY', 'X-RAY', 'CASH', 'PAYMENT', 'RECEIPT', 'DRUGS', 'B/F', 'BROUGHT FORWARD', 'CLIENTS', 'DETAILS', 'LEDGER', 'DATE', 'MEDICAL', 'BILL', 'CONS', 'DRGUG', 'ADDRESS', 'ADD:'];
+        const statusKeywords = ['ACTIVE', 'SUSPENDED', 'CLOSED', 'DECEASED', 'INACTIVE'];
+        const genderKeywords = ['MALE', 'FEMALE'];
 
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
@@ -431,20 +430,30 @@ const uploadPrepaidLedger = async (req, res) => {
                 return !isNum && !isDate;
             });
 
+            let rowStatus = null;
+
             if (candidateTextCells.length > 0) {
                 // Look for the first valid candidate that isn't a status or transaction keyword
                 for (const candidate of candidateTextCells) {
                     const candidateUpper = candidate.toUpperCase();
 
+                    // Extract status if present
+                    if (statusKeywords.includes(candidateUpper)) {
+                        rowStatus = candidateUpper.toLowerCase();
+                    }
+
                     const isTx = txKeywords.some(kw => candidateUpper.includes(kw));
                     const isSchemeNo = candidateUpper.includes('SCH');
                     const isStatus = statusKeywords.includes(candidateUpper);
+                    const isGender = genderKeywords.includes(candidateUpper);
 
-                    // If it's not a transaction keyword, not a number, not a header, not a SCH NO, and not a STATUS
-                    if (!isTx && !isSchemeNo && !isStatus && !candidateUpper.includes('HIGH COST LEDGERS FOR SCHEME MEMBERS') && !candidateUpper.includes('LOW COST LEDGERS FOR SCHEME MEMBERS') && candidate.length > 2) {
-                        // It's likely a Name
-                        pendingName = candidate;
-                        break;
+                    // If it's not a transaction keyword, not a number, not a header, not a SCH NO, not STATUS, not GENDER
+                    if (!isTx && !isSchemeNo && !isStatus && !isGender && !candidateUpper.includes('HIGH COST') && !candidateUpper.includes('LOW COST') && candidate.length > 2) {
+                        // To avoid "Medical bill #298", check if it contains a hash or numbers if it's supposed to be a name
+                        if (!/#\d+/.test(candidateUpper) && !/BILL/.test(candidateUpper)) {
+                            pendingName = candidate;
+                            break;
+                        }
                     }
                 }
             }
@@ -460,10 +469,16 @@ const uploadPrepaidLedger = async (req, res) => {
                     schemeNo: schMatch[1],
                     name: pendingName || 'Unknown',
                     balance: 0,
-                    costCategory: currentSchemeCostCategory
+                    costCategory: currentSchemeCostCategory,
+                    memberStatus: rowStatus || 'active'
                 };
                 pendingName = null; // Reset pending name
                 continue;
+            }
+
+            // Update status if found on a subsequent row for the current member
+            if (currentMember && rowStatus) {
+                currentMember.memberStatus = rowStatus;
             }
 
             // If we have a currentMember, look for balances
@@ -529,6 +544,7 @@ const uploadPrepaidLedger = async (req, res) => {
                 patientType: 'opd',
                 schemeId: req.body.schemeId ? Number(req.body.schemeId) : null,
                 policyNumber: member.schemeNo.substring(0, 50), // Store in policy number as well
+                memberStatus: member.memberStatus,
                 balance: member.balance,
                 prepaidCredit: member.balance > 0 ? member.balance : 0 // Fallback
             }, { transaction: t });
