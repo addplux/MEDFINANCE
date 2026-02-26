@@ -1069,8 +1069,12 @@ const importSchemeMembers = async (req, res) => {
                 await t.commit();
 
             } catch (err) {
-                if (t) await t.rollback();
-                console.error(`Failed to import member row:`, err);
+                if (t && !t.finished) await t.rollback();
+                console.error(`Failed to import member row details:`, {
+                    member: member.NAME || member.firstName,
+                    error: err.message,
+                    stack: err.stack
+                });
                 failedCount++;
                 const msg = err.errors ? err.errors.map(e => e.message).join(', ') : err.message;
                 errors.push(`Error for ${member.NAME || member.firstName || 'Unknown'}: ${msg}`);
@@ -1099,8 +1103,8 @@ const importSchemeMembers = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Import members fatal error:', error);
-        res.status(500).json({ error: 'Failed to initiate import process' });
+        console.error('Import members fatal error detailed stack:', error);
+        res.status(500).json({ error: error.message || 'Failed to initiate import process' });
     }
 };
 
