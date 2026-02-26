@@ -23,7 +23,7 @@ const InfoRow = ({ icon: Icon, label, value }) => (
             <Icon className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
             <div>
                 <p className="text-xs text-gray-400 leading-none mb-0.5">{label}</p>
-                <p className="text-sm font-medium text-gray-800">{value}</p>
+                <p className="text-sm font-medium text-white">{value}</p>
             </div>
         </div>
     ) : null
@@ -94,7 +94,7 @@ const PatientView = () => {
                     <ArrowLeft className="w-4 h-4" />
                 </button>
                 <div className="flex-1">
-                    <h1 className="text-2xl font-bold text-gray-900">Patient Master Record</h1>
+                    <h1 className="text-2xl font-bold text-white">Patient Master Record</h1>
                     <p className="text-sm text-gray-500">Complete patient profile and classification</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
@@ -145,7 +145,7 @@ const PatientView = () => {
                     {/* Identity */}
                     <div className="flex-1 text-center sm:text-left space-y-2">
                         <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                            <h2 className="text-2xl font-bold text-gray-900">
+                            <h2 className="text-2xl font-bold text-white">
                                 {patient.firstName} {patient.lastName}
                             </h2>
                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold border ${badge.bg} ${badge.text} ${badge.border}`}>
@@ -180,8 +180,8 @@ const PatientView = () => {
                             className="bg-indigo-50 rounded-xl p-3 border border-indigo-100 text-center cursor-pointer hover:bg-indigo-100 transition-colors"
                             onClick={() => navigate(`/app/visits?search=${patient.patientNumber}`)}
                         >
-                            <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">Total Hospital Visits</p>
-                            <p className="text-xl font-bold text-indigo-700">{patient.totalVisits || 0}</p>
+                            <p className="text-[10px] text-white font-bold uppercase tracking-wider">Total Hospital Visits</p>
+                            <p className="text-xl font-bold text-white">{patient.totalVisits || 0}</p>
                         </div>
                     </div>
                 </div>
@@ -249,7 +249,7 @@ const PatientView = () => {
                     ].filter(f => parseFloat(patient[f.key] || 0) !== 0).map(f => (
                         <div key={f.key} className="flex justify-between items-center py-1 text-sm border-b border-gray-50 last:border-0">
                             <span className="text-gray-500">{f.label}</span>
-                            <span className="font-semibold text-gray-800">ZMW {parseFloat(patient[f.key]).toFixed(2)}</span>
+                            <span className="font-semibold text-white">ZMW {parseFloat(patient[f.key]).toFixed(2)}</span>
                         </div>
                     ))}
                     {[
@@ -265,7 +265,7 @@ const PatientView = () => {
                     <div className="flex flex-col gap-3 py-1">
                         <div className="flex justify-between items-center text-sm">
                             <span className="text-gray-500">Total Encounters</span>
-                            <span className="font-bold text-gray-800">{patient.totalVisits || 0}</span>
+                            <span className="font-bold text-white">{patient.totalVisits || 0}</span>
                         </div>
                         <button
                             onClick={() => navigate(`/app/visits?search=${patient.patientNumber}`)}
@@ -286,7 +286,7 @@ const PatientView = () => {
             {/* Visit History shortcut */}
             <div className="card p-5 flex items-center justify-between gap-4">
                 <div>
-                    <h3 className="font-semibold text-gray-800">Patient Visit History</h3>
+                    <h3 className="font-semibold text-white">Patient Visit History</h3>
                     <p className="text-sm text-gray-500">View all OPD, IPD, Lab, Pharmacy and other billing records for this patient.</p>
                 </div>
                 <button
