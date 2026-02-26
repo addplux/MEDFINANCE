@@ -406,7 +406,12 @@ const uploadPrepaidLedger = async (req, res) => {
         let pendingName = null;
         const membersToCreate = [];
 
-        const txKeywords = ['BAL B/F', 'BALANCE', 'MEMBERSHIP', 'CONSULTATION', 'PHARMACY', 'LABORATORY', 'X-RAY', 'CASH', 'PAYMENT', 'RECEIPT', 'DRUGS', 'B/F', 'BROUGHT FORWARD', 'CLIENTS', 'DETAILS', 'LEDGER', 'DATE', 'MEDICAL', 'BILL', 'CONS', 'DRGUG', 'ADDRESS', 'ADD:'];
+        const txKeywords = [
+            'BAL B/F', 'BALANCE', 'MEMBERSHIP', 'CONSULTATION', 'PHARMACY', 'LABORATORY', 'X-RAY',
+            'CASH', 'PAYMENT', 'RECEIPT', 'DRUGS', 'B/F', 'BROUGHT FORWARD', 'CLIENTS', 'DETAILS',
+            'LEDGER', 'DATE', 'MEDICAL', 'BILL', 'CONS', 'DRGUG', 'ADDRESS', 'ADD:', 'PHYSIO',
+            'LABS', 'TEST', 'REVIEW', 'RTD', 'NKANZA'
+        ];
         const statusKeywords = ['ACTIVE', 'SUSPENDED', 'CLOSED', 'DECEASED', 'INACTIVE'];
         const genderKeywords = ['MALE', 'FEMALE'];
 
@@ -428,7 +433,8 @@ const uploadPrepaidLedger = async (req, res) => {
             const candidateTextCells = cells.filter(c => {
                 const cleanC = c.replace(/,/g, '');
                 const isNum = !isNaN(Number(cleanC));
-                const isDate = /^\d{2}[\.\/]\d{2}[\.\/]\d{2,4}$/.test(c);
+                // More robust date regex to catch "30/4/2019" or "30/04/19" etc.
+                const isDate = /^\d{1,2}[\.\/\-]\d{1,2}[\.\/\-]\d{2,4}$/.test(c);
                 return !isNum && !isDate;
             });
 
@@ -444,7 +450,10 @@ const uploadPrepaidLedger = async (req, res) => {
                         rowStatus = candidateUpper.toLowerCase();
                     }
 
-                    const isTx = txKeywords.some(kw => candidateUpper.includes(kw));
+                    // Split into words and check if any word intersects with txKeywords
+                    const words = candidateUpper.split(/[\s_-]+/);
+                    const isTx = words.some(w => txKeywords.includes(w)) || txKeywords.some(kw => candidateUpper.includes(kw));
+
                     const isSchemeNo = candidateUpper.includes('SCH');
                     const isStatus = statusKeywords.includes(candidateUpper);
                     const isGender = genderKeywords.includes(candidateUpper);
