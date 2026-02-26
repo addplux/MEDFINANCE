@@ -404,6 +404,8 @@ const uploadPrepaidLedger = async (req, res) => {
         let currentSchemeCostCategory = 'standard';
         let currentMember = null;
         let pendingName = null;
+        const membersToCreate = [];
+
         const txKeywords = ['BAL B/F', 'BALANCE', 'MEMBERSHIP', 'CONSULTATION', 'PHARMACY', 'LABORATORY', 'X-RAY', 'CASH', 'PAYMENT', 'RECEIPT', 'DRUGS', 'B/F', 'BROUGHT FORWARD', 'CLIENTS', 'DETAILS', 'LEDGER', 'DATE', 'MEDICAL', 'BILL', 'CONS', 'DRGUG', 'ADDRESS', 'ADD:'];
         const statusKeywords = ['ACTIVE', 'SUSPENDED', 'CLOSED', 'DECEASED', 'INACTIVE'];
         const genderKeywords = ['MALE', 'FEMALE'];
