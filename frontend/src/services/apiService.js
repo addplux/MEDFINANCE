@@ -32,11 +32,7 @@ export const patientAPI = {
     merge: (data) => api.post('/patients/merge', data),
     getVisitHistory: (id) => api.get(`/patients/${id}/visit-history`),
     topup: (id, amount) => api.post(`/patients/${id}/topup`, { amount }),
-    uploadPrepaidLedger: (formData) => api.post('/patients/upload-prepaid-ledger', formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        },
-    }),
+    uploadPrepaidLedger: (formData) => api.post('/patients/upload-prepaid-ledger', formData),
 };
 
 // Prepaid Plans
@@ -109,9 +105,7 @@ export const receivablesAPI = {
         generateInvoice: (data) => api.post('/receivables/schemes/invoices/generate', data),
         getInvoices: (schemeId) => api.get(`/receivables/schemes/${schemeId}/invoices`),
         getInvoiceDetails: (invoiceId) => api.get(`/receivables/schemes/invoices/${invoiceId}`),
-        importMembers: (schemeId, formData) => api.post(`/receivables/schemes/${schemeId}/import`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        }),
+        importMembers: (schemeId, formData) => api.post(`/receivables/schemes/${schemeId}/import`, formData),
         updateMemberStatus: (schemeId, patientId, status) => api.put(`/receivables/schemes/${schemeId}/members/${patientId}/status`, { status }),
     },
 };
