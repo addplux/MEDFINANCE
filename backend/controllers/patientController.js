@@ -466,7 +466,8 @@ const uploadPrepaidLedger = async (req, res) => {
                 // Find right-most valid number for balance
                 let rowBalance = null;
                 for (let j = row.length - 1; j >= 0; j--) {
-                    const val = String(row[j] || '').replace(/,/g, '').trim();
+                    const originalVal = String(row[j] || '').trim();
+                    const val = originalVal.replace(/,/g, '');
                     if (val && !isNaN(Number(val)) && !/^\d{2}[\.\/]\d{2}[\.\/]\d{2,4}$/.test(val)) {
                         rowBalance = Number(val);
                         break;
@@ -474,7 +475,9 @@ const uploadPrepaidLedger = async (req, res) => {
                 }
 
                 if (rowBalance !== null) {
-                    currentMember.balance = rowBalance;
+                    // Prevent numeric field overflow for DECIMAL(10,2) (-99,999,999.99 to 99,999,999.99)
+                    const clampedBalance = Math.min(Math.max(rowBalance, -99999999.99), 99999999.99);
+                    currentMember.balance = clampedBalance;
                 }
             }
         }
