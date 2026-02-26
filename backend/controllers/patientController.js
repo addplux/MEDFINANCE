@@ -411,7 +411,8 @@ const uploadPrepaidLedger = async (req, res) => {
             'CASH', 'PAYMENT', 'RECEIPT', 'DRUGS', 'B/F', 'BROUGHT FORWARD', 'CLIENTS', 'DETAILS',
             'LEDGER', 'DATE', 'MEDICAL', 'BILL', 'CONS', 'DRGUG', 'ADDRESS', 'ADD:', 'PHYSIO',
             'LABS', 'TEST', 'REVIEW', 'RTD', 'NKANZA', 'ACCOUNT', 'CLOSED', 'NHIMA', 'TOP UP', 'TOP',
-            'UP', 'RCT', 'BAL', 'REMARKS', 'NUMBER', 'MEMBERS', 'MEMBER'
+            'UP', 'RCT', 'BAL', 'REMARKS', 'NUMBER', 'MEMBERS', 'MEMBER', 'UNKNOWN', 'STATUS', 'CEA',
+            'COLLECTED', 'NOT COLLECTED', 'CELL', 'SCAN', 'AREA', 'RIVERSIDE', 'DAGAMASKJOID', 'CHIKOLA'
         ];
         const statusKeywords = ['ACTIVE', 'SUSPENDED', 'CLOSED', 'DECEASED', 'INACTIVE'];
         const genderKeywords = ['MALE', 'FEMALE'];
@@ -459,10 +460,14 @@ const uploadPrepaidLedger = async (req, res) => {
                     const isStatus = statusKeywords.includes(candidateUpper);
                     const isGender = genderKeywords.includes(candidateUpper);
 
+                    // Allow leading numbered lists e.g "1. MUSONDA" but reject 5+ digits like phone numbers
+                    const textWithoutListNumbers = candidateUpper.replace(/^\d+[\.\s]+/, '');
+                    const hasTooManyDigits = /\d{5,}/.test(textWithoutListNumbers) || /^\d+\.\d+\.\d+/.test(textWithoutListNumbers);
+
                     // If it's not a transaction keyword, not a number, not a header, not a SCH NO, not STATUS, not GENDER
-                    if (!isTx && !isSchemeNo && !isStatus && !isGender && !candidateUpper.includes('HIGH COST') && !candidateUpper.includes('LOW COST') && candidate.length > 2) {
+                    if (!isTx && !isSchemeNo && !isStatus && !isGender && !candidateUpper.includes('HIGH COST') && !candidateUpper.includes('LOW COST') && candidateUpper.length > 2) {
                         // To avoid "Medical bill #298", check if it contains a hash or numbers if it's supposed to be a name
-                        if (!/#\d+/.test(candidateUpper) && !/BILL/.test(candidateUpper)) {
+                        if (!/#\d+/.test(candidateUpper) && !/BILL/.test(candidateUpper) && !hasTooManyDigits) {
                             pendingName = candidate;
                             break;
                         }
