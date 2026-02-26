@@ -14,6 +14,7 @@ const CorporateMemberManagement = () => {
     const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [showUpload, setShowUpload] = useState(false);
 
     // Fetch Corporate Schemes on mount
     useEffect(() => {
@@ -43,7 +44,13 @@ const CorporateMemberManagement = () => {
         setLoading(true);
         try {
             const response = await receivablesAPI.schemes.getMembers(schemeId);
-            setMembers(response.data || []);
+            const data = response.data || [];
+            setMembers(data);
+            if (data.length === 0) {
+                setShowUpload(true);
+            } else {
+                setShowUpload(false);
+            }
         } catch (error) {
             console.error('Failed to fetch members:', error);
             addToast('error', 'Failed to load member list.');
@@ -89,8 +96,12 @@ const CorporateMemberManagement = () => {
         try {
             const response = await receivablesAPI.schemes.importMembers(selectedScheme, formData);
 
-            const { results } = response.data;
-            addToast('success', `Upload successful! Added/Updated: ${results.success}.`);
+            const { summary } = response.data;
+            if (summary) {
+                addToast('success', `Upload successful! Added: ${summary.added}, Updated: ${summary.updated}`);
+            } else {
+                addToast('success', `Upload successful!`);
+            }
 
             setSelectedFile(null);
             fetchMembers(selectedScheme);
@@ -183,9 +194,16 @@ const CorporateMemberManagement = () => {
                 </div>
             )}
 
-            {/* Upload Section — only visible when a scheme is selected */}
-            {selectedScheme && (
-                <div className="p-6 bg-white/5 shadow-sm border border-white/10 rounded-xl">
+            {/* Upload Section — visible if explicitly toggled on or if scheme has no members */}
+            {selectedScheme && showUpload && (
+                <div className="p-6 bg-white/5 shadow-sm border border-white/10 rounded-xl relative">
+                    <button
+                        onClick={() => setShowUpload(false)}
+                        className="absolute top-4 right-4 text-white/40 hover:text-white/80 transition-colors"
+                        title="Hide Upload"
+                    >
+                        <XCircle className="w-5 h-5" />
+                    </button>
                     <label className="block text-sm font-semibold text-white/80 mb-2">
                         Upload Roster for <span className="text-primary">{selectedSchemeName}</span> (Excel)
                     </label>
@@ -215,15 +233,26 @@ const CorporateMemberManagement = () => {
             )}
 
             {/* Members Table */}
-            <div className="bg-white shadow-sm border border-slate-200 rounded-xl overflow-hidden">
+            <div className="bg-white shadow-sm border border-slate-200 rounded-xl overflow-hidden mt-6">
                 <div className="p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/50">
-                    <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <Users className="w-5 h-5 text-primary-500" />
-                        {selectedScheme
-                            ? <>{selectedSchemeName} Members <span className="px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 text-xs">{members.length} Total</span></>
-                            : 'Registered Members'
-                        }
-                    </h2>
+                    <div className="flex items-center gap-4">
+                        <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <Users className="w-5 h-5 text-primary-500" />
+                            {selectedScheme
+                                ? <>{selectedSchemeName} Members <span className="px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 text-xs">{members.length} Total</span></>
+                                : 'Registered Members'
+                            }
+                        </h2>
+                        {selectedScheme && !showUpload && (
+                            <button
+                                onClick={() => setShowUpload(true)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 text-sm font-medium rounded-md hover:bg-slate-50 hover:text-primary-600 transition-colors"
+                            >
+                                <Upload className="w-4 h-4" />
+                                Import Roster
+                            </button>
+                        )}
+                    </div>
                     <div className="relative w-full sm:w-72">
                         <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
                         <input
