@@ -44,6 +44,7 @@ const Notification = require('./Notification');
 const Visit = require('./Visit');
 const ARReminderLog = require('./ARReminderLog');
 const PrepaidPlan = require('./PrepaidPlan');
+const SystemLog = require('./SystemLog');
 
 // Define relationships
 
@@ -275,7 +276,8 @@ module.exports = {
     Notification,
     Visit,
     ARReminderLog,
-    PrepaidPlan
+    PrepaidPlan,
+    SystemLog
 };
 
 

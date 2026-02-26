@@ -31,7 +31,8 @@ import {
     Pill,
     Radio,
     Wrench,
-    Layers
+    Layers,
+    Terminal
 } from 'lucide-react';
 
 const MainLayout = ({ children }) => {
@@ -215,6 +216,7 @@ const MainLayout = ({ children }) => {
                 ...(user?.role === 'admin' ? [{ path: '/app/setup/pending-approvals', label: '🔔 Pending Approvals' }] : [])
             ]
         },
+        { path: '/app/setup/audit-logs', icon: Terminal, label: 'System Audit Logs' },
     ];
 
     const handleLogout = () => {

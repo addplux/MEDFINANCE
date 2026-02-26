@@ -245,6 +245,13 @@ export const setupAPI = {
     },
 };
 
+// System Logs
+export const systemLogsAPI = {
+    getAll: () => api.get('/system-logs'),
+    wipe: () => api.delete('/system-logs/wipe'),
+    resolve: (id) => api.patch(`/system-logs/${id}/resolve`)
+};
+
 // Payroll Medical
 export const payrollAPI = {
     getDeductions: (params) => api.get('/payroll/deductions', { params }),

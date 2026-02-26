@@ -6,7 +6,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { syncDatabase, User } = require('./models');
+const { syncDatabase, User, SystemLog } = require('./models');
 const { sequelize, testConnection } = require('./config/database');
 const { seedDatabase } = require('./seed');
 const { initCronJobs } = require('./jobs/cronManager');
@@ -125,10 +125,28 @@ app.use('/api/visits', require('./routes/visits'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/prepaid-plans', require('./routes/prepaidPlans'));
 app.use('/api/utilisation', require('./routes/utilisation'));
+app.use('/api/system-logs', require('./routes/systemLogs'));
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use(async (err, req, res, next) => {
     console.error(err.stack);
+
+    // Attempt to log error to the database
+    try {
+        if (SystemLog) {
+            await SystemLog.create({
+                level: 'error',
+                message: err.message || 'Unknown Error',
+                stackTrace: err.stack,
+                route: req.originalUrl || req.path,
+                method: req.method,
+                ipAddress: req.ip || req.connection.remoteAddress
+            });
+        }
+    } catch (logError) {
+        console.error('Failed to write to SystemLog:', logError);
+    }
+
     res.status(500).json({
         error: 'Something went wrong!',
         message: process.env.NODE_ENV === 'development' ? err.message : undefined

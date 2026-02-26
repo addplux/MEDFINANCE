@@ -78,7 +78,6 @@ import DebtorAgeing from './pages/receivables/DebtorAgeing';
 // Reports
 import Reports from './pages/reports/Reports';
 
-// Setup
 import Setup from './pages/setup/Setup';
 import ServiceForm from './pages/setup/ServiceForm';
 import ServicesList from './pages/setup/ServicesList';
@@ -86,6 +85,7 @@ import UserForm from './pages/setup/UserForm';
 import UserRoles from './pages/setup/UserRoles';
 import DepartmentForm from './pages/setup/DepartmentForm';
 import PayrollMedical from './pages/payroll/PayrollMedical';
+import SystemLogs from './pages/setup/SystemLogs';
 
 // Cash
 import Payments from './pages/cash/Payments';
@@ -256,6 +256,7 @@ function App() {
                         <Route path="setup/roles" element={<UserRoles />} />
                         <Route path="setup/departments/new" element={<DepartmentForm />} />
                         <Route path="setup/departments/:id/edit" element={<DepartmentForm />} />
+                        <Route path="setup/audit-logs" element={<SystemLogs />} />
 
                         <Route path="payroll/medical" element={<PayrollMedical />} />
 
