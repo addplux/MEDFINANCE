@@ -410,7 +410,8 @@ const uploadPrepaidLedger = async (req, res) => {
             'BAL B/F', 'BALANCE', 'MEMBERSHIP', 'CONSULTATION', 'PHARMACY', 'LABORATORY', 'X-RAY',
             'CASH', 'PAYMENT', 'RECEIPT', 'DRUGS', 'B/F', 'BROUGHT FORWARD', 'CLIENTS', 'DETAILS',
             'LEDGER', 'DATE', 'MEDICAL', 'BILL', 'CONS', 'DRGUG', 'ADDRESS', 'ADD:', 'PHYSIO',
-            'LABS', 'TEST', 'REVIEW', 'RTD', 'NKANZA'
+            'LABS', 'TEST', 'REVIEW', 'RTD', 'NKANZA', 'ACCOUNT', 'CLOSED', 'NHIMA', 'TOP UP', 'TOP',
+            'UP', 'RCT', 'BAL', 'REMARKS', 'NUMBER', 'MEMBERS', 'MEMBER'
         ];
         const statusKeywords = ['ACTIVE', 'SUSPENDED', 'CLOSED', 'DECEASED', 'INACTIVE'];
         const genderKeywords = ['MALE', 'FEMALE'];
