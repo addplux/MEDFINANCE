@@ -493,28 +493,34 @@ const uploadPrepaidLedger = async (req, res) => {
 
         for (const member of membersToCreate) {
             const nameParts = member.name.split(' ');
-            const firstName = nameParts[0];
-            const lastName = nameParts.slice(1).join(' ') || 'Unknown';
+            let firstName = nameParts[0] || 'Unknown';
+            let lastName = nameParts.slice(1).join(' ') || 'Unknown';
+
+            // Truncate names to fit DB length
+            firstName = firstName.substring(0, 50);
+            lastName = lastName.substring(0, 50);
 
             // Map Scheme No to Patient No as requested
             let targetPatientNumber = member.schemeNo;
-            const existing = await Patient.findOne({ where: { patientNumber: targetPatientNumber }, transaction: t });
+            const existing = await Patient.findOne({ where: { patientNumber: targetPatientNumber.substring(0, 20) }, transaction: t });
             if (existing) {
                 patientCount++;
-                targetPatientNumber = `${member.schemeNo}-${patientCount}`;
+                targetPatientNumber = `${member.schemeNo.substring(0, 14)}-${patientCount}`;
+            } else {
+                targetPatientNumber = targetPatientNumber.substring(0, 20);
             }
 
             const patient = await Patient.create({
                 patientNumber: targetPatientNumber,
                 firstName,
                 lastName,
-                dateOfBirth: new Date('1990-01-01'), // Default since it's not in the sheet
+                dateOfBirth: '1990-01-01', // Use string to prevent Sequelize Date object issues with DATEONLY
                 gender: 'other', // Default
                 paymentMethod: 'private_prepaid',
                 costCategory: member.costCategory,
                 patientType: 'opd',
                 schemeId: req.body.schemeId ? Number(req.body.schemeId) : null,
-                policyNumber: member.schemeNo, // Store in policy number as well
+                policyNumber: member.schemeNo.substring(0, 50), // Store in policy number as well
                 balance: member.balance,
                 prepaidCredit: member.balance > 0 ? member.balance : 0 // Fallback
             }, { transaction: t });
@@ -530,7 +536,7 @@ const uploadPrepaidLedger = async (req, res) => {
     } catch (error) {
         await t.rollback();
         console.error('Upload Ledger error:', error);
-        res.status(500).json({ error: 'Failed to process ledger upload', details: error.message });
+        res.status(500).json({ error: `Failed to process ledger upload: ${error.message || 'Unknown error'}`, details: error.message });
     }
 };
 
