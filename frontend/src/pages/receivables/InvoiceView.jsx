@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Printer } from 'lucide-react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, Printer, Download } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import api from '../../services/apiClient';
 
 const HOSPITAL_NAME = 'NCHANGA NORTH GENERAL HOSPITAL';
@@ -12,6 +14,7 @@ const fmt = (n) => n > 0 ? Number(n).toLocaleString(undefined, { minimumFraction
 const InvoiceView = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const [invoiceData, setInvoiceData] = useState(null);
     const [loading, setLoading] = useState(true);
     const printRef = useRef();
@@ -23,6 +26,15 @@ const InvoiceView = () => {
             setLoading(true);
             const response = await api.get(`/receivables/schemes/invoices/${id}`);
             setInvoiceData(response.data);
+
+            // Check if user requested an auto-download from list view
+            const queryParams = new URLSearchParams(location.search);
+            if (queryParams.get('download') === 'true') {
+                // Short delay to ensure DOM is fully painted
+                setTimeout(() => {
+                    handleDownloadPDF(response.data.invoice.invoiceNumber);
+                }, 500);
+            }
         } catch (error) {
             console.error('Error fetching invoice:', error);
         } finally {
@@ -32,6 +44,32 @@ const InvoiceView = () => {
 
     const handlePrint = () => window.print();
 
+    const handleDownloadPDF = async (forcedInvoiceNumber = null) => {
+        if (!printRef.current) return;
+        try {
+            // Hide the toolbar and members breakdown for the PDF
+            const input = printRef.current;
+            const canvas = await html2canvas(input, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                windowWidth: input.scrollWidth,
+                windowHeight: input.scrollHeight
+            });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            // Add image to PDF
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+            const invNum = forcedInvoiceNumber || invoice?.invoiceNumber || id;
+            pdf.save(`Invoice_${invNum}.pdf`);
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+        }
+    };
     if (loading) return (
         <div className="flex items-center justify-center min-h-[400px]">
             <div className="flex flex-col items-center gap-4">
@@ -95,13 +133,22 @@ const InvoiceView = () => {
                         <p className="text-xs text-gray-500">{scheme?.schemeName} — {periodLabel}</p>
                     </div>
                 </div>
-                <button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-sm transition-colors"
-                >
-                    <Printer className="w-4 h-4" />
-                    Print / Save PDF
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={handlePrint}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+                    >
+                        <Printer className="w-4 h-4" />
+                        Print
+                    </button>
+                    <button
+                        onClick={handleDownloadPDF}
+                        className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-sm transition-colors"
+                    >
+                        <Download className="w-4 h-4" />
+                        Download PDF
+                    </button>
+                </div>
             </div>
 
             {/* Invoice Paper */}

@@ -283,12 +283,13 @@ const MonthlyBilling = () => {
                                                         >
                                                             <Eye className="w-4 h-4" />
                                                         </Link>
-                                                        <button
+                                                        <Link
+                                                            to={`/app/receivables/invoices/${inv.id}?download=true`}
                                                             className="p-1 text-text-secondary hover:text-primary-600 transition-colors"
                                                             title="Download PDF"
                                                         >
                                                             <Download className="w-4 h-4" />
-                                                        </button>
+                                                        </Link>
                                                     </div>
                                                 </td>
                                             </tr>
