@@ -242,7 +242,7 @@ const PatientView = () => {
 
                 {(patient.paymentMethod === 'corporate' || patient.paymentMethod === 'scheme' || patient.policyNumber) && (
                     <Section title="Scheme / Corporate Details">
-                        <InfoRow icon={Clipboard} label="Scheme Name" value={schemes.find(s => s.id === patient.schemeId)?.name || 'Not Specified'} />
+                        <InfoRow icon={Clipboard} label="Scheme Name" value={patientScheme?.schemeName || 'Not Specified'} />
                         <InfoRow icon={Clipboard} label="Policy Number" value={patient.policyNumber} />
                         <InfoRow icon={Clipboard} label="Member Rank" value={patient.memberRank} />
                         <InfoRow icon={Clipboard} label="Member Suffix" value={patient.memberSuffix?.toString()} />
