@@ -435,7 +435,7 @@ const InvoiceView = () => {
             `}</style>
             {/* Share Modal */}
             {showShareModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in print:hidden">
+                <div className="fixed inset-0 z-50 flex items-start justify-center pt-32 px-4 pb-4 bg-black/50 backdrop-blur-sm animate-fade-in print:hidden overflow-y-auto">
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-slide-up">
                         <div className="flex justify-between items-center p-6 border-b border-gray-100">
                             <h2 className="text-xl font-bold text-gray-900">Share Invoice</h2>
