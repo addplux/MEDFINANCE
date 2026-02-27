@@ -1,5 +1,3 @@
-const puppeteer = require('puppeteer');
-
 /**
  * Generate a PDF buffer from a raw HTML string using Headless Chromium.
  * 
@@ -9,6 +7,16 @@ const puppeteer = require('puppeteer');
 exports.generatePdfFromHtml = async (html) => {
     let browser = null;
     try {
+        // LAZY LOAD: This prevents the server from crashing on startup if 
+        // the puppeteer installation failed due to network issues.
+        let puppeteer;
+        try {
+            puppeteer = require('puppeteer');
+        } catch (e) {
+            console.error('CRITICAL: Puppeteer is not installed. PDF generation is unavailable.');
+            throw new Error('PDF Generation Service is currently unavailable due to missing system dependencies. Please contact administrator.');
+        }
+
         // Standard Puppeteer handles downloading and launching Chrome 
         // regardless of if it's Windows, Mac, Linux, or Railway Container.
         browser = await puppeteer.launch({
