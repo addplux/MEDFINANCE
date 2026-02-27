@@ -153,13 +153,15 @@ const PatientView = () => {
                             <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-bold border ${badge.bg} ${badge.text} ${badge.border}`}>
                                 {badge.label}
                             </span>
-                            {patientScheme && (
+                        </div>
+                        <p className="text-gray-500 font-mono text-sm">{patient.patientNumber}</p>
+                        {patientScheme && (
+                            <div className="flex justify-center sm:justify-start">
                                 <span className="inline-flex items-center px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-bold border bg-indigo-50/10 text-indigo-300 border-indigo-400/30">
                                     {patientScheme.schemeName}
                                 </span>
-                            )}
-                        </div>
-                        <p className="text-gray-500 font-mono text-sm">{patient.patientNumber}</p>
+                            </div>
+                        )}
                         <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2 text-sm text-gray-500">
                             <span className="capitalize">{patient.gender}</span>
                             {age !== null && (
