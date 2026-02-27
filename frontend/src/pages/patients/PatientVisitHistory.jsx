@@ -37,7 +37,32 @@ const getAmount = (visit) => {
 const getDescription = (visit) => {
     const candidates = ['diagnosis', 'description', 'notes', 'billNumber', 'billNo', 'receiptNumber', 'consultationReason'];
     for (const k of candidates) {
-        if (visit[k]) return visit[k];
+        if (visit[k]) {
+            let text = String(visit[k]);
+
+            // Clean up legacy scheme import descriptions to hide zero balances
+            if (text.startsWith('Scheme import:')) {
+                const parts = text.split(':');
+                if (parts.length > 1) {
+                    const params = parts[1].split(',').map(s => s.trim());
+                    const nonZero = params.filter(item => {
+                        const match = item.match(/=(.+)$/);
+                        if (match) {
+                            return parseFloat(match[1]) > 0;
+                        }
+                        return true;
+                    });
+
+                    if (nonZero.length > 0) {
+                        return `${parts[0]}: ${nonZero.join(', ')}`;
+                    } else {
+                        return parts[0];
+                    }
+                }
+            }
+
+            return text;
+        }
     }
     return '—';
 };
