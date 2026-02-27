@@ -153,7 +153,7 @@ const InvoiceView = () => {
 
             {/* Invoice Paper */}
             <div className="max-w-3xl mx-auto mt-8 print:mt-0 print:max-w-none" ref={printRef}>
-                <div className="bg-white shadow-lg print:shadow-none p-10 print:p-6" style={{ fontFamily: 'Arial, sans-serif' }}>
+                <div className="bg-white text-black shadow-lg print:shadow-none p-10 print:p-6" style={{ fontFamily: 'Arial, sans-serif' }}>
 
                     {/* ── HEADER ── */}
                     <div className="text-center mb-6 border-b-2 border-black pb-4">
