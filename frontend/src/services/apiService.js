@@ -105,6 +105,7 @@ export const receivablesAPI = {
         generateInvoice: (data) => api.post('/receivables/schemes/invoices/generate', data),
         getInvoices: (schemeId) => api.get(`/receivables/schemes/${schemeId}/invoices`),
         getInvoiceDetails: (invoiceId) => api.get(`/receivables/schemes/invoices/${invoiceId}`),
+        sendInvoice: (invoiceId, data) => api.post(`/receivables/schemes/invoices/${invoiceId}/send`, data),
         getMembers: (schemeId) => api.get(`/receivables/schemes/${schemeId}/members`),
         importMembers: (schemeId, formData) => api.post(`/receivables/schemes/${schemeId}/import`, formData, {
             headers: {

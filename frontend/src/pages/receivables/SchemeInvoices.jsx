@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Printer, Eye, FileText, CheckCircle, Clock, Download } from 'lucide-react';
+import { Plus, Printer, Eye, FileText, CheckCircle, Clock, Download, Share2 } from 'lucide-react';
 import api from '../../services/apiClient';
 
 const SchemeInvoices = ({ schemeId }) => {
@@ -129,6 +129,13 @@ const SchemeInvoices = ({ schemeId }) => {
                                                 title="Download PDF"
                                             >
                                                 <Download className="w-5 h-5" />
+                                            </button>
+                                            <button
+                                                onClick={() => navigate(`/app/receivables/invoices/${inv.id}?share=true`)}
+                                                className="p-3 hover:bg-white/5 text-white/40 hover:text-green-400 rounded-2xl transition-all"
+                                                title="Share Invoice"
+                                            >
+                                                <Share2 className="w-5 h-5" />
                                             </button>
                                         </div>
                                     </td>

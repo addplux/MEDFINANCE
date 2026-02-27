@@ -10,7 +10,8 @@ import {
     Clock,
     Download,
     Eye,
-    Building2
+    Building2,
+    Share2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -289,6 +290,13 @@ const MonthlyBilling = () => {
                                                             title="Download PDF"
                                                         >
                                                             <Download className="w-4 h-4" />
+                                                        </Link>
+                                                        <Link
+                                                            to={`/app/receivables/invoices/${inv.id}?share=true`}
+                                                            className="p-1 text-text-secondary hover:text-green-600 transition-colors"
+                                                            title="Share Invoice"
+                                                        >
+                                                            <Share2 className="w-4 h-4" />
                                                         </Link>
                                                     </div>
                                                 </td>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Printer, Download } from 'lucide-react';
+import { ArrowLeft, Printer, Download, Share2, Mail, MessageCircle, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import api from '../../services/apiClient';
@@ -19,6 +19,12 @@ const InvoiceView = () => {
     const [loading, setLoading] = useState(true);
     const printRef = useRef();
 
+    // Share Modal State
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [shareMethod, setShareMethod] = useState('email'); // 'email' or 'whatsapp'
+    const [shareData, setShareData] = useState({ recipient: '', message: '' });
+    const [sharing, setSharing] = useState(false);
+
     useEffect(() => { fetchInvoice(); }, [id]);
 
     const fetchInvoice = async () => {
@@ -33,6 +39,10 @@ const InvoiceView = () => {
                 // Short delay to ensure DOM is fully painted
                 setTimeout(() => {
                     handleDownloadPDF(response.data.invoice.invoiceNumber);
+                }, 500);
+            } else if (queryParams.get('share') === 'true') {
+                setTimeout(() => {
+                    setShowShareModal(true);
                 }, 500);
             }
         } catch (error) {
@@ -68,6 +78,53 @@ const InvoiceView = () => {
             pdf.save(`Invoice_${invNum}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
+        }
+    };
+
+    const handleShareSubmit = async (e) => {
+        e.preventDefault();
+        if (!printRef.current) return;
+        try {
+            setSharing(true);
+
+            // Generate PDF silently
+            const input = printRef.current;
+            const canvas = await html2canvas(input, { scale: 2, useCORS: true, logging: false, windowWidth: input.scrollWidth, windowHeight: input.scrollHeight });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+            const invNum = invoice?.invoiceNumber || id;
+
+            if (shareMethod === 'whatsapp') {
+                // WhatsApp Flow: Trigger auto-download, then redirect to wa.me
+                pdf.save(`Invoice_${invNum}.pdf`);
+
+                const waText = encodeURIComponent(shareData.message || `Hello, please find your invoice ${invNum} attached.`);
+                const waUrl = `https://wa.me/${shareData.recipient.replace(/[^0-9+]/g, '')}?text=${waText}`;
+                window.open(waUrl, '_blank');
+
+                setShowShareModal(false);
+                // Optional: Provide a slight delay so they realize what happened
+                setTimeout(() => alert("The PDF has been downloaded. Please drag and drop it into the WhatsApp chat that just opened."), 1000);
+            } else {
+                // Email Flow: Post to Backend
+                const base64Pdf = pdf.output('datauristring');
+                await api.post(`/receivables/schemes/invoices/${id}/send`, {
+                    recipientEmail: shareData.recipient,
+                    base64Pdf,
+                    message: shareData.message
+                });
+                alert('Invoice sent successfully via email!');
+                setShowShareModal(false);
+            }
+        } catch (error) {
+            console.error('Error sharing invoice:', error);
+            alert('Failed to share the invoice. Please check the network log.');
+        } finally {
+            setSharing(false);
         }
     };
     if (loading) return (
@@ -147,6 +204,13 @@ const InvoiceView = () => {
                     >
                         <Download className="w-4 h-4" />
                         Download PDF
+                    </button>
+                    <button
+                        onClick={() => setShowShareModal(true)}
+                        className="flex items-center gap-2 px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium shadow-sm transition-colors"
+                    >
+                        <Share2 className="w-4 h-4" />
+                        Share
                     </button>
                 </div>
             </div>
@@ -354,6 +418,93 @@ const InvoiceView = () => {
                     .print\\:p-6 { padding: 1.5rem !important; }
                 }
             `}</style>
+            {/* Share Modal */}
+            {showShareModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in print:hidden">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-slide-up">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                            <h2 className="text-xl font-bold text-gray-900">Share Invoice</h2>
+                            <button onClick={() => setShowShareModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleShareSubmit} className="p-6 space-y-6">
+                            {/* Method Toggle */}
+                            <div className="flex p-1 bg-gray-100 rounded-xl space-x-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setShareMethod('email')}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${shareMethod === 'email' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    <Mail className="w-4 h-4" /> Email
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShareMethod('whatsapp')}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${shareMethod === 'whatsapp' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    <MessageCircle className="w-4 h-4" /> WhatsApp
+                                </button>
+                            </div>
+
+                            {/* Inputs */}
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {shareMethod === 'email' ? 'Recipient Email' : 'Recipient Phone Number'}
+                                    </label>
+                                    <input
+                                        type={shareMethod === 'email' ? 'email' : 'tel'}
+                                        required
+                                        placeholder={shareMethod === 'email' ? 'billing@company.com' : '+260 970000000'}
+                                        value={shareData.recipient}
+                                        onChange={(e) => setShareData({ ...shareData, recipient: e.target.value })}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    />
+                                    {shareMethod === 'whatsapp' && (
+                                        <p className="text-xs text-gray-500 mt-1">Must include country code (e.g., +260).</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Personal Message</label>
+                                    <textarea
+                                        rows="3"
+                                        placeholder={shareMethod === 'whatsapp' ? 'Hello, please find your invoice attached...' : 'Optional message...'}
+                                        value={shareData.message}
+                                        onChange={(e) => setShareData({ ...shareData, message: e.target.value })}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
+                                    ></textarea>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 pt-4 border-t border-gray-100">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowShareModal(false)}
+                                    className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors"
+                                    disabled={sharing}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={sharing || !shareData.recipient}
+                                    className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 text-white font-medium rounded-xl transition-all"
+                                >
+                                    {sharing ? (
+                                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                    ) : (
+                                        <>
+                                            {shareMethod === 'email' ? <Mail className="w-4 h-4" /> : <MessageCircle className="w-4 h-4" />}
+                                            {shareMethod === 'email' ? 'Send Email' : 'Open WhatsApp'}
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

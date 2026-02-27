@@ -2,6 +2,8 @@ const xlsx = require('xlsx');
 const { CorporateAccount, Scheme, SchemeInvoice, Patient, User, OPDBill, PharmacyBill, LabBill, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill, Service, Payment, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const { postSchemeInvoice } = require('../utils/glPoster');
+const nodemailer = require('nodemailer');
+const fs = require('fs');
 
 
 // ========== Corporate Accounts ==========
@@ -1153,6 +1155,67 @@ const updateMemberStatus = async (req, res) => {
     }
 };
 
+// Send Invoice via Email
+const sendSchemeInvoiceEmail = async (req, res) => {
+    try {
+        const { id } = req.params; // schemeInvoiceId
+        const { recipientEmail, base64Pdf, message, subject } = req.body;
+
+        if (!recipientEmail || !base64Pdf) {
+            return res.status(400).json({ error: 'Recipient email and PDF attachment are required.' });
+        }
+
+        const invoice = await SchemeInvoice.findByPk(id, {
+            include: [{ model: Scheme, as: 'scheme' }]
+        });
+
+        if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+
+        // Strip the base64 prefix if present (e.g., data:application/pdf;base64,)
+        const base64Data = base64Pdf.replace(/^data:application\/pdf;base64,/, '');
+
+        // Configure Nodemailer transporter (you should ideally move these to your .env)
+        const transporter = nodemailer.createTransport({
+            service: 'gmail', // or your SMTP provider
+            auth: {
+                user: process.env.EMAIL_USER || 'hello@medfinance360.com',
+                pass: process.env.EMAIL_PASS || 'your_app_password'
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER || 'hello@medfinance360.com',
+            to: recipientEmail,
+            subject: subject || `Invoice ${invoice.invoiceNumber} from MEDFINANCE360`,
+            text: message || `Please find attached the invoice ${invoice.invoiceNumber} for the period ${new Date(invoice.periodStart).toLocaleDateString()} to ${new Date(invoice.periodEnd).toLocaleDateString()}.`,
+            attachments: [
+                {
+                    filename: `${invoice.invoiceNumber}.pdf`,
+                    content: base64Data,
+                    encoding: 'base64'
+                }
+            ]
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Invoice email sent:', info.response);
+
+        // Update invoice status if it was draft
+        if (invoice.status === 'draft') {
+            await invoice.update({ status: 'sent', sentAt: new Date() });
+        } else {
+            // Just update sentAt
+            await invoice.update({ sentAt: new Date() });
+        }
+
+        res.json({ message: 'Invoice sent successfully via email.' });
+
+    } catch (error) {
+        console.error('Error sending invoice email:', error);
+        res.status(500).json({ error: 'Failed to send invoice email. Please check server configuration.' });
+    }
+};
+
 module.exports = {
     getAllCorporateAccounts,
     createCorporateAccount,
@@ -1168,5 +1231,6 @@ module.exports = {
     getSchemeInvoices,
     importSchemeMembers,
     getAllServices,
-    updateMemberStatus
+    updateMemberStatus,
+    sendSchemeInvoiceEmail
 };
