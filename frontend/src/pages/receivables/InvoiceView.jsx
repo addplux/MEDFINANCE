@@ -71,10 +71,25 @@ const InvoiceView = () => {
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-            // Add image to PDF
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            // Handle Pagination for long invoices
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            let heightLeft = pdfHeight;
+            let position = 0;
 
-            const invNum = forcedInvoiceNumber || invoice?.invoiceNumber || id;
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft > 0) {
+                position = heightLeft - pdfHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+                heightLeft -= pageHeight;
+            }
+
+            // Handle react synthetic events
+            const isEvent = forcedInvoiceNumber && typeof forcedInvoiceNumber === 'object' && forcedInvoiceNumber.nativeEvent;
+            const validForceId = isEvent ? null : forcedInvoiceNumber;
+            const invNum = validForceId || invoice?.invoiceNumber || id;
             pdf.save(`Invoice_${invNum}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -220,91 +235,91 @@ const InvoiceView = () => {
                 <div className="bg-white text-black shadow-lg print:shadow-none p-10 print:p-6" style={{ fontFamily: 'Arial, sans-serif' }}>
 
                     {/* ── HEADER ── */}
-                    <div className="text-center mb-6 border-b-2 border-black pb-4">
-                        <p className="text-sm font-bold tracking-wide">INVOICE / STATEMENT</p>
-                        <h1 className="text-2xl font-black tracking-wider mt-1 uppercase">{HOSPITAL_NAME}</h1>
-                        <p className="text-xs mt-1 text-gray-600">{HOSPITAL_ADDRESS}</p>
-                        <p className="text-xs text-gray-600">{HOSPITAL_TEL}</p>
-                        <div className="flex justify-end mt-1">
-                            <span className="text-sm font-bold">No.&nbsp;
-                                <span className="text-red-600 text-base font-black">{invoice.invoiceNumber}</span>
+                    <div style={{ textAlign: 'center', marginBottom: '24px', borderBottom: '2px solid black', paddingBottom: '16px' }}>
+                        <p style={{ fontSize: '14px', fontWeight: 'bold', letterSpacing: '0.025em', margin: 0 }}>INVOICE / STATEMENT</p>
+                        <h1 style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '0.05em', marginTop: '4px', textTransform: 'uppercase', marginBottom: 0 }}>{HOSPITAL_NAME}</h1>
+                        <p style={{ fontSize: '12px', marginTop: '4px', color: '#4b5563', margin: 0 }}>{HOSPITAL_ADDRESS}</p>
+                        <p style={{ fontSize: '12px', color: '#4b5563', margin: 0 }}>{HOSPITAL_TEL}</p>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                            <span style={{ fontSize: '14px', fontWeight: 'bold' }}>No.&nbsp;
+                                <span style={{ color: '#dc2626', fontSize: '16px', fontWeight: 900 }}>{invoice.invoiceNumber}</span>
                             </span>
                         </div>
                     </div>
 
                     {/* ── META GRID ── */}
-                    <div className="grid grid-cols-2 gap-x-8 mb-4 text-xs">
-                        <div className="space-y-1.5">
-                            <div className="flex gap-1">
-                                <span className="font-semibold whitespace-nowrap">INVOICE / STATEMENT No.:</span>
-                                <span className="border-b border-dotted border-gray-500 flex-1">{invoice.invoiceNumber}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontSize: '12px' }}>
+                        <div style={{ width: '48%' }}>
+                            <div style={{ display: 'flex', marginBottom: '6px' }}>
+                                <span style={{ fontWeight: 600, whiteSpace: 'nowrap', marginRight: '4px' }}>INVOICE / STATEMENT No.:</span>
+                                <span style={{ borderBottom: '1px dotted #6b7280', flex: 1 }}>{invoice.invoiceNumber}</span>
                             </div>
-                            <div>
-                                <span className="font-semibold">Patient's name &amp; Address:</span>
-                                <div className="border-b border-dotted border-gray-500 w-full mt-0.5 pb-0.5">{scheme?.schemeName}</div>
-                                <div className="border-b border-dotted border-gray-500 w-full mt-1 pb-0.5">{scheme?.contactPerson || ''}</div>
-                                <div className="border-b border-dotted border-gray-500 w-full mt-1 pb-0.5">&nbsp;</div>
+                            <div style={{ marginBottom: '6px' }}>
+                                <span style={{ fontWeight: 600 }}>Patient's name &amp; Address:</span>
+                                <div style={{ borderBottom: '1px dotted #6b7280', width: '100%', marginTop: '2px', paddingBottom: '2px' }}>{scheme?.schemeName}</div>
+                                <div style={{ borderBottom: '1px dotted #6b7280', width: '100%', marginTop: '4px', paddingBottom: '2px' }}>{scheme?.contactPerson || ''}</div>
+                                <div style={{ borderBottom: '1px dotted #6b7280', width: '100%', marginTop: '4px', paddingBottom: '2px' }}>&nbsp;</div>
                             </div>
-                            <div className="flex gap-1 mt-1">
-                                <span className="font-semibold whitespace-nowrap">Date Admitted:</span>
-                                <span className="border-b border-dotted border-gray-500 flex-1">&nbsp;</span>
+                            <div style={{ display: 'flex', marginTop: '4px' }}>
+                                <span style={{ fontWeight: 600, whiteSpace: 'nowrap', marginRight: '4px' }}>Date Admitted:</span>
+                                <span style={{ borderBottom: '1px dotted #6b7280', flex: 1 }}>&nbsp;</span>
                             </div>
                         </div>
-                        <div className="space-y-1.5">
-                            <div className="flex gap-1">
-                                <span className="font-semibold whitespace-nowrap">Date:</span>
-                                <span className="border-b border-dotted border-gray-500 flex-1">
+                        <div style={{ width: '48%' }}>
+                            <div style={{ display: 'flex', marginBottom: '6px' }}>
+                                <span style={{ fontWeight: 600, whiteSpace: 'nowrap', marginRight: '4px' }}>Date:</span>
+                                <span style={{ borderBottom: '1px dotted #6b7280', flex: 1 }}>
                                     {new Date().toLocaleDateString('en-GB')}
                                 </span>
                             </div>
-                            <div className="flex gap-1">
-                                <span className="font-semibold whitespace-nowrap">Ward:</span>
-                                <span className="border-b border-dotted border-gray-500 flex-1">&nbsp;</span>
+                            <div style={{ display: 'flex', marginBottom: '6px' }}>
+                                <span style={{ fontWeight: 600, whiteSpace: 'nowrap', marginRight: '4px' }}>Ward:</span>
+                                <span style={{ borderBottom: '1px dotted #6b7280', flex: 1 }}>&nbsp;</span>
                             </div>
-                            <div className="flex gap-1">
-                                <span className="font-semibold whitespace-nowrap">Doctor:</span>
-                                <span className="border-b border-dotted border-gray-500 flex-1">&nbsp;</span>
+                            <div style={{ display: 'flex', marginBottom: '6px' }}>
+                                <span style={{ fontWeight: 600, whiteSpace: 'nowrap', marginRight: '4px' }}>Doctor:</span>
+                                <span style={{ borderBottom: '1px dotted #6b7280', flex: 1 }}>&nbsp;</span>
                             </div>
-                            <div className="flex gap-1">
-                                <span className="font-semibold whitespace-nowrap">Date:</span>
-                                <span className="border-b border-dotted border-gray-500 flex-1">&nbsp;</span>
+                            <div style={{ display: 'flex', marginBottom: '6px' }}>
+                                <span style={{ fontWeight: 600, whiteSpace: 'nowrap', marginRight: '4px' }}>Date:</span>
+                                <span style={{ borderBottom: '1px dotted #6b7280', flex: 1 }}>&nbsp;</span>
                             </div>
-                            <div className="flex gap-1">
-                                <span className="font-semibold whitespace-nowrap">File No.:</span>
-                                <span className="border-b border-dotted border-gray-500 flex-1">&nbsp;</span>
+                            <div style={{ display: 'flex', marginBottom: '6px' }}>
+                                <span style={{ fontWeight: 600, whiteSpace: 'nowrap', marginRight: '4px' }}>File No.:</span>
+                                <span style={{ borderBottom: '1px dotted #6b7280', flex: 1 }}>&nbsp;</span>
                             </div>
-                            <div className="flex gap-1">
-                                <span className="font-semibold whitespace-nowrap">Date Discharged:</span>
-                                <span className="border-b border-dotted border-gray-500 flex-1">&nbsp;</span>
+                            <div style={{ display: 'flex', marginBottom: '6px' }}>
+                                <span style={{ fontWeight: 600, whiteSpace: 'nowrap', marginRight: '4px' }}>Date Discharged:</span>
+                                <span style={{ borderBottom: '1px dotted #6b7280', flex: 1 }}>&nbsp;</span>
                             </div>
                         </div>
                     </div>
 
                     {/* ── BILLING TABLE ── */}
-                    <table className="w-full border-collapse text-sm mt-4" style={{ borderColor: '#000' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', marginTop: '16px' }}>
                         <thead>
-                            <tr className="bg-gray-100">
-                                <th className="border border-black text-center py-2 px-3 font-bold text-xs uppercase tracking-wide w-2/3">
+                            <tr style={{ backgroundColor: '#f3f4f6' }}>
+                                <th style={{ border: '1px solid #000', textAlign: 'center', padding: '8px 12px', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', width: '66%' }}>
                                     DESCRIPTION
                                 </th>
-                                <th className="border border-black text-center py-2 px-3 font-bold text-xs uppercase tracking-wide w-[17%]">
+                                <th style={{ border: '1px solid #000', textAlign: 'center', padding: '8px 12px', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', width: '17%' }}>
                                     CHARGES
                                 </th>
-                                <th className="border border-black text-center py-2 px-3 font-bold text-xs uppercase tracking-wide w-[17%]">
+                                <th style={{ border: '1px solid #000', textAlign: 'center', padding: '8px 12px', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', width: '17%' }}>
                                     PAID ON THIS INVOICE
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
                             {services.map((svc, i) => (
-                                <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                    <td className="border border-black px-3 py-1.5 text-xs font-medium">
+                                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
+                                    <td style={{ border: '1px solid #000', padding: '6px 12px', fontSize: '12px', fontWeight: 500 }}>
                                         {svc.label}:
                                     </td>
-                                    <td className="border border-black px-3 py-1.5 text-xs text-right tabular-nums font-semibold">
+                                    <td style={{ border: '1px solid #000', padding: '6px 12px', fontSize: '12px', textAlign: 'right', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
                                         {fmt(svc.value)}
                                     </td>
-                                    <td className="border border-black px-3 py-1.5 text-xs">&nbsp;</td>
+                                    <td style={{ border: '1px solid #000', padding: '6px 12px', fontSize: '12px' }}>&nbsp;</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -315,37 +330,37 @@ const InvoiceView = () => {
                                 { label: 'LESS PREVIOUS PAYMENT', value: null },
                                 { label: 'AMOUNT OUTSTANDING', value: grandTotal, bold: true },
                             ].map((row, i) => (
-                                <tr key={i} className={row.bold ? 'bg-gray-100' : 'bg-white'}>
-                                    <td className={`border border-black px-3 py-1.5 text-xs ${row.bold ? 'font-black uppercase' : 'font-bold uppercase'}`}>
+                                <tr key={i} style={{ backgroundColor: row.bold ? '#f3f4f6' : '#ffffff' }}>
+                                    <td style={{ border: '1px solid #000', padding: '6px 12px', fontSize: '12px', fontWeight: row.bold ? 900 : 700, textTransform: 'uppercase' }}>
                                         {row.label}
                                     </td>
-                                    <td className="border border-black px-3 py-1.5 text-xs text-right tabular-nums font-bold">
+                                    <td style={{ border: '1px solid #000', padding: '6px 12px', fontSize: '12px', textAlign: 'right', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
                                         {row.value != null ? fmt(row.value) : ''}
                                     </td>
-                                    <td className="border border-black px-3 py-1.5 text-xs">&nbsp;</td>
+                                    <td style={{ border: '1px solid #000', padding: '6px 12px', fontSize: '12px' }}>&nbsp;</td>
                                 </tr>
                             ))}
                         </tfoot>
                     </table>
 
                     {/* ── FOOTER ── */}
-                    <div className="mt-6 text-xs space-y-2">
-                        <div className="flex gap-2">
-                            <span className="font-semibold whitespace-nowrap">BALANCE DUE: To be paid immediately to Hospital Accountant</span>
+                    <div style={{ marginTop: '24px', fontSize: '12px' }}>
+                        <div style={{ display: 'flex', marginBottom: '8px' }}>
+                            <span style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>BALANCE DUE: To be paid immediately to Hospital Accountant</span>
                         </div>
-                        <div className="flex gap-2">
-                            <span className="font-semibold whitespace-nowrap">BALANCE OVERPAID:</span>
-                            <span className="border-b border-dotted border-gray-500 flex-1">&nbsp;</span>
+                        <div style={{ display: 'flex', marginBottom: '8px' }}>
+                            <span style={{ fontWeight: 600, whiteSpace: 'nowrap', marginRight: '8px' }}>BALANCE OVERPAID:</span>
+                            <span style={{ borderBottom: '1px dotted #6b7280', flex: 1 }}>&nbsp;</span>
                         </div>
-                        <div className="flex justify-between items-end mt-4">
-                            <div className="space-y-1">
-                                <div className="flex gap-2">
-                                    <span className="font-semibold whitespace-nowrap">SIGNED:</span>
-                                    <span className="border-b border-dotted border-gray-500 w-48">&nbsp;</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '16px' }}>
+                            <div>
+                                <div style={{ display: 'flex', marginBottom: '4px' }}>
+                                    <span style={{ fontWeight: 600, whiteSpace: 'nowrap', marginRight: '8px' }}>SIGNED:</span>
+                                    <span style={{ borderBottom: '1px dotted #6b7280', width: '192px' }}>&nbsp;</span>
                                 </div>
-                                <p className="text-gray-500 text-[10px]">Original: To Patient</p>
+                                <p style={{ color: '#6b7280', fontSize: '10px', margin: 0 }}>Original: To Patient</p>
                             </div>
-                            <div className="border border-black w-24 h-16 flex items-center justify-center text-gray-400 text-xs">
+                            <div style={{ border: '1px solid black', width: '96px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '12px' }}>
                                 Stamp
                             </div>
                         </div>
