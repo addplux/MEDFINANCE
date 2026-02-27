@@ -444,7 +444,7 @@ const generateMonthlyInvoice = async (req, res) => {
                 billDate: { [Op.lte]: endDate }
             },
             include: [
-                { model: Patient, where: { schemeId }, attributes: ['id'] },
+                { model: Patient, as: 'patient', where: { schemeId }, attributes: ['id'] },
                 { model: Service, as: 'service' }
             ]
         });
@@ -456,7 +456,7 @@ const generateMonthlyInvoice = async (req, res) => {
                 billDate: { [Op.lte]: endDate }
             },
             include: [
-                { model: Patient, where: { schemeId }, attributes: ['id'] },
+                { model: Patient, as: 'patient', where: { schemeId }, attributes: ['id'] },
             ]
         });
 
@@ -467,7 +467,7 @@ const generateMonthlyInvoice = async (req, res) => {
                 billDate: { [Op.lte]: endDate }
             },
             include: [
-                { model: Patient, where: { schemeId }, attributes: ['id'] },
+                { model: Patient, as: 'patient', where: { schemeId }, attributes: ['id'] },
             ]
         });
 
@@ -478,7 +478,7 @@ const generateMonthlyInvoice = async (req, res) => {
                 billDate: { [Op.lte]: endDate }
             },
             include: [
-                { model: Patient, where: { schemeId }, attributes: ['id'] },
+                { model: Patient, as: 'patient', where: { schemeId }, attributes: ['id'] },
             ]
         });
 
@@ -492,7 +492,7 @@ const generateMonthlyInvoice = async (req, res) => {
                         procedureDate: { [Op.lte]: endDate }
                     },
                     include: [
-                        { model: Patient, where: { schemeId }, attributes: ['id'] },
+                        { model: Patient, as: 'patient', where: { schemeId }, attributes: ['id'] },
                     ]
                 });
             }
@@ -510,7 +510,7 @@ const generateMonthlyInvoice = async (req, res) => {
                         createdAt: { [Op.lte]: endDate } // Assuming creation date represents billing date if no specific delivery Date is set
                     },
                     include: [
-                        { model: Patient, where: { schemeId }, attributes: ['id'] },
+                        { model: Patient, as: 'patient', where: { schemeId }, attributes: ['id'] },
                     ]
                 });
             }
@@ -528,7 +528,7 @@ const generateMonthlyInvoice = async (req, res) => {
                         consultationDate: { [Op.lte]: endDate }
                     },
                     include: [
-                        { model: Patient, where: { schemeId }, attributes: ['id'] },
+                        { model: Patient, as: 'patient', where: { schemeId }, attributes: ['id'] },
                     ]
                 });
             }
