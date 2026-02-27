@@ -34,6 +34,7 @@ router.get('/schemes/ledger/:policyNumber', receivablesController.getFamilyLedge
 router.post('/schemes/invoices/generate', authorize('admin', 'accountant'), receivablesController.generateMonthlyInvoice);
 router.get('/schemes/:id/invoices', receivablesController.getSchemeInvoices);
 router.get('/schemes/invoices/:id', receivablesController.getSchemeInvoice);
+router.get('/schemes/invoices/:id/pdf', receivablesController.downloadSchemeInvoicePdf);
 router.post('/schemes/invoices/:id/send', authorize('admin', 'accountant'), receivablesController.sendSchemeInvoiceEmail);
 
 // Bulk Import

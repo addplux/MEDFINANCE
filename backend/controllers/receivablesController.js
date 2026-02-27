@@ -4,6 +4,86 @@ const { Op } = require('sequelize');
 const { postSchemeInvoice } = require('../utils/glPoster');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
+const pdfService = require('../services/pdfService'); // Added pdfService import
+
+// Helper function for currency formatting
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'ZMW' }).format(amount);
+};
+
+// Internal helper to get scheme statement data without exposing it as an endpoint
+const getSchemeStatementInternal = async (schemeId, startDate, endDate) => {
+    const scheme = await Scheme.findByPk(schemeId);
+    if (!scheme) throw new Error('Scheme not found');
+
+    const schemePatients = await Patient.findAll({
+        where: { schemeId: schemeId },
+        attributes: ['id', 'firstName', 'lastName', 'patientNumber', 'gender', 'policyNumber']
+    });
+    const patientIds = schemePatients.map(p => p.id);
+    const patientMap = {};
+    schemePatients.forEach(p => { patientMap[p.id] = p; });
+
+    if (patientIds.length === 0) {
+        return { scheme, bills: [] };
+    }
+
+    const baseWhere = (dateField) => {
+        const w = { patientId: { [Op.in]: patientIds } };
+        if (startDate && endDate) w[dateField] = { [Op.between]: [startDate, endDate] };
+        return w;
+    };
+
+    const [
+        opdBills, pharmacyBills, labBills,
+        radiologyBills, theatreBills, maternityBills, specialistBills
+    ] = await Promise.all([
+        OPDBill.findAll({
+            where: baseWhere('billDate'),
+            include: [{ model: Service, as: 'service', attributes: ['serviceName', 'category'] }]
+        }),
+        PharmacyBill.findAll({ where: baseWhere('billDate') }),
+        LabBill.findAll({ where: baseWhere('billDate') }),
+        RadiologyBill.findAll({ where: baseWhere('billDate') }),
+        TheatreBill.findAll({ where: baseWhere('procedureDate') }),
+        MaternityBill.findAll({ where: baseWhere('admissionDate') }),
+        SpecialistClinicBill.findAll({ where: baseWhere('consultationDate') })
+    ]);
+
+    const normalize = (bill, type, serviceName, dateField = 'billDate', amtField = 'totalAmount', notes = null) => ({
+        id: `${type}-${bill.id}`,
+        billType: type,
+        serviceName,
+        notes: notes || bill.notes || null,
+        billDate: bill[dateField] || bill.billDate || bill.createdAt,
+        patient: patientMap[bill.patientId],
+        totalAmount: parseFloat(bill[amtField] || bill.totalAmount || bill.amount || 0),
+        discount: parseFloat(bill.discount || 0),
+        netAmount: parseFloat(bill.netAmount || bill[amtField] || bill.totalAmount || bill.amount || 0),
+        billNumber: bill.billNumber
+    });
+
+    const unified = [
+        ...opdBills.map(b => normalize(b, 'OPD', b.service?.serviceName || 'OPD Consultation', 'billDate', 'totalAmount', b.notes)),
+        ...pharmacyBills.map(b => normalize(b, 'Pharmacy', 'Pharmacy / Drugs')),
+        ...labBills.map(b => normalize(b, 'Laboratory', b.testName || 'Laboratory Test', 'billDate', 'amount')),
+        ...radiologyBills.map(b => normalize(b, 'Radiology', b.scanType || 'Radiology Scan', 'billDate', 'amount')),
+        ...theatreBills.map(b => normalize(b, 'Theatre', b.procedureType || 'Theatre / Surgery', 'procedureDate')),
+        ...maternityBills.map(b => normalize(b, 'Maternity', `Maternity (${b.deliveryType || 'delivery'})`, 'admissionDate')),
+        ...specialistBills.map(b => normalize(b, 'Specialist', `Specialist - ${b.clinicType || b.specialistName || 'Clinic'}`, 'consultationDate'))
+    ];
+
+    const seenBillNumbers = new Set();
+    const deduped = unified.filter(b => {
+        if (b.billNumber && seenBillNumbers.has(b.billNumber)) return false;
+        if (b.billNumber) seenBillNumbers.add(b.billNumber);
+        return true;
+    });
+
+    deduped.sort((a, b) => new Date(a.billDate) - new Date(b.billDate)); // Sort by date ascending for statement
+
+    return { scheme, bills: deduped };
+};
 
 
 // ========== Corporate Accounts ==========
@@ -161,84 +241,7 @@ const getSchemeStatement = async (req, res) => {
         const { id } = req.params;
         const { startDate, endDate } = req.query;
 
-        const scheme = await Scheme.findByPk(id);
-        if (!scheme) return res.status(404).json({ error: 'Scheme not found' });
-
-        // Build patient ID filter - patients belonging to this scheme
-        const schemePatients = await Patient.findAll({
-            where: { schemeId: id },
-            attributes: ['id', 'firstName', 'lastName', 'patientNumber', 'gender']
-        });
-        const patientIds = schemePatients.map(p => p.id);
-        const patientMap = {};
-        schemePatients.forEach(p => { patientMap[p.id] = p; });
-
-        if (patientIds.length === 0) {
-            return res.json({ scheme, bills: [] });
-        }
-
-        // Date filter helper
-        const dateWhere = (field) => startDate && endDate
-            ? { [Op.between]: [startDate, endDate] }
-            : undefined;
-
-        const baseWhere = (dateField) => {
-            const w = { patientId: { [Op.in]: patientIds } };
-            if (startDate && endDate) w[dateField] = { [Op.between]: [startDate, endDate] };
-            return w;
-        };
-
-        // Query all 7 sources simultaneously
-        const [
-            opdBills, pharmacyBills, labBills,
-            radiologyBills, theatreBills, maternityBills, specialistBills
-        ] = await Promise.all([
-            OPDBill.findAll({
-                where: baseWhere('billDate'),
-                include: [{ model: Service, as: 'service', attributes: ['serviceName', 'category'] }]
-            }),
-            PharmacyBill.findAll({ where: baseWhere('billDate') }),
-            LabBill.findAll({ where: baseWhere('billDate') }),
-            RadiologyBill.findAll({ where: baseWhere('billDate') }),
-            TheatreBill.findAll({ where: baseWhere('procedureDate') }),
-            MaternityBill.findAll({ where: baseWhere('admissionDate') }),
-            SpecialistClinicBill.findAll({ where: baseWhere('consultationDate') })
-        ]);
-
-        // Normalise all bills into a unified shape
-        const normalize = (bill, type, serviceName, dateField = 'billDate', amtField = 'totalAmount', notes = null) => ({
-            id: `${type}-${bill.id}`,
-            billType: type,
-            serviceName,
-            notes: notes || bill.notes || null,
-            billDate: bill[dateField] || bill.billDate || bill.createdAt,
-            patient: patientMap[bill.patientId],
-            totalAmount: parseFloat(bill[amtField] || bill.totalAmount || bill.amount || 0),
-            discount: parseFloat(bill.discount || 0),
-            netAmount: parseFloat(bill.netAmount || bill[amtField] || bill.totalAmount || bill.amount || 0),
-            billNumber: bill.billNumber
-        });
-
-        const unified = [
-            ...opdBills.map(b => normalize(b, 'OPD', b.service?.serviceName || 'OPD Consultation', 'billDate', 'totalAmount', b.notes)),
-            ...pharmacyBills.map(b => normalize(b, 'Pharmacy', 'Pharmacy / Drugs')),
-            ...labBills.map(b => normalize(b, 'Laboratory', b.testName || 'Laboratory Test', 'billDate', 'amount')),
-            ...radiologyBills.map(b => normalize(b, 'Radiology', b.scanType || 'Radiology Scan', 'billDate', 'amount')),
-            ...theatreBills.map(b => normalize(b, 'Theatre', b.procedureType || 'Theatre / Surgery', 'procedureDate')),
-            ...maternityBills.map(b => normalize(b, 'Maternity', `Maternity (${b.deliveryType || 'delivery'})`, 'admissionDate')),
-            ...specialistBills.map(b => normalize(b, 'Specialist', `Specialist - ${b.clinicType || b.specialistName || 'Clinic'}`, 'consultationDate'))
-        ];
-
-        // Deduplicate by billNumber (prevents double-import rows)
-        const seenBillNumbers = new Set();
-        const deduped = unified.filter(b => {
-            if (b.billNumber && seenBillNumbers.has(b.billNumber)) return false;
-            if (b.billNumber) seenBillNumbers.add(b.billNumber);
-            return true;
-        });
-
-        // Sort by date descending
-        deduped.sort((a, b) => new Date(b.billDate) - new Date(a.billDate));
+        const { scheme, bills: deduped } = await getSchemeStatementInternal(id, startDate, endDate);
 
         res.json({ scheme, bills: deduped });
     } catch (error) {
@@ -1216,6 +1219,176 @@ const sendSchemeInvoiceEmail = async (req, res) => {
     }
 };
 
+/**
+ * Helper strictly for building the HTML payload to feed to Puppeteer.
+ */
+const generateInvoiceHtml = async (id) => {
+    const invoice = await SchemeInvoice.findByPk(id, {
+        include: [{ model: Scheme, as: 'scheme' }]
+    });
+
+    if (!invoice) throw new Error("Invoice not found");
+
+    const statementDetails = await getSchemeStatementInternal(invoice.schemeId, invoice.periodStart, invoice.periodEnd);
+
+    // Sum up specific billing categories from the statement
+    const totals = {
+        consultation: 0, nursingCare: 0, laboratory: 0, radiology: 0, dental: 0,
+        pharmacy: 0, other: 0, grandTotal: 0
+    };
+
+    statementDetails.bills.forEach(row => {
+        const billType = row.billType;
+        const sName = (row.serviceName || '').toLowerCase();
+        const amt = parseFloat(row.netAmount || 0);
+
+        if (billType === 'OPD' && sName.includes('consultation')) totals.consultation += amt;
+        else if (billType === 'OPD' && sName.includes('nursing')) totals.nursingCare += amt;
+        else if (billType === 'Laboratory') totals.laboratory += amt;
+        else if (billType === 'Radiology') totals.radiology += amt;
+        else if (billType === 'OPD' && sName.includes('dental')) totals.dental += amt;
+        else if (billType === 'Pharmacy') totals.pharmacy += amt;
+        else totals.other += amt;
+    });
+
+    totals.grandTotal = Object.values(totals).reduce((sum, val) => sum + val, 0); // Recalculate grandTotal based on summed categories
+
+    const periodLabel = `${new Date(invoice.periodStart).toLocaleDateString()} - ${new Date(invoice.periodEnd).toLocaleDateString()}`;
+
+    // Group bills by patient for the detailed breakdown
+    const patientRowsMap = {};
+    statementDetails.bills.forEach(row => {
+        const patientId = row.patient?.id || 'unknown';
+        if (!patientRowsMap[patientId]) {
+            patientRowsMap[patientId] = {
+                patientName: row.patient ? `${row.patient.firstName || ''} ${row.patient.lastName || ''}`.trim() : 'Unknown Patient',
+                policyNumber: row.patient?.policyNumber || row.patient?.patientNumber || '-',
+                consultation: 0, nursingCare: 0, laboratory: 0, radiology: 0, dental: 0,
+                pharmacy: 0, other: 0, total: 0
+            };
+        }
+        const pRow = patientRowsMap[patientId];
+        const billType = row.billType;
+        const sName = (row.serviceName || '').toLowerCase();
+        const amt = parseFloat(row.netAmount || 0);
+
+        if (billType === 'OPD' && sName.includes('consultation')) pRow.consultation += amt;
+        else if (billType === 'OPD' && sName.includes('nursing')) pRow.nursingCare += amt;
+        else if (billType === 'Laboratory') pRow.laboratory += amt;
+        else if (billType === 'Radiology') pRow.radiology += amt;
+        else if (billType === 'OPD' && sName.includes('dental')) pRow.dental += amt;
+        else if (billType === 'Pharmacy') pRow.pharmacy += amt;
+        else pRow.other += amt;
+
+        pRow.total += amt;
+    });
+    const rows = Object.values(patientRowsMap).sort((a, b) => a.patientName.localeCompare(b.patientName));
+
+    // Build massive raw HTML string mapping exactly to our InvoiceView styles
+    const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body { font-family: Arial, sans-serif; color: black; margin: 0; padding: 20px; font-size: 12px; }
+            .header-grid { text-align: center; margin-bottom: 24px; border-bottom: 2px solid black; padding-bottom: 16px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12px; }
+            th, td { border: 1px solid #000; padding: 6px 12px; }
+            th { background-color: #f3f4f6; text-transform: uppercase; font-weight: bold; }
+            .bg-gray { background-color: #f9fafb; }
+            .text-right { text-align: right; }
+            @media print {
+                tr { page-break-inside: avoid; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header-grid">
+            <p style="font-size: 14px; font-weight: bold; margin: 0">INVOICE / STATEMENT</p>
+            <h1 style="font-size: 24px; font-weight: 900; letter-spacing: 0.05em; margin: 4px 0 0 0">${process.env.HOSPITAL_NAME || 'HILLTOP HOSPITAL'}</h1>
+            <p style="color: #4b5563; margin: 4px 0 0 0">${process.env.HOSPITAL_ADDRESS || 'P.O. BOX 111, KABWE'}</p>
+            <div style="display: flex; justify-content: flex-end; margin-top: 4px">
+                <span style="font-size: 14px; font-weight: bold">No. <span style="color: #dc2626">${invoice.invoiceNumber}</span></span>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+            <div style="width: 48%;">
+                <p><b>Statement No.:</b> ${invoice.invoiceNumber}</p>
+                <p><b>Patient / Scheme:</b> ${invoice.scheme?.schemeName || ''}</p>
+            </div>
+            <div style="width: 48%;">
+                <p><b>Date:</b> ${new Date().toLocaleDateString()}</p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr><th style="width: 66%">Description</th><th style="width: 17%">Charges</th><th style="width: 17%">Paid</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Previous Balance</td><td class="text-right">0.00</td><td></td></tr>
+                <tr class="bg-gray"><td>Current Claims</td><td class="text-right">${formatCurrency(totals.grandTotal)}</td><td></td></tr>
+            </tbody>
+            <tfoot>
+                <tr class="bg-gray"><td style="font-weight: 900">AMOUNT OUTSTANDING</td><td class="text-right" style="font-weight: 900">${formatCurrency(totals.grandTotal)}</td><td></td></tr>
+            </tfoot>
+        </table>
+
+        <div style="margin-top: 40px">
+            <h3 style="text-transform: uppercase; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px">Member Billing Detail — ${periodLabel}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Policy #</th><th>Patient</th><th>Consult</th><th>Nursing</th>
+                        <th>Lab</th><th>Radio</th><th>Dental</th><th>Pharmacy</th><th>Other</th><th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows.map((r, i) => `
+                        <tr class="${i % 2 === 0 ? '' : 'bg-gray'}">
+                            <td>${r.policyNumber}</td><td>${r.patientName}</td>
+                            <td class="text-right">${formatCurrency(r.consultation)}</td><td class="text-right">${formatCurrency(r.nursingCare)}</td>
+                            <td class="text-right">${formatCurrency(r.laboratory)}</td><td class="text-right">${formatCurrency(r.radiology)}</td>
+                            <td class="text-right">${formatCurrency(r.dental)}</td><td class="text-right">${formatCurrency(r.pharmacy)}</td>
+                            <td class="text-right">${formatCurrency(r.other)}</td><td class="text-right" style="font-weight: bold">${formatCurrency(r.total)}</td>
+                        </tr>
+                    `).join('')}
+                    <tr style="background-color: #e5e7eb; font-weight: bold">
+                        <td colspan="2" class="text-right">GRAND TOTAL</td>
+                        <td class="text-right">${formatCurrency(totals.consultation)}</td><td class="text-right">${formatCurrency(totals.nursingCare)}</td>
+                        <td class="text-right">${formatCurrency(totals.laboratory)}</td><td class="text-right">${formatCurrency(totals.radiology)}</td>
+                        <td class="text-right">${formatCurrency(totals.dental)}</td><td class="text-right">${formatCurrency(totals.pharmacy)}</td>
+                        <td class="text-right">${formatCurrency(totals.other)}</td><td class="text-right">${formatCurrency(totals.grandTotal)}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+    </html>
+    `;
+    return html;
+};
+
+// Download Invoice via Puppeteer PDF Stream
+const downloadSchemeInvoicePdf = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const html = await generateInvoiceHtml(id);
+        const pdfBuffer = await pdfService.generatePdfFromHtml(html);
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=Invoice_${id}.pdf`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+
+        return res.end(pdfBuffer);
+    } catch (error) {
+        console.error('Download scheme invoice PDF error:', error);
+        res.status(500).json({ error: 'Failed to generate invoice PDF' });
+    }
+};
+
 module.exports = {
     getAllCorporateAccounts,
     createCorporateAccount,
@@ -1232,5 +1405,6 @@ module.exports = {
     importSchemeMembers,
     getAllServices,
     updateMemberStatus,
-    sendSchemeInvoiceEmail
+    sendSchemeInvoiceEmail,
+    downloadSchemeInvoicePdf
 };
