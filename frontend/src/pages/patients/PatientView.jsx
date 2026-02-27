@@ -19,19 +19,19 @@ const TYPE_BADGE = {
 
 const InfoRow = ({ icon: Icon, label, value }) => (
     value ? (
-        <div className="flex items-start gap-3 py-2">
+        <div className="flex items-start gap-3 py-2 print:py-0">
             <Icon className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
             <div>
                 <p className="text-[10px] uppercase tracking-wider text-gray-400 leading-none mb-0.5">{label}</p>
-                <p className="text-sm font-medium text-white">{value}</p>
+                <p className="text-sm font-medium text-white print:text-black">{value}</p>
             </div>
         </div>
     ) : null
 );
 
 const Section = ({ title, children }) => (
-    <div className="card p-6 space-y-2">
-        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4">{title}</h3>
+    <div className="card p-6 space-y-2 print:p-3 print:space-y-1 print:border print:border-gray-200">
+        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4 print:mb-2 print:text-black print:font-black print:text-xs">{title}</h3>
         {children}
     </div>
 );
@@ -89,14 +89,14 @@ const PatientView = () => {
     const patientScheme = patient.schemeId ? schemes.find(s => s.id === patient.schemeId) : null;
 
     return (
-        <div className="space-y-5 pb-10">
+        <div className="space-y-5 pb-10 print:pb-0 print:space-y-2">
             {/* Top nav */}
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-3 flex-wrap print:hidden">
                 <button onClick={() => navigate('/app/patients')} className="btn btn-secondary">
                     <ArrowLeft className="w-4 h-4" />
                 </button>
                 <div className="flex-1">
-                    <h1 className="text-[11px] font-bold text-white uppercase tracking-wider">Patient Master Record</h1>
+                    <h1 className="text-[11px] font-bold text-white uppercase tracking-wider print:text-black">Patient Master Record</h1>
                     <p className="text-xs text-gray-500">Complete patient profile and classification</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
@@ -125,8 +125,8 @@ const PatientView = () => {
             </div>
 
             {/* Profile card */}
-            <div className="card p-4">
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            <div className="card p-4 print:p-2 print:border-none print:shadow-none">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 print:gap-4 print:items-center">
                     {/* Photo */}
                     <div className="flex-shrink-0">
                         {patient.photoUrl ? (
@@ -136,8 +136,8 @@ const PatientView = () => {
                                 className="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-lg"
                             />
                         ) : (
-                            <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-                                <span className="text-white text-3xl font-bold">
+                            <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg print:shadow-none print:border print:border-gray-200 print:from-gray-100 print:to-gray-100">
+                                <span className="text-white print:text-black text-3xl font-bold">
                                     {patient.firstName?.[0]}{patient.lastName?.[0]}
                                 </span>
                             </div>
@@ -147,7 +147,7 @@ const PatientView = () => {
                     {/* Identity */}
                     <div className="flex-1 text-center sm:text-left space-y-2">
                         <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                            <h2 className="text-2xl font-bold text-white">
+                            <h2 className="text-2xl font-bold text-white print:text-black">
                                 {patient.firstName} {patient.lastName}
                             </h2>
                             <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-bold border ${badge.bg} ${badge.text} ${badge.border}`}>
@@ -186,26 +186,26 @@ const PatientView = () => {
                     </div>
 
                     {/* Balance & Visit Summary */}
-                    <div className="flex-shrink-0 flex flex-col gap-3 min-w-[200px]">
-                        <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200 text-center shadow-sm">
+                    <div className="flex-shrink-0 flex flex-col sm:flex-row print:flex-row gap-3 min-w-[200px] print:min-w-0">
+                        <div className="bg-gray-50 rounded-2xl p-4 print:p-2 print:bg-transparent print:border-none border border-gray-200 text-center shadow-sm print:shadow-none">
                             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Outstanding Balance</p>
                             <p className={`text-2xl font-bold mt-2 ${parseFloat(patient.balance) > 0 ? 'text-red-600' : 'text-green-600'}`}>
                                 ZMW {parseFloat(patient.balance || 0).toLocaleString('en-ZM', { minimumFractionDigits: 2 })}
                             </p>
                         </div>
                         <div
-                            className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100 text-center cursor-pointer hover:bg-indigo-100 transition-colors shadow-sm"
+                            className="bg-indigo-50 rounded-2xl p-4 print:p-2 print:bg-transparent print:border-none border border-indigo-100 text-center cursor-pointer hover:bg-indigo-100 transition-colors shadow-sm print:shadow-none"
                             onClick={() => navigate(`/app/visits?search=${patient.patientNumber}`)}
                         >
-                            <p className="text-[10px] text-white font-bold uppercase tracking-wider">Total Hospital Visits</p>
-                            <p className="text-xl font-bold text-white mt-1">{patient.totalVisits || 0}</p>
+                            <p className="text-[10px] text-gray-500 print:text-gray-600 font-bold uppercase tracking-wider">Total Hospital Visits</p>
+                            <p className="text-xl font-bold text-indigo-600 print:text-black mt-1">{patient.totalVisits || 0}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Details grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 print:grid-cols-2 gap-6 print:gap-2">
 
                 {/* Contact Info */}
                 <Section title="Contact Information">
