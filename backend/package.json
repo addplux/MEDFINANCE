@@ -18,7 +18,6 @@
   "author": "MEDFINANCE360 Team",
   "license": "UNLICENSED",
   "dependencies": {
-    "@sparticuz/chromium": "^143.0.4",
     "axios": "^1.13.5",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
@@ -30,7 +29,6 @@
     "nodemailer": "^8.0.1",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
-    "puppeteer-core": "^24.37.5",
     "sequelize": "^6.35.0",
     "xlsx": "^0.18.5"
   },

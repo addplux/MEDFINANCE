@@ -1,5 +1,4 @@
-const puppeteer = require('puppeteer-core');
-const chromium = require('@sparticuz/chromium');
+const puppeteer = require('puppeteer');
 
 /**
  * Generate a PDF buffer from a raw HTML string using Headless Chromium.
@@ -10,13 +9,11 @@ const chromium = require('@sparticuz/chromium');
 exports.generatePdfFromHtml = async (html) => {
     let browser = null;
     try {
-        // Sparticuz ensures this runs seamlessly on Serverless / PaaS limits
+        // Standard Puppeteer handles downloading and launching Chrome 
+        // regardless of if it's Windows, Mac, Linux, or Railway Container.
         browser = await puppeteer.launch({
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath(),
-            headless: chromium.headless,
-            ignoreHTTPSErrors: true,
+            headless: 'new',
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
 
         const page = await browser.newPage();
