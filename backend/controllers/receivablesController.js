@@ -482,46 +482,67 @@ const generateMonthlyInvoice = async (req, res) => {
             ]
         });
 
-        // 5. Theatre Bills
-        const theatreBills = await TheatreBill.findAll({
-            where: {
-                schemeInvoiceId: null,
-                procedureDate: { [Op.lte]: endDate }
-            },
-            include: [
-                { model: Patient, where: { schemeId }, attributes: ['id'] },
-            ]
-        });
+        // 5. Theatre Bills (Optional Module)
+        let theatreBills = [];
+        try {
+            if (TheatreBill) {
+                theatreBills = await TheatreBill.findAll({
+                    where: {
+                        schemeInvoiceId: null,
+                        procedureDate: { [Op.lte]: endDate }
+                    },
+                    include: [
+                        { model: Patient, where: { schemeId }, attributes: ['id'] },
+                    ]
+                });
+            }
+        } catch (e) {
+            console.warn('TheatreBill table missing or error - skipping module');
+        }
 
-        // 6. Maternity Bills
-        const maternityBills = await MaternityBill.findAll({
-            where: {
-                schemeInvoiceId: null,
-                createdAt: { [Op.lte]: endDate } // Assuming creation date represents billing date if no specific delivery Date is set
-            },
-            include: [
-                { model: Patient, where: { schemeId }, attributes: ['id'] },
-            ]
-        });
+        // 6. Maternity Bills (Optional Module)
+        let maternityBills = [];
+        try {
+            if (MaternityBill) {
+                maternityBills = await MaternityBill.findAll({
+                    where: {
+                        schemeInvoiceId: null,
+                        createdAt: { [Op.lte]: endDate } // Assuming creation date represents billing date if no specific delivery Date is set
+                    },
+                    include: [
+                        { model: Patient, where: { schemeId }, attributes: ['id'] },
+                    ]
+                });
+            }
+        } catch (e) {
+            console.warn('MaternityBill table missing or error - skipping module');
+        }
 
-        // 7. Specialist Clinic Bills
-        const specialistBills = await SpecialistClinicBill.findAll({
-            where: {
-                schemeInvoiceId: null,
-                consultationDate: { [Op.lte]: endDate }
-            },
-            include: [
-                { model: Patient, where: { schemeId }, attributes: ['id'] },
-            ]
-        });
+        // 7. Specialist Clinic Bills (Optional Module)
+        let specialistBills = [];
+        try {
+            if (SpecialistClinicBill) {
+                specialistBills = await SpecialistClinicBill.findAll({
+                    where: {
+                        schemeInvoiceId: null,
+                        consultationDate: { [Op.lte]: endDate }
+                    },
+                    include: [
+                        { model: Patient, where: { schemeId }, attributes: ['id'] },
+                    ]
+                });
+            }
+        } catch (e) {
+            console.warn('SpecialistClinicBill table missing or error - skipping module');
+        }
 
         const totalOPD = opdBills.reduce((sum, b) => Number(sum) + Number(b.netAmount), 0);
         const totalPharmacy = pharmacyBills.reduce((sum, b) => Number(sum) + Number(b.netAmount), 0);
         const totalLab = labBills.reduce((sum, b) => Number(sum) + Number(b.netAmount), 0);
         const totalRadiology = radiologyBills.reduce((sum, b) => Number(sum) + Number(b.netAmount), 0);
-        const totalTheatre = theatreBills.reduce((sum, b) => Number(sum) + Number(b.totalAmount), 0);
-        const totalMaternity = maternityBills.reduce((sum, b) => Number(sum) + Number(b.totalAmount), 0);
-        const totalSpecialist = specialistBills.reduce((sum, b) => Number(sum) + Number(b.totalAmount), 0);
+        const totalTheatre = theatreBills.reduce((sum, b) => Number(sum) + Number(b.totalAmount || b.netAmount || 0), 0);
+        const totalMaternity = maternityBills.reduce((sum, b) => Number(sum) + Number(b.totalAmount || b.netAmount || 0), 0);
+        const totalSpecialist = specialistBills.reduce((sum, b) => Number(sum) + Number(b.totalAmount || b.netAmount || 0), 0);
 
         const grandTotal = totalOPD + totalPharmacy + totalLab + totalRadiology + totalTheatre + totalMaternity + totalSpecialist;
 
@@ -565,25 +586,25 @@ const generateMonthlyInvoice = async (req, res) => {
                 transaction
             });
         }
-        if (radiologyBills.length > 0) {
+        if (RadiologyBill && radiologyBills && radiologyBills.length > 0) {
             await RadiologyBill.update({ schemeInvoiceId: invoice.id, paymentStatus: 'claimed' }, {
                 where: { id: { [Op.in]: radiologyBills.map(b => b.id) } },
                 transaction
             });
         }
-        if (theatreBills.length > 0) {
+        if (typeof TheatreBill !== 'undefined' && theatreBills && theatreBills.length > 0) {
             await TheatreBill.update({ schemeInvoiceId: invoice.id, paymentStatus: 'claimed' }, {
                 where: { id: { [Op.in]: theatreBills.map(b => b.id) } },
                 transaction
             });
         }
-        if (maternityBills.length > 0) {
+        if (typeof MaternityBill !== 'undefined' && maternityBills && maternityBills.length > 0) {
             await MaternityBill.update({ schemeInvoiceId: invoice.id, paymentStatus: 'claimed' }, {
                 where: { id: { [Op.in]: maternityBills.map(b => b.id) } },
                 transaction
             });
         }
-        if (specialistBills.length > 0) {
+        if (typeof SpecialistClinicBill !== 'undefined' && specialistBills && specialistBills.length > 0) {
             await SpecialistClinicBill.update({ schemeInvoiceId: invoice.id, paymentStatus: 'claimed' }, {
                 where: { id: { [Op.in]: specialistBills.map(b => b.id) } },
                 transaction
