@@ -153,11 +153,20 @@ const PatientView = () => {
                             </span>
                         </div>
                         <p className="text-gray-500 font-mono text-sm">{patient.patientNumber}</p>
-                        <div className="flex flex-wrap justify-center sm:justify-start gap-4 text-sm text-gray-600">
+                        <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2 text-sm text-gray-500">
                             <span className="capitalize">{patient.gender}</span>
-                            {age !== null && <span>{age} years old</span>}
+                            {age !== null && (
+                                <>
+                                    <span className="text-gray-600">•</span>
+                                    <span>{age} years old</span>
+                                </>
+                            )}
                             {patient.dateOfBirth && (
-                                <span>DOB: {new Date(patient.dateOfBirth).toLocaleDateString()}</span>
+                                <>
+                                    <span className="text-gray-600">•</span>
+                                    <span>DOB: {new Date(patient.dateOfBirth).toLocaleDateString()}</span>
+                                </>
+                            )}
                             )}
                         </div>
                         {patient.nrc && (
