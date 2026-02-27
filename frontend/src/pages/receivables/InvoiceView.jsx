@@ -57,40 +57,18 @@ const InvoiceView = () => {
     const handleDownloadPDF = async (forcedInvoiceNumber = null) => {
         if (!printRef.current) return;
         try {
-            // Hide the toolbar and members breakdown for the PDF
-            const input = printRef.current;
-            const canvas = await html2canvas(input, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                windowWidth: input.scrollWidth,
-                windowHeight: input.scrollHeight
-            });
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            // Because html2canvas blindly slices images and breaks text rows in half,
+            // the most bulletproof way to download a flawless multi-page PDF is leveraging
+            // the browser's native print engine which respects CSS `page-break-inside: avoid`.
 
-            // Handle Pagination for long invoices
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            let heightLeft = pdfHeight;
-            let position = 0;
+            // We temporarily rename the document title so the saved PDF gets the right filename
+            const invNum = forcedInvoiceNumber || invoiceData?.invoice?.invoiceNumber || id;
+            const originalTitle = document.title;
+            document.title = `Invoice_${invNum}`;
 
-            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-            heightLeft -= pageHeight;
+            window.print();
 
-            while (heightLeft > 0) {
-                position = heightLeft - pdfHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-                heightLeft -= pageHeight;
-            }
-
-            // Handle react synthetic events
-            const isEvent = forcedInvoiceNumber && typeof forcedInvoiceNumber === 'object' && forcedInvoiceNumber.nativeEvent;
-            const validForceId = isEvent ? null : forcedInvoiceNumber;
-            const invNum = validForceId || invoice?.invoiceNumber || id;
-            pdf.save(`Invoice_${invNum}.pdf`);
+            document.title = originalTitle;
         } catch (error) {
             console.error('Error generating PDF:', error);
         }
@@ -390,7 +368,7 @@ const InvoiceView = () => {
                                     </thead>
                                     <tbody>
                                         {rows.map((row, i) => (
-                                            <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                            <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} style={{ pageBreakInside: 'avoid' }}>
                                                 <td className="border border-gray-200 px-2 py-1 font-mono text-gray-600">{row.policyNumber || row.manNumber || '-'}</td>
                                                 <td className="border border-gray-200 px-2 py-1 font-medium">{row.patientName}</td>
                                                 <td className="border border-gray-200 px-2 py-1 text-right tabular-nums">{fmt(row.consultation)}</td>
