@@ -94,8 +94,8 @@ const PatientView = () => {
                     <ArrowLeft className="w-4 h-4" />
                 </button>
                 <div className="flex-1">
-                    <h1 className="text-2xl font-bold text-white">Patient Master Record</h1>
-                    <p className="text-sm text-gray-500">Complete patient profile and classification</p>
+                    <h1 className="text-[11px] font-bold text-white uppercase tracking-wider">Patient Master Record</h1>
+                    <p className="text-xs text-gray-500">Complete patient profile and classification</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                     <button
@@ -123,7 +123,7 @@ const PatientView = () => {
             </div>
 
             {/* Profile card */}
-            <div className="card p-6">
+            <div className="card p-4">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                     {/* Photo */}
                     <div className="flex-shrink-0">
