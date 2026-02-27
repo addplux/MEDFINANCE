@@ -441,7 +441,7 @@ const generateMonthlyInvoice = async (req, res) => {
         const opdBills = await OPDBill.findAll({
             where: {
                 schemeInvoiceId: null,
-                billDate: { [Op.between]: [startDate, endDate] }
+                billDate: { [Op.lte]: endDate }
             },
             include: [
                 { model: Patient, where: { schemeId }, attributes: ['id'] },
@@ -453,7 +453,7 @@ const generateMonthlyInvoice = async (req, res) => {
         const pharmacyBills = await PharmacyBill.findAll({
             where: {
                 schemeInvoiceId: null,
-                billDate: { [Op.between]: [startDate, endDate] }
+                billDate: { [Op.lte]: endDate }
             },
             include: [
                 { model: Patient, where: { schemeId }, attributes: ['id'] },
@@ -464,7 +464,7 @@ const generateMonthlyInvoice = async (req, res) => {
         const labBills = await LabBill.findAll({
             where: {
                 schemeInvoiceId: null,
-                billDate: { [Op.between]: [startDate, endDate] }
+                billDate: { [Op.lte]: endDate }
             },
             include: [
                 { model: Patient, where: { schemeId }, attributes: ['id'] },
@@ -475,7 +475,7 @@ const generateMonthlyInvoice = async (req, res) => {
         const radiologyBills = await RadiologyBill.findAll({
             where: {
                 schemeInvoiceId: null,
-                billDate: { [Op.between]: [startDate, endDate] }
+                billDate: { [Op.lte]: endDate }
             },
             include: [
                 { model: Patient, where: { schemeId }, attributes: ['id'] },
@@ -486,7 +486,7 @@ const generateMonthlyInvoice = async (req, res) => {
         const theatreBills = await TheatreBill.findAll({
             where: {
                 schemeInvoiceId: null,
-                procedureDate: { [Op.between]: [startDate, endDate] }
+                procedureDate: { [Op.lte]: endDate }
             },
             include: [
                 { model: Patient, where: { schemeId }, attributes: ['id'] },
@@ -497,7 +497,7 @@ const generateMonthlyInvoice = async (req, res) => {
         const maternityBills = await MaternityBill.findAll({
             where: {
                 schemeInvoiceId: null,
-                createdAt: { [Op.between]: [startDate, endDate] } // Assuming creation date represents billing date if no specific delivery Date is set
+                createdAt: { [Op.lte]: endDate } // Assuming creation date represents billing date if no specific delivery Date is set
             },
             include: [
                 { model: Patient, where: { schemeId }, attributes: ['id'] },
@@ -508,7 +508,7 @@ const generateMonthlyInvoice = async (req, res) => {
         const specialistBills = await SpecialistClinicBill.findAll({
             where: {
                 schemeInvoiceId: null,
-                consultationDate: { [Op.between]: [startDate, endDate] }
+                consultationDate: { [Op.lte]: endDate }
             },
             include: [
                 { model: Patient, where: { schemeId }, attributes: ['id'] },
