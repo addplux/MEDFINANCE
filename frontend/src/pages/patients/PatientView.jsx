@@ -86,6 +86,8 @@ const PatientView = () => {
     const age = calcAge(patient.dateOfBirth);
     const apiBase = import.meta.env.VITE_API_URL || '';
 
+    const patientScheme = patient.schemeId ? schemes.find(s => s.id === patient.schemeId) : null;
+
     return (
         <div className="space-y-5 pb-10">
             {/* Top nav */}
@@ -151,6 +153,11 @@ const PatientView = () => {
                             <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-bold border ${badge.bg} ${badge.text} ${badge.border}`}>
                                 {badge.label}
                             </span>
+                            {patientScheme && (
+                                <span className="inline-flex items-center px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-bold border bg-indigo-50/10 text-indigo-300 border-indigo-400/30">
+                                    {patientScheme.schemeName}
+                                </span>
+                            )}
                         </div>
                         <p className="text-gray-500 font-mono text-sm">{patient.patientNumber}</p>
                         <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2 text-sm text-gray-500">
