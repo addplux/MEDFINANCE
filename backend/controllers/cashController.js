@@ -130,6 +130,7 @@ const createPayment = async (req, res) => {
 
         await t.commit();
 
+        // Fetch the created payment with deep relations so the frontend can instantly print a receipt
         const createdPayment = await Payment.findByPk(payment.id, {
             include: [
                 { association: 'patient' },
@@ -137,8 +138,38 @@ const createPayment = async (req, res) => {
             ]
         });
 
+        // Depending on billType, fetch the granular bill details
+        let billDetails = null;
+        if (createdPayment.billType && createdPayment.billId) {
+            let model;
+            let includeOptions = [];
+            switch (createdPayment.billType) {
+                case 'OPD':
+                case 'OPDBill':
+                    model = OPDBill;
+                    includeOptions = [{ association: 'service' }];
+                    break;
+                case 'Pharmacy':
+                case 'PharmacyBill': model = PharmacyBill; break;
+                case 'Laboratory':
+                case 'LabBill':
+                case 'LaboratoryBill': model = LabBill; break;
+                case 'Radiology':
+                case 'RadiologyBill': model = RadiologyBill; break;
+                case 'Theatre':
+                case 'TheatreBill': model = TheatreBill; break;
+                case 'Maternity':
+                case 'MaternityBill': model = MaternityBill; break;
+                case 'Specialist Clinic':
+                case 'Specialist':
+                case 'SpecialistClinicBill': model = SpecialistClinicBill; break;
+            }
+            if (model) {
+                billDetails = await model.findByPk(createdPayment.billId, { include: includeOptions });
+            }
+        }
 
-        res.status(201).json(createdPayment);
+        res.status(201).json({ payment: createdPayment, billDetails });
     } catch (error) {
         await t.rollback();
         console.error('Create payment error:', error);
@@ -147,6 +178,60 @@ const createPayment = async (req, res) => {
             detail: error.message,
             fields: error.errors?.map(e => ({ field: e.path, message: e.message }))
         });
+    }
+};
+
+// Get single payment receipt
+const getPaymentReceipt = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const payment = await Payment.findByPk(id, {
+            include: [
+                { association: 'patient' },
+                { association: 'receiver', attributes: ['id', 'firstName', 'lastName'] }
+            ]
+        });
+
+        if (!payment) {
+            return res.status(404).json({ error: 'Receipt not found' });
+        }
+
+        // Fetch Bill Details
+        let billDetails = null;
+        if (payment.billType && payment.billId) {
+            let model;
+            let includeOptions = [];
+            switch (payment.billType) {
+                case 'OPD':
+                case 'OPDBill':
+                    model = OPDBill;
+                    includeOptions = [{ association: 'service' }];
+                    break;
+                case 'Pharmacy':
+                case 'PharmacyBill': model = PharmacyBill; break;
+                case 'Laboratory':
+                case 'LabBill':
+                case 'LaboratoryBill': model = LabBill; break;
+                case 'Radiology':
+                case 'RadiologyBill': model = RadiologyBill; break;
+                case 'Theatre':
+                case 'TheatreBill': model = TheatreBill; break;
+                case 'Maternity':
+                case 'MaternityBill': model = MaternityBill; break;
+                case 'Specialist Clinic':
+                case 'Specialist':
+                case 'SpecialistClinicBill': model = SpecialistClinicBill; break;
+            }
+            if (model) {
+                billDetails = await model.findByPk(payment.billId, { include: includeOptions });
+            }
+        }
+
+        res.json({ payment, billDetails });
+    } catch (error) {
+        console.error('Get payment receipt error:', error);
+        res.status(500).json({ error: 'Failed to fetch receipt details' });
     }
 };
 
@@ -318,6 +403,7 @@ const approvePettyCash = async (req, res) => {
 module.exports = {
     getAllPayments,
     createPayment,
+    getPaymentReceipt,
     getAllBankAccounts,
     createBankAccount,
     getAllPettyCash,

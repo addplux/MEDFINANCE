@@ -161,11 +161,11 @@ export const ledgerAPI = {
     financialStatements: (params) => api.get('/ledger/financial-statements', { params }),
 };
 
-// Cash & Bank
 export const cashAPI = {
     payments: {
         getAll: (params) => api.get('/cash/payments', { params }),
         getById: (id) => api.get(`/cash/payments/${id}`),
+        getReceipt: (id) => api.get(`/cash/payments/${id}/receipt`),
         create: (data) => api.post('/cash/payments', data),
         update: (id, data) => api.put(`/cash/payments/${id}`, data),
         delete: (id) => api.delete(`/cash/payments/${id}`),

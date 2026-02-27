@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { cashAPI } from '../../services/apiService';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Printer, Calendar, Edit3, Download, Save, RefreshCw } from 'lucide-react';
+import { Printer, Calendar, Edit3, Download, Save, RefreshCw, Eye } from 'lucide-react';
+import ReceiptModal from '../../components/common/ReceiptModal';
 
 const ShiftReport = () => {
     const { user } = useAuth();
@@ -25,6 +26,10 @@ const ShiftReport = () => {
             expenses: 0
         }
     });
+
+    const [selectedReceiptData, setSelectedReceiptData] = useState(null);
+    const [showReceipt, setShowReceipt] = useState(false);
+    const [receiptLoading, setReceiptLoading] = useState(false);
 
     useEffect(() => {
         loadReportData();
@@ -78,6 +83,20 @@ const ShiftReport = () => {
     const handlePrint = () => {
         setIsEditable(false);
         setTimeout(() => window.print(), 100);
+    };
+
+    const handleViewReceipt = async (id) => {
+        try {
+            setReceiptLoading(id);
+            const response = await cashAPI.payments.getReceipt(id);
+            setSelectedReceiptData(response.data);
+            setShowReceipt(true);
+        } catch (error) {
+            console.error('Error fetching receipt:', error);
+            addToast('error', 'Failed to load receipt details.');
+        } finally {
+            setReceiptLoading(false);
+        }
     };
 
     const handleExportPDF = () => {
@@ -286,6 +305,7 @@ const ShiftReport = () => {
                                 <th className="text-left p-2">Description</th>
                                 <th className="text-left p-2">Method</th>
                                 <th className="text-right p-2">Amount</th>
+                                <th className="text-right p-2 no-print">Receipt</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -303,6 +323,18 @@ const ShiftReport = () => {
                                         <td className="p-2">{t.method}</td>
                                         <td className={`p-2 text-right font-mono ${t.type === 'out' ? 'text-danger-600' : 'text-success-600'}`}>
                                             {t.type === 'out' ? '-' : ''}K{Math.abs(t.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                        </td>
+                                        <td className="p-2 text-right no-print">
+                                            {t.type !== 'out' && (
+                                                <button
+                                                    onClick={() => handleViewReceipt(t.id)}
+                                                    disabled={receiptLoading === t.id}
+                                                    className="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors inline-block"
+                                                    title="Reprint Receipt"
+                                                >
+                                                    {receiptLoading === t.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))
@@ -324,6 +356,12 @@ const ShiftReport = () => {
                     </div>
                 </div>
             </div>
+
+            <ReceiptModal
+                isOpen={showReceipt}
+                onClose={() => setShowReceipt(false)}
+                data={selectedReceiptData}
+            />
         </div>
     );
 };

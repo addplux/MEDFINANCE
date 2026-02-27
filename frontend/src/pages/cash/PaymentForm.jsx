@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft, Save, Wallet, User, CheckCircle } from 'lucide-react';
 import { cashAPI, patientAPI } from '../../services/apiService';
 import { useAuth } from '../../context/AuthContext';
+import ReceiptModal from '../../components/common/ReceiptModal';
 
 const PaymentForm = () => {
     const navigate = useNavigate();
@@ -38,6 +39,9 @@ const PaymentForm = () => {
         billId: stateBillsToPay.length === 1 ? stateBillsToPay[0].id : null,
         notes: ''
     });
+
+    const [showReceipt, setShowReceipt] = useState(false);
+    const [receiptData, setReceiptData] = useState(null);
 
     useEffect(() => {
         loadPatients();
@@ -120,11 +124,12 @@ const PaymentForm = () => {
             if (isEdit) {
                 await cashAPI.payments.update(id, payload);
                 alert('Payment updated successfully');
+                navigate('/app/cash/payments');
             } else {
-                await cashAPI.payments.create(payload);
-                alert('Payment recorded successfully');
+                const response = await cashAPI.payments.create(payload);
+                setReceiptData(response.data);
+                setShowReceipt(true);
             }
-            navigate('/app/cash/payments');
         } catch (error) {
             console.error('Error saving payment:', error);
             const errData = error.response?.data;
@@ -349,6 +354,12 @@ const PaymentForm = () => {
                     </div>
                 </div>
             </form>
+
+            <ReceiptModal
+                isOpen={showReceipt}
+                onClose={() => navigate('/app/cash/payments')}
+                data={receiptData}
+            />
         </div>
     );
 };
