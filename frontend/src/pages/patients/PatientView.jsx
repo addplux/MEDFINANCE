@@ -22,16 +22,16 @@ const InfoRow = ({ icon: Icon, label, value }) => (
         <div className="flex items-start gap-3 py-2 print:py-0">
             <Icon className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
             <div>
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 leading-none mb-0.5">{label}</p>
-                <p className="text-sm font-medium text-white print:text-black">{value}</p>
+                <p className="text-[10px] uppercase tracking-wider text-gray-400 leading-none mb-0.5 print:text-[8px]">{label}</p>
+                <p className="text-sm font-medium text-white print:text-black print:text-[11px] print:leading-tight">{value}</p>
             </div>
         </div>
     ) : null
 );
 
 const Section = ({ title, children }) => (
-    <div className="card p-6 space-y-2 print:p-3 print:space-y-1 print:border print:border-gray-200">
-        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4 print:mb-2 print:text-black print:font-black print:text-xs">{title}</h3>
+    <div className="card p-6 space-y-2 print:p-2 print:space-y-0.5 print:border print:border-gray-200">
+        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4 print:mb-1 print:text-black print:font-black print:text-[9px]">{title}</h3>
         {children}
     </div>
 );
@@ -188,8 +188,8 @@ const PatientView = () => {
                     {/* Balance & Visit Summary */}
                     <div className="flex-shrink-0 flex flex-col sm:flex-row print:flex-row gap-3 min-w-[200px] print:min-w-0">
                         <div className="bg-gray-50 rounded-2xl p-4 print:p-2 print:bg-transparent print:border-none border border-gray-200 text-center shadow-sm print:shadow-none">
-                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Outstanding Balance</p>
-                            <p className={`text-2xl font-bold mt-2 ${parseFloat(patient.balance) > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider print:text-[8px]">Outstanding Balance</p>
+                            <p className={`text-2xl print:text-sm font-bold mt-2 print:mt-0 ${parseFloat(patient.balance) > 0 ? 'text-red-600' : 'text-green-600'}`}>
                                 ZMW {parseFloat(patient.balance || 0).toLocaleString('en-ZM', { minimumFractionDigits: 2 })}
                             </p>
                         </div>
@@ -197,8 +197,8 @@ const PatientView = () => {
                             className="bg-indigo-50 rounded-2xl p-4 print:p-2 print:bg-transparent print:border-none border border-indigo-100 text-center cursor-pointer hover:bg-indigo-100 transition-colors shadow-sm print:shadow-none"
                             onClick={() => navigate(`/app/visits?search=${patient.patientNumber}`)}
                         >
-                            <p className="text-[10px] text-gray-500 print:text-gray-600 font-bold uppercase tracking-wider">Total Hospital Visits</p>
-                            <p className="text-xl font-bold text-indigo-600 print:text-black mt-1">{patient.totalVisits || 0}</p>
+                            <p className="text-[10px] text-gray-500 print:text-gray-600 font-bold uppercase tracking-wider print:text-[8px]">Total Hospital Visits</p>
+                            <p className="text-xl print:text-sm font-bold text-indigo-600 print:text-black mt-1 print:mt-0">{patient.totalVisits || 0}</p>
                         </div>
                     </div>
                 </div>
@@ -279,10 +279,10 @@ const PatientView = () => {
 
                 {/* Record Info */}
                 <Section title="Visit Summary">
-                    <div className="flex flex-col gap-3 py-1">
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-gray-500">Total Encounters</span>
-                            <span className="font-bold text-white">{patient.totalVisits || 0}</span>
+                    <div className="flex flex-col gap-3 py-1 print:py-0 print:gap-1">
+                        <div className="flex justify-between items-center text-sm print:text-[11px]">
+                            <span className="text-gray-500 print:text-black">Total Encounters</span>
+                            <span className="font-bold text-white print:text-black">{patient.totalVisits || 0}</span>
                         </div>
                         <button
                             onClick={() => navigate(`/app/visits?search=${patient.patientNumber}`)}
@@ -301,7 +301,7 @@ const PatientView = () => {
             </div>
 
             {/* Visit History shortcut */}
-            <div className="card p-6 flex flex-col sm:flex-row items-center justify-between gap-6 mt-4">
+            <div className="card p-6 flex flex-col sm:flex-row items-center justify-between gap-6 mt-4 print:hidden">
                 <div>
                     <h3 className="text-lg font-bold text-white">Patient Visit History</h3>
                     <p className="text-sm text-gray-500 mt-1">View all OPD, IPD, Lab, Pharmacy and other billing records for this patient.</p>
