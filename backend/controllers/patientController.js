@@ -66,9 +66,21 @@ const getPatient = async (req, res) => {
         const patient = await Patient.findByPk(req.params.id);
         if (!patient) return res.status(404).json({ error: 'Patient not found' });
 
-        const visitCount = await Visit.count({ where: { patientId: req.params.id } });
+        const where = { patientId: req.params.id };
+        const [opd, ipd, pharmacy, lab, radiology, theatre, maternity, specialist] = await Promise.all([
+            OPDBill.count({ where }),
+            IPDBill.count({ where }),
+            PharmacyBill.count({ where }),
+            LabBill.count({ where }),
+            RadiologyBill.count({ where }),
+            TheatreBill.count({ where }),
+            MaternityBill.count({ where }),
+            SpecialistClinicBill.count({ where })
+        ]);
+        const totalVisits = opd + ipd + pharmacy + lab + radiology + theatre + maternity + specialist;
+
         const patientData = patient.toJSON();
-        patientData.totalVisits = visitCount;
+        patientData.totalVisits = totalVisits;
 
         res.json(patientData);
     } catch (error) {
