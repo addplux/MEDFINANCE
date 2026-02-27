@@ -3,51 +3,114 @@ const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, Patient
 // Get dashboard overview statistics
 const getOverview = async (req, res) => {
     try {
-        // Get total revenue (sum of all payments)
-        const totalRevenue = await Payment.sum('amount') || 0;
+        const { Op } = sequelize;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-        // Get pending bills count
-        const pendingOPD = await OPDBill.count({ where: { status: 'pending' } });
-        const pendingIPD = await IPDBill.count({ where: { status: 'active' } });
-        const pendingPharmacy = await PharmacyBill.count({ where: { status: 'pending' } });
-        const pendingLab = await LabBill.count({ where: { status: 'pending' } });
-        const pendingRadiology = await RadiologyBill.count({ where: { status: 'pending' } });
+        // 1. Clinical Stats
+        const [
+            totalRegistered,
+            newToday,
+            activeInpatients,
+            opdVisitsToday
+        ] = await Promise.all([
+            Patient.count(),
+            Patient.count({ where: { createdAt: { [Op.gte]: today } } }),
+            IPDBill.count({ where: { status: 'active' } }),
+            OPDBill.count({ where: { createdAt: { [Op.gte]: today } } })
+        ]);
+
+        // 2. Financial Overview
+        const [
+            totalRevenue,
+            todayRevenue,
+            monthRevenue
+        ] = await Promise.all([
+            Payment.sum('amount') || 0,
+            Payment.sum('amount', { where: { paymentDate: { [Op.gte]: today } } }) || 0,
+            Payment.sum('amount', { where: { paymentDate: { [Op.gte]: firstDayOfMonth } } }) || 0
+        ]);
+
+        // 3. Pending Bills (Real counts)
+        const [
+            pendingOPD,
+            pendingIPD,
+            pendingPharmacy,
+            pendingLab,
+            pendingRadiology,
+            pendingMaternity,
+            pendingTheatre
+        ] = await Promise.all([
+            OPDBill.count({ where: { status: 'pending' } }),
+            IPDBill.count({ where: { status: 'active' } }),
+            PharmacyBill.count({ where: { status: 'pending' } }),
+            LabBill.count({ where: { status: 'pending' } }),
+            RadiologyBill.count({ where: { status: 'pending' } }),
+            MaternityBill?.count({ where: { status: 'pending' } }) || Promise.resolve(0),
+            TheatreBill?.count({ where: { status: 'pending' } }) || Promise.resolve(0)
+        ]);
 
         const totalPendingBills = pendingOPD + pendingIPD + pendingPharmacy + pendingLab + pendingRadiology;
 
-        // Get today's revenue
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // 4. Revenue by Scheme (Grouped by Patient's Payment Method)
+        // Note: For actual scheme names, we would join with Scheme model. 
+        // For simplicity, we use patientType or paymentMethod from Patient.
+        const schemeRevenue = await Payment.findAll({
+            attributes: [
+                [sequelize.literal('"patient"."payment_method"'), 'scheme'],
+                [sequelize.fn('SUM', sequelize.col('amount')), 'total']
+            ],
+            include: [{
+                model: Patient,
+                as: 'patient',
+                attributes: []
+            }],
+            group: [sequelize.literal('"patient"."payment_method"')],
+            raw: true
+        });
 
-        const todayRevenue = await Payment.sum('amount', {
-            where: {
-                paymentDate: {
-                    [sequelize.Sequelize.Op.gte]: today
-                }
-            }
-        }) || 0;
-
-        // Get this month's revenue
-        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-        const monthRevenue = await Payment.sum('amount', {
-            where: {
-                paymentDate: {
-                    [sequelize.Sequelize.Op.gte]: firstDayOfMonth
-                }
-            }
-        }) || 0;
+        // 5. Inventory Alerts (Low stock)
+        const lowStockItems = await sequelize.query(`
+            SELECT COUNT(*) as count FROM medications m
+            LEFT JOIN (
+                SELECT medication_id, SUM(quantity_on_hand) as total_qty 
+                FROM pharmacy_batches 
+                WHERE is_active = true 
+                GROUP BY medication_id
+            ) b ON m.id = b.medication_id
+            WHERE m.is_active = true AND COALESCE(b.total_qty, 0) <= m.reorder_level
+        `, { type: sequelize.QueryTypes.SELECT });
 
         res.json({
-            totalRevenue,
+            totalRevenue: parseFloat(totalRevenue),
+            todayRevenue: parseFloat(todayRevenue),
+            monthRevenue: parseFloat(monthRevenue),
             totalPendingBills,
-            todayRevenue,
-            monthRevenue,
+            patientStats: {
+                totalRegistered,
+                newToday,
+                currentlyAdmitted: activeInpatients
+            },
+            clinicalActivity: {
+                opdVisitsToday
+            },
             billBreakdown: {
                 opd: pendingOPD,
                 ipd: pendingIPD,
                 pharmacy: pendingPharmacy,
                 laboratory: pendingLab,
-                radiology: pendingRadiology
+                radiology: pendingRadiology,
+                maternity: pendingMaternity,
+                theatre: pendingTheatre
+            },
+            schemeRevenue: schemeRevenue.map(sr => ({
+                name: sr.scheme,
+                value: parseFloat(sr.total)
+            })),
+            alerts: {
+                lowStockCount: parseInt(lowStockItems[0]?.count || 0),
+                nhimaClaimsPending: 0 // Logic to be implemented when insurance claims are refined
             }
         });
     } catch (error) {
