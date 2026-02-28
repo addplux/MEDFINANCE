@@ -32,7 +32,7 @@ const PayrollDeduction = sequelize.define('PayrollDeduction', {
         allowNull: true
     },
     status: {
-        type: DataTypes.ENUM('Pending', 'Deducted'),
+        type: DataTypes.ENUM('Pending', 'Deducted', 'Cancelled'),
         defaultValue: 'Pending'
     },
     deductionDate: {
@@ -42,6 +42,22 @@ const PayrollDeduction = sequelize.define('PayrollDeduction', {
     type: {
         type: DataTypes.ENUM('Medical Bill', 'Advance', 'Other'),
         defaultValue: 'Medical Bill'
+    },
+    accountId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'chart_of_accounts',
+            key: 'id'
+        }
+    },
+    referenceId: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    referenceType: {
+        type: DataTypes.STRING(50),
+        allowNull: true
     }
 }, {
     tableName: 'payroll_deductions',

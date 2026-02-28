@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { payrollAPI } from '../../../services/apiService';
-import { Download, Filter, Search, Calendar, ChevronDown, CheckCircle, Clock } from 'lucide-react';
+import { payrollAPI, ledgerAPI } from '../../../services/apiService';
+import { Download, Filter, Search, Calendar, ChevronDown, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../../utils/formatters';
 
 const DeductionSchedule = () => {
@@ -58,10 +58,38 @@ const DeductionSchedule = () => {
 
     const updateStatus = async (id, newStatus) => {
         try {
+            setLoading(true);
             await payrollAPI.updateStatus(id, newStatus);
-            fetchDeductions(); // Refresh list
+            await fetchDeductions();
         } catch (error) {
             console.error('Failed to update status:', error);
+            alert('Failed to update status: ' + (error.response?.data?.error || error.message));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleBatchProcess = async () => {
+        const pendingIds = filteredDeductions
+            .filter(d => d.status === 'Pending')
+            .map(d => d.id);
+
+        if (pendingIds.length === 0) return;
+
+        if (!window.confirm(`Are you sure you want to process ${pendingIds.length} pending deductions for ${filters.period}? This will generate General Ledger entries.`)) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            await payrollAPI.batchUpdate({ ids: pendingIds, status: 'Deducted' });
+            await fetchDeductions();
+            alert(`Successfully processed ${pendingIds.length} deductions.`);
+        } catch (error) {
+            console.error('Batch processing failed:', error);
+            alert('Batch processing failed: ' + (error.response?.data?.error || error.message));
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -121,7 +149,34 @@ const DeductionSchedule = () => {
                         className="w-full pl-10 pr-4 py-2 bg-bg-tertiary border border-border-color rounded-lg text-text-primary focus:outline-none focus:border-primary-500 transition-all"
                     />
                 </div>
+
+                <div className="flex gap-2 w-full md:w-auto mt-4 md:mt-0">
+                    <button
+                        onClick={handleBatchProcess}
+                        disabled={loading || stats.pending === 0}
+                        className="btn btn-primary flex items-center gap-2 w-full md:w-auto"
+                    >
+                        <CheckCircle size={18} />
+                        Process {filteredDeductions.filter(d => d.status === 'Pending').length} Pending
+                    </button>
+                    <button onClick={fetchDeductions} className="btn btn-secondary p-2">
+                        <Clock size={18} />
+                    </button>
+                </div>
             </div>
+
+            {stats.pending > 0 && (
+                <div className="bg-primary-500/10 border border-primary-500/20 p-4 rounded-lg flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-primary-500 shrink-0 mt-0.5" />
+                    <div>
+                        <h4 className="text-sm font-semibold text-primary-500">Pending Payroll Reconcliation</h4>
+                        <p className="text-xs text-text-secondary mt-1">
+                            There are {deductions.filter(d => d.status === 'Pending').length} pending medical deductions for {filters.period}. 
+                            Processing them will automatically generate General Ledger entries to reconcile staff debt against Salary Payables.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* Table */}
             <div className="bg-bg-secondary rounded-lg border border-border-color overflow-hidden">

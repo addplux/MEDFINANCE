@@ -3,7 +3,7 @@
  * Developed: 2026
  */
 
-const { Payment, BankAccount, PettyCash, Patient, User, sequelize, OPDBill, PharmacyBill, LabBill, LabRequest, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill } = require('../models');
+const { Payment, BankAccount, PettyCash, Patient, User, sequelize, OPDBill, PharmacyBill, LabBill, LabRequest, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill, PayrollDeduction } = require('../models');
 const logAudit = require('../utils/auditLogger');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
 const { postPayment } = require('../utils/glPoster');
@@ -114,6 +114,26 @@ const createPayment = async (req, res) => {
                 if (model) {
                     await model.update({ paymentStatus: 'paid' }, { where: { id: b.id }, transaction: t });
                 }
+            }
+        }
+
+        // Handle Payroll Deduction Creation
+        if (paymentMethod === 'payroll') {
+            const patient = await Patient.findByPk(patientId, { transaction: t });
+            if (patient && patient.staffId) {
+                const now = new Date();
+                const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                
+                await PayrollDeduction.create({
+                    staffId: patient.staffId,
+                    amount: amount,
+                    period: period,
+                    description: `Medical Bill Deduction: ${receiptNumber}${billType ? ` (${billType})` : ''}`,
+                    type: 'Medical Bill',
+                    status: 'Pending',
+                    referenceId: payment.id,
+                    referenceType: 'Payment'
+                }, { transaction: t });
             }
         }
 

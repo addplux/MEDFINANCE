@@ -15,4 +15,7 @@ router.post('/deductions', authMiddleware, authorize('admin', 'accountant', 'hr'
 // Update status
 router.put('/deductions/:id', authMiddleware, authorize('admin', 'accountant', 'hr'), payrollController.updateDeductionStatus);
 
+// Batch Update
+router.post('/deductions/batch', authMiddleware, authorize('admin', 'accountant', 'hr'), payrollController.batchUpdateDeductions);
+
 module.exports = router;

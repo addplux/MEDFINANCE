@@ -22,6 +22,18 @@ const Fund = sequelize.define('Fund', {
         allowNull: false,
         defaultValue: 'general'
     },
+    accountId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'chart_of_accounts',
+            key: 'id'
+        }
+    },
+    purpose: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
     description: {
         type: DataTypes.TEXT,
         allowNull: true

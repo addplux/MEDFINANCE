@@ -1,4 +1,4 @@
-const { PayrollDeduction, User } = require('../models');
+const { PayrollDeduction, User, JournalEntry, JournalLine, ChartOfAccounts, sequelize } = require('../models');
 const { Op } = require('sequelize');
 
 // Get all deductions
@@ -79,27 +79,86 @@ const getStaffBalances = async (req, res) => {
     }
 };
 
-// Update status (e.g., Mark as Deducted)
-const updateDeductionStatus = async (req, res) => {
+// Batch Update status
+const batchUpdateDeductions = async (req, res) => {
+    const t = await sequelize.transaction();
     try {
-        const { id } = req.params;
-        const { status } = req.body;
-
-        const deduction = await PayrollDeduction.findByPk(id);
-        if (!deduction) {
-            return res.status(404).json({ error: 'Deduction not found' });
+        const { ids, status } = req.body;
+        if (!ids || !Array.isArray(ids)) {
+            await t.rollback();
+            return res.status(400).json({ error: 'IDs array is required' });
         }
 
-        deduction.status = status;
-        if (status === 'Deducted') {
-            deduction.deductionDate = new Date();
-        }
-        await deduction.save();
+        const results = [];
+        for (const id of ids) {
+            const deduction = await PayrollDeduction.findByPk(id, { transaction: t });
+            if (!deduction) continue;
 
-        res.json(deduction);
+            const oldStatus = deduction.status;
+            deduction.status = status;
+
+            if (status === 'Deducted' && oldStatus !== 'Deducted') {
+                deduction.deductionDate = new Date();
+
+                // Create Journal Entry
+                const entryCount = await JournalEntry.count({ transaction: t });
+                const entryNumber = `BPE${String(entryCount + 1).padStart(6, '0')}`;
+
+                const journalEntry = await JournalEntry.create({
+                    entryNumber,
+                    entryDate: new Date(),
+                    description: `Batch Payroll Deduction: ${deduction.description}`,
+                    status: 'posted',
+                    postedBy: req.user.id,
+                    createdBy: req.user.id
+                }, { transaction: t });
+
+                // Find Salary Payable Account
+                let salaryPayable = await ChartOfAccounts.findOne({
+                    where: { accountName: { [Op.like]: '%Salary%Payable%' } },
+                    transaction: t
+                });
+
+                const salaryPayableId = salaryPayable ? salaryPayable.id : null;
+                let medicalReceivableId = deduction.accountId;
+
+                if (!medicalReceivableId) {
+                    const medicalRec = await ChartOfAccounts.findOne({
+                        where: { accountName: { [Op.like]: '%Staff%Medical%Receivable%' } },
+                        transaction: t
+                    });
+                    medicalReceivableId = medicalRec ? medicalRec.id : null;
+                }
+
+                if (salaryPayableId && medicalReceivableId) {
+                    await JournalLine.create({
+                        entryId: journalEntry.id,
+                        accountId: salaryPayableId,
+                        debit: deduction.amount,
+                        credit: 0,
+                        description: `Payroll Deduction: ${deduction.staffName || 'Staff Member'}`
+                    }, { transaction: t });
+
+                    await JournalLine.create({
+                        entryId: journalEntry.id,
+                        accountId: medicalReceivableId,
+                        debit: 0,
+                        credit: deduction.amount,
+                        description: `Payroll Deduction: ${deduction.staffName || 'Staff Member'}`
+                    }, { transaction: t });
+                }
+            }
+
+            await deduction.save({ transaction: t });
+            results.push(deduction);
+        }
+
+        await t.commit();
+        res.json({ message: `Successfully updated ${results.length} deductions`, data: results });
     } catch (error) {
-        console.error('Error updating deduction status:', error);
-        res.status(500).json({ error: 'Failed to update deduction status' });
+        await t.rollback();
+        console.error('Batch update failed:', error);
+        res.status(500).json({ error: 'Batch update failed', detail: error.message });
     }
 };
 
@@ -107,5 +166,6 @@ module.exports = {
     getDeductions,
     createDeduction,
     getStaffBalances,
-    updateDeductionStatus
+    updateDeductionStatus,
+    batchUpdateDeductions
 };

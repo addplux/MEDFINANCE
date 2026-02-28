@@ -63,6 +63,7 @@ import TrialBalance from './pages/ledger/TrialBalance';
 // Funds
 import Funds from './pages/funds/Funds';
 import FundForm from './pages/funds/FundForm';
+import FundDetail from './pages/funds/FundDetail';
 
 // Receivables
 import CorporateAccounts from './pages/receivables/CorporateAccounts';
@@ -244,7 +245,7 @@ function App() {
                         <Route path="funds" element={<Funds />} />
                         <Route path="funds/new" element={<FundForm />} />
                         <Route path="funds/:id/edit" element={<FundForm />} />
-                        <Route path="funds/:id" element={<Funds />} />
+                        <Route path="funds/:id" element={<FundDetail />} />
 
 
                         <Route path="reports" element={<Reports />} />

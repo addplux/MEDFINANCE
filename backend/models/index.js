@@ -175,6 +175,9 @@ Department.hasMany(Budget, { foreignKey: 'departmentId', as: 'budgets' });
 Department.belongsTo(User, { foreignKey: 'managerId', as: 'manager' });
 
 Budget.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
+Budget.belongsTo(ChartOfAccounts, { foreignKey: 'accountId', as: 'account' });
+Budget.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+Budget.belongsTo(User, { foreignKey: 'approvedBy', as: 'approver' });
 
 
 // Audit Log relationships
@@ -218,6 +221,7 @@ Department.hasMany(Visit, { foreignKey: 'departmentId', as: 'visits' });
 
 // Payroll Deduction relationships
 PayrollDeduction.belongsTo(User, { foreignKey: 'staffId', as: 'staff' });
+PayrollDeduction.belongsTo(ChartOfAccounts, { foreignKey: 'accountId', as: 'account' });
 
 // Sync database
 const syncDatabase = async (options = {}) => {

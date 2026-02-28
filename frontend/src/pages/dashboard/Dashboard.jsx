@@ -292,10 +292,10 @@ const Dashboard = () => {
                             { label: 'Visits', icon: <CalendarCheck size={20} />, path: '/app/visits', color: 'bg-emerald-500/10 text-emerald-400' },
                             { label: 'Billing', icon: <Plus size={20} />, path: '/app/billing/opd/new', color: 'bg-orange-500/10 text-orange-400' },
                             { label: 'Cashier', icon: <CreditCard size={20} />, path: '/app/cash/payments', color: 'bg-indigo-500/10 text-indigo-400' },
-                            { label: 'Pharmacy', icon: <Pill size={20} />, path: '/app/pharmacy', color: 'bg-rose-500/10 text-rose-400' },
-                            { label: 'Insurance', icon: <Shield size={20} />, path: '/app/nhima', color: 'bg-purple-500/10 text-purple-400' },
-                            { label: 'Ledger', icon: <FileText size={20} />, path: '/app/ledger/journals', color: 'bg-cyan-500/10 text-cyan-400' },
-                            { label: 'Settings', icon: <Settings size={20} />, path: '/app/settings', color: 'bg-slate-500/10 text-slate-400' },
+                            { label: 'Pharmacy', icon: <Pill size={20} />, path: '/app/pharmacy/dashboard', color: 'bg-rose-500/10 text-rose-400' },
+                            { label: 'Insurance', icon: <Shield size={20} />, path: '/app/receivables/schemes', color: 'bg-purple-500/10 text-purple-400' },
+                            { label: 'Ledger', icon: <FileText size={20} />, path: '/app/ledger/journal-entries', color: 'bg-cyan-500/10 text-cyan-400' },
+                            { label: 'Settings', icon: <Settings size={20} />, path: '/app/setup', color: 'bg-slate-500/10 text-slate-400' },
                         ].map((a, i) => (
                             <button key={i} onClick={() => navigate(a.path)} className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group">
                                 <div className={`p-3 rounded-xl ${a.color} shadow-lg transition-transform group-hover:scale-110`}>{a.icon}</div>

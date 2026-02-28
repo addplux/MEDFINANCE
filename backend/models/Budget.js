@@ -15,6 +15,14 @@ const Budget = sequelize.define('Budget', {
             key: 'id'
         }
     },
+    accountId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'chart_of_accounts',
+            key: 'id'
+        }
+    },
     fiscalYear: {
         type: DataTypes.INTEGER,
         allowNull: false
@@ -31,13 +39,9 @@ const Budget = sequelize.define('Budget', {
         type: DataTypes.DECIMAL(15, 2),
         defaultValue: 0.00
     },
-    variance: {
-        type: DataTypes.DECIMAL(15, 2),
-        defaultValue: 0.00
-    },
-    variancePercentage: {
-        type: DataTypes.DECIMAL(5, 2),
-        defaultValue: 0.00
+    status: {
+        type: DataTypes.ENUM('draft', 'approved', 'rejected'),
+        defaultValue: 'draft'
     },
     quarter: {
         type: DataTypes.INTEGER,
@@ -50,6 +54,16 @@ const Budget = sequelize.define('Budget', {
     notes: {
         type: DataTypes.TEXT,
         allowNull: true
+    },
+    createdBy: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: { model: 'users', key: 'id' }
+    },
+    approvedBy: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: { model: 'users', key: 'id' }
     }
 }, {
     tableName: 'budgets',

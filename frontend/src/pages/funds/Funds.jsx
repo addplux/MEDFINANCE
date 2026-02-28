@@ -148,7 +148,7 @@ const Funds = () => {
                         <tbody>
                             {filteredFunds.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="text-center py-12">
+                                    <td colSpan="7" className="text-center py-12">
                                         <div className="empty-state">
                                             <Building size={48} />
                                             <p>{loading ? 'Loading...' : 'No funds found'}</p>
@@ -158,10 +158,23 @@ const Funds = () => {
                             ) : (
                                 filteredFunds.map((fund) => (
                                     <tr key={fund.id}>
-                                        <td className="font-semibold">{fund.fundName}</td>
+                                        <td className="font-semibold">
+                                            <div>{fund.fundName}</div>
+                                            <div className="text-[10px] text-text-secondary uppercase">{fund.fundCode}</div>
+                                        </td>
                                         <td className="capitalize">{fund.fundType}</td>
-                                        <td className="font-bold text-success">
-                                            K {parseFloat(fund.currentBalance || 0).toLocaleString()}
+                                        <td>
+                                            {fund.account ? (
+                                                <div className="text-xs">
+                                                    <span className="font-bold">{fund.account.accountCode}</span>
+                                                    <div className="text-text-secondary">{fund.account.accountName}</div>
+                                                </div>
+                                            ) : (
+                                                <span className="text-text-secondary text-xs italic">Not Linked</span>
+                                            )}
+                                        </td>
+                                        <td className="font-bold text-emerald-400">
+                                            K {parseFloat(fund.balance || 0).toLocaleString()}
                                         </td>
                                         <td>{fund.purpose || '-'}</td>
                                         <td>
@@ -171,6 +184,13 @@ const Funds = () => {
                                         </td>
                                         <td>
                                             <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => navigate(`/app/funds/${fund.id}`)}
+                                                    className="btn btn-sm btn-primary"
+                                                    title="View Transactions"
+                                                >
+                                                    <Clock className="w-4 h-4" />
+                                                </button>
                                                 <button
                                                     onClick={() => navigate(`/app/funds/${fund.id}/edit`)}
                                                     className="btn btn-sm btn-secondary"

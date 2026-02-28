@@ -58,6 +58,8 @@ const PaymentForm = () => {
         // Auto-select payment method if patient is on a corporate scheme
         if (found.schemeId || found.Scheme) {
             setFormData(prev => ({ ...prev, paymentMethod: 'insurance' }));
+        } else if (found.paymentMethod === 'staff') {
+            setFormData(prev => ({ ...prev, paymentMethod: 'payroll' }));
         }
     }, [patients, formData.patientId]);
 
@@ -101,6 +103,9 @@ const PaymentForm = () => {
             setSelectedPatient(found || null);
             if (found && (found.schemeId || found.Scheme)) {
                 setFormData(prev => ({ ...prev, patientId: value, paymentMethod: 'insurance' }));
+                return;
+            } else if (found && found.paymentMethod === 'staff') {
+                setFormData(prev => ({ ...prev, patientId: value, paymentMethod: 'payroll' }));
                 return;
             }
         }
@@ -265,9 +270,13 @@ const PaymentForm = () => {
                                     <option value="bank_transfer">Bank Transfer</option>
                                     <option value="cheque">Cheque</option>
                                     <option value="insurance">Corporate Scheme / Insurance</option>
+                                    <option value="payroll">Payroll Deduction</option>
                                 </select>
                                 {(selectedPatient?.schemeId || selectedPatient?.Scheme) && (
                                     <p className="text-[10px] text-emerald-400 mt-1">✓ Auto-set: patient is a corporate scheme member</p>
+                                )}
+                                {selectedPatient?.paymentMethod === 'staff' && (
+                                    <p className="text-[10px] text-accent mt-1">💡 Suggested: patient is a staff member. Suggest Payroll Deduction.</p>
                                 )}
                             </div>
 

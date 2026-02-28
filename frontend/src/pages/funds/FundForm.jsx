@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { fundAPI } from '../../services/apiService';
+import { fundAPI, ledgerAPI } from '../../services/apiService';
 import { ArrowLeft, Save } from 'lucide-react';
 
 const FundForm = () => {
@@ -15,25 +15,25 @@ const FundForm = () => {
         status: 'active',
         notes: ''
     });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-
+    const [accounts, setAccounts] = useState([]);
+    
     useEffect(() => {
-        if (isEditMode) {
-            fetchFund();
-        }
+        loadData();
     }, [id]);
 
-    const fetchFund = async () => {
+    const loadData = async () => {
         try {
-            setLoading(true);
-            const response = await fundAPI.getById(id);
-            setFormData(response.data);
+            const accRes = await ledgerAPI.accounts.getAll();
+            const allAccs = accRes.data.data || accRes.data;
+            // Funds are usually Liability or Equity
+            setAccounts(allAccs.filter(a => ['liability', 'equity', 'asset'].includes(a.accountType)));
+            
+            if (isEditMode) {
+                const fundRes = await fundAPI.getById(id);
+                setFormData(fundRes.data);
+            }
         } catch (err) {
-            setError('Failed to fetch fund details');
-            console.error(err);
-        } finally {
-            setLoading(false);
+            console.error('Failed to load form data:', err);
         }
     };
 
@@ -131,6 +131,24 @@ const FundForm = () => {
                                     <option value="closed">Closed</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">GL Account (Ledger Link)</label>
+                            <select
+                                name="accountId"
+                                value={formData.accountId || ''}
+                                onChange={handleChange}
+                                className="form-select"
+                            >
+                                <option value="">Draft / No Ledger Link</option>
+                                {accounts.map(acc => (
+                                    <option key={acc.id} value={acc.id}>
+                                        {acc.accountCode} - {acc.accountName} ({acc.accountType})
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="text-[10px] text-text-secondary mt-1">Required for automated financial reporting on donor/retention funds.</p>
                         </div>
 
                         <div className="form-group">

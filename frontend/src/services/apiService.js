@@ -191,6 +191,7 @@ export const budgetAPI = {
     update: (id, data) => api.put(`/budgets/${id}`, data),
     delete: (id) => api.delete(`/budgets/${id}`),
     variance: (id) => api.get(`/budgets/${id}/variance`),
+    analyze: (params) => api.get('/budgets/analysis/variance', { params }),
 };
 
 // Funds
@@ -203,7 +204,8 @@ export const fundAPI = {
     transactions: {
         getAll: (id, params) => api.get(`/funds/${id}/transactions`, { params }),
         create: (id, data) => api.post(`/funds/${id}/transactions`, data)
-    }
+    },
+    createTransaction: (id, data) => api.post(`/funds/${id}/transactions`, data)
 };
 
 
@@ -258,6 +260,7 @@ export const payrollAPI = {
     getStaffBalances: () => api.get('/payroll/balances'),
     createDeduction: (data) => api.post('/payroll/deductions', data),
     updateStatus: (id, status) => api.put(`/payroll/deductions/${id}`, { status }),
+    batchUpdate: (data) => api.post('/payroll/deductions/batch', data)
 };
 
 // Pharmacy

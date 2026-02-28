@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { budgetAPI, setupAPI } from '../../services/apiService';
+import { budgetAPI, setupAPI, ledgerAPI } from '../../services/apiService';
 import { ArrowLeft, Save } from 'lucide-react';
 
 const BudgetForm = () => {
@@ -10,6 +10,7 @@ const BudgetForm = () => {
 
     const [formData, setFormData] = useState({
         departmentId: '',
+        accountId: '',
         fiscalYear: new Date().getFullYear().toString(),
         budgetAmount: '',
         category: 'Operational',
@@ -17,25 +18,32 @@ const BudgetForm = () => {
         status: 'draft'
     });
     const [departments, setDepartments] = useState([]);
+    const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     const currentYear = new Date().getFullYear();
-    const years = [currentYear - 1, currentYear, currentYear + 1, currentYear + 2];
+    const years = [currentYear - 1, currentYear, currentYear, currentYear + 1, currentYear + 2];
 
     useEffect(() => {
-        loadDepartments();
+        loadData();
         if (isEditMode) {
             fetchBudget();
         }
     }, [id]);
 
-    const loadDepartments = async () => {
+    const loadData = async () => {
         try {
-            const response = await setupAPI.departments.getAll();
-            setDepartments(response.data.data || response.data);
+            const [deptRes, accRes] = await Promise.all([
+                setupAPI.departments.getAll(),
+                ledgerAPI.accounts.getAll()
+            ]);
+            setDepartments(deptRes.data.data || deptRes.data);
+            // Filter for expense/revenue accounts for budgeting
+            const allAccs = accRes.data.data || accRes.data;
+            setAccounts(allAccs.filter(a => ['expense', 'revenue'].includes(a.accountType)));
         } catch (err) {
-            console.error('Failed to load departments:', err);
+            console.error('Failed to load form data:', err);
         }
     };
 
@@ -143,6 +151,24 @@ const BudgetForm = () => {
                                     <option value="Personnel">Personnel</option>
                                     <option value="Administrative">Administrative</option>
                                 </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">GL Account (Ledger Link)</label>
+                                <select
+                                    name="accountId"
+                                    value={formData.accountId}
+                                    onChange={handleChange}
+                                    className="form-select"
+                                >
+                                    <option value="">Manual / General Category</option>
+                                    {accounts.map(acc => (
+                                        <option key={acc.id} value={acc.id}>
+                                            {acc.accountCode} - {acc.accountName} ({acc.accountType})
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-[10px] text-text-secondary mt-1">Linking an account enables real-time variance tracking.</p>
                             </div>
 
                             <div className="form-group">
