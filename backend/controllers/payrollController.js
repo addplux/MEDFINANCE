@@ -79,6 +79,90 @@ const getStaffBalances = async (req, res) => {
     }
 };
 
+// Update status (e.g., Mark as Deducted)
+const updateDeductionStatus = async (req, res) => {
+    const t = await sequelize.transaction();
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const deduction = await PayrollDeduction.findByPk(id, { transaction: t });
+        if (!deduction) {
+            await t.rollback();
+            return res.status(404).json({ error: 'Deduction not found' });
+        }
+
+        const oldStatus = deduction.status;
+        deduction.status = status;
+        
+        if (status === 'Deducted' && oldStatus !== 'Deducted') {
+            deduction.deductionDate = new Date();
+
+            // Create Journal Entry
+            const entryCount = await JournalEntry.count({ transaction: t });
+            const entryNumber = `PJE${String(entryCount + 1).padStart(6, '0')}`;
+            
+            const journalEntry = await JournalEntry.create({
+                entryNumber,
+                entryDate: new Date(),
+                description: `Payroll Deduction: ${deduction.description}`,
+                status: 'posted',
+                postedBy: req.user.id,
+                createdBy: req.user.id
+            }, { transaction: t });
+
+            // Find Salary Payable Account (Search by common keywords)
+            let salaryPayable = await ChartOfAccounts.findOne({ 
+                where: { accountName: { [Op.like]: '%Salary%Payable%' } },
+                transaction: t
+            });
+
+            // If not found, use a generic liability account or fallback
+            const salaryPayableId = salaryPayable ? salaryPayable.id : null;
+            
+            // Note: deduction.accountId should ideally be the Staff Medical Receivable (Asset) 
+            // set during cashier processing. If not set, we'll need a fallback.
+            let medicalReceivableId = deduction.accountId;
+            if (!medicalReceivableId) {
+                const medicalRec = await ChartOfAccounts.findOne({
+                    where: { accountName: { [Op.like]: '%Staff%Medical%Receivable%' } },
+                    transaction: t
+                });
+                medicalReceivableId = medicalRec ? medicalRec.id : null;
+            }
+
+            if (salaryPayableId && medicalReceivableId) {
+                // DEBIT Salary Payable (Decrease Liability)
+                await JournalLine.create({
+                    entryId: journalEntry.id,
+                    accountId: salaryPayableId,
+                    debit: deduction.amount,
+                    credit: 0,
+                    description: `Payroll Deduction: ${deduction.staffName || 'Staff Member'}`
+                }, { transaction: t });
+
+                // CREDIT Staff Medical Receivable (Decrease Asset)
+                await JournalLine.create({
+                    entryId: journalEntry.id,
+                    accountId: medicalReceivableId,
+                    debit: 0,
+                    credit: deduction.amount,
+                    description: `Payroll Deduction: ${deduction.staffName || 'Staff Member'}`
+                }, { transaction: t });
+            }
+        }
+        
+        await deduction.save({ transaction: t });
+        await t.commit();
+
+        res.json(deduction);
+    } catch (error) {
+        await t.rollback();
+        console.error('Error updating deduction status:', error);
+        res.status(500).json({ error: 'Failed to update deduction status', detail: error.message });
+    }
+};
+
 // Batch Update status
 const batchUpdateDeductions = async (req, res) => {
     const t = await sequelize.transaction();
