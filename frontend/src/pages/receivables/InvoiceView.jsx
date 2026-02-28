@@ -866,7 +866,7 @@ const InvoiceView = () => {
                     onChange={(e) =>
                       setShareData({ ...shareData, recipient: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-gray-900"
                   />
                   {shareMethod === "whatsapp" && (
                     <p className="text-xs text-gray-500 mt-1">
@@ -889,7 +889,7 @@ const InvoiceView = () => {
                     onChange={(e) =>
                       setShareData({ ...shareData, message: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none text-gray-900"
                   ></textarea>
                 </div>
               </div>
