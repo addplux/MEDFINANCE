@@ -11,9 +11,9 @@ import {
 } from "lucide-react";
 import api from "../../services/apiClient";
 
-const HOSPITAL_NAME = "NCHANGA NORTH GENERAL HOSPITAL";
-const HOSPITAL_ADDRESS = "P.O BOX 10063, CHINGOLA – ZAMBIA";
-const HOSPITAL_TEL = "Tel: 318333 / 313801";
+const HOSPITAL_NAME = "HILLTOP HOSPITAL";
+const HOSPITAL_ADDRESS = "P.O. BOX 111, KABWE";
+const HOSPITAL_TEL = "Tel: +260 977 123456";
 
 const fmt = (n) =>
   n > 0
@@ -217,7 +217,7 @@ const InvoiceView = () => {
             Print
           </button>
           <button
-            onClick={handleDownloadPDF}
+            onClick={() => handleDownloadPDF()}
             className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-sm transition-colors"
           >
             <Download className="w-4 h-4" />

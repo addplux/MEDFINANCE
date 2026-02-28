@@ -1291,13 +1291,18 @@ const generateInvoiceHtml = async (id) => {
     <head>
         <meta charset="UTF-8">
         <style>
-            body { font-family: Arial, sans-serif; color: black; margin: 0; padding: 20px; font-size: 12px; }
-            .header-grid { text-align: center; margin-bottom: 24px; border-bottom: 2px solid black; padding-bottom: 16px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12px; }
-            th, td { border: 1px solid #000; padding: 6px 12px; }
-            th { background-color: #f3f4f6; text-transform: uppercase; font-weight: bold; }
+            body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1f2937; margin: 0; padding: 30px; line-height: 1.5; }
+            .header-grid { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #111827; padding-bottom: 20px; }
+            .hospital-name { font-size: 28px; font-weight: 900; color: #111827; letter-spacing: -0.025em; margin: 5px 0; text-transform: uppercase; }
+            .invoice-title { font-size: 14px; font-weight: 600; color: #6b7280; letter-spacing: 0.1em; text-transform: uppercase; margin: 0; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 11px; }
+            th { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 10px 12px; text-align: left; text-transform: uppercase; font-weight: 700; }
+            td { border: 1px solid #d1d5db; padding: 8px 12px; color: #4b5563; }
             .bg-gray { background-color: #f9fafb; }
             .text-right { text-align: right; }
+            .total-row { background-color: #f3f4f6; font-weight: 700; color: #111827; }
+            .grand-total { background-color: #e5e7eb; font-weight: 900; font-size: 13px; color: #111827; }
+            .invoice-no { color: #dc2626; font-weight: 800; }
             @media print {
                 tr { page-break-inside: avoid; }
             }
@@ -1305,11 +1310,11 @@ const generateInvoiceHtml = async (id) => {
     </head>
     <body>
         <div class="header-grid">
-            <p style="font-size: 14px; font-weight: bold; margin: 0">INVOICE / STATEMENT</p>
-            <h1 style="font-size: 24px; font-weight: 900; letter-spacing: 0.05em; margin: 4px 0 0 0">${process.env.HOSPITAL_NAME || 'HILLTOP HOSPITAL'}</h1>
-            <p style="color: #4b5563; margin: 4px 0 0 0">${process.env.HOSPITAL_ADDRESS || 'P.O. BOX 111, KABWE'}</p>
-            <div style="display: flex; justify-content: flex-end; margin-top: 4px">
-                <span style="font-size: 14px; font-weight: bold">No. <span style="color: #dc2626">${invoice.invoiceNumber}</span></span>
+            <p class="invoice-title">INVOICE / STATEMENT</p>
+            <h1 class="hospital-name">${process.env.HOSPITAL_NAME || 'HILLTOP HOSPITAL'}</h1>
+            <p style="margin: 2px 0; color: #4b5563;">${process.env.HOSPITAL_ADDRESS || 'P.O. BOX 111, KABWE'}</p>
+            <div style="text-align: right; margin-top: 10px;">
+                <span style="font-size: 14px; font-weight: bold;">No. <span class="invoice-no">${invoice.invoiceNumber}</span></span>
             </div>
         </div>
 
@@ -1378,8 +1383,11 @@ const downloadSchemeInvoicePdf = async (req, res) => {
         const html = await generateInvoiceHtml(id);
         const pdfBuffer = await pdfService.generatePdfFromHtml(html);
 
+        const invoice = await SchemeInvoice.findByPk(id);
+        const filename = invoice ? `Invoice_${invoice.invoiceNumber}.pdf` : `Invoice_${id}.pdf`;
+
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=Invoice_${id}.pdf`);
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
         res.setHeader('Content-Length', pdfBuffer.length);
 
         return res.end(pdfBuffer);
