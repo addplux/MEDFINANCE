@@ -25,22 +25,29 @@ const authorize = (...allowedRoles) => {
             return res.status(401).json({ error: 'Unauthorized' });
         }
 
-        // 1. Super Admin Bypass (if applicable, or just check if role is 'admin')
-        if (req.user.role === 'admin') {
+        // Super Admin Bypass — Superintendent and Admin always have full access
+        if (req.user.role === 'admin' || req.user.role === 'superintendent') {
             return next();
         }
 
-        // 2. Check against allowed ENUM roles (Legacy)
+        // Check against allowed ENUM roles
         if (allowedRoles.includes(req.user.role)) {
             return next();
         }
 
-        // 3. Dynamic Role Check (Future-proofing)
-        // If the user has a dynamic role assigned, we might want to check that too.
-        // For now, valid ENUM roles are the primary gate for existing routes.
-
         return res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
     };
+};
+
+// Convenience role group constants for route guards
+const ROLE_GROUPS = {
+    FINANCE: ['accountant', 'superintendent', 'admin'],
+    CLINICAL: ['doctor', 'nurse', 'superintendent', 'admin'],
+    PHARMACY: ['pharmacist', 'superintendent', 'admin'],
+    LAB: ['lab_technician', 'doctor', 'superintendent', 'admin'],
+    RADIOLOGY: ['radiographer', 'doctor', 'superintendent', 'admin'],
+    CASHIER: ['cashier', 'accountant', 'superintendent', 'admin'],
+    ALL_STAFF: ['doctor', 'nurse', 'accountant', 'cashier', 'pharmacist', 'lab_technician', 'radiographer', 'superintendent', 'admin'],
 };
 
 // granular permission check middleware
@@ -88,4 +95,4 @@ const checkPermission = (resource, action) => {
     };
 };
 
-module.exports = { authMiddleware, authorize, checkPermission };
+module.exports = { authMiddleware, authorize, checkPermission, ROLE_GROUPS };

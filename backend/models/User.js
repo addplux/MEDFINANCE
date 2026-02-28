@@ -26,7 +26,19 @@ const User = sequelize.define('User', {
         allowNull: false
     },
     role: {
-        type: DataTypes.ENUM('admin', 'accountant', 'billing_staff', 'viewer', 'doctor', 'nurse', 'pharmacist', 'lab_technician'),
+        type: DataTypes.ENUM(
+            'superintendent', // Medical Director — full system access
+            'admin',          // System Administrator
+            'doctor',         // Medical Officer
+            'nurse',          // Nurse / Ward Staff
+            'accountant',     // Chief Accountant / Finance Officer
+            'cashier',        // Cashier / Billing Clerk
+            'pharmacist',     // Pharmacist / Dispenser
+            'lab_technician', // Laboratory Technician
+            'radiographer',   // Radiographer
+            'billing_staff',  // Legacy: kept for backward compatibility
+            'viewer'          // Read-only observer
+        ),
         allowNull: false,
         defaultValue: 'viewer'
     },
