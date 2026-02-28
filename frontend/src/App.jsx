@@ -142,14 +142,17 @@ import { ToastProvider } from './context/ToastContext';
 import { OfflineProvider } from './context/OfflineContext';
 import OfflineBanner from './components/ui/OfflineBanner';
 
-// Protected Route Component
+// Protected Route Component — checks authentication
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading...</div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-950">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-white/40 text-sm font-medium">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -160,6 +163,40 @@ const ProtectedRoute = ({ children }) => {
 
   return children;
 };
+
+// Role-based Route Guard — redirects if user doesn't have the required role
+const RoleRoute = ({ children, roles }) => {
+  const { user } = useAuth();
+
+  const SUPER = ['superintendent', 'admin'];
+
+  // Superintendent and admin always get through
+  if (SUPER.includes(user?.role)) return children;
+
+  // If no role restriction, allow
+  if (!roles || roles.length === 0) return children;
+
+  // Check if user's role is in the allowed list
+  if (roles.includes(user?.role)) return children;
+
+  // Otherwise show access denied
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
+      <div className="text-6xl mb-4">🔒</div>
+      <h2 className="text-2xl font-black text-white mb-2">Access Denied</h2>
+      <p className="text-white/40 mb-6 max-w-sm">
+        Your role (<span className="text-white/70 font-semibold">{user?.role?.replace('_', ' ')}</span>) does not have permission to view this page.
+      </p>
+      <button
+        onClick={() => window.history.back()}
+        className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors"
+      >
+        Go Back
+      </button>
+    </div>
+  );
+};
+
 
 function App() {
   return (

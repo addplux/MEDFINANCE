@@ -88,55 +88,77 @@ const MainLayout = ({ children }) => {
         }));
     };
 
-    // Roles with access to full system (filter-all).
+    // ── Role groups ──────────────────────────────────────────────────────
     const SUPER_ROLES = ['superintendent', 'admin'];
     const FINANCE = ['accountant', ...SUPER_ROLES];
     const CASHIER_ROLES = ['cashier', ...FINANCE];
+
+    // Clinical: includes ALL roles that walk the wards
     const CLINICAL = ['doctor', 'nurse', ...SUPER_ROLES];
-    const ALL_ROLES = ['superintendent', 'admin', 'doctor', 'nurse', 'accountant', 'cashier', 'pharmacist', 'lab_technician', 'radiographer', 'billing_staff', 'viewer'];
+
+    // Admin portal only — no clinical, no finance
+    const ADMIN_ONLY = SUPER_ROLES;
+
+    // Doctor-level clinical (NOT nurse — nurses can't request lab/radiology)
+    const DOCTOR_PLUS = ['doctor', ...SUPER_ROLES];
+
+    // Dept-specific queues visible to their own team + doctors + admin
+    const LAB_VISIBLE = ['lab_technician', 'doctor', 'nurse', ...SUPER_ROLES];
+    const PHARMA_QUEUE = ['pharmacist', 'doctor', 'nurse', ...SUPER_ROLES];
+    const RADIO_VISIBLE = ['radiographer', 'doctor', 'nurse', ...SUPER_ROLES];
 
     // Helper: does the current user's role appear in the allowed list?
     const hasRole = (...allowedRoles) => allowedRoles.flat().includes(user?.role);
 
     const menuItems = [
+
+        // ── ALWAYS VISIBLE ───────────────────────────────────────────────
         {
             path: '/app/dashboard', icon: LayoutDashboard, label: 'Home',
-            roles: ALL_ROLES
-        },
-        {
-            path: '/app/patients', icon: Users, label: 'Patient',
-            roles: ALL_ROLES
+            // Every role sees the dashboard
         },
 
-        // ── SCHEME MANAGER (Finance + Admin) ──────────────────────────────
+        // Patients: clinical staff + cashier + admin (NOT dept-only staff)
+        {
+            path: '/app/patients', icon: Users, label: 'Patients',
+            roles: ['doctor', 'nurse', 'cashier', ...SUPER_ROLES]
+        },
+
+        // Visits: clinical staff only (nurses & doctors manage visits)
+        {
+            path: '/app/visits', icon: ClipboardList, label: 'Visits',
+            roles: CLINICAL
+        },
+
+        // ── SCHEME MANAGER (Finance + Cashier) ───────────────────────────
         { isHeading: true, label: 'SCHEME MANAGER', roles: CASHIER_ROLES },
         {
             path: '/app/receivables/schemes', icon: Settings, label: 'All Schemes',
             roles: CASHIER_ROLES
         },
         {
-            id: 'private_scheme', icon: DollarSign, label: 'Private Prepaid Scheme',
+            id: 'private_scheme', icon: DollarSign, label: 'Private Prepaid',
             roles: CASHIER_ROLES,
             submenu: [
-                { path: '/app/schemes/private/members', label: 'Membership registration' },
-                { path: '/app/schemes/private/plans', label: 'Plan selection' },
-                { path: '/app/schemes/private/duration', label: 'Start & end date' },
-                { path: '/app/schemes/private/validation', label: 'Service coverage validation' },
-                { path: '/app/schemes/private/tracking', label: 'Utilisation tracking' }
+                { path: '/app/schemes/private/members', label: 'Membership Registration' },
+                { path: '/app/schemes/private/plans', label: 'Plan Selection' },
+                { path: '/app/schemes/private/duration', label: 'Start & End Date' },
+                { path: '/app/schemes/private/validation', label: 'Service Coverage' },
+                { path: '/app/schemes/private/tracking', label: 'Utilisation Tracking' }
             ]
         },
         {
             id: 'corporate_scheme', icon: BookOpen, label: 'Corporate Scheme',
             roles: CASHIER_ROLES,
             submenu: [
-                { path: '/app/schemes/corporate/members', label: 'Member management' },
-                { path: '/app/schemes/corporate/credit', label: 'Credit limit' },
-                { path: '/app/schemes/corporate/terms', label: 'Payment terms' },
-                { path: '/app/schemes/corporate/billing', label: 'Monthly billing cycle' }
+                { path: '/app/schemes/corporate/members', label: 'Member Management' },
+                { path: '/app/schemes/corporate/credit', label: 'Credit Limit' },
+                { path: '/app/schemes/corporate/terms', label: 'Payment Terms' },
+                { path: '/app/schemes/corporate/billing', label: 'Monthly Billing' }
             ]
         },
 
-        // ── FINANCE & OPERATIONS (Accountant + Super) ─────────────────────
+        // ── FINANCE (Accountant + Superintendent) ────────────────────────
         { isHeading: true, label: 'FINANCE & OPERATIONS', roles: CASHIER_ROLES },
         {
             path: '/app/payables/suppliers', icon: CreditCard, label: 'Payables',
@@ -183,69 +205,80 @@ const MainLayout = ({ children }) => {
                 { path: '/app/payroll/medical', label: 'Staff Balances' }
             ]
         },
+        { path: '/app/reports', icon: BarChart3, label: 'Reports', roles: [...FINANCE, 'doctor'] },
+        {
+            path: '/app/receivables/ageing', icon: FileCheck, label: 'Debtor Ageing',
+            roles: FINANCE
+        },
 
-        // ── DEPARTMENTAL QUEUES (Clinical + Dept-specific) ─────────────────
+        // ── DEPARTMENTAL QUEUES ──────────────────────────────────────────
         { isHeading: true, label: 'DEPARTMENTAL QUEUES', roles: [...CLINICAL, 'pharmacist', 'lab_technician', 'radiographer', 'cashier'] },
+
+        // OPD — doctors, nurses, cashier (billing), admin
         {
             path: '/app/opd/dashboard', icon: Stethoscope, label: 'OPD Queue',
-            roles: [...CLINICAL, 'cashier', ...SUPER_ROLES]
+            roles: [...CLINICAL, 'cashier']
         },
+        // Laboratory — lab techs enter results; doctors & nurses submit requests
         {
             path: '/app/lab/dashboard', icon: Beaker, label: 'Laboratory',
-            roles: ['lab_technician', ...CLINICAL]
+            roles: LAB_VISIBLE
         },
+        // Pharmacy queue — pharmacists dispense; doctors & nurses can view
         {
             path: '/app/pharmacy/dashboard', icon: Pill, label: 'Pharmacy',
-            roles: ['pharmacist', ...CLINICAL]
+            roles: PHARMA_QUEUE
         },
+        // Radiology — radiographers process; doctors & nurses submit requests
         {
             path: '/app/radiology/dashboard', icon: Radio, label: 'Radiology',
-            roles: ['radiographer', ...CLINICAL]
+            roles: RADIO_VISIBLE
         },
+        // Other clinical departments — doctors & nurses only
         {
             id: 'departments', icon: Building, label: 'Other Clinics',
             roles: CLINICAL,
             submenu: [
                 { path: '/app/maternity/billing', label: 'Labour Ward' },
-                { path: '/app/theatre/dashboard', label: 'Theater' },
+                { path: '/app/theatre/dashboard', label: 'Theatre' },
                 { path: '/app/physiology/dashboard', label: 'Physiotherapy' },
-                { path: '/app/dental/dashboard', label: 'Dental' }
+                { path: '/app/dental/dashboard', label: 'Dental' },
+                { path: '/app/specialist-clinics/billing', label: 'Specialist Clinics' }
             ]
         },
+
+        // ── PHARMACY INVENTORY (Pharmacist manages stock) ────────────────
         {
-            id: 'pharmacy', icon: Package, label: 'Pharmacy Inventory',
+            id: 'pharmacy_inv', icon: Package, label: 'Pharmacy Inventory',
             roles: ['pharmacist', ...SUPER_ROLES],
             submenu: [
-                { path: '/app/pharmacy/inventory', label: 'Inventory list' },
+                { path: '/app/pharmacy/inventory', label: 'Inventory List' },
                 { path: '/app/pharmacy/dispense', label: 'Dispense Drugs' },
                 { path: '/app/pharmacy/grn', label: 'Receive Stock (GRN)' }
             ]
         },
 
-        // ── SETTINGS (Admin + Superintendent only) ─────────────────────────
-        { isHeading: true, label: 'SETTINGS', roles: [...SUPER_ROLES, ...FINANCE] },
+        // ── SETTINGS (Admin + Superintendent only) ───────────────────────
+        { isHeading: true, label: 'SETTINGS', roles: ADMIN_ONLY },
         {
             path: '/app/setup/services', icon: Layers, label: 'Service Master',
-            roles: SUPER_ROLES
+            roles: ADMIN_ONLY
         },
         {
             id: 'setup', icon: Wrench, label: 'System Setup',
-            roles: SUPER_ROLES,
+            roles: ADMIN_ONLY,
             submenu: [
                 { path: '/app/setup', label: 'Tariffs' },
                 { path: '/app/setup/users/new', label: 'Staff Management' },
                 { path: '/app/setup/roles', label: 'User Roles' },
-                ...(hasRole(...SUPER_ROLES) ? [{ path: '/app/setup/pending-approvals', label: '🔔 Pending Approvals' }] : [])
+                ...(hasRole(...ADMIN_ONLY) ? [{ path: '/app/setup/pending-approvals', label: '🔔 Pending Approvals' }] : [])
             ]
         },
         {
-            path: '/app/reports', icon: BarChart3, label: 'Reports',
-            roles: [...FINANCE, 'doctor', ...SUPER_ROLES]
+            path: '/app/setup/audit-logs', icon: Terminal, label: 'Audit Logs',
+            roles: ADMIN_ONLY
         },
-        {
-            path: '/app/setup/audit-logs', icon: Terminal, label: 'System Audit Logs',
-            roles: SUPER_ROLES
-        },
+
     ].filter(item => !item.roles || hasRole(...item.roles));
 
 
