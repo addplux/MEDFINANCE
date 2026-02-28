@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { labAPI } from '../../services/apiService';
-import { Activity, Clock, FileText, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Activity, Clock, FileText, CheckCircle, AlertTriangle, DollarSign } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getPaymentStatusBadge } from '../../utils/statusBadges';
 
@@ -101,13 +101,13 @@ const LabDashboard = () => {
                     </div>
                 </div>
                 {/* Placeholder for critical results */}
-                <div className="card p-4 flex items-center gap-4">
+                <div className="card p-4 flex items-center gap-4 border-2 border-red-500/20 bg-red-50/10">
                     <div className="p-3 rounded-full bg-red-100 text-red-600">
-                        <AlertTriangle className="w-6 h-6" />
+                        <DollarSign className="w-6 h-6" />
                     </div>
                     <div>
-                        <div className="text-xl font-bold">0</div>
-                        <div className="text-sm text-gray-500">Critical Results</div>
+                        <div className="text-xl font-bold text-red-600">{requests.filter(r => r.paymentStatus === 'unpaid').length}</div>
+                        <div className="text-sm font-semibold text-red-700/60 uppercase tracking-tight">Unpaid Requests</div>
                     </div>
                 </div>
             </div>
@@ -168,13 +168,18 @@ const LabDashboard = () => {
                                         </div>
                                     </td>
                                     <td className="p-4">{getStatusBadge(req.status)}</td>
-                                    <td className="p-4">{getPaymentStatusBadge(req.bill?.paymentStatus)}</td>
+                                    <td className="p-4">{getPaymentStatusBadge(req.paymentStatus)}</td>
                                     <td className="p-4">
                                         {req.status === 'requested' && (
                                             <button
                                                 onClick={() => handleStatusUpdate(req.id, 'sample_collected')}
-                                                className="btn btn-sm btn-outline-primary"
+                                                disabled={req.paymentStatus === 'unpaid'}
+                                                className={`btn btn-sm ${req.paymentStatus === 'unpaid' 
+                                                    ? 'btn-ghost cursor-not-allowed opacity-50' 
+                                                    : 'btn-outline-primary'}`}
+                                                title={req.paymentStatus === 'unpaid' ? 'Payment required before sample collection' : 'Collect Sample'}
                                             >
+                                                {req.paymentStatus === 'unpaid' && <AlertTriangle className="w-3 h-3 mr-1 inline" />}
                                                 Collect Sample
                                             </button>
                                         )}

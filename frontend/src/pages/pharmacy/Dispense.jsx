@@ -95,13 +95,23 @@ const Dispense = () => {
         setCart(newCart);
     };
 
+    const isCashPatient = selectedPatient && patients.find(p => p.id === selectedPatient)?.paymentMethod === 'cash' || 
+                         patients.find(p => p.id === selectedPatient)?.paymentMethod === 'private';
+    const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+
     const handleDispense = async () => {
         if (!selectedPatient || cart.length === 0) return;
+        
+        if (isCashPatient && !paymentConfirmed) {
+            alert('Payment must be confirmed for cash patients before dispensing.');
+            return;
+        }
 
         try {
             setLoading(true);
             const payload = {
                 patientId: selectedPatient,
+                paymentConfirmed: isCashPatient ? paymentConfirmed : true,
                 items: cart.map(item => ({
                     medicationId: item.medicationId,
                     batchId: item.batchId,
@@ -115,7 +125,7 @@ const Dispense = () => {
             navigate('/app/pharmacy/inventory');
         } catch (error) {
             console.error('Dispense failed:', error);
-            alert('Failed to dispense medication');
+            alert(error.response?.data?.detail || error.response?.data?.error || 'Failed to dispense medication');
         } finally {
             setLoading(false);
         }
@@ -288,15 +298,40 @@ const Dispense = () => {
                         <span>K{cartTotal.toFixed(2)}</span>
                     </div>
 
-                    <div className="bg-blue-50 text-blue-800 p-3 rounded-md text-sm mb-4">
-                        <Activity className="w-4 h-4 inline-block mr-1" />
-                        Once dispensed, these items will generate a bill with status: <strong>Unpaid</strong>.
-                    </div>
+                    {isCashPatient && (
+                        <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg space-y-3">
+                            <div className="flex items-start gap-3">
+                                <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
+                                <div>
+                                    <div className="font-bold text-orange-800">Payment Required</div>
+                                    <div className="text-sm text-orange-700">
+                                        This is a cash patient. Please verify payment has been made at the cashier.
+                                    </div>
+                                </div>
+                            </div>
+                            <label className="flex items-center gap-2 cursor-pointer p-2 bg-white rounded border border-orange-200 hover:bg-orange-50 transition-colors">
+                                <input 
+                                    type="checkbox" 
+                                    className="checkbox checkbox-primary"
+                                    checked={paymentConfirmed}
+                                    onChange={(e) => setPaymentConfirmed(e.target.checked)}
+                                />
+                                <span className="text-sm font-semibold text-orange-800">I confirm payment has been received</span>
+                            </label>
+                        </div>
+                    )}
+
+                    {!isCashPatient && (
+                        <div className="bg-blue-50 text-blue-800 p-3 rounded-md text-sm mb-4">
+                            <Activity className="w-4 h-4 inline-block mr-1" />
+                            Once dispensed, these items will generate a bill for the scheme/prepaid account.
+                        </div>
+                    )}
 
                     <button
                         onClick={handleDispense}
-                        disabled={loading || cart.length === 0 || !selectedPatient}
-                        className="btn btn-primary w-full py-3"
+                        disabled={loading || cart.length === 0 || !selectedPatient || (isCashPatient && !paymentConfirmed)}
+                        className={`btn btn-primary w-full py-3 ${loading || cart.length === 0 || !selectedPatient || (isCashPatient && !paymentConfirmed) ? 'opacity-50' : ''}`}
                     >
                         {loading ? 'Dispensing...' : 'Confirm Dispense'}
                     </button>

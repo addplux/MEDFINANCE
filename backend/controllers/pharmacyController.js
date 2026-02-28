@@ -139,6 +139,11 @@ const getBatches = async (req, res) => {
 // ========== Dispensing ==========
 
 // Dispense medication
+// PAYMENT GATE: Cash/private patients must have paid before dispensing.
+// Scheme, corporate, and prepaid patients are always allowed through.
+const PAID_PAYMENT_METHODS = ['corporate', 'scheme', 'insurance', 'private_prepaid'];
+const CASH_METHODS = ['cash', 'private'];
+
 const dispenseMedication = async (req, res) => {
     const t = await sequelize.transaction();
     try {
@@ -148,7 +153,26 @@ const dispenseMedication = async (req, res) => {
             return res.status(400).json({ error: 'Patient and items are required' });
         }
 
-        const bills = [];
+        // PAYMENT GATE: Fetch patient and validate payment eligibility
+        const patient = await Patient.findByPk(patientId, { transaction: t });
+        if (!patient) {
+            await t.rollback();
+            return res.status(404).json({ error: 'Patient not found' });
+        }
+
+        const isCashPatient = CASH_METHODS.includes(patient.paymentMethod);
+        if (isCashPatient) {
+            // For cash patients, we require explicit confirmation that payment has been made.
+            // The frontend must pass paymentConfirmed: true after the cashier has processed payment.
+            if (!req.body.paymentConfirmed) {
+                await t.rollback();
+                return res.status(403).json({
+                    error: 'Payment confirmation required.',
+                    detail: 'This is a cash patient. Please confirm that payment has been received at the cashier before dispensing.',
+                    requiresConfirmation: true
+                });
+            }
+        }
 
         for (const item of items) {
             const { medicationId, batchId, quantity, discount } = item;

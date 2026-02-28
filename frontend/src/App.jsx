@@ -109,6 +109,7 @@ import LabRequestForm from './pages/lab/LabRequestForm';
 import LabResultEntry from './pages/lab/LabResultEntry';
 
 // Radiology
+import RadiologyDashboard from './pages/radiology/RadiologyDashboard';
 import RadiologyRequestForm from './pages/radiology/RadiologyRequestForm';
 
 // Theatre
@@ -260,7 +261,7 @@ function App() {
 
                         <Route path="payroll/medical" element={<PayrollMedical />} />
 
-                        <Route path="lab/dashboard" element={<DepartmentDashboard title="Laboratory" departmentId={1} type="lab" />} />
+                        <Route path="lab/dashboard" element={<LabDashboard />} />
                         <Route path="lab/tests" element={<LabTests />} />
                         <Route path="lab/request" element={<LabRequestForm />} />
                         <Route path="lab/results/:id" element={<LabResultEntry />} />
@@ -270,7 +271,7 @@ function App() {
                         <Route path="pharmacy/grn" element={<GoodsReceivedNote />} />
                         <Route path="pharmacy/dispense" element={<Dispense />} />
 
-                        <Route path="radiology/dashboard" element={<DepartmentDashboard title="Radiology" departmentId={3} type="radiology" />} />
+                        <Route path="radiology/dashboard" element={<RadiologyDashboard />} />
                         <Route path="radiology/request" element={<RadiologyRequestForm />} />
 
                         <Route path="opd/dashboard" element={<DepartmentDashboard title="OPD" departmentId={4} />} />

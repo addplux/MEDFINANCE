@@ -298,6 +298,7 @@ export const radiologyAPI = {
     requests: {
         getAll: (params) => api.get('/radiology/requests', { params }),
         create: (data) => api.post('/radiology/requests', data),
+        updateStatus: (id, status) => api.patch(`/radiology/requests/${id}/status`, { status })
     },
 };
 

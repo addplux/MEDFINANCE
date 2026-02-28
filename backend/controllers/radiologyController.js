@@ -2,6 +2,10 @@ const { RadiologyBill, Visit, Patient, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const { postChargeToGL } = require('../utils/glPoster');
 
+// Payment statuses that allow processing without cashier confirmation
+const PAID_STATUSES = ['paid', 'prepaid', 'corporate', 'scheme', 'insurance'];
+const CASH_METHODS = ['cash', 'private'];
+
 // Generate unique bill number
 const generateBillNumber = async () => {
     const prefix = 'RAD';
@@ -73,6 +77,13 @@ exports.createRequest = async (req, res) => {
         });
         const totalAmount = services.reduce((sum, s) => sum + Number(s.price), 0);
 
+        // Determine payment status based on patient payment method
+        const patientRecord = await Patient.findByPk(patientId, { transaction });
+        const patientMethod = patientRecord ? patientRecord.paymentMethod : 'cash';
+        const initialPaymentStatus = CASH_METHODS.includes(patientMethod) ? 'unpaid' :
+            ['corporate'].includes(patientMethod) ? 'corporate' :
+            ['scheme', 'insurance'].includes(patientMethod) ? 'scheme' : 'prepaid';
+
         const bill = await RadiologyBill.create({
             billNumber,
             visitId: visit.id,
@@ -84,7 +95,7 @@ exports.createRequest = async (req, res) => {
             netAmount: totalAmount,
             createdBy: req.user.id,
             status: 'pending',
-            paymentStatus: 'pending',
+            paymentStatus: initialPaymentStatus,
             billDate: new Date()
         }, { transaction });
 
@@ -111,7 +122,7 @@ exports.getAllRequests = async (req, res) => {
         const requests = await RadiologyBill.findAll({
             where,
             include: [
-                { model: Patient, as: 'patient', attributes: ['id', 'firstName', 'lastName', 'hospitalNumber'] }
+                { model: Patient, as: 'patient', attributes: ['id', 'firstName', 'lastName', 'hospitalNumber', 'paymentMethod'] }
             ],
             order: [['createdAt', 'DESC']]
         });
@@ -120,5 +131,34 @@ exports.getAllRequests = async (req, res) => {
     } catch (error) {
         console.error('Error fetching radiology requests:', error);
         res.status(500).json({ error: 'Failed to fetch radiology requests' });
+    }
+};
+
+// Update radiology request status — enforces payment gate
+exports.updateRequestStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const bill = await RadiologyBill.findByPk(req.params.id, {
+            include: [{ model: Patient, as: 'patient', attributes: ['paymentMethod'] }]
+        });
+
+        if (!bill) return res.status(404).json({ error: 'Radiology request not found' });
+
+        // Payment gate: block cash/private patients if bill is unpaid
+        if (!PAID_STATUSES.includes(bill.paymentStatus)) {
+            const isCash = !bill.patient || CASH_METHODS.includes(bill.patient.paymentMethod);
+            if (isCash) {
+                return res.status(403).json({
+                    error: 'Payment required before processing.',
+                    detail: 'Radiology fees for this patient have not been paid. Please confirm payment at the cashier first.'
+                });
+            }
+        }
+
+        await bill.update({ status });
+        res.json(bill);
+    } catch (error) {
+        console.error('Error updating radiology status:', error);
+        res.status(500).json({ error: 'Failed to update radiology request status' });
     }
 };

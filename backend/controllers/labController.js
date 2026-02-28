@@ -208,7 +208,7 @@ const getRequests = async (req, res) => {
                 {
                     model: Patient,
                     as: 'patient',
-                    attributes: ['firstName', 'lastName', 'dateOfBirth', 'gender']
+                    attributes: ['firstName', 'lastName', 'dateOfBirth', 'gender', 'paymentMethod']
                 },
                 {
                     model: User,
@@ -232,12 +232,29 @@ const getRequests = async (req, res) => {
 };
 
 // Update Request Status (e.g., Sample Collected)
+// PAYMENT GATE: Only allow processing if payment is confirmed (unpaid cash patients are blocked)
+const PAID_STATUSES = ['paid', 'prepaid', 'corporate', 'scheme', 'insurance'];
+
 const updateRequestStatus = async (req, res) => {
     try {
         const { status } = req.body;
-        const request = await LabRequest.findByPk(req.params.id);
+        const request = await LabRequest.findByPk(req.params.id, {
+            include: [{ model: Patient, as: 'patient', attributes: ['paymentMethod'] }]
+        });
 
         if (!request) return res.status(404).json({ error: 'Request not found' });
+
+        // Block processing for unpaid cash patients
+        if (!PAID_STATUSES.includes(request.paymentStatus)) {
+            const cashMethods = ['cash', 'private'];
+            const isCash = !request.patient || cashMethods.includes(request.patient.paymentMethod);
+            if (isCash) {
+                return res.status(403).json({
+                    error: 'Payment required before processing.',
+                    detail: 'Lab fees for this patient have not been paid. Please confirm payment at the cashier first.'
+                });
+            }
+        }
 
         await request.update({ status });
         res.json(request);

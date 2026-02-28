@@ -12,4 +12,7 @@ router.get('/requests', authorize('SA', 'DOCTOR', 'NURSE', 'RADIOLOGIST'), radio
 // Create new radiology request
 router.post('/requests', authorize('SA', 'DOCTOR', 'NURSE'), radiologyController.createRequest);
 
+// Update radiology request status (payment gate enforced)
+router.patch('/requests/:id/status', radiologyController.updateRequestStatus);
+
 module.exports = router;
