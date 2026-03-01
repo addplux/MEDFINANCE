@@ -96,7 +96,9 @@ const createPatient = async (req, res) => {
         const {
             firstName, lastName, dateOfBirth, gender, phone, email, address,
             paymentMethod, costCategory, staffId, serviceId, registeredService, ward,
-            emergencyContact, emergencyPhone, nrc, patientType, schemeId, initialDeposit
+            emergencyContact, emergencyPhone, nrc, patientType, schemeId, initialDeposit,
+            // Prepaid / membership fields
+            balance, prepaidCredit, policyNumber, memberRank, memberSuffix, memberStatus
         } = req.body;
 
         // Validate required fields
@@ -114,6 +116,9 @@ const createPatient = async (req, res) => {
         if (req.file) {
             photoUrl = `/uploads/patients/${req.file.filename}`;
         }
+
+        // For private_prepaid members the opening balance is in `balance`
+        const openingBalance = Number(balance || prepaidCredit || 0);
 
         const patient = await Patient.create({
             patientNumber,
@@ -134,12 +139,19 @@ const createPatient = async (req, res) => {
             nrc,
             patientType: patientType || 'opd',
             schemeId: schemeId || null,
-            photoUrl
+            photoUrl,
+            // Membership fields
+            policyNumber: policyNumber || null,
+            memberRank: memberRank || null,
+            memberSuffix: memberSuffix || null,
+            memberStatus: memberStatus || 'active',
+            // Set opening balance directly for prepaid members
+            balance: openingBalance,
+            prepaidCredit: openingBalance
         }, { transaction: t });
 
-        // Handle initial deposit if present
-        if (initialDeposit && !isNaN(Number(initialDeposit)) && Number(initialDeposit) > 0) {
-            // Generate receipt number
+        // For standard cash patients with an explicit initial deposit — create a Payment record too
+        if (initialDeposit && !isNaN(Number(initialDeposit)) && Number(initialDeposit) > 0 && paymentMethod !== 'private_prepaid') {
             const paymentCount = await Payment.count({ transaction: t });
             const receiptNumber = `RCP${String(paymentCount + 1).padStart(6, '0')}`;
 
@@ -150,10 +162,9 @@ const createPatient = async (req, res) => {
                 paymentMethod: 'cash',
                 paymentDate: new Date(),
                 notes: 'Initial registration fee / deposit',
-                receivedBy: req.user?.id || 1 // Fallback for testing
+                receivedBy: req.user?.id || 1
             }, { transaction: t });
 
-            // Update balance
             await updatePatientBalance(patient.id, t);
         }
 
@@ -169,6 +180,7 @@ const createPatient = async (req, res) => {
         });
     }
 };
+
 
 // Update patient
 const updatePatient = async (req, res) => {
