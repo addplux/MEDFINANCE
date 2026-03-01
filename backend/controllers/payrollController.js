@@ -94,14 +94,14 @@ const updateDeductionStatus = async (req, res) => {
 
         const oldStatus = deduction.status;
         deduction.status = status;
-        
+
         if (status === 'Deducted' && oldStatus !== 'Deducted') {
             deduction.deductionDate = new Date();
 
             // Create Journal Entry
             const entryCount = await JournalEntry.count({ transaction: t });
             const entryNumber = `PJE${String(entryCount + 1).padStart(6, '0')}`;
-            
+
             const journalEntry = await JournalEntry.create({
                 entryNumber,
                 entryDate: new Date(),
@@ -111,27 +111,38 @@ const updateDeductionStatus = async (req, res) => {
                 createdBy: req.user.id
             }, { transaction: t });
 
-            // Find Salary Payable Account (Search by common keywords)
-            let salaryPayable = await ChartOfAccounts.findOne({ 
-                where: { accountName: { [Op.like]: '%Salary%Payable%' } },
+            // Auto-create Salary Payable if it doesn't exist
+            const [salaryPayable] = await ChartOfAccounts.findOrCreate({
+                where: { accountName: 'Salary Payable' },
+                defaults: {
+                    accountCode: '2100',
+                    accountName: 'Salary Payable',
+                    accountType: 'liability',
+                    balance: 0.00,
+                    isActive: true
+                },
                 transaction: t
             });
+            const salaryPayableId = salaryPayable.id;
 
-            // If not found, use a generic liability account or fallback
-            const salaryPayableId = salaryPayable ? salaryPayable.id : null;
-            
-            // Note: deduction.accountId should ideally be the Staff Medical Receivable (Asset) 
-            // set during cashier processing. If not set, we'll need a fallback.
+            // Auto-create Staff Medical Receivable if it doesn't exist
             let medicalReceivableId = deduction.accountId;
             if (!medicalReceivableId) {
-                const medicalRec = await ChartOfAccounts.findOne({
-                    where: { accountName: { [Op.like]: '%Staff%Medical%Receivable%' } },
+                const [medicalRec] = await ChartOfAccounts.findOrCreate({
+                    where: { accountName: 'Staff Medical Receivable' },
+                    defaults: {
+                        accountCode: '1300',
+                        accountName: 'Staff Medical Receivable',
+                        accountType: 'asset',
+                        balance: 0.00,
+                        isActive: true
+                    },
                     transaction: t
                 });
-                medicalReceivableId = medicalRec ? medicalRec.id : null;
+                medicalReceivableId = medicalRec.id;
             }
 
-            if (salaryPayableId && medicalReceivableId) {
+            if (salaryPayableId && medicalReceivableId) { // always true now
                 // DEBIT Salary Payable (Decrease Liability)
                 await JournalLine.create({
                     entryId: journalEntry.id,
@@ -151,7 +162,7 @@ const updateDeductionStatus = async (req, res) => {
                 }, { transaction: t });
             }
         }
-        
+
         await deduction.save({ transaction: t });
         await t.commit();
 
@@ -197,24 +208,38 @@ const batchUpdateDeductions = async (req, res) => {
                     createdBy: req.user.id
                 }, { transaction: t });
 
-                // Find Salary Payable Account
-                let salaryPayable = await ChartOfAccounts.findOne({
-                    where: { accountName: { [Op.like]: '%Salary%Payable%' } },
+                // Auto-create Salary Payable if it doesn't exist
+                const [salaryPayable] = await ChartOfAccounts.findOrCreate({
+                    where: { accountName: 'Salary Payable' },
+                    defaults: {
+                        accountCode: '2100',
+                        accountName: 'Salary Payable',
+                        accountType: 'liability',
+                        balance: 0.00,
+                        isActive: true
+                    },
                     transaction: t
                 });
+                const salaryPayableId = salaryPayable.id;
 
-                const salaryPayableId = salaryPayable ? salaryPayable.id : null;
+                // Auto-create Staff Medical Receivable if it doesn't exist
                 let medicalReceivableId = deduction.accountId;
-
                 if (!medicalReceivableId) {
-                    const medicalRec = await ChartOfAccounts.findOne({
-                        where: { accountName: { [Op.like]: '%Staff%Medical%Receivable%' } },
+                    const [medicalRec] = await ChartOfAccounts.findOrCreate({
+                        where: { accountName: 'Staff Medical Receivable' },
+                        defaults: {
+                            accountCode: '1300',
+                            accountName: 'Staff Medical Receivable',
+                            accountType: 'asset',
+                            balance: 0.00,
+                            isActive: true
+                        },
                         transaction: t
                     });
-                    medicalReceivableId = medicalRec ? medicalRec.id : null;
+                    medicalReceivableId = medicalRec.id;
                 }
 
-                if (salaryPayableId && medicalReceivableId) {
+                if (salaryPayableId && medicalReceivableId) { // always true now
                     await JournalLine.create({
                         entryId: journalEntry.id,
                         accountId: salaryPayableId,
