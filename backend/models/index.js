@@ -71,6 +71,10 @@ User.hasMany(Shift, { foreignKey: 'userId', as: 'shifts' });
 User.hasMany(Notification, { foreignKey: 'userId', as: 'notifications' });
 Notification.belongsTo(User, { foreignKey: 'userId', as: 'recipient' });
 
+// User <-> Role association (required by checkPermission middleware)
+User.belongsTo(Role, { foreignKey: 'roleId', as: 'userRole' });
+Role.hasMany(User, { foreignKey: 'roleId', as: 'users' });
+
 // ... (other relationships)
 
 // Shift relationships
