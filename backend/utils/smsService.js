@@ -28,7 +28,7 @@ const getMtnAccessToken = async () => {
         const options = {
             hostname: 'api.mtn.com',
             port: 443,
-            path: '/v1/oauth/access_token?grant_type=client_credentials',
+            path: '/v1/oauth/access_token/accesstoken?grant_type=client_credentials',
             method: 'POST',
             headers: {
                 'Authorization': `Basic ${credentials}`,
