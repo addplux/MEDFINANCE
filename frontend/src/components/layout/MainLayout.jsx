@@ -383,10 +383,10 @@ const MainLayout = ({ children }) => {
                                         <button
                                             onClick={() => toggleMenu(item.id)}
                                             className={`
-                                                w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+                                                w-full flex items-center gap-2.5 px-3 py-2 rounded-full
                                                 transition-all duration-200 group text-sm font-medium
                                                 ${hasActiveChild
-                                                    ? 'bg-blue-600 text-white'
+                                                    ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)] ring-1 ring-white/20'
                                                     : 'text-white/60 hover:bg-white/5 hover:text-white'
                                                 }
                                                 ${sidebarCollapsed ? 'justify-center' : ''}
@@ -417,7 +417,7 @@ const MainLayout = ({ children }) => {
                                                                 w-full flex items-center px-3 py-2 rounded-lg
                                                                 transition-all duration-200 text-[13px] font-medium
                                                                 ${isActive
-                                                                    ? 'text-blue-400'
+                                                                    ? 'text-primary drop-shadow-[0_0_8px_rgba(255,0,204,0.5)]'
                                                                     : 'text-white/40 hover:text-white'
                                                                 }
                                                             `}
@@ -442,10 +442,10 @@ const MainLayout = ({ children }) => {
                                         setSidebarOpen(false);
                                     }}
                                     className={`
-                                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+                                        w-full flex items-center gap-2.5 px-3 py-2 rounded-full
                                         transition-all duration-200 text-sm font-medium group
                                         ${active
-                                            ? 'bg-blue-600 text-white'
+                                            ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)] ring-1 ring-white/20'
                                             : 'text-white/60 hover:bg-white/5 hover:text-white'
                                         }
                                         ${sidebarCollapsed ? 'justify-center' : ''}
@@ -464,7 +464,7 @@ const MainLayout = ({ children }) => {
                     <button
                         onClick={handleLogout}
                         className={`
-                            w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+                            w-full flex items-center gap-2.5 px-3 py-2 rounded-full
                             text-sm font-medium text-white/40 hover:bg-red-500/10 hover:text-red-400
                             transition-all duration-200
                             ${sidebarCollapsed ? 'justify-center' : ''}

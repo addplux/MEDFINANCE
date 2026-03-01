@@ -41,7 +41,7 @@ const dayName = (d) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Dat
 const StatCard = ({ icon, label, value, change, changeLabel, colorClass, iconBg }) => {
     const positive = change >= 0;
     return (
-        <div className="glass-card p-5 border-white/10 group hover:border-white/20 transition-all hover:-translate-y-1">
+        <div className="glass-card p-4 rounded-xl border-white/5 bg-bg-tertiary group hover:border-white/20 transition-all hover:-translate-y-1">
             <div className="flex items-start justify-between mb-4">
                 <div className={`p-2.5 rounded-xl ${iconBg} shadow-inner`}>
                     {React.cloneElement(icon, { size: 20, className: colorClass })}
@@ -54,8 +54,8 @@ const StatCard = ({ icon, label, value, change, changeLabel, colorClass, iconBg 
                 )}
             </div>
             <div>
-                <h3 className="text-2xl font-black text-white tracking-tight">{value}</h3>
-                <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary mt-1 group-hover:text-text-primary transition-colors">{label}</p>
+                <h3 className="text-xl font-bold text-white tracking-tight">{value}</h3>
+                <p className="text-[10px] font-semibold tracking-wider text-text-secondary mt-1 group-hover:text-text-primary transition-colors">{label}</p>
             </div>
         </div>
     );
@@ -163,7 +163,7 @@ const Dashboard = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-6 py-8 space-y-8 animate-fade-in text-text-primary">
+        <div className="max-w-full mx-auto px-4 py-4 space-y-8 animate-fade-in text-text-primary">
             
             {/* ── Header ───────────────────────────────────────────────────── */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -173,7 +173,7 @@ const Dashboard = () => {
                     </div>
                     <div>
                         <h1 className="text-3xl font-black tracking-tight text-white uppercase">Hospital Dashboard</h1>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary mt-1">{todayString} — Performance Overview</p>
+                        <p className="text-[10px] font-semibold tracking-wider text-text-secondary mt-1">{todayString} — Performance Overview</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-4 self-end md:self-auto">
@@ -198,10 +198,10 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 {/* Departmental Revenue Distribution */}
-                <div className="lg:col-span-2 glass-card p-6 border-white/10 flex flex-col">
+                <div className="lg:col-span-2 glass-card p-5 rounded-xl border-white/5 bg-bg-tertiary flex flex-col">
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white">Departmental Queue Load</h2>
+                            <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">Departmental Queue Load</h2>
                             <p className="text-[10px] text-text-secondary mt-1 tracking-widest uppercase">Pending items awaiting processing</p>
                         </div>
                         <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full">
@@ -230,8 +230,8 @@ const Dashboard = () => {
                 </div>
 
                 {/* Revenue by Scheme Donut */}
-                <div className="glass-card p-6 border-white/10 flex flex-col">
-                    <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white mb-8">Revenue Distribution</h2>
+                <div className="glass-card p-5 rounded-xl border-white/5 bg-bg-tertiary flex flex-col">
+                    <h2 className="text-[11px] font-bold uppercase tracking-widest text-white mb-8">Revenue Distribution</h2>
                     <div className="flex-1 min-h-[180px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -257,10 +257,10 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
                 {/* Growth Trends */}
-                <div className="glass-card p-8 border-white/10">
+                <div className="glass-card p-5 rounded-xl border-white/5 bg-bg-tertiary">
                     <div className="flex items-center gap-3 mb-8">
                         <TrendingUp size={18} className="text-emerald-400" />
-                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white">Daily Growth Trends</h2>
+                        <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">Daily Growth Trends</h2>
                     </div>
                     <div className="h-[220px]">
                         <ResponsiveContainer width="100%" height="100%">
@@ -281,10 +281,10 @@ const Dashboard = () => {
                 </div>
 
                 {/* Quick Shortcuts */}
-                <div className="glass-card p-8 border-white/10">
+                <div className="glass-card p-5 rounded-xl border-white/5 bg-bg-tertiary">
                     <div className="flex items-center gap-3 mb-8">
                         <Layers size={18} className="text-accent" />
-                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white">Mission Shortcuts</h2>
+                        <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">Mission Shortcuts</h2>
                     </div>
                     <div className="grid grid-cols-4 gap-4">
                         {[
@@ -310,11 +310,11 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
                 {/* Recent Operational Activity */}
-                <div className="glass-card p-6 border-white/10 overflow-hidden">
+                <div className="glass-card p-5 rounded-xl border-white/5 bg-bg-tertiary overflow-hidden">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                             <Activity size={18} className="text-accent" />
-                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white">Clinical Flow</h2>
+                            <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">Clinical Flow</h2>
                         </div>
                         <button onClick={() => navigate('/app/visits')} className="text-[10px] font-black uppercase text-accent hover:underline flex items-center gap-1">
                             Live Queue <ChevronRight size={10} />
@@ -342,10 +342,10 @@ const Dashboard = () => {
                 </div>
 
                 {/* Intelligence Alerts */}
-                <div className="glass-card p-6 border-white/10">
+                <div className="glass-card p-5 rounded-xl border-white/5 bg-bg-tertiary">
                     <div className="flex items-center gap-3 mb-6">
                         <Bell size={18} className="text-accent" />
-                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white">System Intelligence</h2>
+                        <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">System Intelligence</h2>
                     </div>
                     <div className="space-y-3">
                         {overview?.alerts?.lowStockCount > 0 && (

@@ -8,7 +8,7 @@ export default {
         extend: {
             colors: {
                 primary: {
-                    DEFAULT: '#FF00CC', // Vibrant Pink
+                    DEFAULT: '#FF00CC', // Hot pink signature
                     50: '#ffe5f9',
                     100: '#ffccf3',
                     200: '#ff99e7',
@@ -20,6 +20,25 @@ export default {
                     800: '#660052',
                     900: '#330029',
                 },
+                accent: {
+                    DEFAULT: '#00EAFF',
+                },
+                bg: {
+                    primary: '#000000', // Reference Stark Black
+                    secondary: '#09090b', // Reference Elevated Zinc-950
+                    tertiary: '#18181b', // Reference Card Zinc-900
+                    elevated: '#27272a', // Reference Border Zinc-800
+                },
+                text: {
+                    primary: '#FFFFFF',
+                    secondary: '#a1a1aa', // Zinc-400
+                    tertiary: '#71717a', // Zinc-500
+                },
+                border: {
+                    color: '#27272a', // Zinc-800
+                    hover: '#3f3f46', // Zinc-700
+                }
+            },
                 accent: {
                     DEFAULT: '#00EAFF', // Electric Cyan
                     50: '#e5fdff',
