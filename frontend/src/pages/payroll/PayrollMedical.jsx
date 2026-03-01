@@ -14,12 +14,12 @@ const PayrollMedical = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-4 border-b border-border-color">
+            <div className="flex gap-2 border-b border-border-color">
                 <button
                     onClick={() => setActiveTab('schedule')}
-                    className={`pb-3 px-1 flex items-center gap-2 transition-colors relative ${activeTab === 'schedule'
-                            ? 'text-primary-500 font-medium'
-                            : 'text-text-secondary hover:text-text-primary'
+                    className={`pb-3 px-5 flex items-center gap-2 transition-colors relative ${activeTab === 'schedule'
+                        ? 'text-primary-500 font-medium'
+                        : 'text-text-secondary hover:text-text-primary'
                         }`}
                 >
                     <FileText className="w-4 h-4" />
@@ -30,9 +30,9 @@ const PayrollMedical = () => {
                 </button>
                 <button
                     onClick={() => setActiveTab('balances')}
-                    className={`pb-3 px-1 flex items-center gap-2 transition-colors relative ${activeTab === 'balances'
-                            ? 'text-primary-500 font-medium'
-                            : 'text-text-secondary hover:text-text-primary'
+                    className={`pb-3 px-5 flex items-center gap-2 transition-colors relative ${activeTab === 'balances'
+                        ? 'text-primary-500 font-medium'
+                        : 'text-text-secondary hover:text-text-primary'
                         }`}
                 >
                     <Users className="w-4 h-4" />
