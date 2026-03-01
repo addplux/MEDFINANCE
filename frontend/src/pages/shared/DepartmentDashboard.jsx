@@ -45,7 +45,10 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
     useEffect(() => {
         loadData();
         const interval = setInterval(loadData, 30000); // Auto refresh every 30s
-        return (
+        return () => clearInterval(interval);
+    }, [loadData]);
+
+    return (
         <div className="flex flex-col h-full space-y-3 animate-fade-in">
             {/* Minimalist Header */}
             <div className="flex items-center justify-between px-1">
@@ -212,7 +215,6 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
             </div>
         </div>
     );
-            </div>
 };
 
 export default DepartmentDashboard;
