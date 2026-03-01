@@ -1,6 +1,7 @@
 const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, Patient, Service, User, sequelize, TheatreBill, MaternityBill, SpecialistClinicBill, LabRequest, LabTest, LabResult, Medication } = require('../models');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
 const { postChargeToGL } = require('../utils/glPoster');
+const { assertPatientActive } = require('../utils/patientStatusGuard');
 
 // Get all OPD bills
 const getAllOPDBills = async (req, res) => {
@@ -77,6 +78,11 @@ const createOPDBill = async (req, res) => {
         const patient = await Patient.findByPk(patientId);
         if (!patient) {
             return res.status(404).json({ error: 'Patient not found' });
+        }
+
+        // Block billing for suspended/closed accounts
+        try { assertPatientActive(patient); } catch (e) {
+            return res.status(e.statusCode || 403).json({ error: e.message, code: e.code });
         }
 
         // Determine unit price based on patient's payment method

@@ -1,6 +1,7 @@
 const { LabTest, LabRequest, LabResult, Patient, User, PrepaidPlan, LabBill } = require('../models');
 const { Op, Sequelize } = require('sequelize');
 const { sequelize } = require('../config/database');
+const { assertPatientActive } = require('../utils/patientStatusGuard');
 
 // ========== Lab Test Management ==========
 
@@ -69,6 +70,12 @@ const createRequest = async (req, res) => {
         // Fetch patient and tests
         const patient = await Patient.findByPk(patientId, { transaction: t });
         if (!patient) return res.status(404).json({ error: 'Patient not found' });
+
+        // Block lab requests for suspended/closed accounts
+        try { assertPatientActive(patient); } catch (e) {
+            await t.rollback();
+            return res.status(e.statusCode || 403).json({ error: e.message, code: e.code });
+        }
 
         const tests = await LabTest.findAll({ where: { id: testIds }, transaction: t });
         const totalAmount = tests.reduce((sum, test) => sum + parseFloat(test.price || 0), 0);

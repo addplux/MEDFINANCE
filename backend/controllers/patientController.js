@@ -7,6 +7,7 @@ const { Op } = require('sequelize');
 const fs = require('fs');
 const path = require('path');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
+const { sendSuspensionSMS } = require('../utils/smsService');
 
 // Get all patients
 const getAllPatients = async (req, res) => {
@@ -219,6 +220,12 @@ const updatePatient = async (req, res) => {
         }
 
         await patient.update(updateData);
+
+        // Send SMS if account just got suspended
+        if (updateData.memberStatus === 'suspended' && oldData.memberStatus !== 'suspended') {
+            // Fire and forget — don't block the response if SMS fails
+            sendSuspensionSMS(patient).catch(err => console.error('[SMS] Suspension SMS error:', err));
+        }
 
         // Audit Logging for Financial Fields
         const financialFields = [

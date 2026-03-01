@@ -2,6 +2,7 @@ const { MaternityBill, Patient } = require('../models');
 const { Op } = require('sequelize');
 const { postChargeToGL } = require('../utils/glPoster');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
+const { assertPatientActive } = require('../utils/patientStatusGuard');
 
 // Generate unique bill number
 const generateBillNumber = async () => {
@@ -24,6 +25,13 @@ const generateBillNumber = async () => {
 
 exports.createMaternityBill = async (req, res) => {
     try {
+        // Block billing for suspended/closed accounts
+        if (req.body.patientId) {
+            const patient = await Patient.findByPk(req.body.patientId);
+            try { assertPatientActive(patient); } catch (e) {
+                return res.status(e.statusCode || 403).json({ error: e.message, code: e.code });
+            }
+        }
         const billNumber = await generateBillNumber();
         const bill = await MaternityBill.create({ ...req.body, billNumber });
 

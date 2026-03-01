@@ -3,6 +3,7 @@ const { updatePatientBalance } = require('../utils/balanceUpdater');
 const { postChargeToGL } = require('../utils/glPoster');
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
+const { assertPatientActive } = require('../utils/patientStatusGuard');
 
 // ========== Medication Inventory ==========
 
@@ -158,6 +159,12 @@ const dispenseMedication = async (req, res) => {
         if (!patient) {
             await t.rollback();
             return res.status(404).json({ error: 'Patient not found' });
+        }
+
+        // Block dispensing for suspended/closed accounts
+        try { assertPatientActive(patient); } catch (e) {
+            await t.rollback();
+            return res.status(e.statusCode || 403).json({ error: e.message, code: e.code });
         }
 
         const isCashPatient = CASH_METHODS.includes(patient.paymentMethod);

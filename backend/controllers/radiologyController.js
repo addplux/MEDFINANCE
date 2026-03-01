@@ -1,6 +1,7 @@
 const { RadiologyBill, Visit, Patient, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const { postChargeToGL } = require('../utils/glPoster');
+const { assertPatientActive } = require('../utils/patientStatusGuard');
 
 // Payment statuses that allow processing without cashier confirmation
 const PAID_STATUSES = ['paid', 'prepaid', 'corporate', 'scheme', 'insurance'];
@@ -80,9 +81,16 @@ exports.createRequest = async (req, res) => {
         // Determine payment status based on patient payment method
         const patientRecord = await Patient.findByPk(patientId, { transaction });
         const patientMethod = patientRecord ? patientRecord.paymentMethod : 'cash';
+
+        // Block billing for suspended/closed accounts
+        try { assertPatientActive(patientRecord); } catch (e) {
+            await transaction.rollback();
+            return res.status(e.statusCode || 403).json({ error: e.message, code: e.code });
+        }
+
         const initialPaymentStatus = CASH_METHODS.includes(patientMethod) ? 'unpaid' :
             ['corporate'].includes(patientMethod) ? 'corporate' :
-            ['scheme', 'insurance'].includes(patientMethod) ? 'scheme' : 'prepaid';
+                ['scheme', 'insurance'].includes(patientMethod) ? 'scheme' : 'prepaid';
 
         const bill = await RadiologyBill.create({
             billNumber,
