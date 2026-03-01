@@ -212,6 +212,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
             </div>
         </div>
     );
+            </div>
 };
 
 export default DepartmentDashboard;
