@@ -126,54 +126,54 @@ const Budgets = () => {
                                     </td>
                                 </tr>
                             ) : (
-                                    {filteredBudgets.map((budget) => {
-                                        const variance = budget.variance || 0;
-                                        const percentage = budget.variancePercentage || 0;
-                                        return (
-                                            <tr key={budget.id}>
-                                                <td className="font-medium">
-                                                    <div>{budget.department?.departmentName || '-'}</div>
-                                                    <div className="text-[10px] text-text-secondary uppercase tracking-tight">
-                                                        {budget.account ? `${budget.account.accountCode} - ${budget.account.accountName}` : budget.category}
-                                                    </div>
-                                                </td>
-                                                <td>{budget.fiscalYear}</td>
-                                                <td className="font-semibold text-text-primary">K {parseFloat(budget.budgetedAmount || 0).toLocaleString()}</td>
-                                                <td className="font-semibold text-rose-400">
-                                                    K {parseFloat(budget.actualAmount || 0).toLocaleString()}
-                                                </td>
-                                                <td>
-                                                    <div className={`font-black tracking-tight ${variance >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                                        {variance >= 0 ? '+' : ''}K {parseFloat(variance).toLocaleString()}
-                                                        <span className="text-[10px] ml-1 opacity-60">({percentage}%)</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span className={getStatusBadge(budget.status)}>
-                                                        {budget.status}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={() => navigate(`/app/budgets/${budget.id}/edit`)}
-                                                            className="btn btn-sm btn-ghost hover:bg-white/5"
-                                                            title="Edit"
-                                                        >
-                                                            <Edit className="w-4 h-4" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDelete(budget.id)}
-                                                            className="btn btn-sm btn-ghost text-rose-400 hover:bg-rose-400/10"
-                                                            title="Delete"
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
+                                filteredBudgets.map((budget) => {
+                                    const variance = budget.variance || 0;
+                                    const percentage = budget.variancePercentage || 0;
+                                    return (
+                                        <tr key={budget.id}>
+                                            <td className="font-medium">
+                                                <div>{budget.department?.departmentName || '-'}</div>
+                                                <div className="text-[10px] text-text-secondary uppercase tracking-tight">
+                                                    {budget.account ? `${budget.account.accountCode} - ${budget.account.accountName}` : budget.category}
+                                                </div>
+                                            </td>
+                                            <td>{budget.fiscalYear}</td>
+                                            <td className="font-semibold text-text-primary">K {parseFloat(budget.budgetedAmount || 0).toLocaleString()}</td>
+                                            <td className="font-semibold text-rose-400">
+                                                K {parseFloat(budget.actualAmount || 0).toLocaleString()}
+                                            </td>
+                                            <td>
+                                                <div className={`font-black tracking-tight ${variance >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                    {variance >= 0 ? '+' : ''}K {parseFloat(variance).toLocaleString()}
+                                                    <span className="text-[10px] ml-1 opacity-60">({percentage}%)</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span className={getStatusBadge(budget.status)}>
+                                                    {budget.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => navigate(`/app/budgets/${budget.id}/edit`)}
+                                                        className="btn btn-sm btn-ghost hover:bg-white/5"
+                                                        title="Edit"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(budget.id)}
+                                                        className="btn btn-sm btn-ghost text-rose-400 hover:bg-rose-400/10"
+                                                        title="Delete"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>
