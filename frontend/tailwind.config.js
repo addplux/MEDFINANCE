@@ -8,36 +8,59 @@ export default {
         extend: {
             colors: {
                 primary: {
-                    DEFAULT: '#3B82F6', // Reference Blue
-                    50: '#eff6ff',
-                    100: '#dbeafe',
-                    200: '#bfdbfe',
-                    300: '#93c5fd',
-                    400: '#60a5fa',
-                    500: '#3b82f6',
-                    600: '#2563eb',
-                    700: '#1d4ed8',
-                    800: '#1e40af',
-                    900: '#1e3a8a',
+                    DEFAULT: '#FF00CC', // Vibrant Pink
+                    50: '#ffe5f9',
+                    100: '#ffccf3',
+                    200: '#ff99e7',
+                    300: '#ff66db',
+                    400: '#ff33cf',
+                    500: '#FF00CC',
+                    600: '#cc00a3',
+                    700: '#99007a',
+                    800: '#660052',
+                    900: '#330029',
                 },
                 accent: {
-                    DEFAULT: '#0EA5E9', // Reference Light Blue
+                    DEFAULT: '#00EAFF', // Electric Cyan
+                    50: '#e5fdff',
+                    100: '#ccfaff',
+                    200: '#99f5ff',
+                    300: '#66f0ff',
+                    400: '#33ebff',
+                    500: '#00EAFF',
+                    600: '#00bbcc',
+                    700: '#008c99',
+                    800: '#005e66',
+                    900: '#002f33',
+                },
+                highlight: {
+                    DEFAULT: '#FF9500', // Vivid Orange
+                    50: '#fff4e5',
+                    100: '#ffe9cc',
+                    200: '#ffd399',
+                    300: '#ffbd66',
+                    400: '#ffa733',
+                    500: '#FF9500',
                 },
                 bg: {
-                    primary: '#f8fafc', // Slate 50 (Main body background)
-                    secondary: '#ffffff', // White (Cards)
-                    tertiary: '#f1f5f9', // Slate 100 (Hover/Header)
-                    elevated: '#ffffff', // White
+                    primary: '#080808', // Deep Black
+                    secondary: '#121212', // Dark Charcoal
+                    tertiary: '#1A1A1A', // Slate Gray
+                    elevated: '#242424',
                 },
                 text: {
-                    primary: '#0f172a', // Slate 900
-                    secondary: '#64748b', // Slate 500
-                    tertiary: '#94a3b8', // Slate 400
+                    primary: '#FFFFFF',
+                    secondary: '#A1A1A1',
+                    tertiary: '#717171',
                 },
                 border: {
-                    color: '#e2e8f0', // Slate 200
-                    hover: '#cbd5e1', // Slate 300
+                    color: '#2A2A2A',
+                    hover: '#3A3A3A',
                 }
+            },
+            fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+                serif: ['Playfair Display', 'serif'],
             },
             animation: {
                 'fade-in': 'fadeIn 0.5s ease-out forwards',

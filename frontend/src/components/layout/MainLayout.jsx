@@ -383,10 +383,10 @@ const MainLayout = ({ children }) => {
                                         <button
                                             onClick={() => toggleMenu(item.id)}
                                             className={`
-                                                w-full flex items-center gap-2.5 px-3 py-2 rounded-full
+                                                w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
                                                 transition-all duration-200 group text-sm font-medium
                                                 ${hasActiveChild
-                                                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30 font-bold'
+                                                    ? 'bg-blue-600 text-white'
                                                     : 'text-white/60 hover:bg-white/5 hover:text-white'
                                                 }
                                                 ${sidebarCollapsed ? 'justify-center' : ''}
@@ -417,7 +417,7 @@ const MainLayout = ({ children }) => {
                                                                 w-full flex items-center px-3 py-2 rounded-lg
                                                                 transition-all duration-200 text-[13px] font-medium
                                                                 ${isActive
-                                                                    ? 'text-primary drop-shadow-[0_0_8px_rgba(255,0,204,0.5)]'
+                                                                    ? 'text-blue-400'
                                                                     : 'text-white/40 hover:text-white'
                                                                 }
                                                             `}
@@ -442,10 +442,10 @@ const MainLayout = ({ children }) => {
                                         setSidebarOpen(false);
                                     }}
                                     className={`
-                                        w-full flex items-center gap-2.5 px-3 py-2 rounded-full
+                                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
                                         transition-all duration-200 text-sm font-medium group
                                         ${active
-                                            ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30 font-bold'
+                                            ? 'bg-blue-600 text-white'
                                             : 'text-white/60 hover:bg-white/5 hover:text-white'
                                         }
                                         ${sidebarCollapsed ? 'justify-center' : ''}
@@ -464,7 +464,7 @@ const MainLayout = ({ children }) => {
                     <button
                         onClick={handleLogout}
                         className={`
-                            w-full flex items-center gap-2.5 px-3 py-2 rounded-full
+                            w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
                             text-sm font-medium text-white/40 hover:bg-red-500/10 hover:text-red-400
                             transition-all duration-200
                             ${sidebarCollapsed ? 'justify-center' : ''}
@@ -487,18 +487,18 @@ const MainLayout = ({ children }) => {
             {/* Main Content */}
             <div className={`flex-1 flex flex-col transition-all duration-500 bg-bg-primary ${sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'} `}>
                 {/* Mobile Header */}
-                <header className="lg:hidden h-16 bg-white shadow-sm border-b border-border-color px-6 flex items-center justify-between sticky top-0 z-20">
+                <header className="lg:hidden h-16 bg-black/40 backdrop-blur-xl border-b border-white/5 px-6 flex items-center justify-between sticky top-0 z-20">
                     <button
                         onClick={() => setSidebarOpen(true)}
                         className="p-2 hover:bg-white/5 rounded-xl transition-all"
                     >
-                        <Menu className="w-6 h-6 text-text-primary" />
+                        <Menu className="w-6 h-6 text-white" />
                     </button>
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-accent flex items-center justify-center">
                             <Activity className="w-4 h-4 text-white" />
                         </div>
-                        <span className="text-lg font-black tracking-tighter text-text-primary">{orgName.split(' ')[0]}</span>
+                        <span className="text-lg font-black tracking-tighter text-white">{orgName.split(' ')[0]}</span>
                     </div>
                     <NotificationBell />
                 </header>
