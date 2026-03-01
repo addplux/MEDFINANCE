@@ -28,7 +28,7 @@ const ReceiptModal = ({ isOpen, onClose, data }) => {
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh] print:shadow-none print:w-full print:max-w-none print:h-auto">
 
                 {/* Header Actions (Hidden when printing) */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-100 print:hidden shrink-0">
+                <div className="flex items-center justify-between p-4 border-b border-black/20 print:hidden shrink-0">
                     <h2 className="text-lg font-bold text-gray-900">Payment Receipt</h2>
                     <div className="flex items-center gap-2">
                         <button
@@ -40,7 +40,7 @@ const ReceiptModal = ({ isOpen, onClose, data }) => {
                         </button>
                         <button
                             onClick={onClose}
-                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -73,35 +73,35 @@ const ReceiptModal = ({ isOpen, onClose, data }) => {
                         }
                     `}</style>
 
-                    <div className="receipt-print-area font-mono text-gray-800">
+                    <div className="receipt-print-area font-mono text-black">
                         {/* Header */}
-                        <div className="text-center mb-6 pb-6 border-b-2 border-dashed border-gray-300">
+                        <div className="text-center mb-6 pb-6 border-b-2 border-dashed border-black/40">
                             <h1 className="text-xl font-bold mb-1">{HOSPITAL_NAME}</h1>
-                            <p className="text-xs text-gray-600">{HOSPITAL_ADDRESS}</p>
-                            <p className="text-xs text-gray-600">{HOSPITAL_TEL}</p>
+                            <p className="text-xs text-black">{HOSPITAL_ADDRESS}</p>
+                            <p className="text-xs text-black">{HOSPITAL_TEL}</p>
 
-                            <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center px-4">
+                            <div className="mt-4 pt-4 border-t border-black/20 flex justify-between items-center px-4">
                                 <div className="text-left leading-tight">
-                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">Receipt No</p>
+                                    <p className="text-[10px] text-black uppercase tracking-widest">Receipt No</p>
                                     <p className="font-bold text-base">{payment.receiptNumber || 'N/A'}</p>
                                 </div>
                                 <div className="text-right leading-tight">
-                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">Date</p>
+                                    <p className="text-[10px] text-black uppercase tracking-widest">Date</p>
                                     <p className="font-bold">{new Date(payment.paymentDate).toLocaleString()}</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Customer Info */}
-                        <div className="mb-6 bg-gray-50 rounded-lg p-4 border border-gray-100">
+                        <div className="mb-6 bg-white border border-black/10 rounded-lg p-4 border border-black/20">
                             <div className="grid grid-cols-2 gap-y-4">
                                 <div>
-                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Patient</p>
+                                    <p className="text-[10px] text-black uppercase tracking-widest mb-1">Patient</p>
                                     <p className="font-bold">{patientName}</p>
-                                    <p className="text-xs text-gray-600">ID: {patientNumber}</p>
+                                    <p className="text-xs text-black">ID: {patientNumber}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">CASHIER</p>
+                                    <p className="text-[10px] text-black uppercase tracking-widest mb-1">CASHIER</p>
                                     <p className="font-bold">{cashierName}</p>
                                 </div>
                             </div>
@@ -117,13 +117,13 @@ const ReceiptModal = ({ isOpen, onClose, data }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr className="border-b border-gray-200 border-dashed">
+                                    <tr className="border-b border-black/20 border-dashed">
                                         <td className="py-3">
                                             <p className="font-bold">{payment.billType || 'General Payment'} Payment</p>
                                             {billDetails?.service?.serviceName ? (
-                                                <p className="text-xs text-gray-600">Service: {billDetails.service.serviceName}</p>
+                                                <p className="text-xs text-black">Service: {billDetails.service.serviceName}</p>
                                             ) : payment.notes ? (
-                                                <p className="text-xs text-gray-600">{payment.notes}</p>
+                                                <p className="text-xs text-black">{payment.notes}</p>
                                             ) : null}
                                         </td>
                                         <td className="py-3 text-right font-medium">ZMW {fmt(payment.amount)}</td>
@@ -133,19 +133,19 @@ const ReceiptModal = ({ isOpen, onClose, data }) => {
                         </div>
 
                         {/* Totals */}
-                        <div className="flex justify-between items-center py-4 border-t-2 border-black bg-gray-50 px-4 rounded-lg">
+                        <div className="flex justify-between items-center py-4 border-t-2 border-black bg-white border border-black/10 px-4 rounded-lg">
                             <div>
-                                <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">Method: {payment.paymentMethod?.toUpperCase()}</p>
-                                {payment.referenceNumber && <p className="text-xs text-gray-600">Ref: {payment.referenceNumber}</p>}
+                                <p className="text-[10px] uppercase tracking-widest text-black font-bold mb-1">Method: {payment.paymentMethod?.toUpperCase()}</p>
+                                {payment.referenceNumber && <p className="text-xs text-black">Ref: {payment.referenceNumber}</p>}
                             </div>
                             <div className="text-right">
-                                <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">Total Paid</p>
+                                <p className="text-[10px] uppercase tracking-widest text-black font-bold mb-1">Total Paid</p>
                                 <p className="text-2xl font-black">ZMW {fmt(payment.amount)}</p>
                             </div>
                         </div>
 
                         {/* Footer */}
-                        <div className="mt-8 text-center text-xs text-gray-500">
+                        <div className="mt-8 text-center text-xs text-black">
                             <p>Thank you for using MedFinance360</p>
                             <p className="mt-1">Wishing you a quick recovery.</p>
                         </div>
