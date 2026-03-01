@@ -20,7 +20,6 @@
   "author": "MEDFINANCE360 Team",
   "license": "UNLICENSED",
   "dependencies": {
-    "africastalking": "^0.7.9",
     "axios": "^1.13.5",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
@@ -34,6 +33,7 @@
     "pg-hstore": "^2.3.4",
     "puppeteer": "^24.37.5",
     "sequelize": "^6.35.0",
+    "twilio": "^5.12.2",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

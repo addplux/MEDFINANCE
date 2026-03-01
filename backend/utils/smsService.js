@@ -1,15 +1,17 @@
 /**
- * smsService - Africa's Talking SMS API wrapper.
+ * smsService - Twilio SMS API wrapper.
  * Required env vars:
- *   AT_API_KEY
- *   AT_USERNAME
- *   AT_SENDER_ID (optional)
+ *   TWILIO_ACCOUNT_SID
+ *   TWILIO_AUTH_TOKEN
+ *   TWILIO_PHONE_NUMBER (e.g. +1234567890)
  */
+
+const twilio = require('twilio');
 
 const sendSuspensionSMS = async (patient) => {
     try {
-        if (!process.env.AT_API_KEY || !process.env.AT_USERNAME) {
-            console.warn('[SMS] AT_API_KEY or AT_USERNAME not configured - skipping SMS.');
+        if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_PHONE_NUMBER) {
+            console.warn('[SMS] Twilio credentials not fully configured - skipping SMS.');
             return { skipped: true };
         }
 
@@ -24,29 +26,20 @@ const sendSuspensionSMS = async (patient) => {
         if (normalizedPhone.startsWith('0')) normalizedPhone = '+260' + normalizedPhone.slice(1);
         if (!normalizedPhone.startsWith('+')) normalizedPhone = '+260' + normalizedPhone;
 
-        const credentials = {
-            apiKey: process.env.AT_API_KEY,
-            username: process.env.AT_USERNAME,
-        };
-        const AfricasTalking = require('africastalking')(credentials);
-        const sms = AfricasTalking.SMS;
+        const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-        const options = {
-            to: [normalizedPhone],
-            message: `Dear ${patient.firstName} ${patient.lastName}, your MedFinance360 account has been SUSPENDED. Services are temporarily unavailable. Please contact the accounts office for assistance.`
-        };
+        const message = await client.messages.create({
+            body: `Dear ${patient.firstName} ${patient.lastName}, your MedFinance360 account has been SUSPENDED. Services are temporarily unavailable. Please contact the accounts office for assistance.`,
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to: normalizedPhone
+        });
 
-        if (process.env.AT_SENDER_ID) {
-            options.from = process.env.AT_SENDER_ID;
-        }
-
-        const result = await sms.send(options);
-        console.log(`[SMS] Suspension SMS sent to ${normalizedPhone}`);
-        return result;
+        console.log(`[SMS] Suspension SMS sent to ${normalizedPhone}. SID: ${message.sid}`);
+        return { success: true, sid: message.sid, status: message.status };
 
     } catch (err) {
         // Never block the main flow for SMS failures
-        console.error('[SMS] Failed to send suspension SMS:', err);
+        console.error('[SMS] Failed to send suspension SMS via Twilio:', err.message);
         return { error: err.message };
     }
 };

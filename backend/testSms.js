@@ -2,15 +2,16 @@ require('dotenv').config();
 const { sendSuspensionSMS } = require('./utils/smsService');
 
 async function testSMS() {
-    console.log("Testing Africa's Talking SMS integration...");
+    console.log("Testing Twilio SMS integration...");
 
-    if (!process.env.AT_API_KEY) {
-        console.warn('⚠️ AT_API_KEY not found in .env');
-        console.log('Please define AT_API_KEY and AT_USERNAME in your local .env or Railway/Vercel config.');
+    if (!process.env.TWILIO_ACCOUNT_SID) {
+        console.warn('⚠️ TWILIO_ACCOUNT_SID not found in .env');
+        console.log('Please define TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER in your local .env or Railway/Vercel config.');
 
-        // For testing right now, you can uncomment these and paste your keys from the sandbox:
-        // process.env.AT_API_KEY = 'YOUR_API_KEY';
-        // process.env.AT_USERNAME = 'sandbox'; 
+        // For testing right now, you can uncomment these and paste your keys from the Twilio Console:
+        // process.env.TWILIO_ACCOUNT_SID = 'AC...';
+        // process.env.TWILIO_AUTH_TOKEN = '...'; 
+        // process.env.TWILIO_PHONE_NUMBER = '+1...'; // A valid Twilio number or messaging service SID
     }
 
     const testPatient = {
