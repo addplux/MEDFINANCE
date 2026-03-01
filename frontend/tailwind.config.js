@@ -8,18 +8,37 @@ export default {
         extend: {
             colors: {
                 primary: {
-                    DEFAULT: '#FF00CC', // Hot pink signature
-                    50: '#ffe5f9',
-                    100: '#ffccf3',
-                    200: '#ff99e7',
-                    300: '#ff66db',
-                    400: '#ff33cf',
-                    500: '#FF00CC',
-                    600: '#cc00a3',
-                    700: '#99007a',
-                    800: '#660052',
-                    900: '#330029',
+                    DEFAULT: '#3B82F6', // Reference Blue
+                    50: '#eff6ff',
+                    100: '#dbeafe',
+                    200: '#bfdbfe',
+                    300: '#93c5fd',
+                    400: '#60a5fa',
+                    500: '#3b82f6',
+                    600: '#2563eb',
+                    700: '#1d4ed8',
+                    800: '#1e40af',
+                    900: '#1e3a8a',
                 },
+                accent: {
+                    DEFAULT: '#0EA5E9', // Reference Light Blue
+                },
+                bg: {
+                    primary: '#f8fafc', // Slate 50 (Main body background)
+                    secondary: '#ffffff', // White (Cards)
+                    tertiary: '#f1f5f9', // Slate 100 (Hover/Header)
+                    elevated: '#ffffff', // White
+                },
+                text: {
+                    primary: '#0f172a', // Slate 900
+                    secondary: '#64748b', // Slate 500
+                    tertiary: '#94a3b8', // Slate 400
+                },
+                border: {
+                    color: '#e2e8f0', // Slate 200
+                    hover: '#cbd5e1', // Slate 300
+                }
+            },
                 accent: {
                     DEFAULT: '#00EAFF',
                 },

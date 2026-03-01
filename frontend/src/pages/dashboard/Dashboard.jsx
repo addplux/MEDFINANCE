@@ -41,7 +41,7 @@ const dayName = (d) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Dat
 const StatCard = ({ icon, label, value, change, changeLabel, colorClass, iconBg }) => {
     const positive = change >= 0;
     return (
-        <div className="glass-card p-4 rounded-xl border-white/5 bg-bg-tertiary group hover:border-white/20 transition-all hover:-translate-y-1">
+        <div className="glass-card p-4 rounded-xl border-slate-200 bg-bg-tertiary group hover:border-slate-300 transition-all hover:-translate-y-1">
             <div className="flex items-start justify-between mb-4">
                 <div className={`p-2.5 rounded-xl ${iconBg} shadow-inner`}>
                     {React.cloneElement(icon, { size: 20, className: colorClass })}
@@ -54,8 +54,8 @@ const StatCard = ({ icon, label, value, change, changeLabel, colorClass, iconBg 
                 )}
             </div>
             <div>
-                <h3 className="text-xl font-bold text-white tracking-tight">{value}</h3>
-                <p className="text-[10px] font-semibold tracking-wider text-text-secondary mt-1 group-hover:text-text-primary transition-colors">{label}</p>
+                <h3 className="text-xl font-bold text-slate-900 tracking-tight">{value}</h3>
+                <p className="text-[10px] font-semibold tracking-wider text-slate-500 mt-1 group-hover:text-text-primary transition-colors">{label}</p>
             </div>
         </div>
     );
@@ -65,15 +65,15 @@ const StatCard = ({ icon, label, value, change, changeLabel, colorClass, iconBg 
 const ChartTip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     return (
-        <div className="bg-slate-900/90 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl px-4 py-3">
-            <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary mb-2">{label}</p>
+        <div className="bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl shadow-2xl px-4 py-3">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">{label}</p>
             {payload.map((p, i) => (
                 <div key={i} className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
-                        <span className="text-xs font-bold text-white/70">{p.name}</span>
+                        <span className="text-xs font-bold text-slate-900/70">{p.name}</span>
                     </div>
-                    <span className="text-xs font-black text-white">{typeof p.value === 'number' ? fmt(p.value) : p.value}</span>
+                    <span className="text-xs font-black text-slate-900">{typeof p.value === 'number' ? fmt(p.value) : p.value}</span>
                 </div>
             ))}
         </div>
@@ -156,8 +156,8 @@ const Dashboard = () => {
     if (loading && !overview) {
         return (
             <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center gap-4">
-                <div className="w-12 h-12 border-4 border-accent/20 border-t-accent rounded-full animate-spin" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-text-secondary animate-pulse">Initializing Mission Control...</span>
+                <div className="w-12 h-12 border-4 border-accent/40 border-t-accent rounded-full animate-spin" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 animate-pulse">Initializing Mission Control...</span>
             </div>
         );
     }
@@ -168,22 +168,22 @@ const Dashboard = () => {
             {/* ── Header ───────────────────────────────────────────────────── */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
-                    <div className="p-3 bg-accent/10 rounded-2xl border border-accent/20">
+                    <div className="p-3 bg-accent/10 rounded-2xl border border-accent/40">
                         <LayoutDashboard className="text-accent" size={32} />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-black tracking-tight text-white uppercase">Hospital Dashboard</h1>
-                        <p className="text-[10px] font-semibold tracking-wider text-text-secondary mt-1">{todayString} — Performance Overview</p>
+                        <h1 className="text-3xl font-black tracking-tight text-slate-900 uppercase">Hospital Dashboard</h1>
+                        <p className="text-[10px] font-semibold tracking-wider text-slate-500 mt-1">{todayString} — Performance Overview</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-4 self-end md:self-auto">
-                    <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-2xl flex flex-col items-end">
+                    <div className="bg-slate-50 border border-slate-200 px-4 py-2 rounded-2xl flex flex-col items-end">
                         <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live Systems
                         </span>
-                        <span className="text-xs font-bold text-white">MedFinance Node-01</span>
+                        <span className="text-xs font-bold text-slate-900">MedFinance Node-01</span>
                     </div>
-                    <button onClick={loadDashboard} className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-text-secondary hover:text-white transition-all shadow-lg">
+                    <button onClick={loadDashboard} className="p-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl text-slate-500 hover:text-slate-900 transition-all shadow-lg">
                         <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
                     </button>
                 </div>
@@ -198,13 +198,13 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 {/* Departmental Revenue Distribution */}
-                <div className="lg:col-span-2 glass-card p-5 rounded-xl border-white/5 bg-bg-tertiary flex flex-col">
+                <div className="lg:col-span-2 glass-card p-5 rounded-xl border-slate-200 bg-bg-tertiary flex flex-col">
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">Departmental Queue Load</h2>
-                            <p className="text-[10px] text-text-secondary mt-1 tracking-widest uppercase">Pending items awaiting processing</p>
+                            <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Departmental Queue Load</h2>
+                            <p className="text-[10px] text-slate-500 mt-1 tracking-widest uppercase">Pending items awaiting processing</p>
                         </div>
-                        <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+                        <div className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-full">
                             <span className="text-[9px] font-black uppercase tracking-widest text-accent">Real-time</span>
                         </div>
                     </div>
@@ -217,10 +217,10 @@ const Dashboard = () => {
                                         <stop offset="100%" stopColor="#3B82F6" stopOpacity={0.6} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid stroke="#FFFFFF05" vertical={false} />
+                                <CartesianGrid stroke="#e2e8f0" vertical={false} />
                                 <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 900, fill: '#64748B' }} axisLine={false} tickLine={false} />
                                 <YAxis tick={{ fontSize: 10, fontWeight: 900, fill: '#64748B' }} axisLine={false} tickLine={false} />
-                                <Tooltip content={<ChartTip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+                                <Tooltip content={<ChartTip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
                                 <Bar dataKey="value" name="Pending Items" radius={[8, 8, 0, 0]}>
                                     {deptRevenueData.map((_, i) => <Cell key={i} fill={CHART_GRADIENT_COLORS[i % CHART_GRADIENT_COLORS.length]} />)}
                                 </Bar>
@@ -230,8 +230,8 @@ const Dashboard = () => {
                 </div>
 
                 {/* Revenue by Scheme Donut */}
-                <div className="glass-card p-5 rounded-xl border-white/5 bg-bg-tertiary flex flex-col">
-                    <h2 className="text-[11px] font-bold uppercase tracking-widest text-white mb-8">Revenue Distribution</h2>
+                <div className="glass-card p-5 rounded-xl border-slate-200 bg-bg-tertiary flex flex-col">
+                    <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-900 mb-8">Revenue Distribution</h2>
                     <div className="flex-1 min-h-[180px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -244,9 +244,9 @@ const Dashboard = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-3 mt-6">
                         {schemeDistribution.map(s => (
-                            <div key={s.name} className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl border border-white/5">
+                            <div key={s.name} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200">
                                 <span className="w-2 h-2 rounded-full shrink-0" style={{ background: s.color }} />
-                                <span className="text-[9px] font-black uppercase text-white/60 truncate tracking-tight">{s.name}</span>
+                                <span className="text-[9px] font-black uppercase text-slate-900/60 truncate tracking-tight">{s.name}</span>
                             </div>
                         ))}
                     </div>
@@ -257,10 +257,10 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
                 {/* Growth Trends */}
-                <div className="glass-card p-5 rounded-xl border-white/5 bg-bg-tertiary">
+                <div className="glass-card p-5 rounded-xl border-slate-200 bg-bg-tertiary">
                     <div className="flex items-center gap-3 mb-8">
                         <TrendingUp size={18} className="text-emerald-400" />
-                        <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">Daily Growth Trends</h2>
+                        <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Daily Growth Trends</h2>
                     </div>
                     <div className="h-[220px]">
                         <ResponsiveContainer width="100%" height="100%">
@@ -271,7 +271,7 @@ const Dashboard = () => {
                                         <stop offset="100%" stopColor="#10B981" stopOpacity={0.01} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid stroke="#FFFFFF05" vertical={false} />
+                                <CartesianGrid stroke="#e2e8f0" vertical={false} />
                                 <XAxis dataKey="day" tick={{ fontSize: 10, fontWeight: 900, fill: '#64748B' }} axisLine={false} tickLine={false} />
                                 <Tooltip content={<ChartTip />} />
                                 <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#10B981" strokeWidth={3} fill="url(#trendGradient)" dot={{ r: 4, fill: '#10B981', strokeWidth: 2, stroke: '#0F172A' }} />
@@ -281,10 +281,10 @@ const Dashboard = () => {
                 </div>
 
                 {/* Quick Shortcuts */}
-                <div className="glass-card p-5 rounded-xl border-white/5 bg-bg-tertiary">
+                <div className="glass-card p-5 rounded-xl border-slate-200 bg-bg-tertiary">
                     <div className="flex items-center gap-3 mb-8">
                         <Layers size={18} className="text-accent" />
-                        <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">Mission Shortcuts</h2>
+                        <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Mission Shortcuts</h2>
                     </div>
                     <div className="grid grid-cols-4 gap-4">
                         {[
@@ -297,9 +297,9 @@ const Dashboard = () => {
                             { label: 'Ledger', icon: <FileText size={20} />, path: '/app/ledger/journal-entries', color: 'bg-cyan-500/10 text-cyan-400' },
                             { label: 'Settings', icon: <Settings size={20} />, path: '/app/setup', color: 'bg-slate-500/10 text-slate-400' },
                         ].map((a, i) => (
-                            <button key={i} onClick={() => navigate(a.path)} className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group">
+                            <button key={i} onClick={() => navigate(a.path)} className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-200 transition-all group">
                                 <div className={`p-3 rounded-xl ${a.color} shadow-lg transition-transform group-hover:scale-110`}>{a.icon}</div>
-                                <span className="text-[9px] font-black uppercase tracking-tight text-text-secondary group-hover:text-white">{a.label}</span>
+                                <span className="text-[9px] font-black uppercase tracking-tight text-slate-500 group-hover:text-slate-900">{a.label}</span>
                             </button>
                         ))}
                     </div>
@@ -310,11 +310,11 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
                 {/* Recent Operational Activity */}
-                <div className="glass-card p-5 rounded-xl border-white/5 bg-bg-tertiary overflow-hidden">
+                <div className="glass-card p-5 rounded-xl border-slate-200 bg-bg-tertiary overflow-hidden">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                             <Activity size={18} className="text-accent" />
-                            <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">Clinical Flow</h2>
+                            <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Clinical Flow</h2>
                         </div>
                         <button onClick={() => navigate('/app/visits')} className="text-[10px] font-black uppercase text-accent hover:underline flex items-center gap-1">
                             Live Queue <ChevronRight size={10} />
@@ -322,19 +322,19 @@ const Dashboard = () => {
                     </div>
                     <div className="space-y-4">
                         {(recentData.bills || []).slice(0, 5).map((bill, i) => (
-                            <div key={i} className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:bg-white/5 transition-colors">
+                            <div key={i} className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl group hover:bg-slate-50 transition-colors">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center font-black text-xs text-accent uppercase">
+                                    <div className="w-10 h-10 rounded-full bg-accent/10 border border-accent/40 flex items-center justify-center font-black text-xs text-accent uppercase">
                                         {bill.patient?.firstName?.[0]}{bill.patient?.lastName?.[0]}
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-white uppercase group-hover:text-accent transition-colors">{bill.patient?.firstName} {bill.patient?.lastName}</span>
-                                        <span className="text-[9px] font-black text-text-secondary tracking-widest uppercase">ID: {bill.patient?.patientNumber} — {bill.service?.serviceName || 'GENERAL_OPD'}</span>
+                                        <span className="text-sm font-bold text-slate-900 uppercase group-hover:text-accent transition-colors">{bill.patient?.firstName} {bill.patient?.lastName}</span>
+                                        <span className="text-[9px] font-black text-slate-500 tracking-widest uppercase">ID: {bill.patient?.patientNumber} — {bill.service?.serviceName || 'GENERAL_OPD'}</span>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xs font-black text-white">{fmt(bill.netAmount)}</p>
-                                    <p className="text-[9px] font-bold text-text-secondary uppercase mt-1">{new Date(bill.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                    <p className="text-xs font-black text-slate-900">{fmt(bill.netAmount)}</p>
+                                    <p className="text-[9px] font-bold text-slate-500 uppercase mt-1">{new Date(bill.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                                 </div>
                             </div>
                         ))}
@@ -342,10 +342,10 @@ const Dashboard = () => {
                 </div>
 
                 {/* Intelligence Alerts */}
-                <div className="glass-card p-5 rounded-xl border-white/5 bg-bg-tertiary">
+                <div className="glass-card p-5 rounded-xl border-slate-200 bg-bg-tertiary">
                     <div className="flex items-center gap-3 mb-6">
                         <Bell size={18} className="text-accent" />
-                        <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">System Intelligence</h2>
+                        <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-900">System Intelligence</h2>
                     </div>
                     <div className="space-y-3">
                         {overview?.alerts?.lowStockCount > 0 && (
@@ -353,8 +353,8 @@ const Dashboard = () => {
                                 <div className="p-3 bg-orange-500/20 rounded-xl text-orange-400 self-start"><Pill size={20} /></div>
                                 <div>
                                     <p className="text-xs font-black text-orange-400 uppercase tracking-widest">Inventory Alert</p>
-                                    <p className="text-sm font-bold text-white mt-1 uppercase italic tracking-tighter">{overview.alerts.lowStockCount} Items Below Threshold</p>
-                                    <p className="text-[10px] text-text-secondary mt-1 uppercase font-black opacity-60">Procurement action recommended immediately.</p>
+                                    <p className="text-sm font-bold text-slate-900 mt-1 uppercase italic tracking-tighter">{overview.alerts.lowStockCount} Items Below Threshold</p>
+                                    <p className="text-[10px] text-slate-500 mt-1 uppercase font-black opacity-60">Procurement action recommended immediately.</p>
                                 </div>
                                 <ChevronRight className="ml-auto self-center text-orange-400/40" />
                             </div>
@@ -363,16 +363,16 @@ const Dashboard = () => {
                             <div className="p-3 bg-blue-500/20 rounded-xl text-blue-400 self-start"><CheckCircle size={20} /></div>
                             <div>
                                 <p className="text-xs font-black text-blue-400 uppercase tracking-widest">Data Integrity Check</p>
-                                <p className="text-sm font-bold text-white mt-1 uppercase italic tracking-tighter">Mathematical Parity Confirmed</p>
-                                <p className="text-[10px] text-text-secondary mt-1 uppercase font-black opacity-60">All ledgers balanced — Next sync in 4 min.</p>
+                                <p className="text-sm font-bold text-slate-900 mt-1 uppercase italic tracking-tighter">Mathematical Parity Confirmed</p>
+                                <p className="text-[10px] text-slate-500 mt-1 uppercase font-black opacity-60">All ledgers balanced — Next sync in 4 min.</p>
                             </div>
                         </div>
                         <div className="flex gap-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl group hover:bg-emerald-500/20 transition-all opacity-60 hover:opacity-100">
                             <div className="p-3 bg-emerald-500/20 rounded-xl text-emerald-400 self-start"><Shield size={20} /></div>
                             <div>
                                 <p className="text-xs font-black text-emerald-400 uppercase tracking-widest">Security Protocol</p>
-                                <p className="text-sm font-bold text-white mt-1 uppercase italic tracking-tighter">Threat Monitoring Level: Zero</p>
-                                <p className="text-[10px] text-text-secondary mt-1 uppercase font-black opacity-60">Encrypted transmission protocols active.</p>
+                                <p className="text-sm font-bold text-slate-900 mt-1 uppercase italic tracking-tighter">Threat Monitoring Level: Zero</p>
+                                <p className="text-[10px] text-slate-500 mt-1 uppercase font-black opacity-60">Encrypted transmission protocols active.</p>
                             </div>
                         </div>
                     </div>
