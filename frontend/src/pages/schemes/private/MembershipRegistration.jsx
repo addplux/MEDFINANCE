@@ -77,7 +77,11 @@ const MembershipRegistration = () => {
     };
 
     const handleFormChange = (e) => {
-        const { name, value } = e.target;
+        let { name, value } = e.target;
+        // Auto-capitalize first letter for name fields
+        if ((name === 'firstName' || name === 'lastName') && value) {
+            value = value.charAt(0).toUpperCase() + value.slice(1);
+        }
         setForm(prev => ({ ...prev, [name]: value }));
         // Auto-set policyNumber prefix from scheme if blank
         if (name === 'schemeId' && !form.policyNumber) {
