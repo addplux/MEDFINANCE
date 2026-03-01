@@ -119,17 +119,7 @@
 
   /* Edge-to-Edge Experience */
   .edge-to-edge {
-    width: 100vw;
-    margin-left: calc(-50vw + 50%);
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  @media (min-width: 768px) {
-    .edge-to-edge {
-      width: 100%;
-      margin-left: 0;
-    }
+    @apply w-screen min-w-[100vw] relative left-1/2 -translate-x-1/2 md:w-full md:min-w-0 md:static md:translate-x-0;
   }
 
   /* Buttons */
