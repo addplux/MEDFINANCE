@@ -319,26 +319,26 @@ const SchemeMembers = ({ schemeId }) => {
     };
 
     const columns = [
-        { field: 'policyNumber', headerName: 'Policy #', width: 130, renderCell: (params) => <span className="font-bold text-gray-900">{params.value}</span> },
-        { field: 'memberSuffix', headerName: 'Suffix', width: 80, renderCell: (params) => <span className="font-semibold text-gray-600">{params.value || '-'}</span> },
-        { field: 'fullName', headerName: 'Name', width: 220, renderCell: (params) => <span className="font-bold text-gray-800">{`${params.row.lastName}, ${params.row.firstName}`}</span> },
-        { field: 'nursingCare', headerName: 'Nursing', width: 100, type: 'number', renderCell: (params) => <span className="font-semibold text-gray-600">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'laboratory', headerName: 'Lab', width: 100, type: 'number', renderCell: (params) => <span className="font-semibold text-gray-600">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'radiology', headerName: 'Radio', width: 100, type: 'number', renderCell: (params) => <span className="font-semibold text-gray-600">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'dental', headerName: 'Dental', width: 100, type: 'number', renderCell: (params) => <span className="font-semibold text-gray-600">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'lodging', headerName: 'Lodging', width: 100, type: 'number', renderCell: (params) => <span className="font-semibold text-gray-600">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'surgicals', headerName: 'Surgicals', width: 110, type: 'number', renderCell: (params) => <span className="font-semibold text-gray-600">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'drRound', headerName: 'Dr Round', width: 110, type: 'number', renderCell: (params) => <span className="font-semibold text-gray-600">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'food', headerName: 'Food', width: 100, type: 'number', renderCell: (params) => <span className="font-semibold text-gray-600">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'physio', headerName: 'Physio', width: 100, type: 'number', renderCell: (params) => <span className="font-semibold text-gray-500">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'pharmacy', headerName: 'Pharmacy', width: 110, type: 'number', renderCell: (params) => <span className="font-semibold text-gray-500">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'sundries', headerName: 'Sundries', width: 100, type: 'number', renderCell: (params) => <span className="font-semibold text-gray-500">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'antenatal', headerName: 'Antenatal', width: 110, type: 'number', renderCell: (params) => <span className="font-semibold text-gray-500">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'balance', headerName: 'Total', width: 120, type: 'number', renderCell: (params) => <span className="font-bold text-gray-900">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'policyNumber', headerName: 'Policy #', width: 110, renderCell: (params) => <span className="font-bold text-slate-800">{params.value}</span> },
+        { field: 'memberSuffix', headerName: 'Suf', width: 60, renderCell: (params) => <span className="font-semibold text-slate-500">{params.value || '-'}</span> },
+        { field: 'fullName', headerName: 'Name', width: 180, renderCell: (params) => <span className="font-bold text-slate-700">{`${params.row.lastName}, ${params.row.firstName}`}</span> },
+        { field: 'nursingCare', headerName: 'Nurs', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'laboratory', headerName: 'Lab', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'radiology', headerName: 'Rad', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'dental', headerName: 'Dent', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'lodging', headerName: 'Lodge', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'surgicals', headerName: 'Surg', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'drRound', headerName: 'Dr', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'food', headerName: 'Food', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'physio', headerName: 'Physio', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-400">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'pharmacy', headerName: 'Pharm', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-400">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'sundries', headerName: 'Sund', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-400">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'antenatal', headerName: 'Ante', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-400">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'balance', headerName: 'Total', width: 100, type: 'number', renderCell: (params) => <span className="font-black text-blue-600">{Number(params.value || 0).toLocaleString()}</span> },
         {
-            field: 'memberStatus', headerName: 'Status', width: 100, renderCell: (params) => (
-                <span className={`px-2 inline-flex text-[10px] leading-4 font-bold rounded-full uppercase ${params.value === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {params.value}
+            field: 'memberStatus', headerName: 'Sts', width: 70, renderCell: (params) => (
+                <span className={`px-2 py-0.5 inline-flex text-[9px] leading-tight font-black rounded-md uppercase tracking-widest ${params.value === 'active' ? 'bg-green-100/50 text-green-700 border border-green-200' : 'bg-red-100/50 text-red-700 border border-red-200'}`}>
+                    {params.value.substring(0, 3)}
                 </span>
             )
         },
@@ -374,7 +374,7 @@ const SchemeMembers = ({ schemeId }) => {
 
     return (
 
-        <div className="flex flex-col h-full space-y-4 min-w-0 bg-white text-gray-900 p-6">
+        <div className="flex flex-col h-full space-y-3 min-w-0 bg-transparent text-white p-4">
             {/* Import Status Message */}
             {importResult && (
                 <div className={`p-4 rounded-xl flex items-start gap-3 animate-fade-in ${importResult.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
@@ -410,23 +410,23 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
             )}
 
-            <div className="flex flex-col flex-1 bg-white border border-slate-200 overflow-hidden min-w-0 rounded-2xl shadow-sm">
-                {/* Header / Filters (Suno Style) */}
-                <div className="p-4 border-b border-slate-200 flex flex-wrap gap-4 items-center flex-shrink-0 bg-slate-50">
+            <div className="flex flex-col flex-1 bg-white/[0.02] border border-white/10 overflow-hidden min-w-0 rounded-2xl shadow-sm">
+                {/* Header / Filters (Compact Style) */}
+                <div className="p-3 border-b border-white/10 flex flex-wrap gap-3 items-center flex-shrink-0 bg-transparent backdrop-blur-md">
                     {/* Search & Filter */}
-                    <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
-                        <form onSubmit={handleSearch} className="flex items-center gap-3 w-full sm:w-auto">
-                            <div className="relative flex-1 sm:w-80 group">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors w-4 h-4" />
+                    <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center">
+                        <form onSubmit={handleSearch} className="flex items-center gap-2 w-full sm:w-auto">
+                            <div className="relative flex-1 sm:w-64 group">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors w-3.5 h-3.5" />
                                 <input
                                     type="text"
                                     placeholder="Search members..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-11 pr-4 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all w-full placeholder-slate-400 font-medium text-slate-800"
+                                    className="pl-9 pr-3 py-1.5 bg-white/5 border border-white/10 rounded-md text-[11px] focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all w-full placeholder-white/30 font-medium text-white shadow-sm"
                                 />
                             </div>
-                            <button type="submit" className="px-5 py-2.5 bg-slate-900 text-white hover:bg-slate-800 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-sm">
+                            <button type="submit" className="px-4 py-1.5 bg-white/10 text-white hover:bg-white/20 rounded-md text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm border border-white/5">
                                 Search
                             </button>
                         </form>
@@ -435,29 +435,29 @@ const SchemeMembers = ({ schemeId }) => {
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
-                                className="w-full sm:w-auto px-5 py-2.5 bg-white border border-slate-300 rounded-full text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-200 cursor-pointer appearance-none uppercase tracking-wider hover:bg-slate-50 transition-all pr-10"
+                                className="w-full sm:w-auto px-4 py-1.5 bg-white/5 border border-white/10 rounded-md text-[11px] font-bold text-white focus:ring-1 focus:ring-primary/50 focus:border-primary/50 cursor-pointer appearance-none uppercase tracking-wide hover:bg-white/10 transition-all shadow-sm pr-8"
                             >
                                 <option value="all" className="bg-bg-primary">All Status</option>
                                 <option value="active" className="bg-bg-primary">Active</option>
                                 <option value="suspended" className="bg-bg-primary">Suspended</option>
                                 <option value="closed" className="bg-bg-primary">Closed</option>
                             </select>
-                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30 pointer-events-none" />
                         </div>
                     </div>
 
                     {/* Import Actions */}
-                    <div className="flex gap-3 w-full md:w-auto justify-end ml-auto">
+                    <div className="flex gap-2 w-full md:w-auto justify-end ml-auto">
                         <button
                             onClick={handleDownloadTemplate}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-300 rounded-full text-xs font-semibold uppercase tracking-wider transition-all"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 rounded-md text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm"
                             title="Download CSV Template"
                         >
-                            <Download className="w-4 h-4" />
+                            <Download className="w-3.5 h-3.5" />
                             <span className="hidden lg:inline">Template</span>
                         </button>
 
-                        <label className={`flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-semibold uppercase tracking-wider transition-all shadow-sm cursor-pointer ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <label className={`flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-black rounded-md text-[11px] font-black uppercase tracking-wide transition-all shadow-sm cursor-pointer ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
                             <input
                                 type="file"
                                 onChange={handleFileSelect}
@@ -468,7 +468,7 @@ const SchemeMembers = ({ schemeId }) => {
                             {importing ? (
                                 <span className="loading loading-spinner loading-xs"></span>
                             ) : (
-                                <Upload className="w-4 h-4" />
+                                <Upload className="w-3.5 h-3.5" />
                             )}
                             <span>Import</span>
                         </label>
@@ -488,45 +488,48 @@ const SchemeMembers = ({ schemeId }) => {
                         density="compact"
                         sx={{
                             border: 0,
-                            backgroundColor: '#ffffff',
+                            backgroundColor: 'transparent',
                             fontFamily: 'inherit',
+                            color: '#ffffff',
                             '& .MuiDataGrid-columnHeaders': {
-                                backgroundColor: '#f8fafc',
-                                borderBottom: '1px solid #e2e8f0',
+                                backgroundColor: 'transparent',
+                                borderBottom: '1px solid rgba(255,255,255,0.1)',
                             },
                             '& .MuiDataGrid-columnHeaderTitle': {
-                                color: '#374151',
-                                fontWeight: 700,
-                                fontSize: '11px',
+                                color: 'rgba(255,255,255,0.5)',
+                                fontWeight: 800,
+                                fontSize: '10px',
                                 textTransform: 'uppercase',
-                                letterSpacing: '0.05em',
+                                letterSpacing: '0.06em',
                             },
                             '& .MuiDataGrid-columnHeader': {
-                                color: '#374151',
+                                color: 'rgba(255,255,255,0.7)',
                             },
                             '& .MuiDataGrid-cell': {
-                                borderBottom: '1px solid #f1f5f9',
-                                fontSize: '13px',
-                                color: '#1e293b',
+                                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                fontSize: '12px',
+                                color: 'rgba(255,255,255,0.8)',
+                                fontWeight: 500,
                             },
                             '& .MuiDataGrid-row:hover': {
-                                backgroundColor: '#f8fafc',
+                                backgroundColor: 'rgba(255,255,255,0.02)',
                             },
                             '& .MuiDataGrid-footerContainer': {
-                                borderTop: '1px solid #e2e8f0',
-                                backgroundColor: '#f8fafc',
-                                color: '#64748b',
+                                borderTop: '1px solid rgba(255,255,255,0.1)',
+                                backgroundColor: 'transparent',
+                                color: 'rgba(255,255,255,0.5)',
                             },
                             '& .MuiTablePagination-root': {
-                                color: '#64748b',
+                                color: 'rgba(255,255,255,0.5)',
                             },
                             '& .MuiIconButton-root': {
-                                color: '#64748b',
+                                color: 'rgba(255,255,255,0.5)',
                             },
                             '& .MuiDataGrid-virtualScroller': {
                                 '&::-webkit-scrollbar': { width: '6px', height: '6px' },
-                                '&::-webkit-scrollbar-track': { background: '#f1f5f9' },
-                                '&::-webkit-scrollbar-thumb': { background: '#cbd5e1', borderRadius: '6px' },
+                                '&::-webkit-scrollbar-track': { background: 'transparent' },
+                                '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.1)', borderRadius: '6px' },
+                                '&::-webkit-scrollbar-thumb:hover': { background: 'rgba(255,255,255,0.2)' },
                             },
                         }}
                     />

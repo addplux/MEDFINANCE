@@ -206,52 +206,52 @@ const MembershipRegistration = () => {
             )}
 
             {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-1">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Membership Registration</h1>
-                    <p className="text-white/50 mt-1 text-sm">Register and manage Private Prepaid Scheme members</p>
+                    <h1 className="text-xl font-bold text-white tracking-tight">Membership Registration</h1>
+                    <p className="text-white/40 mt-0.5 text-[11px] uppercase tracking-wider font-semibold">Manage Private Prepaid Scheme members</p>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={() => setShowUploadModal(true)} className="btn btn-secondary bg-white/10 hover:bg-white/20 border-white/10 text-white">
-                        <Upload className="w-4 h-4" /> Upload Ledger
+                    <button onClick={() => setShowUploadModal(true)} className="px-4 py-1.5 flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all">
+                        <Upload className="w-3.5 h-3.5" /> Upload Ledger
                     </button>
-                    <button onClick={() => { setForm(emptyForm); setShowModal(true); }} className="btn btn-primary">
-                        <Plus className="w-4 h-4" /> Register Member
+                    <button onClick={() => { setForm(emptyForm); setShowModal(true); }} className="px-4 py-1.5 flex items-center gap-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-[11px] font-black uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(255,0,204,0.3)]">
+                        <Plus className="w-3.5 h-3.5" /> Register Member
                     </button>
                 </div>
             </div>
 
             {/* Stats Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <div className="card p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
-                        <Users className="w-5 h-5 text-indigo-600" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="p-3 bg-white/[0.02] border border-white/10 rounded-xl flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                        <Users className="w-4 h-4 text-indigo-400" />
                     </div>
                     <div>
-                        <div className="text-2xl font-bold text-white">{members.length}</div>
-                        <div className="text-xs text-white/50">Total Members</div>
+                        <div className="text-lg font-bold text-white leading-none mb-1">{members.length}</div>
+                        <div className="text-[10px] uppercase tracking-widest font-bold text-white/40">Total Members</div>
                     </div>
                 </div>
-                <div className="card p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                        <Battery className="w-5 h-5 text-green-600" />
+                <div className="p-3 bg-white/[0.02] border border-white/10 rounded-xl flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center border border-green-500/20">
+                        <Battery className="w-4 h-4 text-green-400" />
                     </div>
                     <div>
-                        <div className="text-2xl font-bold text-white">
+                        <div className="text-lg font-bold text-white leading-none mb-1">
                             ZK {members.reduce((s, m) => s + Number(m.balance || 0), 0).toLocaleString()}
                         </div>
-                        <div className="text-xs text-white/50">Total Balance</div>
+                        <div className="text-[10px] uppercase tracking-widest font-bold text-white/40">Total Balance</div>
                     </div>
                 </div>
-                <div className="card p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-                        <AlertCircle className="w-5 h-5 text-red-600" />
+                <div className="p-3 bg-white/[0.02] border border-white/10 rounded-xl flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center border border-red-500/20">
+                        <AlertCircle className="w-4 h-4 text-red-400" />
                     </div>
                     <div>
-                        <div className="text-2xl font-bold text-white">
+                        <div className="text-lg font-bold text-white leading-none mb-1">
                             {members.filter(m => Number(m.balance || 0) <= 0).length}
                         </div>
-                        <div className="text-xs text-white/50">Zero/Negative Balance</div>
+                        <div className="text-[10px] uppercase tracking-widest font-bold text-white/40">Zero/Negative</div>
                     </div>
                 </div>
             </div>
