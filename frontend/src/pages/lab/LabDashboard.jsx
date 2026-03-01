@@ -137,7 +137,7 @@ const LabDashboard = () => {
             ) : (
                 <div className="card overflow-hidden border border-border-color shadow-sm">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm hover:table-fixed">
+                        <table className="w-full text-sm">
                             <thead className="bg-bg-secondary border-b border-border-color">
                                 <tr>
                                     <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Req #</th>
