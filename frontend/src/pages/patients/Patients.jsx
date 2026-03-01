@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { patientAPI } from '../../services/apiService';
-import { Users, Plus, Search, Eye, Edit, Trash2, GitMerge, ClipboardList, Banknote, Building, CreditCard, Stethoscope, Gift, Siren, RefreshCw } from 'lucide-react';
+import { Users, Plus, Search, Eye, Edit, Trash2, GitMerge, ClipboardList, Banknote, Building, CreditCard, Stethoscope, Gift, Siren, RefreshCw, ShieldOff, ShieldCheck, ShieldAlert } from 'lucide-react';
 
 const PATIENT_TYPES = [
     { value: '', label: 'All', icon: Users },
@@ -96,6 +96,38 @@ const Patients = () => {
     const handleCategoryChange = (e) => {
         setCategoryFilter(e.target.value);
         setCurrentPage(1);
+    };
+
+    const handleStatusChange = async (patient) => {
+        const next = patient.memberStatus === 'active' ? 'suspended'
+            : patient.memberStatus === 'suspended' ? 'closed'
+                : 'active';
+        const label = next === 'suspended' ? 'suspend' : next === 'closed' ? 'close' : 'reactivate';
+        if (!window.confirm(`Are you sure you want to ${label} ${patient.firstName} ${patient.lastName}'s account?`)) return;
+        try {
+            await patientAPI.update(patient.id, { memberStatus: next });
+            loadPatients();
+        } catch (err) {
+            alert('Failed to update account status.');
+        }
+    };
+
+    const StatusIcon = ({ status }) => {
+        if (status === 'suspended') return <ShieldAlert className="w-4 h-4" />;
+        if (status === 'closed') return <ShieldOff className="w-4 h-4" />;
+        return <ShieldCheck className="w-4 h-4" />;
+    };
+
+    const statusBtnClass = (status) => {
+        if (status === 'suspended') return 'p-2 hover:bg-yellow-500/20 text-yellow-400 hover:text-yellow-300 rounded-full transition-colors';
+        if (status === 'closed') return 'p-2 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-full transition-colors';
+        return 'p-2 hover:bg-green-500/20 text-gray-400 hover:text-green-400 rounded-full transition-colors';
+    };
+
+    const statusTitle = (status) => {
+        if (status === 'active') return 'Suspend Account';
+        if (status === 'suspended') return 'Close Account';
+        return 'Reactivate Account';
     };
 
     return (
@@ -242,6 +274,13 @@ const Patients = () => {
                                                     <Edit className="w-4 h-4" />
                                                 </button>
                                                 <button
+                                                    onClick={() => handleStatusChange(patient)}
+                                                    className={statusBtnClass(patient.memberStatus)}
+                                                    title={statusTitle(patient.memberStatus)}
+                                                >
+                                                    <StatusIcon status={patient.memberStatus} />
+                                                </button>
+                                                <button
                                                     onClick={() => handleDelete(patient.id)}
                                                     className="p-2 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded-full transition-colors"
                                                     title="Delete"
@@ -295,12 +334,16 @@ const Patients = () => {
                                     <div><span className="text-gray-400">Phone: </span>{patient.phone || '—'}</div>
                                     <div><span className="text-gray-400">NRC: </span>{patient.nrc || '—'}</div>
                                 </div>
-                                <div className="pt-3 border-t border-gray-100 flex gap-3">
+                                <div className="pt-3 border-t border-gray-100 flex gap-2 flex-wrap">
                                     <button onClick={() => navigate(`/app/patients/${patient.id}`)} className="btn btn-sm btn-secondary rounded-full flex-1 justify-center">
                                         <Eye className="w-3.5 h-3.5 mr-1" /> View
                                     </button>
                                     <button onClick={() => navigate(`/app/patients/${patient.id}/edit`)} className="btn btn-sm btn-secondary rounded-full flex-1 justify-center">
                                         <Edit className="w-3.5 h-3.5 mr-1" /> Edit
+                                    </button>
+                                    <button onClick={() => handleStatusChange(patient)} className="btn btn-sm btn-secondary rounded-full flex-1 justify-center" title={statusTitle(patient.memberStatus)}>
+                                        <StatusIcon status={patient.memberStatus} />
+                                        <span className="ml-1">{patient.memberStatus === 'active' ? 'Suspend' : patient.memberStatus === 'suspended' ? 'Close' : 'Reactivate'}</span>
                                     </button>
                                     <button onClick={() => handleDelete(patient.id)} className="btn btn-sm btn-danger rounded-full flex-1 justify-center">
                                         <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
