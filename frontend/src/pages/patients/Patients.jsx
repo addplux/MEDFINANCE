@@ -121,7 +121,7 @@ const Patients = () => {
     const statusBtnClass = (status) => {
         if (status === 'suspended') return 'p-2 hover:bg-yellow-500/20 text-yellow-400 hover:text-yellow-300 rounded-full transition-colors';
         if (status === 'closed') return 'p-2 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-full transition-colors';
-        return 'p-2 hover:bg-green-500/20 text-gray-400 hover:text-green-400 rounded-full transition-colors';
+        return 'p-2 hover:bg-green-500/20 text-green-400 hover:text-green-300 rounded-full transition-colors';
     };
 
     const statusTitle = (status) => {
