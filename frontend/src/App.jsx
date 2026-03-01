@@ -219,121 +219,132 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <Routes>
+                        {/* ── Dashboard — all roles ───────────────────────────────────── */}
                         <Route path="/" element={<Dashboard />} />
                         <Route path="dashboard" element={<Dashboard />} />
-                        <Route path="billing/opd" element={<OPDBilling />} />
-                        <Route path="billing/opd/new" element={<CreateOPDBill />} />
-                        <Route path="patients" element={<Patients />} />
-                        <Route path="patients/new" element={<CreatePatient />} />
-                        <Route path="patients/merge" element={<MergePatients />} />
-                        <Route path="patients/:id" element={<PatientView />} />
-                        <Route path="patients/:id/edit" element={<EditPatient />} />
-                        <Route path="patients/:id/history" element={<PatientVisitHistory />} />
 
-                        <Route path="visits" element={<Visits />} />
-                        <Route path="visits/new" element={<CreateVisit />} />
-                        <Route path="visits/:id" element={<VisitDetail />} />
+                        {/* ── Patients & Visits — clinical + cashier ──────────────────── */}
+                        <Route path="patients" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><Patients /></RoleRoute>} />
+                        <Route path="patients/new" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><CreatePatient /></RoleRoute>} />
+                        <Route path="patients/merge" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><MergePatients /></RoleRoute>} />
+                        <Route path="patients/:id" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><PatientView /></RoleRoute>} />
+                        <Route path="patients/:id/edit" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><EditPatient /></RoleRoute>} />
+                        <Route path="patients/:id/history" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><PatientVisitHistory /></RoleRoute>} />
 
-                        {/* Scheme Manager - Private Prepaid */}
-                        <Route path="schemes/private/members" element={<MembershipRegistration />} />
-                        <Route path="schemes/private/plans" element={<PlanSelection />} />
-                        <Route path="schemes/private/duration" element={<StartEndDate />} />
-                        <Route path="schemes/private/validation" element={<ServiceCoverage />} />
-                        <Route path="schemes/private/tracking" element={<UtilisationTracking />} />
+                        <Route path="visits" element={<RoleRoute roles={['doctor', 'nurse']}><Visits /></RoleRoute>} />
+                        <Route path="visits/new" element={<RoleRoute roles={['doctor', 'nurse']}><CreateVisit /></RoleRoute>} />
+                        <Route path="visits/:id" element={<RoleRoute roles={['doctor', 'nurse']}><VisitDetail /></RoleRoute>} />
 
-                        {/* Scheme Manager - Corporate */}
-                        <Route path="schemes/corporate/members" element={<CorporateMemberManagement />} />
-                        <Route path="schemes/corporate/credit" element={<CreditLimit />} />
-                        <Route path="schemes/corporate/terms" element={<PaymentTerms />} />
-                        <Route path="schemes/corporate/billing" element={<MonthlyBilling />} />
+                        {/* ── OPD Billing ─────────────────────────────────────────────── */}
+                        <Route path="billing/opd" element={<RoleRoute roles={['cashier', 'accountant']}><OPDBilling /></RoleRoute>} />
+                        <Route path="billing/opd/new" element={<RoleRoute roles={['cashier', 'accountant']}><CreateOPDBill /></RoleRoute>} />
 
-                        <Route path="receivables/corporate" element={<CorporateAccounts />} />
-                        <Route path="receivables/corporate/new" element={<CorporateAccountForm />} />
-                        <Route path="receivables/corporate/:id/edit" element={<CorporateAccountForm />} />
-                        <Route path="receivables/schemes" element={<Schemes />} />
-                        <Route path="receivables/schemes/new" element={<SchemeForm />} />
-                        <Route path="receivables/schemes/:id" element={<SchemeDetails />} />
-                        <Route path="receivables/schemes/:id/edit" element={<SchemeForm />} />
-                        <Route path="receivables/invoices/:id" element={<InvoiceView />} />
-                        <Route path="receivables/ledger/:policyNumber" element={<FamilyLedger />} />
-                        <Route path="receivables/ageing" element={<DebtorAgeing />} />
+                        {/* ── Scheme Manager — cashier + finance ──────────────────────── */}
+                        <Route path="schemes/private/members" element={<RoleRoute roles={['cashier', 'accountant']}><MembershipRegistration /></RoleRoute>} />
+                        <Route path="schemes/private/plans" element={<RoleRoute roles={['cashier', 'accountant']}><PlanSelection /></RoleRoute>} />
+                        <Route path="schemes/private/duration" element={<RoleRoute roles={['cashier', 'accountant']}><StartEndDate /></RoleRoute>} />
+                        <Route path="schemes/private/validation" element={<RoleRoute roles={['cashier', 'accountant']}><ServiceCoverage /></RoleRoute>} />
+                        <Route path="schemes/private/tracking" element={<RoleRoute roles={['cashier', 'accountant']}><UtilisationTracking /></RoleRoute>} />
 
-                        <Route path="payables/suppliers" element={<Suppliers />} />
-                        <Route path="payables/suppliers/new" element={<SupplierForm />} />
-                        <Route path="payables/suppliers/:id/edit" element={<SupplierForm />} />
+                        <Route path="schemes/corporate/members" element={<RoleRoute roles={['cashier', 'accountant']}><CorporateMemberManagement /></RoleRoute>} />
+                        <Route path="schemes/corporate/credit" element={<RoleRoute roles={['cashier', 'accountant']}><CreditLimit /></RoleRoute>} />
+                        <Route path="schemes/corporate/terms" element={<RoleRoute roles={['cashier', 'accountant']}><PaymentTerms /></RoleRoute>} />
+                        <Route path="schemes/corporate/billing" element={<RoleRoute roles={['cashier', 'accountant']}><MonthlyBilling /></RoleRoute>} />
 
-                        <Route path="ledger/accounts" element={<ChartOfAccounts />} />
-                        <Route path="ledger/accounts/new" element={<AccountForm />} />
-                        <Route path="ledger/accounts/:id/edit" element={<AccountForm />} />
-                        <Route path="ledger/journal-entries" element={<JournalEntries />} />
-                        <Route path="ledger/journal-entries/new" element={<JournalEntryForm />} />
-                        <Route path="ledger/trial-balance" element={<TrialBalance />} />
+                        {/* ── Receivables — cashier + finance ─────────────────────────── */}
+                        <Route path="receivables/corporate" element={<RoleRoute roles={['cashier', 'accountant']}><CorporateAccounts /></RoleRoute>} />
+                        <Route path="receivables/corporate/new" element={<RoleRoute roles={['cashier', 'accountant']}><CorporateAccountForm /></RoleRoute>} />
+                        <Route path="receivables/corporate/:id/edit" element={<RoleRoute roles={['cashier', 'accountant']}><CorporateAccountForm /></RoleRoute>} />
+                        <Route path="receivables/schemes" element={<RoleRoute roles={['cashier', 'accountant']}><Schemes /></RoleRoute>} />
+                        <Route path="receivables/schemes/new" element={<RoleRoute roles={['cashier', 'accountant']}><SchemeForm /></RoleRoute>} />
+                        <Route path="receivables/schemes/:id" element={<RoleRoute roles={['cashier', 'accountant']}><SchemeDetails /></RoleRoute>} />
+                        <Route path="receivables/schemes/:id/edit" element={<RoleRoute roles={['cashier', 'accountant']}><SchemeForm /></RoleRoute>} />
+                        <Route path="receivables/invoices/:id" element={<RoleRoute roles={['cashier', 'accountant']}><InvoiceView /></RoleRoute>} />
+                        <Route path="receivables/ledger/:policyNumber" element={<RoleRoute roles={['cashier', 'accountant']}><FamilyLedger /></RoleRoute>} />
+                        <Route path="receivables/ageing" element={<RoleRoute roles={['accountant']}><DebtorAgeing /></RoleRoute>} />
 
-                        <Route path="cash/payments" element={<Payments />} />
-                        <Route path="cash/payments/new" element={<PaymentForm />} />
-                        <Route path="cash/payments/:id/edit" element={<PaymentForm />} />
-                        <Route path="cash/shift-report" element={<ShiftReport />} />
+                        {/* ── Payables / Ledger / Budgets / Funds — finance only ───────── */}
+                        <Route path="payables/suppliers" element={<RoleRoute roles={['accountant']}><Suppliers /></RoleRoute>} />
+                        <Route path="payables/suppliers/new" element={<RoleRoute roles={['accountant']}><SupplierForm /></RoleRoute>} />
+                        <Route path="payables/suppliers/:id/edit" element={<RoleRoute roles={['accountant']}><SupplierForm /></RoleRoute>} />
 
-                        <Route path="budgets" element={<Budgets />} />
-                        <Route path="budgets/new" element={<BudgetForm />} />
-                        <Route path="budgets/:id/edit" element={<BudgetForm />} />
-                        <Route path="budgets/analysis" element={<BudgetAnalysis />} />
+                        <Route path="ledger/accounts" element={<RoleRoute roles={['accountant']}><ChartOfAccounts /></RoleRoute>} />
+                        <Route path="ledger/accounts/new" element={<RoleRoute roles={['accountant']}><AccountForm /></RoleRoute>} />
+                        <Route path="ledger/accounts/:id/edit" element={<RoleRoute roles={['accountant']}><AccountForm /></RoleRoute>} />
+                        <Route path="ledger/journal-entries" element={<RoleRoute roles={['accountant']}><JournalEntries /></RoleRoute>} />
+                        <Route path="ledger/journal-entries/new" element={<RoleRoute roles={['accountant']}><JournalEntryForm /></RoleRoute>} />
+                        <Route path="ledger/trial-balance" element={<RoleRoute roles={['accountant']}><TrialBalance /></RoleRoute>} />
 
-                        <Route path="funds" element={<Funds />} />
-                        <Route path="funds/new" element={<FundForm />} />
-                        <Route path="funds/:id/edit" element={<FundForm />} />
-                        <Route path="funds/:id" element={<FundDetail />} />
+                        <Route path="budgets" element={<RoleRoute roles={['accountant']}><Budgets /></RoleRoute>} />
+                        <Route path="budgets/new" element={<RoleRoute roles={['accountant']}><BudgetForm /></RoleRoute>} />
+                        <Route path="budgets/:id/edit" element={<RoleRoute roles={['accountant']}><BudgetForm /></RoleRoute>} />
+                        <Route path="budgets/analysis" element={<RoleRoute roles={['accountant']}><BudgetAnalysis /></RoleRoute>} />
 
+                        <Route path="funds" element={<RoleRoute roles={['accountant']}><Funds /></RoleRoute>} />
+                        <Route path="funds/new" element={<RoleRoute roles={['accountant']}><FundForm /></RoleRoute>} />
+                        <Route path="funds/:id/edit" element={<RoleRoute roles={['accountant']}><FundForm /></RoleRoute>} />
+                        <Route path="funds/:id" element={<RoleRoute roles={['accountant']}><FundDetail /></RoleRoute>} />
 
-                        <Route path="reports" element={<Reports />} />
+                        <Route path="payroll/medical" element={<RoleRoute roles={['accountant']}><PayrollMedical /></RoleRoute>} />
 
-                        <Route path="setup/services" element={<ServicesList />} />
-                        <Route path="setup/services/new" element={<ServiceForm />} />
-                        <Route path="setup/services/:id/edit" element={<ServiceForm />} />
-                        <Route path="setup/users/new" element={<UserForm />} />
-                        <Route path="setup/users/:id/edit" element={<UserForm />} />
-                        <Route path="setup/roles" element={<UserRoles />} />
-                        <Route path="setup/departments/new" element={<DepartmentForm />} />
-                        <Route path="setup/departments/:id/edit" element={<DepartmentForm />} />
-                        <Route path="setup/audit-logs" element={<SystemLogs />} />
+                        <Route path="reports" element={<RoleRoute roles={['accountant', 'doctor']}><Reports /></RoleRoute>} />
 
-                        <Route path="payroll/medical" element={<PayrollMedical />} />
+                        {/* ── Cash & Banking — cashier + finance ──────────────────────── */}
+                        <Route path="cash/payments" element={<RoleRoute roles={['cashier', 'accountant']}><Payments /></RoleRoute>} />
+                        <Route path="cash/payments/new" element={<RoleRoute roles={['cashier', 'accountant']}><PaymentForm /></RoleRoute>} />
+                        <Route path="cash/payments/:id/edit" element={<RoleRoute roles={['cashier', 'accountant']}><PaymentForm /></RoleRoute>} />
+                        <Route path="cash/shift-report" element={<RoleRoute roles={['cashier', 'accountant']}><ShiftReport /></RoleRoute>} />
 
-                        <Route path="lab/dashboard" element={<LabDashboard />} />
-                        <Route path="lab/tests" element={<LabTests />} />
-                        <Route path="lab/request" element={<LabRequestForm />} />
-                        <Route path="lab/results/:id" element={<LabResultEntry />} />
+                        {/* ── Laboratory — lab techs + clinical ───────────────────────── */}
+                        <Route path="lab/dashboard" element={<RoleRoute roles={['lab_technician', 'doctor', 'nurse']}><LabDashboard /></RoleRoute>} />
+                        <Route path="lab/tests" element={<RoleRoute roles={['lab_technician', 'doctor', 'nurse']}><LabTests /></RoleRoute>} />
+                        <Route path="lab/request" element={<RoleRoute roles={['lab_technician', 'doctor', 'nurse']}><LabRequestForm /></RoleRoute>} />
+                        <Route path="lab/results/:id" element={<RoleRoute roles={['lab_technician', 'doctor', 'nurse']}><LabResultEntry /></RoleRoute>} />
 
-                        <Route path="pharmacy/dashboard" element={<DepartmentDashboard title="Pharmacy" departmentId={2} />} />
-                        <Route path="pharmacy/inventory" element={<PharmacyInventory />} />
-                        <Route path="pharmacy/grn" element={<GoodsReceivedNote />} />
-                        <Route path="pharmacy/dispense" element={<Dispense />} />
+                        {/* ── Pharmacy — pharmacist + clinical ────────────────────────── */}
+                        <Route path="pharmacy/dashboard" element={<RoleRoute roles={['pharmacist', 'doctor', 'nurse']}><DepartmentDashboard title="Pharmacy" departmentId={2} /></RoleRoute>} />
+                        <Route path="pharmacy/inventory" element={<RoleRoute roles={['pharmacist']}><PharmacyInventory /></RoleRoute>} />
+                        <Route path="pharmacy/grn" element={<RoleRoute roles={['pharmacist']}><GoodsReceivedNote /></RoleRoute>} />
+                        <Route path="pharmacy/dispense" element={<RoleRoute roles={['pharmacist', 'doctor', 'nurse']}><Dispense /></RoleRoute>} />
 
-                        <Route path="radiology/dashboard" element={<RadiologyDashboard />} />
-                        <Route path="radiology/request" element={<RadiologyRequestForm />} />
+                        {/* ── Radiology — radiographer + clinical ─────────────────────── */}
+                        <Route path="radiology/dashboard" element={<RoleRoute roles={['radiographer', 'doctor', 'nurse']}><RadiologyDashboard /></RoleRoute>} />
+                        <Route path="radiology/request" element={<RoleRoute roles={['radiographer', 'doctor', 'nurse']}><RadiologyRequestForm /></RoleRoute>} />
 
-                        <Route path="opd/dashboard" element={<DepartmentDashboard title="OPD" departmentId={4} />} />
+                        {/* ── Clinical Departments — clinical only ─────────────────────── */}
+                        <Route path="opd/dashboard" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><DepartmentDashboard title="OPD" departmentId={4} /></RoleRoute>} />
 
-                        <Route path="theatre/dashboard" element={<DepartmentDashboard title="Theatre" departmentId={7} type="theatre" />} />
-                        <Route path="theatre/billing/new" element={<TheatreBillForm />} />
-                        <Route path="theatre/billing/:id/edit" element={<TheatreBillForm />} />
+                        <Route path="theatre/dashboard" element={<RoleRoute roles={['doctor', 'nurse']}><DepartmentDashboard title="Theatre" departmentId={7} type="theatre" /></RoleRoute>} />
+                        <Route path="theatre/billing/new" element={<RoleRoute roles={['doctor', 'nurse']}><TheatreBillForm /></RoleRoute>} />
+                        <Route path="theatre/billing/:id/edit" element={<RoleRoute roles={['doctor', 'nurse']}><TheatreBillForm /></RoleRoute>} />
 
-                        <Route path="maternity/billing" element={<DepartmentDashboard title="Maternity" departmentId={6} type="maternity" />} />
-                        <Route path="maternity/billing/new" element={<MaternityBillForm />} />
-                        <Route path="maternity/billing/:id/edit" element={<MaternityBillForm />} />
+                        <Route path="maternity/billing" element={<RoleRoute roles={['doctor', 'nurse']}><DepartmentDashboard title="Maternity" departmentId={6} type="maternity" /></RoleRoute>} />
+                        <Route path="maternity/billing/new" element={<RoleRoute roles={['doctor', 'nurse']}><MaternityBillForm /></RoleRoute>} />
+                        <Route path="maternity/billing/:id/edit" element={<RoleRoute roles={['doctor', 'nurse']}><MaternityBillForm /></RoleRoute>} />
 
-                        <Route path="specialist-clinics/billing" element={<SpecialistClinics />} />
-                        <Route path="specialist-clinics/billing/new" element={<SpecialistClinicForm />} />
-                        <Route path="specialist-clinics/billing/:id/edit" element={<SpecialistClinicForm />} />
+                        <Route path="specialist-clinics/billing" element={<RoleRoute roles={['doctor', 'nurse']}><SpecialistClinics /></RoleRoute>} />
+                        <Route path="specialist-clinics/billing/new" element={<RoleRoute roles={['doctor', 'nurse']}><SpecialistClinicForm /></RoleRoute>} />
+                        <Route path="specialist-clinics/billing/:id/edit" element={<RoleRoute roles={['doctor', 'nurse']}><SpecialistClinicForm /></RoleRoute>} />
 
-                        <Route path="physiology/dashboard" element={<DepartmentDashboard title="Physiotherapy" departmentId={5} />} />
-                        <Route path="physiology/billing/new" element={<SpecialistClinicForm defaultClinicType="Physiotherapy" />} />
+                        <Route path="physiology/dashboard" element={<RoleRoute roles={['doctor', 'nurse']}><DepartmentDashboard title="Physiotherapy" departmentId={5} /></RoleRoute>} />
+                        <Route path="physiology/billing/new" element={<RoleRoute roles={['doctor', 'nurse']}><SpecialistClinicForm defaultClinicType="Physiotherapy" /></RoleRoute>} />
 
-                        <Route path="dental/dashboard" element={<DepartmentDashboard title="Dental" departmentId={6} />} />
-                        <Route path="dental/billing/new" element={<SpecialistClinicForm defaultClinicType="Dental" />} />
+                        <Route path="dental/dashboard" element={<RoleRoute roles={['doctor', 'nurse']}><DepartmentDashboard title="Dental" departmentId={6} /></RoleRoute>} />
+                        <Route path="dental/billing/new" element={<RoleRoute roles={['doctor', 'nurse']}><SpecialistClinicForm defaultClinicType="Dental" /></RoleRoute>} />
 
-                        <Route path="setup" element={<Setup />} />
-                        <Route path="setup/pending-approvals" element={<PendingApprovals />} />
+                        {/* ── Setup — superintendent + admin only ─────────────────────── */}
+                        <Route path="setup" element={<RoleRoute roles={[]}><Setup /></RoleRoute>} />
+                        <Route path="setup/services" element={<RoleRoute roles={[]}><ServicesList /></RoleRoute>} />
+                        <Route path="setup/services/new" element={<RoleRoute roles={[]}><ServiceForm /></RoleRoute>} />
+                        <Route path="setup/services/:id/edit" element={<RoleRoute roles={[]}><ServiceForm /></RoleRoute>} />
+                        <Route path="setup/users/new" element={<RoleRoute roles={[]}><UserForm /></RoleRoute>} />
+                        <Route path="setup/users/:id/edit" element={<RoleRoute roles={[]}><UserForm /></RoleRoute>} />
+                        <Route path="setup/roles" element={<RoleRoute roles={[]}><UserRoles /></RoleRoute>} />
+                        <Route path="setup/departments/new" element={<RoleRoute roles={[]}><DepartmentForm /></RoleRoute>} />
+                        <Route path="setup/departments/:id/edit" element={<RoleRoute roles={[]}><DepartmentForm /></RoleRoute>} />
+                        <Route path="setup/audit-logs" element={<RoleRoute roles={[]}><SystemLogs /></RoleRoute>} />
+                        <Route path="setup/pending-approvals" element={<RoleRoute roles={[]}><PendingApprovals /></RoleRoute>} />
+
                         <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
                       </Routes>
                     </MainLayout>
