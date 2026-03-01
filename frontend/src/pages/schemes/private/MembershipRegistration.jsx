@@ -104,7 +104,13 @@ const MembershipRegistration = () => {
         try {
             setSaving(true);
             const fd = new FormData();
-            Object.entries(form).forEach(([k, v]) => { if (v !== '') fd.append(k, v); });
+            Object.entries(form).forEach(([k, v]) => {
+                // Skip empty strings to avoid validation errors (e.g. email isEmail check)
+                if (v === '' || v === null || v === undefined) return;
+                fd.append(k, v);
+            });
+            // Coerce memberSuffix to integer if present
+            if (form.memberSuffix) fd.set('memberSuffix', parseInt(form.memberSuffix, 10));
             // Also store the initial payment as prepaidCredit so the balance updater knows total credits
             fd.set('prepaidCredit', form.balance);
             await patientAPI.create(fd);
@@ -113,7 +119,7 @@ const MembershipRegistration = () => {
             setForm(emptyForm);
             loadMembers();
         } catch (err) {
-            showAlert('error', err?.response?.data?.error || 'Failed to register member.');
+            showAlert('error', err?.response?.data?.error || err?.response?.data?.details || 'Failed to register member.');
         } finally {
             setSaving(false);
         }
@@ -483,7 +489,7 @@ const MembershipRegistration = () => {
                             </div>
 
                             <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
-                                <button type="button" onClick={() => setShowModal(false)} className="btn btn-secondary">Cancel</button>
+                                <button type="button" onClick={() => setShowModal(false)} className="btn border border-gray-300 text-gray-700 bg-white hover:bg-gray-50">Cancel</button>
                                 <button type="submit" disabled={saving} className="btn btn-primary">
                                     {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                                     {saving ? 'Registering…' : 'Register Member'}
