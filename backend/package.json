@@ -20,7 +20,6 @@
   "author": "MEDFINANCE360 Team",
   "license": "UNLICENSED",
   "dependencies": {
-    "africastalking": "^0.7.9",
     "axios": "^1.13.5",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
