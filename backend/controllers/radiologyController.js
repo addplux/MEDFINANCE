@@ -136,7 +136,7 @@ exports.getAllRequests = async (req, res) => {
         const requests = await RadiologyBill.findAll({
             where,
             include: [
-                { model: Patient, as: 'patient', attributes: ['id', 'firstName', 'lastName', 'hospitalNumber', 'paymentMethod'] }
+                { model: Patient, as: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber', 'paymentMethod'] }
             ],
             order: [['createdAt', 'DESC']]
         });
