@@ -88,9 +88,7 @@ exports.createRequest = async (req, res) => {
             return res.status(e.statusCode || 403).json({ error: e.message, code: e.code });
         }
 
-        const initialPaymentStatus = CASH_METHODS.includes(patientMethod) ? 'unpaid' :
-            ['corporate'].includes(patientMethod) ? 'corporate' :
-                ['scheme', 'insurance'].includes(patientMethod) ? 'scheme' : 'prepaid';
+        const initialPaymentStatus = 'unpaid';
 
         const bill = await RadiologyBill.create({
             billNumber,
