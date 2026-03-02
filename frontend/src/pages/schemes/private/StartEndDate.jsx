@@ -323,6 +323,15 @@ const StartEndDate = () => {
                         '& .MuiDataGrid-cell': {
                             borderBottom: '1px solid rgba(255,255,255,0.05)',
                         },
+                        '& .MuiDataGrid-row:hover': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        },
+                        '& .MuiDataGrid-row.Mui-selected': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        },
+                        '& .MuiDataGrid-row.Mui-selected:hover': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        },
                         '& .MuiDataGrid-footerContainer': {
                             borderTop: '1px solid rgba(255,255,255,0.1)',
                             backgroundColor: 'rgba(255,255,255,0.03)',
