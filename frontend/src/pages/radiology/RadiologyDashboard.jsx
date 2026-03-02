@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { radiologyAPI } from '../../services/apiService';
-import { Radio, Clock, CheckCircle, AlertTriangle, FileText } from 'lucide-react';
+import { Radio, Clock, CheckCircle, AlertTriangle, FileText, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getPaymentStatusBadge } from '../../utils/statusBadges';
 
@@ -168,8 +168,8 @@ const RadiologyDashboard = () => {
                                                 <button
                                                     onClick={() => handleStatusUpdate(req.id, 'in_progress')}
                                                     disabled={req.paymentStatus === 'unpaid'}
-                                                    className={`inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md transition-all ${req.paymentStatus === 'unpaid' 
-                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                                    className={`inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md transition-all ${req.paymentStatus === 'unpaid'
+                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                         : 'bg-white border border-primary-200 text-primary-700 hover:bg-primary-50 hover:border-primary-300 shadow-sm'}`}
                                                 >
                                                     {req.paymentStatus === 'unpaid' && <AlertTriangle className="w-3 h-3 mr-1.5 inline" />}
