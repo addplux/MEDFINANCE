@@ -49,75 +49,62 @@ const RadiologyDashboard = () => {
     };
 
     return (
-        <div className="space-y-4">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-xl font-bold text-text-primary tracking-tight">Radiology Dashboard</h1>
-                    <p className="text-sm text-white/70 mt-1">Manage radiology requests and scans</p>
+        <div className="flex flex-col h-full space-y-4 animate-fade-in">
+            {/* Minimalist Header */}
+            <div className="flex items-center justify-between px-2">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                        <Radio className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                        <h1 className="text-xl font-black tracking-tight text-white">Radiology Dashboard</h1>
+                        <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/40">
+                            <span className="flex items-center gap-1">
+                                <Activity className="w-3 h-3" /> {requests.length} SCANS
+                            </span>
+                            <span className="flex items-center gap-1 text-primary">
+                                <AlertTriangle className="w-3 h-3" /> {requests.filter(r => r.paymentStatus === 'unpaid').length} UNPAID
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <div className="flex gap-2">
+
+                <div className="flex items-center gap-2">
+                    <button onClick={fetchRequests} className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-all border border-white/5 ml-1">
+                        <Activity className={`w-4 h-4 text-white/60 ${loading ? 'animate-spin' : ''}`} />
+                    </button>
                     <button
                         onClick={() => navigate('/app/radiology/request')}
-                        className="btn btn-primary btn-sm flex items-center gap-1.5"
+                        className="btn btn-primary ml-2 px-4 py-2 text-xs"
                     >
-                        <Radio className="w-3.5 h-3.5" />
-                        New Radiology Request
+                        + New Request
                     </button>
                 </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="card p-3 flex items-center gap-3 border border-border-color shadow-sm">
-                    <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
-                        <Clock className="w-5 h-5" />
-                    </div>
-                    <div>
-                        <div className="text-lg font-bold leading-none mb-1 text-text-primary">{requests.filter(r => r.status === 'pending').length}</div>
-                        <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Pending</div>
-                    </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border border-border-color shadow-sm">
-                    <div className="p-2 rounded-lg bg-yellow-50 text-yellow-600">
-                        <Activity className="w-5 h-5" />
-                    </div>
-                    <div>
-                        <div className="text-lg font-bold leading-none mb-1 text-text-primary">{requests.filter(r => r.status === 'in_progress').length}</div>
-                        <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">In Progress</div>
-                    </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border border-border-color shadow-sm">
-                    <div className="p-2 rounded-lg bg-green-50 text-green-600">
-                        <CheckCircle className="w-5 h-5" />
-                    </div>
-                    <div>
-                        <div className="text-lg font-bold leading-none mb-1 text-text-primary">{requests.filter(r => r.status === 'completed').length}</div>
-                        <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Completed</div>
-                    </div>
-                </div>
-                <div className="card p-3 flex items-center gap-3 border border-border-color shadow-sm">
-                    <div className="p-2 rounded-lg bg-purple-50 text-purple-600">
-                        <FileText className="w-5 h-5" />
-                    </div>
-                    <div>
-                        <div className="text-lg font-bold leading-none mb-1 text-text-primary">{requests.filter(r => r.status === 'reported').length}</div>
-                        <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Reported</div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Filters */}
-            <div className="flex gap-1.5 overflow-x-auto pb-1">
-                {['all', 'pending', 'in_progress', 'completed', 'reported'].map(f => (
+            {/* Quick Filters */}
+            <div className="flex items-center gap-2 px-2 pb-2">
+                {[
+                    { id: 'all', label: 'ALL REQUESTS', count: requests.length },
+                    { id: 'pending', label: 'PENDING', count: requests.filter(r => r.status === 'pending').length },
+                    { id: 'in_progress', label: 'IN PROGRESS', count: requests.filter(r => r.status === 'in_progress').length },
+                    { id: 'completed', label: 'COMPLETED', count: requests.filter(r => r.status === 'completed').length },
+                    { id: 'reported', label: 'REPORTED', count: requests.filter(r => r.status === 'reported').length }
+                ].map(f => (
                     <button
-                        key={f}
-                        onClick={() => setFilter(f)}
-                        className={`px-3 py-1.5 rounded-md text-[13px] font-medium whitespace-nowrap transition-colors border ${filter === f
-                            ? 'bg-primary/20 border-primary/30 text-primary shadow-sm'
-                            : 'bg-bg-tertiary border-border-color text-white/70 hover:bg-bg-secondary hover:text-text-primary'
+                        key={f.id}
+                        onClick={() => setFilter(f.id)}
+                        className={`relative px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${filter === f.id
+                            ? 'bg-white text-black border-white'
+                            : 'bg-white/5 text-white/40 border-white/5 hover:border-white/20'
                             }`}
                     >
-                        {f.charAt(0).toUpperCase() + f.slice(1).replace('_', ' ')}
+                        {f.label}
+                        {f.count > 0 && f.id !== 'all' && (
+                            <span className={`absolute -top-1.5 -right-1.5 flex items-center justify-center px-1.5 py-0.5 text-[9px] font-black rounded-full shadow-md ${filter === f.id ? 'bg-primary text-white border border-primary/50' : 'bg-bg-tertiary text-white/80 border border-white/10'}`}>
+                                {f.count}
+                            </span>
+                        )}
                     </button>
                 ))}
             </div>
