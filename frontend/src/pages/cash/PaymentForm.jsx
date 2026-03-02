@@ -13,8 +13,10 @@ const PaymentForm = () => {
     const isEdit = Boolean(id);
 
     // State passed from the Payments/Ledger page
-    const statePatientId = location.state?.patientId ? String(location.state.patientId) : '';
     const stateBillsToPay = location.state?.billsToPay || [];
+    const statePatientId = location.state?.patientId
+        ? String(location.state.patientId)
+        : (stateBillsToPay.length > 0 ? String(stateBillsToPay[0].patientId) : '');
 
     // Derive bill type — null for multiple depts (allowNull: true in DB)
     const uniqueDepts = [...new Set(stateBillsToPay.map(b => b.department).filter(Boolean))];
@@ -50,17 +52,25 @@ const PaymentForm = () => {
 
     // When patients list loads, find the pre-selected patient and auto-fill method
     useEffect(() => {
+        console.log("PaymentForm: checking patients vs formData", { patientsLoaded: patients.length, patientIdToMatch: formData.patientId });
         if (!patients.length || !formData.patientId) return;
         const found = patients.find(p => String(p.id) === String(formData.patientId));
-        if (!found) return;
+        if (!found) {
+            console.warn("PaymentForm: Patient ID not found in patients array", formData.patientId);
+            return;
+        }
         setSelectedPatient(found);
 
-        // Auto-select payment method if patient is on a corporate scheme
-        if (found.schemeId || found.Scheme) {
-            setFormData(prev => ({ ...prev, paymentMethod: 'insurance' }));
-        } else if (found.paymentMethod === 'staff') {
-            setFormData(prev => ({ ...prev, paymentMethod: 'payroll' }));
-        }
+        // Also ensure form data uses the string ID so select box binds correctly
+        setFormData(prev => {
+            const next = { ...prev, patientId: String(found.id) };
+            if (found.schemeId || found.Scheme) {
+                next.paymentMethod = 'insurance';
+            } else if (found.paymentMethod === 'staff') {
+                next.paymentMethod = 'payroll';
+            }
+            return next;
+        });
     }, [patients, formData.patientId]);
 
     const loadPatients = async () => {
