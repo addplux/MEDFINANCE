@@ -314,11 +314,11 @@ function App() {
                         {/* ── Clinical Departments — clinical only ─────────────────────── */}
                         <Route path="opd/dashboard" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><DepartmentDashboard title="OPD" departmentId={4} /></RoleRoute>} />
 
-                        <Route path="theatre/dashboard" element={<RoleRoute roles={['doctor', 'nurse']}><DepartmentDashboard title="Theatre" departmentId={7} type="theatre" /></RoleRoute>} />
+                        <Route path="theatre/dashboard" element={<RoleRoute roles={['doctor', 'nurse']}><TheatreBilling /></RoleRoute>} />
                         <Route path="theatre/billing/new" element={<RoleRoute roles={['doctor', 'nurse']}><TheatreBillForm /></RoleRoute>} />
                         <Route path="theatre/billing/:id/edit" element={<RoleRoute roles={['doctor', 'nurse']}><TheatreBillForm /></RoleRoute>} />
 
-                        <Route path="maternity/billing" element={<RoleRoute roles={['doctor', 'nurse']}><DepartmentDashboard title="Maternity" departmentId={6} type="maternity" /></RoleRoute>} />
+                        <Route path="maternity/billing" element={<RoleRoute roles={['doctor', 'nurse']}><MaternityBilling /></RoleRoute>} />
                         <Route path="maternity/billing/new" element={<RoleRoute roles={['doctor', 'nurse']}><MaternityBillForm /></RoleRoute>} />
                         <Route path="maternity/billing/:id/edit" element={<RoleRoute roles={['doctor', 'nurse']}><MaternityBillForm /></RoleRoute>} />
 
@@ -326,10 +326,10 @@ function App() {
                         <Route path="specialist-clinics/billing/new" element={<RoleRoute roles={['doctor', 'nurse']}><SpecialistClinicForm /></RoleRoute>} />
                         <Route path="specialist-clinics/billing/:id/edit" element={<RoleRoute roles={['doctor', 'nurse']}><SpecialistClinicForm /></RoleRoute>} />
 
-                        <Route path="physiology/dashboard" element={<RoleRoute roles={['doctor', 'nurse']}><DepartmentDashboard title="Physiotherapy" departmentId={5} /></RoleRoute>} />
+                        <Route path="physiology/dashboard" element={<RoleRoute roles={['doctor', 'nurse']}><SpecialistClinics /></RoleRoute>} />
                         <Route path="physiology/billing/new" element={<RoleRoute roles={['doctor', 'nurse']}><SpecialistClinicForm defaultClinicType="Physiotherapy" /></RoleRoute>} />
 
-                        <Route path="dental/dashboard" element={<RoleRoute roles={['doctor', 'nurse']}><DepartmentDashboard title="Dental" departmentId={6} /></RoleRoute>} />
+                        <Route path="dental/dashboard" element={<RoleRoute roles={['doctor', 'nurse']}><SpecialistClinics /></RoleRoute>} />
                         <Route path="dental/billing/new" element={<RoleRoute roles={['doctor', 'nurse']}><SpecialistClinicForm defaultClinicType="Dental" /></RoleRoute>} />
 
                         {/* ── Setup — superintendent + admin only ─────────────────────── */}

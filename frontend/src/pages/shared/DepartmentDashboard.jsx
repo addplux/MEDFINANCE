@@ -49,7 +49,10 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
     }, [loadData]);
 
     const filteredVisits = visits.filter(v => {
+        if (filter === 'all') return true;
         if (filter === 'pending_bill') return v.billingSummary?.status === 'pending';
+        if (filter === 'unpaid') return v.billingSummary?.paidAmount === 0 && (v.billingSummary?.totalAmount > 0);
+        if (filter === 'paid') return v.billingSummary?.paidAmount >= v.billingSummary?.totalAmount && v.billingSummary?.totalAmount > 0;
         if (filter === 'high_frequency') return (v.dailyCheckInCount || 0) > 1;
         return true;
     });
@@ -108,7 +111,9 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
             <div className="flex items-center gap-2 px-2 pb-2">
                 {[
                     { id: 'all', label: 'ALL QUEUE', count: visits.length },
-                    { id: 'pending_bill', label: 'PENDING BILLS', count: visits.filter(v => v.billingSummary?.status === 'pending').length },
+                    { id: 'pending_bill', label: 'PENDING', count: visits.filter(v => v.billingSummary?.status === 'pending').length },
+                    { id: 'unpaid', label: 'UNPAID', count: visits.filter(v => v.billingSummary?.paidAmount === 0 && (v.billingSummary?.totalAmount > 0)).length },
+                    { id: 'paid', label: 'PAID', count: visits.filter(v => v.billingSummary?.paidAmount >= v.billingSummary?.totalAmount && v.billingSummary?.totalAmount > 0).length },
                     { id: 'high_frequency', label: 'MULTIPLE VISITS', count: visits.filter(v => (v.dailyCheckInCount || 0) > 1).length }
                 ].map(f => (
                     <button
