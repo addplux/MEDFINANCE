@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { theatreAPI } from '../../services/apiService';
-import { Plus, Search, DollarSign, FileText, AlertCircle } from 'lucide-react';
+import { Plus, Search, DollarSign, FileText, AlertCircle, Activity, RefreshCw } from 'lucide-react';
 import { getPaymentStatusBadge } from '../../utils/statusBadges';
 
 const TheatreBilling = () => {
@@ -40,84 +40,77 @@ const TheatreBilling = () => {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold text-text-primary">Theatre Billing</h1>
-                    <p className="text-text-secondary">Manage surgical procedure billing</p>
+        <div className="flex flex-col h-full space-y-4 animate-fade-in">
+            {/* Minimalist Header */}
+            <div className="flex items-center justify-between px-2">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                        <Activity className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                        <h1 className="text-xl font-black tracking-tight text-white">Theatre Billing</h1>
+                        {stats && (
+                            <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/40 mt-1">
+                                <span className="flex items-center gap-1">
+                                    <FileText className="w-3 h-3" /> {stats.totalBills} BILLS
+                                </span>
+                                <span className="flex items-center gap-1 text-green-500">
+                                    <DollarSign className="w-3 h-3" /> K{stats.totalRevenue?.toLocaleString()} REVENUE
+                                </span>
+                                <span className="flex items-center gap-1 text-blue-500">
+                                    <DollarSign className="w-3 h-3" /> K{stats.totalPaid?.toLocaleString()} PAID
+                                </span>
+                                <span className="flex items-center gap-1 text-orange-500">
+                                    <AlertCircle className="w-3 h-3" /> K{stats.totalPending?.toLocaleString()} PENDING
+                                </span>
+                            </div>
+                        )}
+                    </div>
                 </div>
-                <Link to="/app/theatre/billing/new" className="btn btn-primary flex items-center gap-2">
-                    <Plus className="w-4 h-4" />
-                    New Theatre Bill
-                </Link>
+
+                <div className="flex items-center gap-2">
+                    <button onClick={fetchBills} className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-all border border-white/5 ml-1">
+                        <RefreshCw className={`w-4 h-4 text-white/60 ${loading ? 'animate-spin' : ''}`} />
+                    </button>
+                    <Link to="/app/theatre/billing/new" className="btn btn-primary ml-2 px-4 py-2 text-xs flex items-center gap-2">
+                        <Plus className="w-4 h-4" />
+                        New Theatre Bill
+                    </Link>
+                </div>
             </div>
 
-            {/* Stats Cards */}
-            {stats && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="card p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-text-secondary">Total Bills</p>
-                                <p className="text-2xl font-bold text-text-primary">{stats.totalBills}</p>
-                            </div>
-                            <FileText className="w-8 h-8 text-primary-500" />
-                        </div>
-                    </div>
-                    <div className="card p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-text-secondary">Total Revenue</p>
-                                <p className="text-2xl font-bold text-green-600">K{stats.totalRevenue?.toLocaleString()}</p>
-                            </div>
-                            <DollarSign className="w-8 h-8 text-green-500" />
-                        </div>
-                    </div>
-                    <div className="card p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-text-secondary">Total Paid</p>
-                                <p className="text-2xl font-bold text-blue-600">K{stats.totalPaid?.toLocaleString()}</p>
-                            </div>
-                            <DollarSign className="w-8 h-8 text-blue-500" />
-                        </div>
-                    </div>
-                    <div className="card p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-text-secondary">Pending</p>
-                                <p className="text-2xl font-bold text-orange-600">K{stats.totalPending?.toLocaleString()}</p>
-                            </div>
-                            <AlertCircle className="w-8 h-8 text-orange-500" />
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Filters */}
-            <div className="card p-4 flex gap-4">
-                <div className="flex-1">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
-                        <input
-                            type="text"
-                            placeholder="Search bills..."
-                            className="form-input pl-10"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
+            <div className="flex items-center gap-4 px-2 pb-2">
+                <div className="relative group flex-1 max-w-sm">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 group-focus-within:text-primary transition-colors w-4 h-4" />
+                    <input
+                        type="text"
+                        placeholder="Search bills..."
+                        className="w-full pl-10 pr-4 py-2 bg-white/[0.03] border border-white/5 rounded-full text-xs focus:ring-2 focus:ring-primary/20 focus:bg-white/10 transition-all placeholder-white/20 font-bold text-white"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
-                <select
-                    className="form-select"
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                    <option value="">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="partial">Partial</option>
-                    <option value="paid">Paid</option>
-                </select>
+
+                <div className="flex gap-1.5 overflow-x-auto">
+                    {[
+                        { id: '', label: 'ALL STATUS' },
+                        { id: 'pending', label: 'PENDING' },
+                        { id: 'partial', label: 'PARTIAL' },
+                        { id: 'paid', label: 'PAID' }
+                    ].map(f => (
+                        <button
+                            key={f.id}
+                            onClick={() => setStatusFilter(f.id)}
+                            className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${statusFilter === f.id
+                                ? 'bg-primary text-white border-primary/50'
+                                : 'bg-white/5 text-white/40 border-white/5 hover:border-white/20'
+                                }`}
+                        >
+                            {f.label}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Bills Table */}

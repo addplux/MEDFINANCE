@@ -105,21 +105,26 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
             </div>
 
             {/* Quick Filters */}
-            <div className="flex items-center gap-2 px-2">
+            <div className="flex items-center gap-2 px-2 pb-2">
                 {[
-                    { id: 'all', label: 'ALL QUEUE' },
-                    { id: 'pending_bill', label: 'PENDING BILLS' },
-                    { id: 'high_frequency', label: 'MULTIPLE VISITS' }
+                    { id: 'all', label: 'ALL QUEUE', count: visits.length },
+                    { id: 'pending_bill', label: 'PENDING BILLS', count: visits.filter(v => v.billingSummary?.status === 'pending').length },
+                    { id: 'high_frequency', label: 'MULTIPLE VISITS', count: visits.filter(v => (v.dailyCheckInCount || 0) > 1).length }
                 ].map(f => (
                     <button
                         key={f.id}
                         onClick={() => setFilter(f.id)}
-                        className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${filter === f.id
+                        className={`relative px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${filter === f.id
                             ? 'bg-white text-black border-white'
                             : 'bg-white/5 text-white/40 border-white/5 hover:border-white/20'
                             }`}
                     >
                         {f.label}
+                        {f.count > 0 && f.id !== 'all' && (
+                            <span className={`absolute -top-1.5 -right-1.5 flex items-center justify-center px-1.5 py-0.5 text-[9px] font-black rounded-full shadow-md ${filter === f.id ? 'bg-primary text-white border border-primary/50' : 'bg-bg-tertiary text-white/80 border border-white/10'}`}>
+                                {f.count}
+                            </span>
+                        )}
                     </button>
                 ))}
             </div>
