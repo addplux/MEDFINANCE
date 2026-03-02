@@ -270,17 +270,17 @@ const StartEndDate = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap items-center gap-3 bg-surface/30 p-3 rounded-2xl border border-border/50">
+            <div className="flex flex-wrap items-center gap-3 bg-[#1A1A1A] p-3 rounded-2xl border border-[#2A2A2A]">
                 <div className="relative flex-1 min-w-[200px]">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
                     <input
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search members by name, ID or patient number..."
-                        className="w-full pl-10 pr-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent transition-all"
+                        className="w-full pl-10 pr-4 py-2.5 bg-bg-secondary border border-border-color rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent transition-all"
                     />
                 </div>
-                <div className="flex items-center gap-1.5 p-1 bg-surface border border-border rounded-xl">
+                <div className="flex items-center gap-1.5 p-1 bg-bg-secondary border border-border-color rounded-xl">
                     {['all', 'active', 'expiring', 'expired'].map(status => (
                         <button
                             key={status}
@@ -293,7 +293,7 @@ const StartEndDate = () => {
                 </div>
                 <button
                     onClick={loadData}
-                    className="p-2.5 bg-surface border border-border rounded-xl text-text-secondary hover:text-accent transition-all"
+                    className="p-2.5 bg-bg-secondary border border-border-color rounded-xl text-text-secondary hover:text-accent transition-all"
                     title="Refresh Data"
                 >
                     <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
@@ -313,6 +313,7 @@ const StartEndDate = () => {
                     }}
                     pageSizeOptions={[10, 25, 50]}
                     sx={{
+                        backgroundColor: 'transparent',
                         border: 'none',
                         color: 'var(--text-primary)',
                         '& .MuiDataGrid-columnHeaders': {
