@@ -293,6 +293,7 @@ const UtilisationTracking = () => {
                             pageSize={10}
                             rowsPerPageOptions={[10, 20]}
                             rowHeight={50}
+                            columnHeaderHeight={50}
                             disableSelectionOnClick
                             sx={{
                                 border: 'none',
@@ -313,8 +314,8 @@ const UtilisationTracking = () => {
                                     }
                                 },
                                 '& .MuiDataGrid-cell': {
-                                    borderBottom: 'none',
-                                    padding: '8px 12px'
+                                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                                    padding: '0 12px'
                                 },
                                 '& .MuiDataGrid-footerContainer': {
                                     borderTop: '1px solid rgba(255, 255, 255, 0.05)',
