@@ -95,13 +95,13 @@ const Dispense = () => {
         setCart(newCart);
     };
 
-    const isCashPatient = selectedPatient && patients.find(p => p.id === selectedPatient)?.paymentMethod === 'cash' || 
-                         patients.find(p => p.id === selectedPatient)?.paymentMethod === 'private';
+    const isCashPatient = selectedPatient && patients.find(p => p.id === selectedPatient)?.paymentMethod === 'cash' ||
+        patients.find(p => p.id === selectedPatient)?.paymentMethod === 'private';
     const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
     const handleDispense = async () => {
         if (!selectedPatient || cart.length === 0) return;
-        
+
         if (isCashPatient && !paymentConfirmed) {
             alert('Payment must be confirmed for cash patients before dispensing.');
             return;
@@ -137,7 +137,7 @@ const Dispense = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-100px)]">
             {/* Left Panel: Selection */}
             <div className="lg:col-span-2 space-y-6 pr-2">
-                <div className="card p-6">
+                <div className="card p-6 overflow-visible">
                     <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                         <User className="w-5 h-5" /> Select Patient
                     </h2>
@@ -310,8 +310,8 @@ const Dispense = () => {
                                 </div>
                             </div>
                             <label className="flex items-center gap-2 cursor-pointer p-2 bg-white rounded border border-orange-200 hover:bg-orange-50 transition-colors">
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     className="checkbox checkbox-primary"
                                     checked={paymentConfirmed}
                                     onChange={(e) => setPaymentConfirmed(e.target.checked)}
