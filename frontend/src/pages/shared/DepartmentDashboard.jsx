@@ -114,14 +114,14 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                     <button
                         key={f.id}
                         onClick={() => setFilter(f.id)}
-                        className={`relative px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${filter === f.id
+                        className={`relative px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border flex items-center gap-2 ${filter === f.id
                             ? 'bg-white text-black border-white'
                             : 'bg-white/5 text-white/40 border-white/5 hover:border-white/20'
                             }`}
                     >
                         {f.label}
                         {f.count > 0 && f.id !== 'all' && (
-                            <span className={`absolute -top-1.5 -right-1.5 flex items-center justify-center px-1.5 py-0.5 text-[9px] font-black rounded-full shadow-md ${filter === f.id ? 'bg-primary text-white border border-primary/50' : 'bg-bg-tertiary text-white/80 border border-white/10'}`}>
+                            <span className={`flex items-center justify-center px-1.5 py-0.5 text-[9px] font-black rounded-full shadow-md ${filter === f.id ? 'bg-primary text-white border border-primary/50' : 'bg-bg-tertiary text-white/80 border border-white/10'}`}>
                                 {f.count}
                             </span>
                         )}
