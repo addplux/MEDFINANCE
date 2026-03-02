@@ -113,7 +113,15 @@ exports.createRequest = async (req, res) => {
     } catch (error) {
         await transaction.rollback();
         console.error('Error creating radiology request:', error);
-        res.status(500).json({ error: 'Failed to create radiology request', details: error.message });
+
+        // Return a 403 status if it's a known patient status guard error
+        const statusCode = error.statusCode || 500;
+        const defaultMsg = 'Failed to create radiology request';
+
+        res.status(statusCode).json({
+            error: statusCode === 403 ? error.message : defaultMsg,
+            details: error.message
+        });
     }
 };
 
