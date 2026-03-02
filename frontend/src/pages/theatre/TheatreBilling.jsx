@@ -114,22 +114,22 @@ const TheatreBilling = () => {
             </div>
 
             {/* Bills Table */}
-            <div className="card">
+            <div className="card overflow-hidden border border-white/5 shadow-sm">
                 <div className="overflow-x-auto">
-                    <table className="table">
-                        <thead>
+                    <table className="w-full text-sm">
+                        <thead className="bg-white/5 border-b border-white/5">
                             <tr>
-                                <th>Bill Number</th>
-                                <th>Patient</th>
-                                <th>Procedure</th>
-                                <th>Surgeon</th>
-                                <th>Date</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th className="text-left py-3 px-4 text-[10px] font-black text-white/40 uppercase tracking-widest">Bill #</th>
+                                <th className="text-left py-3 px-4 text-[10px] font-black text-white/40 uppercase tracking-widest">Patient</th>
+                                <th className="text-left py-3 px-4 text-[10px] font-black text-white/40 uppercase tracking-widest">Procedure</th>
+                                <th className="text-left py-3 px-4 text-[10px] font-black text-white/40 uppercase tracking-widest">Surgeon</th>
+                                <th className="text-left py-3 px-4 text-[10px] font-black text-white/40 uppercase tracking-widest">Date</th>
+                                <th className="text-left py-3 px-4 text-[10px] font-black text-white/40 uppercase tracking-widest">Amount</th>
+                                <th className="text-left py-3 px-4 text-[10px] font-black text-white/40 uppercase tracking-widest">Status</th>
+                                <th className="text-right py-3 px-4 text-[10px] font-black text-white/40 uppercase tracking-widest">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-white/5 bg-transparent">
                             {loading ? (
                                 <tr>
                                     <td colSpan="8" className="text-center py-8">Loading...</td>
@@ -142,25 +142,24 @@ const TheatreBilling = () => {
                                 </tr>
                             ) : (
                                 bills.map((bill) => (
-                                    <tr key={bill.id}>
-                                        <td className="font-medium">{bill.billNumber}</td>
-                                        <td>
-                                            {bill.patient ?
-                                                `${bill.patient.firstName} ${bill.patient.lastName}` :
-                                                'N/A'
-                                            }
+                                    <tr key={bill.id} className="hover:bg-white/[0.02] transition-colors group">
+                                        <td className="py-2.5 px-4 font-bold text-white whitespace-nowrap">{bill.billNumber}</td>
+                                        <td className="py-2.5 px-4">
+                                            <div className="font-bold text-white leading-snug">
+                                                {bill.patient ? `${bill.patient.firstName} ${bill.patient.lastName}` : 'N/A'}
+                                            </div>
                                         </td>
-                                        <td>{bill.procedureType}</td>
-                                        <td>{bill.surgeonName}</td>
-                                        <td>{new Date(bill.procedureDate).toLocaleDateString()}</td>
-                                        <td className="font-medium">K{parseFloat(bill.totalAmount).toLocaleString()}</td>
-                                        <td>
+                                        <td className="py-2.5 px-4 text-[13px] text-white/70 whitespace-nowrap">{bill.procedureType}</td>
+                                        <td className="py-2.5 px-4 text-[13px] text-white/70 whitespace-nowrap">{bill.surgeonName}</td>
+                                        <td className="py-2.5 px-4 text-[13px] text-white/70 whitespace-nowrap">{new Date(bill.procedureDate).toLocaleDateString()}</td>
+                                        <td className="py-2.5 px-4 font-black text-white whitespace-nowrap">K{parseFloat(bill.totalAmount).toLocaleString()}</td>
+                                        <td className="py-2.5 px-4 whitespace-nowrap">
                                             {getPaymentStatusBadge(bill.paymentStatus)}
                                         </td>
-                                        <td>
+                                        <td className="py-2.5 px-4 text-right whitespace-nowrap">
                                             <Link
                                                 to={`/app/theatre/billing/${bill.id}/edit`}
-                                                className="text-primary-600 hover:text-primary-700"
+                                                className="inline-flex items-center justify-center px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all bg-white/5 border border-white/10 text-white hover:bg-primary/20 hover:border-primary/50 hover:text-primary"
                                             >
                                                 View
                                             </Link>
