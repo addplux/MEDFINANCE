@@ -16,7 +16,7 @@ const VISIT_TYPES = [
 
 const STATUS_COLORS = {
     active: 'bg-green-100 text-green-800',
-    discharged: 'bg-gray-100 text-gray-600',
+    discharged: 'bg-gray-100 text-text-secondary',
     transferred: 'bg-yellow-100 text-yellow-800',
     cancelled: 'bg-red-100 text-red-700',
 };
@@ -78,8 +78,8 @@ const Visits = () => {
             {/* Header */}
             <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Visits / Encounters</h1>
-                    <p className="text-sm text-gray-500">{total} total visit{total !== 1 ? 's' : ''} recorded</p>
+                    <h1 className="text-2xl font-bold text-text-primary">Visits / Encounters</h1>
+                    <p className="text-sm text-text-secondary">{total} total visit{total !== 1 ? 's' : ''} recorded</p>
                 </div>
                 <button onClick={() => navigate('/app/visits/new')} className="btn btn-primary">
                     <Plus className="w-4 h-4" /> Register Visit
@@ -93,8 +93,8 @@ const Visits = () => {
                         key={t.key}
                         onClick={() => setType(t.key)}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${typeFilter === t.key
-                                ? 'bg-indigo-600 text-white border-indigo-600'
-                                : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-400'
+                            ? 'bg-indigo-600 text-white border-indigo-600'
+                            : 'bg-bg-tertiary text-text-secondary border-border-color hover:border-indigo-400'
                             }`}
                     >
                         <t.icon className="w-3.5 h-3.5" />
@@ -123,7 +123,7 @@ const Visits = () => {
 
                 {/* Search */}
                 <div className="relative">
-                    <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary" />
                     <input
                         type="text"
                         placeholder="Search patient…"
@@ -140,11 +140,11 @@ const Visits = () => {
             {/* Table */}
             <div className="card overflow-hidden">
                 {loading ? (
-                    <div className="flex items-center justify-center py-16 text-gray-400">
+                    <div className="flex items-center justify-center py-16 text-text-tertiary">
                         <RefreshCw className="w-5 h-5 animate-spin mr-2" /> Loading visits…
                     </div>
                 ) : visits.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-gray-400 gap-2">
+                    <div className="flex flex-col items-center justify-center py-16 text-text-tertiary gap-2">
                         <ClipboardList className="w-10 h-10" />
                         <p className="text-sm">No visits found.</p>
                         <button onClick={() => navigate('/app/visits/new')} className="btn btn-primary mt-2">
@@ -156,7 +156,7 @@ const Visits = () => {
                         {/* Desktop */}
                         <div className="hidden md:block overflow-x-auto">
                             <table className="w-full text-left">
-                                <thead className="text-xs font-bold text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
+                                <thead className="text-xs font-bold text-text-secondary uppercase bg-bg-tertiary/50 border-b border-border-color">
                                     <tr>
                                         <th className="px-4 py-3">Visit #</th>
                                         <th className="px-4 py-3">Patient</th>
@@ -168,22 +168,22 @@ const Visits = () => {
                                         <th className="px-4 py-3 text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100">
+                                <tbody className="divide-y divide-border-color">
                                     {visits.map(v => (
                                         <tr
                                             key={v.id}
-                                            className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                            className="hover:bg-bg-tertiary/50 transition-colors cursor-pointer"
                                             onClick={() => navigate(`/app/visits/${v.id}`)}
                                         >
-                                            <td className="px-4 py-3 font-mono text-sm text-indigo-700 font-semibold">{v.visitNumber}</td>
+                                            <td className="px-4 py-3 font-mono text-sm text-accent font-semibold">{v.visitNumber}</td>
                                             <td className="px-4 py-3">
-                                                <div className="font-medium text-gray-900 text-sm">{v.patient?.firstName} {v.patient?.lastName}</div>
-                                                <div className="text-xs text-gray-400">{v.patient?.patientNumber}</div>
+                                                <div className="font-medium text-text-primary text-sm">{v.patient?.firstName} {v.patient?.lastName}</div>
+                                                <div className="text-xs text-text-tertiary">{v.patient?.patientNumber}</div>
                                             </td>
                                             <td className="px-4 py-3"><TypeBadge type={v.visitType} /></td>
-                                            <td className="px-4 py-3 text-sm text-gray-600">{v.department?.name || v.assignedDepartment || '—'}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-600">{v.scheme?.name || '—'}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-500">{v.admissionDate ? new Date(v.admissionDate).toLocaleDateString() : '—'}</td>
+                                            <td className="px-4 py-3 text-sm text-text-secondary">{v.department?.name || v.assignedDepartment || '—'}</td>
+                                            <td className="px-4 py-3 text-sm text-text-secondary">{v.scheme?.name || '—'}</td>
+                                            <td className="px-4 py-3 text-sm text-text-secondary">{v.admissionDate ? new Date(v.admissionDate).toLocaleDateString() : '—'}</td>
                                             <td className="px-4 py-3">
                                                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[v.status] || ''}`}>{v.status}</span>
                                             </td>
@@ -206,15 +206,15 @@ const Visits = () => {
                         </div>
 
                         {/* Mobile cards */}
-                        <div className="md:hidden divide-y divide-gray-100">
+                        <div className="md:hidden divide-y divide-border-color">
                             {visits.map(v => (
                                 <div key={v.id} className="p-4 space-y-2" onClick={() => navigate(`/app/visits/${v.id}`)}>
                                     <div className="flex justify-between items-start">
-                                        <span className="font-mono text-indigo-700 font-bold text-sm">{v.visitNumber}</span>
+                                        <span className="font-mono text-accent font-bold text-sm">{v.visitNumber}</span>
                                         <TypeBadge type={v.visitType} />
                                     </div>
-                                    <p className="font-medium text-gray-900">{v.patient?.firstName} {v.patient?.lastName}</p>
-                                    <div className="flex justify-between items-center text-xs text-gray-400">
+                                    <p className="font-medium text-text-primary">{v.patient?.firstName} {v.patient?.lastName}</p>
+                                    <div className="flex justify-between items-center text-xs text-text-tertiary">
                                         <span>{v.department?.name || v.assignedDepartment || '—'}</span>
                                         <span className={`px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[v.status] || ''}`}>{v.status}</span>
                                     </div>
