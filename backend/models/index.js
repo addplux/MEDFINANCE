@@ -165,6 +165,7 @@ PharmacyBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'sche
 LabBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
 RadiologyBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
 
+
 SchemeInvoice.hasMany(OPDBill, { foreignKey: 'schemeInvoiceId', as: 'opdBills' });
 SchemeInvoice.hasMany(PharmacyBill, { foreignKey: 'schemeInvoiceId', as: 'pharmacyBills' });
 SchemeInvoice.hasMany(LabBill, { foreignKey: 'schemeInvoiceId', as: 'labBills' });

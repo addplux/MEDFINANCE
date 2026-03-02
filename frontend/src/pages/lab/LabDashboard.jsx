@@ -51,8 +51,8 @@ const LabDashboard = () => {
         <div className="space-y-4">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-xl font-bold text-gray-900 tracking-tight">Laboratory Dashboard</h1>
-                    <p className="text-sm text-gray-500 mt-1">Manage lab requests and results</p>
+                    <h1 className="text-xl font-bold text-text-primary tracking-tight">Laboratory Dashboard</h1>
+                    <p className="text-sm text-text-secondary mt-1">Manage lab requests and results</p>
                 </div>
                 <div className="flex gap-2">
                     <button
@@ -78,8 +78,8 @@ const LabDashboard = () => {
                         <Clock className="w-5 h-5" />
                     </div>
                     <div>
-                        <div className="text-lg font-bold leading-none mb-1 text-gray-900">{requests.filter(r => r.status === 'requested').length}</div>
-                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Pending</div>
+                        <div className="text-lg font-bold leading-none mb-1 text-text-primary">{requests.filter(r => r.status === 'requested').length}</div>
+                        <div className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Pending</div>
                     </div>
                 </div>
                 <div className="card p-3 flex items-center gap-3 border border-border-color shadow-sm">
@@ -87,8 +87,8 @@ const LabDashboard = () => {
                         <Activity className="w-5 h-5" />
                     </div>
                     <div>
-                        <div className="text-lg font-bold leading-none mb-1 text-gray-900">{requests.filter(r => r.status === 'sample_collected' || r.status === 'in_progress').length}</div>
-                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">In Progress</div>
+                        <div className="text-lg font-bold leading-none mb-1 text-text-primary">{requests.filter(r => r.status === 'sample_collected' || r.status === 'in_progress').length}</div>
+                        <div className="text-xs font-semibold text-text-secondary uppercase tracking-wider">In Progress</div>
                     </div>
                 </div>
                 <div className="card p-3 flex items-center gap-3 border border-border-color shadow-sm">
@@ -96,8 +96,8 @@ const LabDashboard = () => {
                         <CheckCircle className="w-5 h-5" />
                     </div>
                     <div>
-                        <div className="text-lg font-bold leading-none mb-1 text-gray-900">{requests.filter(r => r.status === 'completed').length}</div>
-                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Completed</div>
+                        <div className="text-lg font-bold leading-none mb-1 text-text-primary">{requests.filter(r => r.status === 'completed').length}</div>
+                        <div className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Completed</div>
                     </div>
                 </div>
                 {/* Placeholder for critical results */}
@@ -119,8 +119,8 @@ const LabDashboard = () => {
                         key={f}
                         onClick={() => setFilter(f)}
                         className={`px-3 py-1.5 rounded-md text-[13px] font-medium whitespace-nowrap transition-colors border ${filter === f
-                            ? 'bg-primary-50 border-primary-200 text-primary-700 shadow-sm'
-                            : 'bg-white border-border-color text-gray-500 hover:bg-bg-secondary'
+                            ? 'bg-primary/20 border-primary/30 text-primary shadow-sm'
+                            : 'bg-bg-tertiary border-border-color text-text-secondary hover:bg-bg-secondary hover:text-text-primary'
                             }`}
                     >
                         {f.charAt(0).toUpperCase() + f.slice(1).replace('_', ' ')}
@@ -130,7 +130,7 @@ const LabDashboard = () => {
 
             {/* Requests List */}
             {loading ? (
-                <div className="text-center py-8 text-sm text-gray-500 flex flex-col items-center justify-center">
+                <div className="text-center py-8 text-sm text-text-secondary flex flex-col items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mb-2"></div>
                     Loading requests...
                 </div>
@@ -140,25 +140,25 @@ const LabDashboard = () => {
                         <table className="w-full text-sm">
                             <thead className="bg-bg-secondary border-b border-border-color">
                                 <tr>
-                                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Req #</th>
-                                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Patient</th>
-                                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider w-1/4">Tests</th>
-                                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
-                                    <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
+                                    <th className="text-left py-3 px-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Req #</th>
+                                    <th className="text-left py-3 px-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Date</th>
+                                    <th className="text-left py-3 px-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Patient</th>
+                                    <th className="text-left py-3 px-4 text-xs font-semibold text-text-secondary uppercase tracking-wider w-1/4">Tests</th>
+                                    <th className="text-left py-3 px-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
+                                    <th className="text-left py-3 px-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Payment</th>
+                                    <th className="text-right py-3 px-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-border-color bg-white text-gray-900">
+                            <tbody className="divide-y divide-border-color bg-bg-primary text-text-primary">
                                 {requests.map((req) => (
-                                    <tr key={req.id} className="hover:bg-bg-secondary/50 transition-colors group">
-                                        <td className="py-2.5 px-4 font-medium text-gray-900 whitespace-nowrap">{req.requestNumber}</td>
-                                        <td className="py-2.5 px-4 text-[13px] text-gray-500 whitespace-nowrap">
+                                    <tr key={req.id} className="hover:bg-bg-secondary transition-colors group">
+                                        <td className="py-2.5 px-4 font-medium text-text-primary whitespace-nowrap">{req.requestNumber}</td>
+                                        <td className="py-2.5 px-4 text-[13px] text-text-secondary whitespace-nowrap">
                                             {new Date(req.createdAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                                         </td>
                                         <td className="py-2.5 px-4">
-                                            <div className="font-medium text-gray-900 leading-snug">{req.patient.firstName} {req.patient.lastName}</div>
-                                            <div className="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5 whitespace-nowrap">
+                                            <div className="font-medium text-text-primary leading-snug">{req.patient.firstName} {req.patient.lastName}</div>
+                                            <div className="text-[11px] text-text-secondary flex items-center gap-1 mt-0.5 whitespace-nowrap">
                                                 <span className="capitalize">{req.patient.gender}</span>
                                                 <span>•</span>
                                                 <span>{new Date().getFullYear() - new Date(req.patient.dateOfBirth).getFullYear()} yrs</span>
@@ -200,7 +200,7 @@ const LabDashboard = () => {
                                             {req.status === 'completed' && (
                                                 <button
                                                     onClick={() => navigate(`/app/lab/results/${req.id}`)}
-                                                    className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm transition-all"
+                                                    className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md bg-white border border-gray-200 text-text-primary hover:bg-gray-50 shadow-sm transition-all"
                                                 >
                                                     View Results
                                                 </button>
@@ -214,8 +214,8 @@ const LabDashboard = () => {
                                             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-50 mb-3">
                                                 <FileText className="w-6 h-6 text-gray-400" />
                                             </div>
-                                            <h3 className="text-sm font-medium text-gray-900">No requests found</h3>
-                                            <p className="mt-1 text-sm text-gray-500">There are no lab requests matching the selected filter.</p>
+                                            <h3 className="text-sm font-medium text-text-primary">No requests found</h3>
+                                            <p className="mt-1 text-sm text-text-secondary">There are no lab requests matching the selected filter.</p>
                                         </td>
                                     </tr>
                                 )}
@@ -229,3 +229,4 @@ const LabDashboard = () => {
 };
 
 export default LabDashboard;
+
