@@ -299,13 +299,23 @@ const UtilisationTracking = () => {
                                 border: 'none',
                                 backgroundColor: 'transparent',
                                 color: 'var(--text-primary)',
-                                '& .MuiDataGrid-columnHeaders': {
+                                '& .MuiDataGrid-topContainer': {
                                     backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                                },
+                                '& .MuiDataGrid-columnHeaders': {
+                                    backgroundColor: 'transparent',
                                     color: 'var(--text-secondary)',
                                     fontSize: '0.75rem',
                                     fontWeight: 600,
                                     textTransform: 'uppercase',
-                                    letterSpacing: '0.05em'
+                                    letterSpacing: '0.05em',
+                                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                                },
+                                '& .MuiDataGrid-columnHeader': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.02) !important',
+                                },
+                                '& .MuiDataGrid-filler': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.02) !important',
                                 },
                                 '& .MuiDataGrid-row': {
                                     borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
