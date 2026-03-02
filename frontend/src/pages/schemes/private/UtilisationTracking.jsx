@@ -140,7 +140,7 @@ const UtilisationTracking = () => {
             flex: 0.8,
             renderCell: (params) => (
                 <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${params.value === 'Exceeded' ? 'bg-red-500/10 text-red-400' :
-                        (params.value === 'Critical' ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-400')
+                    (params.value === 'Critical' ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-400')
                     }`}>
                     {params.value}
                 </span>
@@ -160,12 +160,12 @@ const UtilisationTracking = () => {
                     <button
                         onClick={fetchReport}
                         disabled={loading}
-                        className="p-2 rounded-xl bg-surface border border-border hover:bg-white/5 text-text-secondary transition-all"
+                        className="p-2 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] hover:bg-white/5 text-text-secondary transition-all"
                         title="Refresh Data"
                     >
                         <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-xl text-sm font-semibold text-text-primary hover:bg-white/5 transition-all">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl text-sm font-semibold text-text-primary hover:bg-white/5 transition-all">
                         <Download size={16} /> Export CSV
                     </button>
                 </div>
@@ -267,10 +267,10 @@ const UtilisationTracking = () => {
                                     value={searchTerm}
                                     onChange={e => setSearchTerm(e.target.value)}
                                     placeholder="Search member..."
-                                    className="pl-9 pr-4 py-2 text-xs bg-surface border border-border rounded-xl text-text-primary focus:outline-none focus:border-accent w-48"
+                                    className="pl-9 pr-4 py-2 text-xs bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl text-text-primary focus:outline-none focus:border-accent w-48"
                                 />
                             </div>
-                            <div className="flex items-center gap-2 bg-surface border border-border rounded-xl px-2 py-1">
+                            <div className="flex items-center gap-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl px-2 py-1">
                                 <Filter size={14} className="text-text-secondary ml-1" />
                                 <select
                                     value={tierFilter}
@@ -292,9 +292,12 @@ const UtilisationTracking = () => {
                             columns={columns}
                             pageSize={10}
                             rowsPerPageOptions={[10, 20]}
+                            rowHeight={50}
                             disableSelectionOnClick
                             sx={{
                                 border: 'none',
+                                backgroundColor: 'transparent',
+                                color: 'var(--text-primary)',
                                 '& .MuiDataGrid-columnHeaders': {
                                     backgroundColor: 'rgba(255, 255, 255, 0.02)',
                                     color: 'var(--text-secondary)',
@@ -311,7 +314,7 @@ const UtilisationTracking = () => {
                                 },
                                 '& .MuiDataGrid-cell': {
                                     borderBottom: 'none',
-                                    padding: '12px'
+                                    padding: '8px 12px'
                                 },
                                 '& .MuiDataGrid-footerContainer': {
                                     borderTop: '1px solid rgba(255, 255, 255, 0.05)',
