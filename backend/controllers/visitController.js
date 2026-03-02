@@ -64,7 +64,7 @@ const createVisit = async (req, res) => {
             include: [
                 { model: Patient, as: 'patient', attributes: ['id', 'patientNumber', 'firstName', 'lastName', 'phone', 'paymentMethod'] },
                 { model: User, as: 'admitter', attributes: ['id', 'firstName', 'lastName'] },
-                { model: Scheme, as: 'scheme', attributes: ['id', 'name'] },
+                { model: Scheme, as: 'scheme', attributes: ['id', 'schemeName'] },
                 { model: Department, as: 'department', attributes: ['id', 'name'] }
             ]
         });
@@ -106,7 +106,7 @@ const getAllVisits = async (req, res) => {
                     required: Object.keys(patientWhere).length > 0
                 },
                 { model: User, as: 'admitter', attributes: ['id', 'firstName', 'lastName'] },
-                { model: Scheme, as: 'scheme', attributes: ['id', 'name'] },
+                { model: Scheme, as: 'scheme', attributes: ['id', 'schemeName'] },
                 { model: Department, as: 'department', attributes: ['id', 'name'] }
             ],
             order: [['created_at', 'DESC']],
@@ -185,7 +185,7 @@ const getVisit = async (req, res) => {
                         'emergencyContact', 'emergencyPhone', 'nextOfKinRelationship', 'photoUrl']
                 },
                 { model: User, as: 'admitter', attributes: ['id', 'firstName', 'lastName'] },
-                { model: Scheme, as: 'scheme', attributes: ['id', 'name'] },
+                { model: Scheme, as: 'scheme', attributes: ['id', 'schemeName'] },
                 { model: Department, as: 'department', attributes: ['id', 'name'] }
             ]
         });

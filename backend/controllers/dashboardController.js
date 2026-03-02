@@ -3,7 +3,7 @@ const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, Patient
 // Get dashboard overview statistics
 const getOverview = async (req, res) => {
     try {
-        const { Op } = sequelize;
+        const { Op } = sequelize.Sequelize;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
