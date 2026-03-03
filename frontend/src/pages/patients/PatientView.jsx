@@ -3,8 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { patientAPI, receivablesAPI } from '../../services/apiService';
 import {
     ArrowLeft, Edit, History, Phone, Mail, MapPin, User, CreditCard,
-    Shield, Clipboard, Printer, Calendar, AlertCircle
+    Shield, Clipboard, Printer, Calendar, AlertCircle, PlusCircle
 } from 'lucide-react';
+import NewAdmissionModal from '../../components/admissions/NewAdmissionModal';
 
 const TYPE_BADGE = {
     cash: { label: 'Cash', bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
@@ -49,6 +50,7 @@ const PatientView = () => {
     const [schemes, setSchemes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isAdmissionModalOpen, setIsAdmissionModalOpen] = useState(false);
 
     useEffect(() => {
         const load = async () => {
@@ -303,17 +305,37 @@ const PatientView = () => {
             {/* Visit History shortcut */}
             <div className="card p-6 flex flex-col sm:flex-row items-center justify-between gap-6 mt-4 print:hidden">
                 <div>
-                    <h3 className="text-lg font-bold text-white">Patient Visit History</h3>
-                    <p className="text-sm text-gray-500 mt-1">View all OPD, IPD, Lab, Pharmacy and other billing records for this patient.</p>
+                    <h3 className="text-lg font-bold text-white">Patient Actions & History</h3>
+                    <p className="text-sm text-gray-500 mt-1">Manage admissions, or view all OPD, IPD, Lab, and Pharmacy records.</p>
                 </div>
-                <button
-                    onClick={() => navigate(`/app/patients/${id}/history`)}
-                    className="btn btn-primary flex-shrink-0"
-                >
-                    <History className="w-4 h-4" />
-                    View Full History
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                        onClick={() => setIsAdmissionModalOpen(true)}
+                        className="btn btn-primary bg-indigo-600 hover:bg-indigo-700 text-white flex-shrink-0"
+                    >
+                        <PlusCircle className="w-5 h-5 mr-1" />
+                        Admit Patient (IPD)
+                    </button>
+                    <button
+                        onClick={() => navigate(`/app/patients/${id}/history`)}
+                        className="btn btn-secondary flex-shrink-0"
+                    >
+                        <History className="w-4 h-4" />
+                        View Full History
+                    </button>
+                </div>
             </div>
+
+            {/* Modals */}
+            <NewAdmissionModal
+                isOpen={isAdmissionModalOpen}
+                onClose={() => setIsAdmissionModalOpen(false)}
+                initialPatient={patient}
+                onSuccess={(admission) => {
+                    // Could refresh patient data or navigate to admission details here
+                    setIsAdmissionModalOpen(false);
+                }}
+            />
         </div>
     );
 };

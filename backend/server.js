@@ -109,6 +109,8 @@ app.use('/api/funds', require('./routes/funds'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/setup', require('./routes/setup'));
 app.use('/api/roles', require('./routes/roleRoutes'));
+app.use('/api/wards', require('./routes/wardRoutes'));
+app.use('/api/admissions', require('./routes/admissionRoutes'));
 app.use('/api/payroll', require('./routes/payroll'));
 app.use('/api/pharmacy', require('./routes/pharmacy'));
 app.use('/api/lab', require('./routes/lab'));

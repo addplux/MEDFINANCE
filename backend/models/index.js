@@ -45,6 +45,9 @@ const Visit = require('./Visit');
 const ARReminderLog = require('./ARReminderLog');
 const PrepaidPlan = require('./PrepaidPlan');
 const SystemLog = require('./SystemLog');
+const Ward = require('./Ward');
+const Bed = require('./Bed');
+const Admission = require('./Admission');
 
 // Define relationships
 
@@ -224,6 +227,28 @@ Patient.hasMany(Visit, { foreignKey: 'patientId', as: 'visits' });
 Scheme.hasMany(Visit, { foreignKey: 'schemeId', as: 'visits' });
 Department.hasMany(Visit, { foreignKey: 'departmentId', as: 'visits' });
 
+// Ward & Bed relationships
+Ward.hasMany(Bed, { foreignKey: 'wardId', as: 'beds' });
+Bed.belongsTo(Ward, { foreignKey: 'wardId', as: 'ward' });
+
+// Admission relationships
+Admission.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
+Patient.hasMany(Admission, { foreignKey: 'patientId', as: 'admissions' });
+
+Admission.belongsTo(Ward, { foreignKey: 'wardId', as: 'ward' });
+Ward.hasMany(Admission, { foreignKey: 'wardId', as: 'admissions' });
+
+Admission.belongsTo(Bed, { foreignKey: 'bedId', as: 'bed' });
+Bed.hasMany(Admission, { foreignKey: 'bedId', as: 'admissions' });
+
+Admission.belongsTo(User, { foreignKey: 'admittingDoctorId', as: 'admittingDoctor' });
+Admission.belongsTo(User, { foreignKey: 'admittedById', as: 'admitter' });
+User.hasMany(Admission, { foreignKey: 'admittingDoctorId', as: 'doctorAdmissions' });
+User.hasMany(Admission, { foreignKey: 'admittedById', as: 'processedAdmissions' });
+
+// Link Bed current admission
+Bed.belongsTo(Admission, { foreignKey: 'currentAdmissionId', as: 'currentAdmission' });
+
 // Payroll Deduction relationships
 PayrollDeduction.belongsTo(User, { foreignKey: 'staffId', as: 'staff' });
 PayrollDeduction.belongsTo(ChartOfAccounts, { foreignKey: 'accountId', as: 'account' });
@@ -286,7 +311,10 @@ module.exports = {
     Visit,
     ARReminderLog,
     PrepaidPlan,
-    SystemLog
+    SystemLog,
+    Ward,
+    Bed,
+    Admission
 };
 
 
