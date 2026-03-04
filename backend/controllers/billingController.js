@@ -552,14 +552,34 @@ const getPendingQueue = async (req, res) => {
 // Get all patients currently awaiting pharmacy dispensing (transferred to Pharmacy dept)
 const getPharmacyQueue = async (req, res) => {
     try {
-        const { Visit, Patient, Scheme } = require('../models');
+        const { Visit, Patient, Scheme, Department } = require('../models');
         const { Op } = require('sequelize');
 
-        const visits = await Visit.findAll({
+        // Find the Pharmacy department ID
+        const pharmDept = await Department.findOne({
             where: {
-                status: 'active',
-                assignedDepartment: { [Op.iLike]: '%pharmacy%' }
-            },
+                [Op.or]: [
+                    { departmentName: { [Op.iLike]: '%pharmacy%' } },
+                    { departmentCode: 'PHARM' }
+                ]
+            }
+        });
+
+        const where = {
+            status: 'active'
+        };
+
+        if (pharmDept) {
+            where[Op.or] = [
+                { assignedDepartment: { [Op.iLike]: '%pharmacy%' } },
+                { departmentId: pharmDept.id }
+            ];
+        } else {
+            where.assignedDepartment = { [Op.iLike]: '%pharmacy%' };
+        }
+
+        const visits = await Visit.findAll({
+            where,
             include: [
                 {
                     model: Patient,
