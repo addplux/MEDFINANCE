@@ -549,35 +549,17 @@ const getPendingQueue = async (req, res) => {
     }
 };
 
-// Get all patients currently awaiting pharmacy dispensing (transferred to Pharmacy dept OR with unpaid pharmacy bills)
+// Get all patients currently in the pharmacy queue:
+// - Source 1: ALL active visits (matching localhost behavior)
+// - Source 2: Patients with unpaid PharmacyBill records but no active visit
 const getPharmacyQueue = async (req, res) => {
     try {
-        const { Visit, Patient, Scheme, Department, PharmacyBill } = require('../models');
+        const { Visit, Patient, Scheme, PharmacyBill } = require('../models');
         const { Op } = require('sequelize');
 
-        // Find the Pharmacy department
-        const pharmDept = await Department.findOne({
-            where: {
-                [Op.or]: [
-                    { departmentName: { [Op.iLike]: '%pharmacy%' } },
-                    { departmentCode: 'PHARM' }
-                ]
-            }
-        });
-
-        // --- Source 1: Active visits assigned/transferred to Pharmacy ---
-        const visitWhere = { status: 'active' };
-        if (pharmDept) {
-            visitWhere[Op.or] = [
-                { assignedDepartment: { [Op.iLike]: '%pharmacy%' } },
-                { departmentId: pharmDept.id }
-            ];
-        } else {
-            visitWhere.assignedDepartment = { [Op.iLike]: '%pharmacy%' };
-        }
-
+        // --- Source 1: ALL active visits ---
         const visits = await Visit.findAll({
-            where: visitWhere,
+            where: { status: 'active' },
             include: [
                 {
                     model: Patient,
@@ -597,19 +579,25 @@ const getPharmacyQueue = async (req, res) => {
         const queueMap = new Map();
         visits.forEach(v => {
             if (!v.patient) return;
-            queueMap.set(v.patient.id, {
-                id: v.id,
-                visitId: v.id,
-                visitNumber: v.visitNumber,
-                visitType: v.visitType,
-                admissionDate: v.admissionDate,
-                updatedAt: v.updatedAt,
-                patient: v.patient,
-                scheme: v.scheme
-            });
+            const pid = v.patient.id;
+            // Keep the most recent visit per patient
+            if (!queueMap.has(pid) || new Date(v.updatedAt) > new Date(queueMap.get(pid).updatedAt)) {
+                queueMap.set(pid, {
+                    id: v.id,
+                    visitId: v.id,
+                    visitNumber: v.visitNumber,
+                    visitType: v.visitType,
+                    admissionDate: v.admissionDate,
+                    updatedAt: v.updatedAt,
+                    queueStatus: v.queueStatus,
+                    notes: v.notes,
+                    patient: v.patient,
+                    scheme: v.scheme
+                });
+            }
         });
 
-        // --- Source 2: Patients with unpaid PharmacyBill records ---
+        // --- Source 2: Patients with unpaid PharmacyBill but NO active visit ---
         const unpaidPharmBills = await PharmacyBill.findAll({
             where: { paymentStatus: 'unpaid' },
             include: [
@@ -625,7 +613,6 @@ const getPharmacyQueue = async (req, res) => {
         unpaidPharmBills.forEach(bill => {
             if (!bill.patient) return;
             const pid = bill.patient.id;
-            // Only add if not already present from a visit transfer (avoid duplicates)
             if (!queueMap.has(pid)) {
                 queueMap.set(pid, {
                     id: `bill-${bill.id}`,
@@ -634,6 +621,8 @@ const getPharmacyQueue = async (req, res) => {
                     visitType: null,
                     admissionDate: bill.createdAt,
                     updatedAt: bill.updatedAt,
+                    queueStatus: null,
+                    notes: null,
                     patient: bill.patient,
                     scheme: null
                 });
