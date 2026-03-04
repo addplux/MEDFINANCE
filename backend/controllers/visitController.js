@@ -1,355 +1,207 @@
+const { Visit, Patient, Scheme, Vitals, PatientMovement, Department, Admission, Bed, Ward, User, OPDBill } = require('../models');
 const { Op } = require('sequelize');
-const { Visit, Patient, Scheme, Department, User, PatientMovement, OPDBill, Service, PharmacyBill, LabBill, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill } = require('../models');
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
-
-const generateVisitNumber = async () => {
-    const today = new Date();
-    const datePart = [
-        today.getFullYear(),
-        String(today.getMonth() + 1).padStart(2, '0'),
-        String(today.getDate()).padStart(2, '0')
-    ].join('');
-
-    // Count visits created today to build a sequence
-    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-    const count = await Visit.count({ where: { createdAt: { [Op.gte]: startOfDay } } });
-    const seq = String(count + 1).padStart(4, '0');
-    return `VIS-${datePart}-${seq}`;
-};
-
-// ── Controllers ──────────────────────────────────────────────────────────────
-
-// POST /visits
+// Create a new outpatient visit
 const createVisit = async (req, res) => {
     try {
         const {
-            patientId, visitType, schemeId, departmentId,
-            assignedDepartment, notes, admissionDate
+            patientId,
+            visitType,
+            schemeId,
+            departmentId,
+            priority,
+            reasonForVisit,
+            initialVitals
         } = req.body;
 
-        if (!patientId) return res.status(400).json({ error: 'Patient is required' });
-        if (!visitType) return res.status(400).json({ error: 'Visit type is required' });
-
-        const patient = await Patient.findByPk(patientId);
-        if (!patient) return res.status(404).json({ error: 'Patient not found' });
-
-        const visitNumber = await generateVisitNumber();
+        // Generate visit number
+        const count = await Visit.count();
+        const visitNumber = `VIS${String(count + 1).padStart(6, '0')}`;
 
         const visit = await Visit.create({
             visitNumber,
-            visitType,
             patientId,
-            schemeId: schemeId || null,
-            departmentId: departmentId || null,
-            assignedDepartment: assignedDepartment || null,
-            notes: notes || null,
-            admittedById: req.user?.id || null,
-            admissionDate: admissionDate || new Date(),
-            status: 'active'
+            visitType,
+            schemeId,
+            departmentId,
+            priority,
+            reasonForVisit,
+            status: 'active',
+            queueStatus: 'awaiting_triage',
+            admittedById: req.user.id
         });
 
-        // Log initial patient movement to department
-        if (assignedDepartment || departmentId) {
-            await PatientMovement.create({
-                patientId,
-                fromDepartment: null,
-                toDepartment: assignedDepartment || 'Assigned Department',
-                notes: `Visit ${visitNumber} started (${visitType.toUpperCase()})`,
-                admittedBy: req.user?.id || null
-            });
-        }
-
-        // ── Real World OPD Flow (Billing Gate 1) ──
-        // Generate a standard Consultation Bill for OPD visits
-        if (visitType === 'opd') {
-            // Use findOrCreate to avoid unique constraint errors on serviceCode
-            const [consultationService] = await Service.findOrCreate({
-                where: { serviceCode: 'CONS' },
-                defaults: {
-                    serviceCode: 'CONS',
-                    serviceName: 'General OPD Consultation',
-                    category: 'opd',
-                    price: 150,
-                    cashPrice: 150,
-                    corporatePrice: 200,
-                    schemePrice: 200,
-                    staffPrice: 50
-                }
-            });
-
-            await OPDBill.create({
-                billNumber: `OPD-${Date.now().toString().slice(-6)}`,
-                serviceId: consultationService.id,
-                patientId,
+        // If initial vitals provided, create them
+        if (initialVitals) {
+            await Vitals.create({
+                ...initialVitals,
                 visitId: visit.id,
-                description: 'General OPD Consultation Fee',
-                totalAmount: (schemeId ? consultationService.schemePrice : consultationService.cashPrice) || 150,
-                netAmount: (schemeId ? consultationService.schemePrice : consultationService.cashPrice) || 150,
-                unitPrice: (schemeId ? consultationService.schemePrice : consultationService.cashPrice) || 150,
-                paidAmount: schemeId ? ((schemeId ? consultationService.schemePrice : consultationService.cashPrice) || 150) : 0,
-                paymentStatus: schemeId ? 'paid' : 'unpaid',
-                status: 'pending',
-                createdBy: req.user?.id || 1, // fallback to a system user if none is tied to this request (e.g. testing)
-                dueDate: new Date()
+                patientId,
+                recordedBy: req.user.id
             });
         }
+
+        // Create initial movement
+        await PatientMovement.create({
+            visitId: visit.id,
+            patientId,
+            fromDepartmentId: null,
+            toDepartmentId: departmentId,
+            reason: 'Initial Triage/Consultation',
+            admittedBy: req.user.id
+        });
 
         const fullVisit = await Visit.findByPk(visit.id, {
             include: [
-                { model: Patient, as: 'patient', attributes: ['id', 'patientNumber', 'firstName', 'lastName', 'phone', 'paymentMethod'] },
-                { model: User, as: 'admitter', attributes: ['id', 'firstName', 'lastName'] },
-                { model: Scheme, as: 'scheme', attributes: ['id', 'schemeName'] },
-                { model: Department, as: 'department', attributes: ['id', 'departmentName'] }
+                { model: Patient, as: 'patient' },
+                { model: Department, as: 'department' }
             ]
         });
 
         res.status(201).json(fullVisit);
     } catch (error) {
-        console.error('Error creating visit:', error);
-        res.status(500).json({ error: 'Failed to create visit', details: error.message });
+        console.error('Create visit error:', error);
+        res.status(500).json({ error: 'Failed to create visit' });
     }
 };
 
-// GET /visits
+// Get all active visits
 const getAllVisits = async (req, res) => {
     try {
-        const {
-            search = '', visitType, status, queueStatus, departmentId, page = 1, limit = 50
-        } = req.query;
-
+        const { status, queueStatus, departmentId } = req.query;
         const where = {};
-        if (visitType) where.visitType = visitType;
         if (status) where.status = status;
         if (queueStatus) where.queueStatus = queueStatus;
         if (departmentId) where.departmentId = departmentId;
 
-        const patientWhere = {};
-        if (search) {
-            patientWhere[Op.or] = [
-                { firstName: { [Op.like]: `%${search}%` } },
-                { lastName: { [Op.like]: `%${search}%` } },
-                { patientNumber: { [Op.like]: `%${search}%` } }
-            ];
-        }
-
-        const { count, rows } = await Visit.findAndCountAll({
+        const visits = await Visit.findAll({
             where,
             include: [
-                {
-                    model: Patient, as: 'patient',
-                    attributes: ['id', 'patientNumber', 'firstName', 'lastName', 'phone', 'paymentMethod'],
-                    where: Object.keys(patientWhere).length ? patientWhere : undefined,
-                    required: Object.keys(patientWhere).length > 0
-                },
-                { model: User, as: 'admitter', attributes: ['id', 'firstName', 'lastName'] },
-                { model: Scheme, as: 'scheme', attributes: ['id', 'schemeName'] },
-                { model: Department, as: 'department', attributes: ['id', 'departmentName'] }
+                { model: Patient, as: 'patient' },
+                { model: Scheme, as: 'scheme' }
             ],
-            order: [['created_at', 'DESC']],
-            limit: parseInt(limit),
-            offset: (parseInt(page) - 1) * parseInt(limit)
+            order: [['updatedAt', 'DESC']]
         });
 
-        // Enhance visits with daily check-in counts and billing summary
-        const today = new Date();
-        const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-
-        const enhancedVisits = await Promise.all(rows.map(async (v) => {
-            const plainVisit = v.get({ plain: true });
-
-            // Daily Check-in Count
-            const dayCount = await Visit.count({
-                where: {
-                    patientId: plainVisit.patientId,
-                    createdAt: { [Op.gte]: startOfDay }
-                }
-            });
-            plainVisit.dailyCheckInCount = dayCount;
-
-            // Simple Billing Aggregation for the day (Scan all bill types)
-            // Note: In a production app, we'd want a more efficient way to query these
-            const billModels = [OPDBill, PharmacyBill, LabBill, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill];
-            let totalBilledToday = 0;
-            let pendingBills = 0;
-
-            for (const Model of billModels) {
-                const bills = await Model.findAll({
-                    where: {
-                        patientId: plainVisit.patientId,
-                        createdAt: { [Op.gte]: startOfDay }
-                    }
-                });
-                bills.forEach(b => {
-                    const amount = parseFloat(b.netAmount || b.amount || b.totalAmount || 0);
-                    const isPaid = b.paymentStatus === 'paid' || b.paymentStatus === 'covered' || b.paymentStatus === 'scheme_covered';
-                    if (!isPaid) {
-                        totalBilledToday += amount;
-                        if (b.paymentStatus === 'unpaid') {
-                            pendingBills++;
-                        }
-                    }
-                });
-            }
-
-            plainVisit.billingSummary = {
-                totalAmount: totalBilledToday,
-                pendingCount: pendingBills,
-                status: pendingBills > 0 ? 'pending' : (totalBilledToday > 0 ? 'cleared' : 'none')
-            };
-
-            return plainVisit;
-        }));
-
-        res.json({
-            visits: enhancedVisits,
-            total: count,
-            page: parseInt(page),
-            totalPages: Math.ceil(count / parseInt(limit))
-        });
+        res.json(visits);
     } catch (error) {
-        console.error('Error fetching visits:', error);
-        res.status(500).json({ error: 'Failed to fetch visits', details: error.message });
+        console.error('Get visits error:', error);
+        res.status(500).json({ error: 'Failed to get visits' });
     }
 };
 
-// GET /visits/:id
+// Get single visit details
 const getVisit = async (req, res) => {
     try {
         const visit = await Visit.findByPk(req.params.id, {
             include: [
-                {
-                    model: Patient, as: 'patient',
-                    attributes: ['id', 'patientNumber', 'firstName', 'lastName', 'phone',
-                        'gender', 'dateOfBirth', 'nrc', 'paymentMethod',
-                        'emergencyContact', 'emergencyPhone', 'nextOfKinRelationship', 'photoUrl']
-                },
-                { model: User, as: 'admitter', attributes: ['id', 'firstName', 'lastName'] },
-                { model: Scheme, as: 'scheme', attributes: ['id', 'schemeName'] },
-                { model: Department, as: 'department', attributes: ['id', 'departmentName'] }
+                { model: Patient, as: 'patient' },
+                { model: Department, as: 'department' },
+                { model: Vitals, as: 'vitals' },
+                { model: PatientMovement, as: 'movements' },
+                { model: Admission, as: 'admissions', include: [{ model: Bed, as: 'bed', include: [{ model: Ward, as: 'ward' }] }] }
             ]
         });
 
-        if (!visit) return res.status(404).json({ error: 'Visit not found' });
-
-        const plainVisit = visit.get({ plain: true });
-
-        // Calculate billing summary for this visit exactly as done in getAllVisits
-        const billModels = [OPDBill, PharmacyBill, LabBill, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill];
-        let totalBilledToday = 0;
-        let pendingBills = 0;
-
-        const startOfDay = new Date(new Date().setHours(0, 0, 0, 0));
-
-        for (const Model of billModels) {
-            const bills = await Model.findAll({
-                where: {
-                    patientId: plainVisit.patientId,
-                    createdAt: { [Op.gte]: startOfDay }
-                }
-            });
-            bills.forEach(b => {
-                const amount = parseFloat(b.netAmount || b.amount || b.totalAmount || 0);
-                const isPaid = b.paymentStatus === 'paid' || b.paymentStatus === 'covered' || b.paymentStatus === 'scheme_covered';
-                if (!isPaid) {
-                    totalBilledToday += amount;
-                    if (b.paymentStatus === 'unpaid') {
-                        pendingBills++;
-                    }
-                }
-            });
+        if (!visit) {
+            return res.status(404).json({ error: 'Visit not found' });
         }
 
-        plainVisit.billingSummary = {
-            totalAmount: totalBilledToday,
-            pendingCount: pendingBills,
-            status: pendingBills > 0 ? 'pending' : (totalBilledToday > 0 ? 'cleared' : 'none')
-        };
-
-        res.json(plainVisit);
-    } catch (error) {
-        console.error('Error fetching visit:', error);
-        res.status(500).json({ error: 'Failed to fetch visit', details: error.message });
-    }
-};
-
-// PUT /visits/:id/queue-status
-const updateQueueStatus = async (req, res) => {
-    try {
-        const visit = await Visit.findByPk(req.params.id);
-        if (!visit) return res.status(404).json({ error: 'Visit not found' });
-
-        const { queueStatus } = req.body;
-        const validStatuses = ['pending_triage', 'waiting_doctor', 'with_doctor', 'pending_results', 'ready_for_discharge'];
-
-        if (!validStatuses.includes(queueStatus)) {
-            return res.status(400).json({ error: 'Invalid queue status' });
-        }
-
-        await visit.update({ queueStatus });
         res.json(visit);
     } catch (error) {
-        console.error('Error updating queue status:', error);
-        res.status(500).json({ error: 'Failed to update queue status', details: error.message });
+        console.error('Get visit error:', error);
+        res.status(500).json({ error: 'Failed to get visit' });
     }
 };
 
-// PUT /visits/:id
+// Update visit info or transfer department
 const updateVisit = async (req, res) => {
     try {
         const visit = await Visit.findByPk(req.params.id);
         if (!visit) return res.status(404).json({ error: 'Visit not found' });
 
-        const { schemeId, departmentId, assignedDepartment, notes, status } = req.body;
-        await visit.update({ schemeId, departmentId, assignedDepartment, notes, status });
+        const { departmentId, queueStatus, priority, status } = req.body;
+
+        const oldDept = visit.departmentId;
+
+        if (departmentId && departmentId !== oldDept) {
+            // Log movement
+            await PatientMovement.create({
+                visitId: visit.id,
+                patientId: visit.patientId,
+                fromDepartmentId: oldDept,
+                toDepartmentId: departmentId,
+                reason: 'Department Transfer',
+                admittedBy: req.user.id
+            });
+            visit.departmentId = departmentId;
+        }
+
+        if (queueStatus) visit.queueStatus = queueStatus;
+        if (priority) visit.priority = priority;
+        if (status) visit.status = status;
+
+        await visit.save();
+
         res.json(visit);
     } catch (error) {
-        console.error('Error updating visit:', error);
-        res.status(500).json({ error: 'Failed to update visit', details: error.message });
+        console.error('Update visit error:', error);
+        res.status(500).json({ error: 'Failed to update visit' });
     }
 };
 
-// POST /visits/:id/discharge
+// Discharge/Close visit
 const dischargeVisit = async (req, res) => {
     try {
         const visit = await Visit.findByPk(req.params.id);
         if (!visit) return res.status(404).json({ error: 'Visit not found' });
-        if (visit.status === 'discharged') return res.status(400).json({ error: 'Visit already discharged' });
 
-        await visit.update({ status: 'discharged', dischargeDate: new Date() });
+        visit.status = 'closed';
+        visit.dischargeDate = new Date();
+        await visit.save();
 
-        // Log movement out
-        await PatientMovement.create({
-            patientId: visit.patientId,
-            fromDepartment: visit.assignedDepartment || 'Ward',
-            toDepartment: 'Discharged',
-            notes: `Patient discharged from visit ${visit.visitNumber}`,
-            admittedBy: req.user?.id || null
-        });
-
-        res.json({ message: 'Patient discharged successfully', visit });
+        res.json({ message: 'Visit closed successfully' });
     } catch (error) {
-        console.error('Error discharging visit:', error);
-        res.status(500).json({ error: 'Failed to discharge visit', details: error.message });
+        console.error('Discharge visit error:', error);
+        res.status(500).json({ error: 'Failed to close visit' });
     }
 };
 
-// GET /visits/:id/movements
+// Record patient movements
 const getVisitMovements = async (req, res) => {
     try {
-        const visit = await Visit.findByPk(req.params.id, { attributes: ['id', 'patientId'] });
-        if (!visit) return res.status(404).json({ error: 'Visit not found' });
-
         const movements = await PatientMovement.findAll({
-            where: { patientId: visit.patientId },
-            include: [{ model: User, as: 'admitter', attributes: ['id', 'firstName', 'lastName'] }],
-            order: [['created_at', 'ASC']]
+            where: { visitId: req.params.id },
+            include: [
+                { model: Department, as: 'fromDepartment' },
+                { model: Department, as: 'toDepartment' },
+                { model: User, as: 'admitter', attributes: ['firstName', 'lastName'] }
+            ],
+            order: [['createdAt', 'DESC']]
         });
-
         res.json(movements);
     } catch (error) {
-        console.error('Error fetching movements:', error);
-        res.status(500).json({ error: 'Failed to fetch movements', details: error.message });
+        console.error('Get movements error:', error);
+        res.status(500).json({ error: 'Failed to get movements' });
+    }
+};
+
+// Quick status update for dashboards
+const updateQueueStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { queueStatus } = req.body;
+
+        const visit = await Visit.findByPk(id);
+        if (!visit) return res.status(404).json({ error: 'Visit not found' });
+
+        visit.queueStatus = queueStatus;
+        await visit.save();
+
+        res.json(visit);
+    } catch (error) {
+        console.error('Update queue status error:', error);
+        res.status(500).json({ error: 'Failed to update queue status' });
     }
 };
 

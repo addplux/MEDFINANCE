@@ -487,9 +487,6 @@ const getUnpaidPatientBills = async (req, res) => {
 // Get a consolidated queue of all patients with unpaid bills across all departments
 const getPendingQueue = async (req, res) => {
     try {
-        // Query all tables for 'unpaid' records
-
-        // Query all tables for 'unpaid' records
         const [opd, pharmacy, lab, radiology, theatre, maternity, specialist] = await Promise.all([
             OPDBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
             PharmacyBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),

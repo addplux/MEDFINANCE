@@ -1,0 +1,91 @@
+﻿node : D:\MEDFINANCE360
+\backend\controllers\bi
+llingController.js:608
+At line:1 char:1
++ node 
+--trace-uncaught 
+server.js > out.txt 2> 
+err.txt
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo     
+         : 
+NotSpecified: (D:\ME   
+ DFINANCE36...ntroller.
+j    s:608:String) [], 
+Remot    eException
+    + 
+FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+};
+^
+
+SyntaxError: 
+Unexpected token '}'
+    at wrapSafe (node:i
+nternal/modules/cjs/loa
+der:1638:18)
+    at Module._compile 
+(node:internal/modules/
+cjs/loader:1680:20)
+    at Object..js (node
+:internal/modules/cjs/l
+oader:1839:10)
+    at Module.load (nod
+e:internal/modules/cjs/
+loader:1441:32)
+    at Function._load (
+node:internal/modules/c
+js/loader:1263:12)
+    at TracingChannel.t
+raceSync (node:diagnost
+ics_channel:328:14)
+    at wrapModuleLoad (
+node:internal/modules/c
+js/loader:237:24)
+    at Module.require (
+node:internal/modules/c
+js/loader:1463:12)
+    at require (node:in
+ternal/modules/helpers:
+147:16)
+    at 
+Object.<anonymous> (D:\
+MEDFINANCE360\backend\r
+outes\billing.js:3:27)
+Thrown at:
+    at wrapSafe (node:i
+nternal/modules/cjs/loa
+der:1638:18)
+    at node:internal/mo
+dules/cjs/loader:1680:2
+0
+    at node:internal/mo
+dules/cjs/loader:1839:1
+0
+    at node:internal/mo
+dules/cjs/loader:1441:3
+2
+    at node:internal/mo
+dules/cjs/loader:1263:1
+2
+    at traceSync (node:
+diagnostics_channel:328
+:14)
+    at wrapModuleLoad (
+node:internal/modules/c
+js/loader:237:24)
+    at node:internal/mo
+dules/cjs/loader:1463:1
+2
+    at require (node:in
+ternal/modules/helpers:
+147:16)
+    at D:\MEDFINANCE360
+\backend\routes\billing
+.js:3:27
+
+
+Node.js v22.22.0
