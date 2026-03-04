@@ -20,6 +20,14 @@ const OPDBill = sequelize.define('OPDBill', {
             key: 'id'
         }
     },
+    visitId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'visits',
+            key: 'id'
+        }
+    },
     serviceId: {
         type: DataTypes.INTEGER,
         allowNull: false,

@@ -14,19 +14,19 @@ export const useToast = () => {
 export const ToastProvider = ({ children }) => {
     const [toasts, setToasts] = useState([]);
 
+    const removeToast = useCallback((id) => {
+        setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, []);
+
     const addToast = useCallback((message, type = 'info', duration = 3000) => {
         const id = Date.now();
         setToasts((prev) => [...prev, { id, message, type, duration }]);
 
         if (duration > 0) {
             setTimeout(() => {
-                removeToast(id);
+                setToasts((prev) => prev.filter((toast) => toast.id !== id));
             }, duration);
         }
-    }, []);
-
-    const removeToast = useCallback((id) => {
-        setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, []);
 
     const success = useCallback((message, duration) => {

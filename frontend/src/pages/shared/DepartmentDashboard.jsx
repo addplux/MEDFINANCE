@@ -16,12 +16,23 @@ const DEPT_ICONS = {
     'Specialist': Clipboard
 };
 
+const PAYMENT_METHOD_STYLES = {
+    cash: { label: 'Cash', classes: 'bg-green-500/10 text-green-400 border-green-500/20' },
+    corporate: { label: 'Corporate', classes: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+    scheme: { label: 'Scheme', classes: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+    staff: { label: 'Staff', classes: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+    exempted: { label: 'Exempted', classes: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+    private_prepaid: { label: 'Prepaid', classes: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
+    emergency: { label: 'Emergency', classes: 'bg-red-500/10 text-red-400 border-red-500/20' },
+    foc: { label: 'FOC', classes: 'bg-gray-500/10 text-gray-400 border-gray-500/20' },
+};
+
 const DepartmentDashboard = ({ title, departmentId, type }) => {
     const navigate = useNavigate();
     const [visits, setVisits] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [filter, setFilter] = useState('all'); // all, pending_bill, high_frequency
+    const [filter, setFilter] = useState(title === 'OPD' ? 'triage' : 'all'); // Set default to triage for OPD
 
     const Icon = DEPT_ICONS[title] || Activity;
 
@@ -49,13 +60,39 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
     }, [loadData]);
 
     const filteredVisits = visits.filter(v => {
-        if (filter === 'all') return true;
-        if (filter === 'pending_bill') return v.billingSummary?.status === 'pending';
-        if (filter === 'unpaid') return v.billingSummary?.paidAmount === 0 && (v.billingSummary?.totalAmount > 0);
-        if (filter === 'paid') return v.billingSummary?.paidAmount >= v.billingSummary?.totalAmount && v.billingSummary?.totalAmount > 0;
-        if (filter === 'high_frequency') return (v.dailyCheckInCount || 0) > 1;
-        return true;
+        if (title === 'OPD') {
+            if (filter === 'triage') return v.queueStatus === 'pending_triage';
+            if (filter === 'doctor') return v.queueStatus === 'waiting_doctor' || v.queueStatus === 'with_doctor';
+            if (filter === 'results') return v.queueStatus === 'pending_results';
+            if (filter === 'discharge') return v.queueStatus === 'ready_for_discharge';
+            return true; // "all_opd" or fallback
+        } else {
+            if (filter === 'all') return true;
+            if (filter === 'pending_bill') return v.billingSummary?.status === 'pending';
+            if (filter === 'unpaid') return v.billingSummary?.paidAmount === 0 && (v.billingSummary?.totalAmount > 0);
+            if (filter === 'paid') return v.billingSummary?.paidAmount >= v.billingSummary?.totalAmount && v.billingSummary?.totalAmount > 0;
+            if (filter === 'high_frequency') return (v.dailyCheckInCount || 0) > 1;
+            return true;
+        }
     });
+
+    const standardFilters = [
+        { id: 'all', label: 'ALL QUEUE', count: visits.length },
+        { id: 'pending_bill', label: 'PENDING', count: visits.filter(v => v.billingSummary?.status === 'pending').length },
+        { id: 'unpaid', label: 'UNPAID', count: visits.filter(v => v.billingSummary?.paidAmount === 0 && (v.billingSummary?.totalAmount > 0)).length },
+        { id: 'paid', label: 'PAID', count: visits.filter(v => v.billingSummary?.paidAmount >= v.billingSummary?.totalAmount && v.billingSummary?.totalAmount > 0).length },
+        { id: 'high_frequency', label: 'MULTIPLE VISITS', count: visits.filter(v => (v.dailyCheckInCount || 0) > 1).length }
+    ];
+
+    const opdFilters = [
+        { id: 'all_opd', label: 'ALL OPD', count: visits.length },
+        { id: 'triage', label: 'TRIAGE', count: visits.filter(v => v.queueStatus === 'pending_triage').length },
+        { id: 'doctor', label: 'DOCTOR Q', count: visits.filter(v => v.queueStatus === 'waiting_doctor' || v.queueStatus === 'with_doctor').length },
+        { id: 'results', label: 'PENDING RESULTS', count: visits.filter(v => v.queueStatus === 'pending_results').length },
+        { id: 'discharge', label: 'BILLING & EXIT', count: visits.filter(v => v.queueStatus === 'ready_for_discharge').length }
+    ];
+
+    const activeFilters = title === 'OPD' ? opdFilters : standardFilters;
 
     return (
         <div className="flex flex-col h-full space-y-4 animate-fade-in">
@@ -66,7 +103,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                         <Icon className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                        <h1 className="text-xl font-black tracking-tight text-white">{title} Queue</h1>
+                        <h1 className="text-xl font-black tracking-tight text-white">{title === 'OPD' ? 'OPD' : `${title} Queue`}</h1>
                         <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/40">
                             <span className="flex items-center gap-1">
                                 <Users className="w-3 h-3" /> {visits.length} PATIENTS
@@ -109,13 +146,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
 
             {/* Quick Filters */}
             <div className="flex items-center gap-2 px-2 pb-2">
-                {[
-                    { id: 'all', label: 'ALL QUEUE', count: visits.length },
-                    { id: 'pending_bill', label: 'PENDING', count: visits.filter(v => v.billingSummary?.status === 'pending').length },
-                    { id: 'unpaid', label: 'UNPAID', count: visits.filter(v => v.billingSummary?.paidAmount === 0 && (v.billingSummary?.totalAmount > 0)).length },
-                    { id: 'paid', label: 'PAID', count: visits.filter(v => v.billingSummary?.paidAmount >= v.billingSummary?.totalAmount && v.billingSummary?.totalAmount > 0).length },
-                    { id: 'high_frequency', label: 'MULTIPLE VISITS', count: visits.filter(v => (v.dailyCheckInCount || 0) > 1).length }
-                ].map(f => (
+                {activeFilters.map(f => (
                     <button
                         key={f.id}
                         onClick={() => setFilter(f.id)}
@@ -139,7 +170,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                 {filteredVisits.length === 0 ? (
                     <div className="h-64 glass-panel border-dashed border-white/5 rounded-[2rem] flex flex-col items-center justify-center text-white/20">
                         <Users className="w-12 h-12 mb-2 opacity-10" />
-                        <p className="text-sm font-bold tracking-tight">Zero patients in queue</p>
+                        <p className="text-sm font-bold tracking-tight">Zero patients in {filter.replace('_', ' ').toLowerCase()}</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -163,14 +194,19 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                                 {v.patient?.firstName?.charAt(0)}{v.patient?.lastName?.charAt(0)}
                                             </span>
                                         </div>
-                                        <div>
-                                            <h3 className="text-sm font-bold text-white tracking-tight leading-none mb-1">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-sm font-bold text-white tracking-tight leading-none">
                                                 {v.patient?.firstName} {v.patient?.lastName}
                                             </h3>
-                                            <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-none">
-                                                {v.patient?.patientNumber}
-                                            </p>
+                                            {v.patient?.paymentMethod && PAYMENT_METHOD_STYLES[v.patient.paymentMethod] && (
+                                                <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase border leading-none ${PAYMENT_METHOD_STYLES[v.patient.paymentMethod].classes}`}>
+                                                    {PAYMENT_METHOD_STYLES[v.patient.paymentMethod].label}
+                                                </span>
+                                            )}
                                         </div>
+                                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mt-1">
+                                            {v.patient?.patientNumber}
+                                        </p>
                                     </div>
                                     <div className="text-right">
                                         <div className="text-[10px] font-black text-white/40 flex items-center gap-1 justify-end uppercase">
@@ -189,21 +225,38 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
 
                                 <div className="flex items-center justify-between mt-auto">
                                     {/* Billing Status */}
-                                    <div className="flex items-center gap-1.5">
-                                        <div className={`w-1.5 h-1.5 rounded-full ${v.billingSummary?.status === 'pending' ? 'bg-primary shadow-[0_0_8px_rgba(255,0,204,0.6)] animate-pulse' :
-                                            v.billingSummary?.status === 'cleared' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' :
-                                                'bg-white/10'
+                                    <div className="flex items-center gap-1.5 flex-wrap flex-1 min-w-0 pr-2">
+                                        {/* Status Dot */}
+                                        <div className={`w-1.5 h-1.5 flex-shrink-0 rounded-full ${v.queueStatus === 'pending_triage' ? 'bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.6)] animate-pulse' :
+                                            v.queueStatus === 'waiting_doctor' ? 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)] animate-pulse' :
+                                                v.queueStatus === 'with_doctor' ? 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]' :
+                                                    v.queueStatus === 'pending_results' ? 'bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]' :
+                                                        v.billingSummary?.status === 'pending' ? 'bg-primary shadow-[0_0_8px_rgba(255,0,204,0.6)]' :
+                                                            v.billingSummary?.status === 'cleared' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' :
+                                                                'bg-white/10'
                                             }`} />
-                                        <span className={`text-[9px] font-black uppercase tracking-widest ${v.billingSummary?.status === 'pending' ? 'text-primary' :
-                                            v.billingSummary?.status === 'cleared' ? 'text-green-500' :
-                                                'text-white/20'
+
+                                        {/* Dynamic Status Text */}
+                                        <span className={`text-[9px] font-black uppercase tracking-widest truncate ${v.queueStatus === 'pending_triage' ? 'text-orange-400' :
+                                            v.queueStatus === 'waiting_doctor' ? 'text-blue-400' :
+                                                v.queueStatus === 'with_doctor' ? 'text-purple-400' :
+                                                    v.queueStatus === 'pending_results' ? 'text-yellow-400' :
+                                                        v.billingSummary?.status === 'pending' ? 'text-primary' :
+                                                            v.billingSummary?.status === 'cleared' ? 'text-green-500' :
+                                                                'text-white/20'
                                             }`}>
-                                            {v.billingSummary?.status === 'pending' ? `K${v.billingSummary.totalAmount} UNPAID` :
-                                                v.billingSummary?.status === 'cleared' ? 'BILL CLEARED' : 'NO BILL'}
+                                            {
+                                                v.queueStatus === 'pending_triage' ? 'AWAITING TRIAGE' :
+                                                    v.queueStatus === 'waiting_doctor' ? 'TO SEE DOCTOR' :
+                                                        v.queueStatus === 'with_doctor' ? 'IN CONSULTATION' :
+                                                            v.queueStatus === 'pending_results' ? 'AWAITING LABS/XRAY' :
+                                                                v.billingSummary?.status === 'pending' ? `K${v.billingSummary.totalAmount} UNPAID` :
+                                                                    v.billingSummary?.status === 'cleared' ? 'BILL CLEARED' : 'NO BILL'
+                                            }
                                         </span>
                                     </div>
 
-                                    <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all">
+                                    <div className="w-6 h-6 flex-shrink-0 rounded-lg bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all">
                                         <ChevronRight className="w-4 h-4 text-white/40" />
                                     </div>
                                 </div>

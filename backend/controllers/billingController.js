@@ -552,6 +552,49 @@ const getPendingQueue = async (req, res) => {
     }
 };
 
+// Get all patients currently awaiting pharmacy dispensing (transferred to Pharmacy dept)
+const getPharmacyQueue = async (req, res) => {
+    try {
+        const { Visit, Patient, Scheme } = require('../models');
+        const { Op } = require('sequelize');
+
+        const visits = await Visit.findAll({
+            where: {
+                status: 'active',
+                assignedDepartment: { [Op.iLike]: '%pharmacy%' }
+            },
+            include: [
+                {
+                    model: Patient,
+                    as: 'patient',
+                    attributes: ['id', 'firstName', 'lastName', 'patientNumber', 'paymentMethod']
+                },
+                {
+                    model: Scheme,
+                    as: 'scheme',
+                    attributes: ['id', 'schemeName']
+                }
+            ],
+            order: [['updatedAt', 'ASC']] // longest waiting first
+        });
+
+        const result = visits.map(v => ({
+            visitId: v.id,
+            visitNumber: v.visitNumber,
+            visitType: v.visitType,
+            admissionDate: v.admissionDate,
+            updatedAt: v.updatedAt,
+            patient: v.patient,
+            scheme: v.scheme
+        }));
+
+        res.json(result);
+    } catch (error) {
+        console.error('Get pharmacy queue error:', error);
+        res.status(500).json({ error: 'Failed to get pharmacy queue', details: error.message });
+    }
+};
+
 module.exports = {
     getAllOPDBills,
     getOPDBill,
@@ -561,5 +604,6 @@ module.exports = {
     getPatientBalance,
     getPatientStatement,
     getUnpaidPatientBills,
-    getPendingQueue
+    getPendingQueue,
+    getPharmacyQueue
 };

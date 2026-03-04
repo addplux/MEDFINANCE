@@ -128,6 +128,7 @@ app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/prepaid-plans', require('./routes/prepaidPlans'));
 app.use('/api/utilisation', require('./routes/utilisation'));
 app.use('/api/system-logs', require('./routes/systemLogs'));
+app.use('/api/vitals', require('./routes/vitals'));
 
 // Error handling middleware
 app.use(async (err, req, res, next) => {

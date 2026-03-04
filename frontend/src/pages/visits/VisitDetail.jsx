@@ -4,21 +4,23 @@ import { visitAPI } from '../../services/apiService';
 import {
     ArrowLeft, User, RefreshCw, LogOut, Move,
     Stethoscope, BedDouble, Baby, Siren, ClipboardList,
-    Phone, Shield, Calendar, MapPin, AlertCircle
+    Phone, Shield, Calendar, MapPin, AlertCircle, AlertTriangle
 } from 'lucide-react';
+import TriageWidget from './components/TriageWidget';
+import DoctorWorkspace from './components/DoctorWorkspace';
 
 const TYPE_MAP = {
-    opd: { label: 'OPD', icon: Stethoscope, bg: 'bg-blue-100', text: 'text-blue-800' },
-    inpatient: { label: 'Inpatient', icon: BedDouble, bg: 'bg-purple-100', text: 'text-purple-800' },
-    maternity: { label: 'Maternity', icon: Baby, bg: 'bg-pink-100', text: 'text-pink-800' },
-    emergency: { label: 'Emergency', icon: Siren, bg: 'bg-red-100', text: 'text-red-800' },
+    opd: { label: 'OPD', icon: Stethoscope, bg: 'bg-blue-900/40', text: 'text-blue-300' },
+    inpatient: { label: 'Inpatient', icon: BedDouble, bg: 'bg-purple-900/40', text: 'text-purple-300' },
+    maternity: { label: 'Maternity', icon: Baby, bg: 'bg-pink-900/40', text: 'text-pink-300' },
+    emergency: { label: 'Emergency', icon: Siren, bg: 'bg-red-900/40', text: 'text-red-300' },
 };
 
 const STATUS_COLORS = {
-    active: 'bg-green-100 text-green-800',
-    discharged: 'bg-gray-100 text-gray-600',
-    transferred: 'bg-yellow-100 text-yellow-800',
-    cancelled: 'bg-red-50 text-red-700',
+    active: 'bg-green-900/40 text-green-300',
+    discharged: 'bg-gray-800 text-gray-400',
+    transferred: 'bg-yellow-900/40 text-yellow-300',
+    cancelled: 'bg-red-900/40 text-red-400',
 };
 
 const DEPARTMENTS = [
@@ -28,10 +30,10 @@ const DEPARTMENTS = [
 
 const InfoRow = ({ icon: Icon, label, value }) => value ? (
     <div className="flex items-start gap-2 py-1.5">
-        <Icon className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+        <Icon className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
         <div>
-            <p className="text-xs text-gray-400">{label}</p>
-            <p className="text-sm font-medium text-gray-800">{value}</p>
+            <p className="text-xs text-gray-500">{label}</p>
+            <p className="text-sm font-medium text-white">{value}</p>
         </div>
     </div>
 ) : null;
@@ -71,6 +73,10 @@ const VisitDetail = () => {
     useEffect(() => { load(); }, [id]);
 
     const handleDischarge = async () => {
+        if (visit.billingSummary?.status === 'pending') {
+            alert('Cannot discharge patient: There are unpaid bills that must be cleared first.');
+            return;
+        }
         if (!window.confirm('Discharge this patient from the visit?')) return;
         setDischarging(true);
         try {
@@ -137,7 +143,7 @@ const VisitDetail = () => {
                 </button>
                 <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                        <h1 className="text-2xl font-bold font-mono text-indigo-700">{visit.visitNumber}</h1>
+                        <h1 className="text-2xl font-bold font-mono text-indigo-300">{visit.visitNumber}</h1>
                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold ${typeCfg.bg} ${typeCfg.text}`}>
                             <TypeIcon className="w-4 h-4" />{typeCfg.label}
                         </span>
@@ -145,25 +151,43 @@ const VisitDetail = () => {
                             {visit.status}
                         </span>
                     </div>
-                    <p className="text-sm text-gray-500 mt-0.5">
+                    <p className="text-sm text-gray-400 mt-0.5">
                         Admitted: {visit.admissionDate ? new Date(visit.admissionDate).toLocaleString() : '—'}
                         {visit.dischargeDate && ` · Discharged: ${new Date(visit.dischargeDate).toLocaleString()}`}
                     </p>
                 </div>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap items-center">
+                    {visit.billingSummary?.status === 'pending' && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-bold mr-2">
+                            <AlertTriangle className="w-4 h-4" /> Unpaid Bills (K{visit.billingSummary.totalAmount})
+                        </div>
+                    )}
                     {p && (
                         <button onClick={() => navigate(`/app/patients/${p.id}`)} className="btn btn-secondary">
                             <User className="w-4 h-4" /> Patient Record
                         </button>
                     )}
                     {visit.status === 'active' && (
-                        <button onClick={handleDischarge} disabled={discharging} className="btn btn-primary bg-orange-500 hover:bg-orange-600 border-orange-500">
+                        <button
+                            onClick={handleDischarge}
+                            disabled={discharging || visit.billingSummary?.status === 'pending'}
+                            className={`btn ${visit.billingSummary?.status === 'pending' ? 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-300' : 'btn-primary bg-orange-500 hover:bg-orange-600 border-orange-500'}`}
+                            title={visit.billingSummary?.status === 'pending' ? 'Clear bills before discharge' : 'Discharge Patient'}
+                        >
                             <LogOut className="w-4 h-4" />
                             {discharging ? 'Discharging…' : 'Discharge Patient'}
                         </button>
                     )}
                 </div>
             </div>
+
+            {/* Real-World OPD Widgets */}
+            {visit.visitType === 'opd' && visit.status === 'active' && (
+                <div className="space-y-4">
+                    <TriageWidget visitId={visit.id} patientId={p?.id} queueStatus={visit.queueStatus} onVitalsSaved={load} />
+                    <DoctorWorkspace visitId={visit.id} queueStatus={visit.queueStatus} notes={visit.notes} onStatusChange={load} />
+                </div>
+            )}
 
             {/* Main grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -182,7 +206,7 @@ const VisitDetail = () => {
                                     </div>
                                 )}
                                 <div>
-                                    <p className="font-bold text-gray-900">{p.firstName} {p.lastName}</p>
+                                    <p className="font-bold text-white">{p.firstName} {p.lastName}</p>
                                     <p className="text-xs font-mono text-gray-400">{p.patientNumber}</p>
                                 </div>
                             </div>
@@ -198,8 +222,8 @@ const VisitDetail = () => {
                 <div className="card p-5 md:col-span-1">
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Visit Details</h3>
                     <div className="space-y-1">
-                        <InfoRow icon={MapPin} label="Department" value={visit.department?.name || visit.assignedDepartment} />
-                        <InfoRow icon={Shield} label="Scheme" value={visit.scheme?.name} />
+                        <InfoRow icon={MapPin} label="Department" value={visit.department?.departmentName || visit.assignedDepartment} />
+                        <InfoRow icon={Shield} label="Scheme" value={visit.scheme?.schemeName} />
                         <InfoRow icon={User} label="Admitted By" value={visit.admitter ? `${visit.admitter.firstName} ${visit.admitter.lastName}` : undefined} />
                         <InfoRow icon={Calendar} label="Admission" value={visit.admissionDate ? new Date(visit.admissionDate).toLocaleString() : undefined} />
                         {visit.dischargeDate && (
@@ -207,9 +231,9 @@ const VisitDetail = () => {
                         )}
                     </div>
                     {visit.notes && (
-                        <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                            <p className="text-xs text-gray-400 mb-1">Notes</p>
-                            <p className="text-sm text-gray-700">{visit.notes}</p>
+                        <div className="mt-3 p-3 bg-gray-800/60 rounded-lg border border-gray-700">
+                            <p className="text-xs text-gray-500 mb-1">Notes</p>
+                            <p className="text-sm text-gray-300">{visit.notes}</p>
                         </div>
                     )}
                 </div>
@@ -253,8 +277,8 @@ const VisitDetail = () => {
 
             {/* Movement Log */}
             <div className="card overflow-hidden">
-                <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-800">Patient Movement Log</h3>
+                <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
+                    <h3 className="font-semibold text-white">Patient Movement Log</h3>
                     <span className="text-xs text-gray-400">{movements.length} entries</span>
                 </div>
                 {movLoading ? (
@@ -262,19 +286,19 @@ const VisitDetail = () => {
                 ) : movements.length === 0 ? (
                     <div className="py-10 text-center text-gray-400 text-sm">No movements recorded yet.</div>
                 ) : (
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-gray-800">
                         {movements.map((m, i) => (
                             <div key={m.id ?? i} className="flex gap-4 px-5 py-4">
                                 <div className="flex flex-col items-center">
-                                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                                        <Move className="w-4 h-4 text-indigo-600" />
+                                    <div className="w-8 h-8 rounded-full bg-indigo-900/50 flex items-center justify-center">
+                                        <Move className="w-4 h-4 text-indigo-400" />
                                     </div>
-                                    {i < movements.length - 1 && <div className="w-0.5 bg-gray-200 flex-1 mt-1" />}
+                                    {i < movements.length - 1 && <div className="w-0.5 bg-gray-700 flex-1 mt-1" />}
                                 </div>
                                 <div className="flex-1 pb-2">
-                                    <p className="text-sm font-semibold text-gray-900">
+                                    <p className="text-sm font-semibold text-gray-200">
                                         {m.fromDepartment ? <><span className="text-gray-500">{m.fromDepartment}</span> → </> : ''}
-                                        <span className="text-indigo-700">{m.toDepartment}</span>
+                                        <span className="text-indigo-400">{m.toDepartment}</span>
                                     </p>
                                     {m.notes && <p className="text-xs text-gray-500 mt-0.5 italic">"{m.notes}"</p>}
                                     <p className="text-xs text-gray-400 mt-1">

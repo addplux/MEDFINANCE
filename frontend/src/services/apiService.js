@@ -50,9 +50,16 @@ export const visitAPI = {
     getById: (id) => api.get(`/visits/${id}`),
     create: (data) => api.post('/visits', data),
     update: (id, data) => api.put(`/visits/${id}`, data),
+    updateQueueStatus: (id, queueStatus) => api.put(`/visits/${id}/queue-status`, { queueStatus }),
     discharge: (id) => api.post(`/visits/${id}/discharge`),
     getMovements: (id) => api.get(`/visits/${id}/movements`),
     logMovement: (patientId, data) => api.post('/patient-movements', { patientId, ...data }),
+};
+
+// Vitals (Triage)
+export const vitalsAPI = {
+    getByVisit: (visitId) => api.get(`/vitals/visit/${visitId}`),
+    create: (data) => api.post('/vitals', data),
 };
 
 // Billing

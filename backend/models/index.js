@@ -38,6 +38,7 @@ const LabResult = require('./LabResult');
 const TheatreBill = require('./TheatreBill');
 const MaternityBill = require('./MaternityBill');
 const SpecialistClinicBill = require('./SpecialistClinicBill');
+const Vitals = require('./Vitals');
 const Shift = require('./Shift');
 const Refund = require('./Refund');
 const Notification = require('./Notification');
@@ -109,6 +110,7 @@ Patient.belongsTo(Scheme, { foreignKey: 'schemeId', as: 'scheme' });
 
 // Billing relationships
 OPDBill.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
+OPDBill.belongsTo(Visit, { foreignKey: 'visitId', as: 'visit' });
 OPDBill.belongsTo(Service, { foreignKey: 'serviceId', as: 'service' });
 OPDBill.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 

@@ -216,7 +216,7 @@ const MainLayout = ({ children }) => {
 
         // OPD — doctors, nurses, cashier (billing), admin
         {
-            path: '/app/opd/dashboard', icon: Stethoscope, label: 'OPD Queue',
+            path: '/app/opd/dashboard', icon: Stethoscope, label: 'OPD',
             roles: [...CLINICAL, 'cashier']
         },
         // Laboratory — lab techs enter results; doctors & nurses submit requests
