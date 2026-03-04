@@ -42,12 +42,18 @@ const createVisit = async (req, res) => {
         }
 
         // Create initial movement
+        let deptName = 'Unknown Department';
+        if (departmentId) {
+            const dept = await Department.findByPk(departmentId);
+            if (dept) deptName = dept.departmentName;
+        }
+
         await PatientMovement.create({
-            visitId: visit.id,
             patientId,
-            fromDepartmentId: null,
-            toDepartmentId: departmentId,
-            reason: 'Initial Triage/Consultation',
+            fromDepartment: 'Admission',
+            toDepartment: deptName,
+            notes: 'Initial Triage/Consultation',
+            movementDate: new Date(),
             admittedBy: req.user.id
         });
 
@@ -98,7 +104,6 @@ const getVisit = async (req, res) => {
                 { model: Patient, as: 'patient' },
                 { model: Department, as: 'department' },
                 { model: Vitals, as: 'vitals' },
-                { model: PatientMovement, as: 'movements' },
                 { model: Admission, as: 'admissions', include: [{ model: Bed, as: 'bed', include: [{ model: Ward, as: 'ward' }] }] }
             ]
         });
@@ -126,12 +131,24 @@ const updateVisit = async (req, res) => {
 
         if (departmentId && departmentId !== oldDept) {
             // Log movement
+            let fromDeptName = 'Unknown';
+            let toDeptName = 'Unknown';
+
+            if (oldDept) {
+                const oldD = await Department.findByPk(oldDept);
+                if (oldD) fromDeptName = oldD.departmentName;
+            }
+            if (departmentId) {
+                const newD = await Department.findByPk(departmentId);
+                if (newD) toDeptName = newD.departmentName;
+            }
+
             await PatientMovement.create({
-                visitId: visit.id,
                 patientId: visit.patientId,
-                fromDepartmentId: oldDept,
-                toDepartmentId: departmentId,
-                reason: 'Department Transfer',
+                fromDepartment: fromDeptName,
+                toDepartment: toDeptName,
+                notes: 'Department Transfer',
+                movementDate: new Date(),
                 admittedBy: req.user.id
             });
             visit.departmentId = departmentId;
@@ -170,14 +187,23 @@ const dischargeVisit = async (req, res) => {
 // Record patient movements
 const getVisitMovements = async (req, res) => {
     try {
+        const visit = await Visit.findByPk(req.params.id);
+        if (!visit) return res.status(404).json({ error: 'Visit not found' });
+
+        const endBound = visit.dischargeDate || new Date();
+
         const movements = await PatientMovement.findAll({
-            where: { visitId: req.params.id },
+            where: {
+                patientId: visit.patientId,
+                movementDate: {
+                    [Op.gte]: visit.admissionDate,
+                    [Op.lte]: endBound
+                }
+            },
             include: [
-                { model: Department, as: 'fromDepartment' },
-                { model: Department, as: 'toDepartment' },
                 { model: User, as: 'admitter', attributes: ['firstName', 'lastName'] }
             ],
-            order: [['createdAt', 'DESC']]
+            order: [['movementDate', 'DESC']]
         });
         res.json(movements);
     } catch (error) {
