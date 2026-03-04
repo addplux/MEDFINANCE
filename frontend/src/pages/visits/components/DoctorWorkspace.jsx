@@ -6,10 +6,12 @@ const DoctorWorkspace = ({ visitId, queueStatus, notes, onStatusChange }) => {
     const [loading, setLoading] = useState(false);
     const [clinicalNotes, setClinicalNotes] = useState(notes || '');
 
-    const handleUpdateStatus = async (newStatus) => {
+    const handleUpdateStatus = async (newStatus, assignedDepartment = null) => {
         setLoading(true);
         try {
-            await visitAPI.update(visitId, { notes: clinicalNotes });
+            const updatePayload = { notes: clinicalNotes };
+            if (assignedDepartment) updatePayload.assignedDepartment = assignedDepartment;
+            await visitAPI.update(visitId, updatePayload);
             await visitAPI.updateQueueStatus(visitId, newStatus);
             if (onStatusChange) onStatusChange();
         } catch (err) {
@@ -75,11 +77,19 @@ const DoctorWorkspace = ({ visitId, queueStatus, notes, onStatusChange }) => {
                             </button>
 
                             <button
-                                onClick={() => handleUpdateStatus('ready_for_discharge')}
+                                onClick={() => handleUpdateStatus('ready_for_discharge', 'Pharmacy')}
                                 disabled={loading}
                                 className="btn bg-green-500 hover:bg-green-600 text-white border-green-500 text-sm py-1.5"
                             >
-                                <Send className="w-4 h-4" /> Send to Pharmacy / Discharge
+                                <Send className="w-4 h-4" /> Send to Pharmacy
+                            </button>
+
+                            <button
+                                onClick={() => handleUpdateStatus('ready_for_discharge')}
+                                disabled={loading}
+                                className="btn bg-orange-500 hover:bg-orange-600 text-white border-orange-500 text-sm py-1.5"
+                            >
+                                <Send className="w-4 h-4" /> Ready for Discharge
                             </button>
                         </>
                     )}
