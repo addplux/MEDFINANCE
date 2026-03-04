@@ -549,13 +549,13 @@ const getPendingQueue = async (req, res) => {
     }
 };
 
-// Get all patients currently awaiting pharmacy dispensing (transferred to Pharmacy dept)
+// Get all patients currently awaiting pharmacy dispensing (transferred to Pharmacy dept OR with unpaid pharmacy bills)
 const getPharmacyQueue = async (req, res) => {
     try {
-        const { Visit, Patient, Scheme, Department } = require('../models');
+        const { Visit, Patient, Scheme, Department, PharmacyBill } = require('../models');
         const { Op } = require('sequelize');
 
-        // Find the Pharmacy department ID
+        // Find the Pharmacy department
         const pharmDept = await Department.findOne({
             where: {
                 [Op.or]: [
@@ -565,21 +565,19 @@ const getPharmacyQueue = async (req, res) => {
             }
         });
 
-        const where = {
-            status: 'active'
-        };
-
+        // --- Source 1: Active visits assigned/transferred to Pharmacy ---
+        const visitWhere = { status: 'active' };
         if (pharmDept) {
-            where[Op.or] = [
+            visitWhere[Op.or] = [
                 { assignedDepartment: { [Op.iLike]: '%pharmacy%' } },
                 { departmentId: pharmDept.id }
             ];
         } else {
-            where.assignedDepartment = { [Op.iLike]: '%pharmacy%' };
+            visitWhere.assignedDepartment = { [Op.iLike]: '%pharmacy%' };
         }
 
         const visits = await Visit.findAll({
-            where,
+            where: visitWhere,
             include: [
                 {
                     model: Patient,
@@ -592,18 +590,58 @@ const getPharmacyQueue = async (req, res) => {
                     attributes: ['id', 'schemeName']
                 }
             ],
-            order: [['updatedAt', 'ASC']] // longest waiting first
+            order: [['updatedAt', 'ASC']]
         });
 
-        const result = visits.map(v => ({
-            visitId: v.id,
-            visitNumber: v.visitNumber,
-            visitType: v.visitType,
-            admissionDate: v.admissionDate,
-            updatedAt: v.updatedAt,
-            patient: v.patient,
-            scheme: v.scheme
-        }));
+        // Build map keyed by patient ID for deduplication
+        const queueMap = new Map();
+        visits.forEach(v => {
+            if (!v.patient) return;
+            queueMap.set(v.patient.id, {
+                id: v.id,
+                visitId: v.id,
+                visitNumber: v.visitNumber,
+                visitType: v.visitType,
+                admissionDate: v.admissionDate,
+                updatedAt: v.updatedAt,
+                patient: v.patient,
+                scheme: v.scheme
+            });
+        });
+
+        // --- Source 2: Patients with unpaid PharmacyBill records ---
+        const unpaidPharmBills = await PharmacyBill.findAll({
+            where: { paymentStatus: 'unpaid' },
+            include: [
+                {
+                    model: Patient,
+                    as: 'patient',
+                    attributes: ['id', 'firstName', 'lastName', 'patientNumber', 'paymentMethod']
+                }
+            ],
+            order: [['createdAt', 'ASC']]
+        });
+
+        unpaidPharmBills.forEach(bill => {
+            if (!bill.patient) return;
+            const pid = bill.patient.id;
+            // Only add if not already present from a visit transfer (avoid duplicates)
+            if (!queueMap.has(pid)) {
+                queueMap.set(pid, {
+                    id: `bill-${bill.id}`,
+                    visitId: null,
+                    visitNumber: null,
+                    visitType: null,
+                    admissionDate: bill.createdAt,
+                    updatedAt: bill.updatedAt,
+                    patient: bill.patient,
+                    scheme: null
+                });
+            }
+        });
+
+        const result = Array.from(queueMap.values())
+            .sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt));
 
         res.json(result);
     } catch (error) {
