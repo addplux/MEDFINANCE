@@ -184,7 +184,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                         {filteredVisits.map((v) => (
                             <div
                                 key={v.id}
-                                onClick={() => navigate(`/app/visits/${v.id}`)}
+                                onClick={() => v.visitId ? navigate(`/app/visits/${v.visitId}`) : navigate(`/app/patients/${v.patient?.id}`)}
                                 className="group relative glass-panel hover:bg-white/[0.04] p-4 border-white/5 hover:border-white/10 transition-all cursor-pointer rounded-[1.5rem]"
                             >
                                 {/* Check-in Count Badge */}
