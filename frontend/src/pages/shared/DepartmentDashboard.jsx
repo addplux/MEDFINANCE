@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { visitAPI } from '../../services/apiService';
+import { visitAPI, billingAPI } from '../../services/apiService';
 import {
     Users, Clock, DollarSign, Activity,
     ChevronRight, Search, RefreshCw, Filter,
@@ -39,19 +39,26 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            // Fetch active visits for this department
-            const res = await visitAPI.getAll({
-                status: 'active',
-                departmentId: departmentId,
-                search: search
-            });
-            setVisits(res.data.visits || []);
+            let data = [];
+            if (title === 'Pharmacy') {
+                const res = await billingAPI.patient.getPharmacyQueue();
+                data = res.data;
+            } else {
+                // Fetch active visits for this department
+                const res = await visitAPI.getAll({
+                    status: 'active',
+                    departmentId: departmentId,
+                    search: search
+                });
+                data = res.data.visits || [];
+            }
+            setVisits(data);
         } catch (error) {
             console.error('Failed to load department data:', error);
         } finally {
             setLoading(false);
         }
-    }, [departmentId, search]);
+    }, [departmentId, search, title]);
 
     useEffect(() => {
         loadData();

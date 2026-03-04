@@ -115,13 +115,14 @@ const createVisit = async (req, res) => {
 const getAllVisits = async (req, res) => {
     try {
         const {
-            search = '', visitType, status, queueStatus, page = 1, limit = 50
+            search = '', visitType, status, queueStatus, departmentId, page = 1, limit = 50
         } = req.query;
 
         const where = {};
         if (visitType) where.visitType = visitType;
         if (status) where.status = status;
         if (queueStatus) where.queueStatus = queueStatus;
+        if (departmentId) where.departmentId = departmentId;
 
         const patientWhere = {};
         if (search) {
