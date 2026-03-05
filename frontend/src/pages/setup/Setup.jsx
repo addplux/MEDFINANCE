@@ -83,8 +83,8 @@ const Setup = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">System Setup</h1>
-                    <p className="text-gray-600 mt-1">Configure system settings and master data</p>
+                    <h1 className="text-3xl font-bold text-white">System Setup</h1>
+                    <p className="text-gray-300 mt-1">Configure system settings and master data</p>
                 </div>
                 {activeTab !== 'profile' && (
                     <button
@@ -107,7 +107,7 @@ const Setup = () => {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`px-6 py-4 border-b-2 transition-colors ${activeTab === tab.id
                                     ? 'border-primary-600 text-primary-600'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                                    : 'border-transparent text-gray-300 hover:text-white'
                                     }`}
                             >
                                 {tab.label}

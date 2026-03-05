@@ -83,7 +83,7 @@ const OrganizationProfile = () => {
 
             <div className="card">
                 <div className="border-b border-gray-200 p-6 flex justify-between items-center">
-                    <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                    <h2 className="text-xl font-semibold text-white flex items-center gap-2">
                         <Building className="w-5 h-5" />
                         Hospital / Organization Profile
                     </h2>
