@@ -62,8 +62,8 @@ const Reports = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Reports & Analytics</h1>
-                    <p className="text-gray-600 mt-1">Financial reports and business intelligence</p>
+                    <h1 className="text-3xl font-bold text-white">Reports & Analytics</h1>
+                    <p className="text-gray-300 mt-1">Financial reports and business intelligence</p>
                 </div>
                 <button onClick={handleExport} className="btn btn-primary">
                     <Download className="w-5 h-5" />
@@ -111,7 +111,7 @@ const Reports = () => {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center gap-2 px-6 py-4 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id
                                     ? 'border-primary-600 text-primary-600'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                                    : 'border-transparent text-gray-300 hover:text-white'
                                     }`}
                             >
                                 <tab.icon className="w-5 h-5" />
