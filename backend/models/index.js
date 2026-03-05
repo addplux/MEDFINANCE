@@ -225,6 +225,8 @@ Visit.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 Visit.belongsTo(User, { foreignKey: 'admittedById', as: 'admitter' });
 Visit.belongsTo(Scheme, { foreignKey: 'schemeId', as: 'scheme' });
 Visit.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
+Visit.hasMany(Vitals, { foreignKey: 'visitId', as: 'vitals' });
+Visit.hasMany(Admission, { foreignKey: 'visitId', as: 'admissions' });
 Patient.hasMany(Visit, { foreignKey: 'patientId', as: 'visits' });
 Scheme.hasMany(Visit, { foreignKey: 'schemeId', as: 'visits' });
 Department.hasMany(Visit, { foreignKey: 'departmentId', as: 'visits' });

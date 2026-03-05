@@ -20,6 +20,14 @@ const Admission = sequelize.define('Admission', {
             key: 'id'
         }
     },
+    visitId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'visits',
+            key: 'id'
+        }
+    },
     wardId: {
         type: DataTypes.INTEGER,
         allowNull: false,

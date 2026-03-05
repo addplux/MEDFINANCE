@@ -116,8 +116,7 @@ const getVisit = async (req, res) => {
             include: [
                 { model: Patient, as: 'patient' },
                 { model: Department, as: 'department' },
-                { model: Vitals, as: 'vitals' },
-                { model: Admission, as: 'admissions', include: [{ model: Bed, as: 'bed', include: [{ model: Ward, as: 'ward' }] }] }
+                { model: Vitals, as: 'vitals' }
             ]
         });
 
@@ -125,7 +124,18 @@ const getVisit = async (req, res) => {
             return res.status(404).json({ error: 'Visit not found' });
         }
 
-        res.json(visit);
+        // Fetch admissions for this patient alongside the visit if needed
+        // but not linked directly to the visit to prevent crash
+        const admissions = await Admission.findAll({
+            where: { patientId: visit.patientId },
+            include: [{ model: Bed, as: 'bed', include: [{ model: Ward, as: 'ward' }] }],
+            order: [['admissionDate', 'DESC']]
+        });
+
+        const visitData = visit.toJSON();
+        visitData.admissions = admissions; // manually attach
+
+        res.json(visitData);
     } catch (error) {
         console.error('Get visit error:', error);
         res.status(500).json({ error: 'Failed to get visit' });
