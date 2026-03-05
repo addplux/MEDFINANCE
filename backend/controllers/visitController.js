@@ -74,22 +74,35 @@ const createVisit = async (req, res) => {
 // Get all active visits
 const getAllVisits = async (req, res) => {
     try {
-        const { status, queueStatus, departmentId } = req.query;
+        const { status, queueStatus, departmentId, search, visitType } = req.query;
         const where = {};
         if (status) where.status = status;
         if (queueStatus) where.queueStatus = queueStatus;
         if (departmentId) where.departmentId = departmentId;
+        if (visitType) where.visitType = visitType;
 
-        const visits = await Visit.findAll({
+        const patientInclude = { model: Patient, as: 'patient' };
+        if (search) {
+            patientInclude.where = {
+                [Op.or]: [
+                    { firstName: { [Op.iLike]: `%${search}%` } },
+                    { lastName: { [Op.iLike]: `%${search}%` } },
+                    { patientNumber: { [Op.iLike]: `%${search}%` } }
+                ]
+            };
+        }
+
+        const { count, rows: visits } = await Visit.findAndCountAll({
             where,
             include: [
-                { model: Patient, as: 'patient' },
-                { model: Scheme, as: 'scheme' }
+                patientInclude,
+                { model: Scheme, as: 'scheme' },
+                { model: Department, as: 'department' }
             ],
             order: [['updatedAt', 'DESC']]
         });
 
-        res.json(visits);
+        res.json({ visits, total: count });
     } catch (error) {
         console.error('Get visits error:', error);
         res.status(500).json({ error: 'Failed to get visits' });
