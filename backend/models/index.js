@@ -308,6 +308,7 @@ module.exports = {
     TheatreBill,
     MaternityBill,
     SpecialistClinicBill,
+    Vitals,
     Shift,
     Refund,
     Role,
