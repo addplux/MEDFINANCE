@@ -89,11 +89,11 @@ const UserForm = () => {
             <div className="flex items-center gap-4">
                 <button
                     onClick={() => navigate('/app/setup')}
-                    className="p-2 hover:bg-gray-100 rounded-full"
+                    className="p-2 hover:bg-white/10 rounded-full"
                 >
-                    <ArrowLeft className="w-5 h-5 text-gray-500" />
+                    <ArrowLeft className="w-5 h-5 text-white" />
                 </button>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-white">
                     {isEditMode ? 'Edit User' : 'New User'}
                 </h1>
             </div>
@@ -223,7 +223,7 @@ const UserForm = () => {
                             onChange={handleChange}
                             className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                         />
-                        <label className="text-sm font-medium text-gray-700">Active</label>
+                        <label className="text-sm font-medium text-gray-300">Active</label>
                     </div>
 
                     <div className="pt-4 flex justify-end gap-3">
