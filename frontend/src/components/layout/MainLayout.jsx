@@ -315,7 +315,7 @@ const MainLayout = ({ children }) => {
                                 <img
                                     src="/zer0day_logo.png"
                                     alt="ZER0DAY"
-                                    className="h-10 w-auto object-contain"
+                                    className="h-10 w-10 object-cover rounded-full"
                                     style={{ filter: 'drop-shadow(0 0 8px rgba(0,234,255,0.5))' }}
                                 />
                             </div>
@@ -334,7 +334,7 @@ const MainLayout = ({ children }) => {
                             <img
                                 src="/zer0day_logo.png"
                                 alt="ZER0DAY"
-                                className="h-8 w-8 object-contain"
+                                className="h-8 w-8 object-cover rounded-full"
                                 style={{ filter: 'drop-shadow(0 0 6px rgba(0,234,255,0.5))' }}
                             />
                         </div>
