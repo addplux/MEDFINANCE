@@ -182,7 +182,9 @@ const Visits = () => {
                                             </td>
                                             <td className="px-4 py-3"><TypeBadge type={v.visitType} /></td>
                                             <td className="px-4 py-3 text-sm text-text-secondary">{v.department?.name || v.assignedDepartment || '—'}</td>
-                                            <td className="px-4 py-3 text-sm text-text-secondary">{v.scheme?.name || '—'}</td>
+                                            <td className="px-4 py-3 text-sm text-text-secondary capitalize">
+                                                {v.scheme?.name || (v.patient?.paymentMethod ? v.patient.paymentMethod.replace('_', ' ') : '—')}
+                                            </td>
                                             <td className="px-4 py-3 text-sm text-text-secondary">{v.admissionDate ? new Date(v.admissionDate).toLocaleDateString() : '—'}</td>
                                             <td className="px-4 py-3">
                                                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[v.status] || ''}`}>{v.status}</span>
