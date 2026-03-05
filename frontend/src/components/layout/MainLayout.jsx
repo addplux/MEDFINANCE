@@ -307,15 +307,36 @@ const MainLayout = ({ children }) => {
                 style={{ background: 'linear-gradient(160deg, #0d1b3e 0%, #0a1628 60%, #081020 100%)' }}
             >
                 {/* Logo & Collapse Button */}
-                <div className="h-16 px-6 flex items-center justify-between border-b border-white/10 rounded-t-2xl">
+                <div className="h-20 px-4 flex items-center justify-between border-b border-white/10 rounded-t-2xl">
                     {!sidebarCollapsed && (
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20">
-                                <Activity className="w-5 h-5 text-white" />
+                        <div className="flex items-center gap-3">
+                            {/* ZER0DAY Logo */}
+                            <div className="relative">
+                                <img
+                                    src="/zer0day_logo.png"
+                                    alt="ZER0DAY"
+                                    className="h-10 w-auto object-contain"
+                                    style={{ filter: 'drop-shadow(0 0 8px rgba(0,234,255,0.5))' }}
+                                />
                             </div>
-                            <span className="text-xl font-black tracking-tighter bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                                {orgName.split(' ')[0]}
-                            </span>
+                            <div className="flex flex-col">
+                                <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40 leading-none">
+                                    powered by
+                                </span>
+                                <span className="text-xs font-bold tracking-widest text-cyan-400 uppercase leading-tight">
+                                    ZER0DAY
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                    {sidebarCollapsed && (
+                        <div className="mx-auto">
+                            <img
+                                src="/zer0day_logo.png"
+                                alt="ZER0DAY"
+                                className="h-8 w-8 object-contain"
+                                style={{ filter: 'drop-shadow(0 0 6px rgba(0,234,255,0.5))' }}
+                            />
                         </div>
                     )}
                     <button
