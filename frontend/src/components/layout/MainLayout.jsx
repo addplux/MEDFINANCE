@@ -321,7 +321,7 @@ const MainLayout = ({ children }) => {
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-[10px] font-semibold text-white/40 leading-none">
-                                    &copy; {new Date().getFullYear()}
+                                    &copy; {new Date().getFullYear()} TechElevate SaaS
                                 </span>
                                 <span className="text-xs font-bold text-white truncate max-w-[110px] leading-tight mt-0.5">
                                     {orgName}
