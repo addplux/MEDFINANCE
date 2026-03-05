@@ -296,15 +296,18 @@ const MainLayout = ({ children }) => {
             {/* Sidebar */}
             <aside
                 className={`
-          fixed top-0 left-0 h-full glass-panel border-r border-white/5 z-40
+          fixed top-4 left-4 h-[calc(100vh-2rem)] z-40
           transform transition-all duration-300 lg:translate-x-0
-          flex flex-col bg-black/40 backdrop-blur-2xl
+          flex flex-col rounded-2xl
+          border border-white/10
+          shadow-[0_8px_40px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)]
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${sidebarCollapsed ? 'w-20' : 'w-64'}
 `}
+                style={{ background: 'linear-gradient(160deg, #0d1b3e 0%, #0a1628 60%, #081020 100%)' }}
             >
                 {/* Logo & Collapse Button */}
-                <div className="h-16 px-6 flex items-center justify-between border-b border-white/5">
+                <div className="h-16 px-6 flex items-center justify-between border-b border-white/10 rounded-t-2xl">
                     {!sidebarCollapsed && (
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20">
@@ -460,7 +463,7 @@ const MainLayout = ({ children }) => {
                 </nav>
 
                 {/* Logout Button */}
-                <div className="p-4 border-t border-white/5 bg-black/20">
+                <div className="p-4 border-t border-white/10 rounded-b-2xl" style={{ background: 'rgba(0,0,0,0.2)' }}>
                     <button
                         onClick={handleLogout}
                         className={`
@@ -485,7 +488,7 @@ const MainLayout = ({ children }) => {
             )}
 
             {/* Main Content */}
-            <div className={`flex-1 flex flex-col transition-all duration-500 bg-bg-primary ${sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'} `}>
+            <div className={`flex-1 flex flex-col transition-all duration-500 bg-bg-primary ${sidebarCollapsed ? 'lg:pl-28' : 'lg:pl-72'} `}>
                 {/* Mobile Header */}
                 <header className="lg:hidden h-16 bg-black/40 backdrop-blur-xl border-b border-white/5 px-6 flex items-center justify-between sticky top-0 z-20">
                     <button
