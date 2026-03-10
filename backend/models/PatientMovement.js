@@ -16,11 +16,11 @@ const PatientMovement = sequelize.define('PatientMovement', {
         }
     },
     fromDepartment: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(100),
         allowNull: true
     },
     toDepartment: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(100),
         allowNull: false
     },
     movementDate: {

@@ -9,8 +9,11 @@ const createVisit = async (req, res) => {
             visitType,
             schemeId,
             departmentId,
+            assignedDepartment,
             priority,
             reasonForVisit,
+            notes,
+            admissionDate,
             initialVitals
         } = req.body;
 
@@ -24,10 +27,13 @@ const createVisit = async (req, res) => {
             visitType,
             schemeId,
             departmentId,
+            assignedDepartment,
             priority,
             reasonForVisit,
+            notes,
+            admissionDate: admissionDate || new Date(),
             status: 'active',
-            queueStatus: 'awaiting_triage',
+            queueStatus: 'pending_triage',
             admittedById: req.user.id
         });
 
@@ -42,7 +48,7 @@ const createVisit = async (req, res) => {
         }
 
         // Create initial movement
-        let deptName = 'Unknown Department';
+        let deptName = assignedDepartment || 'Unknown Department';
         if (departmentId) {
             const dept = await Department.findByPk(departmentId);
             if (dept) deptName = dept.departmentName;
