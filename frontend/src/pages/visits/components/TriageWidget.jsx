@@ -68,29 +68,29 @@ const TriageWidget = ({ visitId, patientId, queueStatus, onVitalsSaved }) => {
 
     if (vitals) {
         return (
-            <div className="card p-5 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100">
+            <div className="card p-5 bg-gradient-to-br from-blue-900 to-indigo-900 border border-blue-800">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-blue-900 flex items-center gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-blue-600" /> Triage Completed
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-accent" /> Triage Completed
                     </h3>
-                    <span className="text-xs text-blue-600 font-medium">Recorded by {vitals.recordedBy?.firstName} {vitals.recordedBy?.lastName}</span>
+                    <span className="text-xs text-white opacity-70 font-medium">Recorded by {vitals.recordedBy?.firstName} {vitals.recordedBy?.lastName}</span>
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white p-3 rounded-xl border border-blue-100 flex items-center gap-3">
-                        <Heart className="w-8 h-8 text-red-400 p-1.5 bg-red-50 rounded-lg" />
-                        <div><p className="text-xs text-gray-500">BP</p><p className="font-bold text-gray-900">{vitals.bloodPressure || '—'}</p></div>
+                    <div className="bg-white/5 p-3 rounded-xl border border-white/10 flex items-center gap-3">
+                        <Heart className="w-8 h-8 text-red-400 p-1.5 bg-red-500/10 rounded-lg" />
+                        <div><p className="text-xs text-white opacity-60">BP</p><p className="font-bold text-white">{vitals.bloodPressure || '—'}</p></div>
                     </div>
-                    <div className="bg-white p-3 rounded-xl border border-blue-100 flex items-center gap-3">
-                        <Thermometer className="w-8 h-8 text-orange-400 p-1.5 bg-orange-50 rounded-lg" />
-                        <div><p className="text-xs text-gray-500">Temp</p><p className="font-bold text-gray-900">{vitals.temperature ? `${vitals.temperature}°C` : '—'}</p></div>
+                    <div className="bg-white/5 p-3 rounded-xl border border-white/10 flex items-center gap-3">
+                        <Thermometer className="w-8 h-8 text-orange-400 p-1.5 bg-orange-500/10 rounded-lg" />
+                        <div><p className="text-xs text-white opacity-60">Temp</p><p className="font-bold text-white">{vitals.temperature ? `${vitals.temperature}°C` : '—'}</p></div>
                     </div>
-                    <div className="bg-white p-3 rounded-xl border border-blue-100 flex items-center gap-3">
-                        <Activity className="w-8 h-8 text-green-500 p-1.5 bg-green-50 rounded-lg" />
-                        <div><p className="text-xs text-gray-500">Pulse / SpO2</p><p className="font-bold text-gray-900">{vitals.pulse || '—'} / {vitals.spo2 ? `${vitals.spo2}%` : '—'}</p></div>
+                    <div className="bg-white/5 p-3 rounded-xl border border-white/10 flex items-center gap-3">
+                        <Activity className="w-8 h-8 text-green-500 p-1.5 bg-green-500/10 rounded-lg" />
+                        <div><p className="text-xs text-white opacity-60">Pulse / SpO2</p><p className="font-bold text-white">{vitals.pulse || '—'} / {vitals.spo2 ? `${vitals.spo2}%` : '—'}</p></div>
                     </div>
-                    <div className="bg-white p-3 rounded-xl border border-blue-100 flex items-center gap-3">
-                        <Scale className="w-8 h-8 text-purple-400 p-1.5 bg-purple-50 rounded-lg" />
-                        <div><p className="text-xs text-gray-500">Weight / BMI</p><p className="font-bold text-gray-900">{vitals.weight || '—'}kg / {vitals.bmi || '—'}</p></div>
+                    <div className="bg-white/5 p-3 rounded-xl border border-white/10 flex items-center gap-3">
+                        <Scale className="w-8 h-8 text-purple-400 p-1.5 bg-purple-500/10 rounded-lg" />
+                        <div><p className="text-xs text-white opacity-60">Weight / BMI</p><p className="font-bold text-white">{vitals.weight || '—'}kg / {vitals.bmi || '—'}</p></div>
                     </div>
                 </div>
             </div>
@@ -102,7 +102,7 @@ const TriageWidget = ({ visitId, patientId, queueStatus, onVitalsSaved }) => {
     return (
         <div className="card p-5 border border-orange-200 shadow-[0_0_15px_rgba(251,146,60,0.1)] relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1 h-full bg-orange-400" />
-            <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
                 <Activity className="w-5 h-5 text-orange-500" /> Record Vitals (Triage)
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -136,8 +136,8 @@ const TriageWidget = ({ visitId, patientId, queueStatus, onVitalsSaved }) => {
                         <input type="number" step="0.1" placeholder="175" value={form.height} onChange={e => handleFormChange('height', e.target.value)} className="form-input py-1.5 text-sm" />
                     </div>
                     <div className="form-group">
-                        <label className="form-label text-xs">BMI</label>
-                        <input type="number" disabled value={form.bmi} className="form-input py-1.5 text-sm bg-gray-50 border-gray-200" />
+                        <label className="form-label text-xs text-white opacity-80">BMI</label>
+                        <input type="number" disabled value={form.bmi} className="form-input py-1.5 text-sm bg-white/5 border-white/10 text-white" />
                     </div>
                 </div>
                 <div className="flex justify-end pt-2">

@@ -25,11 +25,11 @@ const DoctorWorkspace = ({ visitId, queueStatus, notes, onStatusChange }) => {
 
     if (queueStatus === 'ready_for_discharge') {
         return (
-            <div className="card p-5 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 mt-4">
-                <h3 className="font-bold text-green-900 flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" /> Patient Ready for Discharge / Billing
+            <div className="card p-5 bg-gradient-to-br from-green-900 to-emerald-900 border border-green-800 mt-4">
+                <h3 className="font-bold text-white flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-accent" /> Patient Ready for Discharge / Billing
                 </h3>
-                <p className="text-sm text-green-700 mt-1">
+                <p className="text-sm text-white opacity-80 mt-1">
                     The patient's consultation is complete. They must clear any pending bills before final discharge.
                 </p>
             </div>
@@ -40,13 +40,13 @@ const DoctorWorkspace = ({ visitId, queueStatus, notes, onStatusChange }) => {
         <div className="card p-5 border border-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.1)] relative overflow-hidden mt-4">
             <div className="absolute top-0 left-0 w-1 h-full bg-purple-500" />
 
-            <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Stethoscope className="w-5 h-5 text-purple-600" /> Doctor's Workspace
+            <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                <Stethoscope className="w-5 h-5 text-purple-400" /> Doctor's Workspace
             </h3>
 
             <div className="space-y-4">
                 <div className="form-group">
-                    <label className="form-label text-xs font-semibold text-purple-900">Clinical Notes & Diagnosis</label>
+                    <label className="form-label text-xs font-semibold text-white opacity-80">Clinical Notes & Diagnosis</label>
                     <textarea
                         value={clinicalNotes}
                         onChange={(e) => setClinicalNotes(e.target.value)}

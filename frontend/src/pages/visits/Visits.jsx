@@ -175,7 +175,7 @@ const Visits = () => {
                                             className="hover:bg-bg-tertiary/50 transition-colors cursor-pointer"
                                             onClick={() => navigate(`/app/visits/${v.id}`)}
                                         >
-                                            <td className="px-4 py-3 font-mono text-sm text-accent font-semibold">{v.visitNumber}</td>
+                                            <td className="px-4 py-3 font-mono text-sm text-white font-semibold">{v.visitNumber}</td>
                                             <td className="px-4 py-3">
                                                 <div className="font-medium text-text-primary text-sm">{v.patient?.firstName} {v.patient?.lastName}</div>
                                                 <div className="text-xs text-text-tertiary">{v.patient?.patientNumber}</div>
@@ -212,7 +212,7 @@ const Visits = () => {
                             {visits.map(v => (
                                 <div key={v.id} className="p-4 space-y-2" onClick={() => navigate(`/app/visits/${v.id}`)}>
                                     <div className="flex justify-between items-start">
-                                        <span className="font-mono text-accent font-bold text-sm">{v.visitNumber}</span>
+                                        <span className="font-mono text-white font-bold text-sm">{v.visitNumber}</span>
                                         <TypeBadge type={v.visitType} />
                                     </div>
                                     <p className="font-medium text-text-primary">{v.patient?.firstName} {v.patient?.lastName}</p>

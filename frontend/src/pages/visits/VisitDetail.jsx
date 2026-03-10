@@ -10,10 +10,10 @@ import TriageWidget from './components/TriageWidget';
 import DoctorWorkspace from './components/DoctorWorkspace';
 
 const TYPE_MAP = {
-    opd: { label: 'OPD', icon: Stethoscope, bg: 'bg-blue-900/40', text: 'text-blue-300' },
-    inpatient: { label: 'Inpatient', icon: BedDouble, bg: 'bg-purple-900/40', text: 'text-purple-300' },
-    maternity: { label: 'Maternity', icon: Baby, bg: 'bg-pink-900/40', text: 'text-pink-300' },
-    emergency: { label: 'Emergency', icon: Siren, bg: 'bg-red-900/40', text: 'text-red-300' },
+    opd: { label: 'OPD', icon: Stethoscope, bg: 'bg-blue-900/40', text: 'text-white' },
+    inpatient: { label: 'Inpatient', icon: BedDouble, bg: 'bg-purple-900/40', text: 'text-white' },
+    maternity: { label: 'Maternity', icon: Baby, bg: 'bg-pink-900/40', text: 'text-white' },
+    emergency: { label: 'Emergency', icon: Siren, bg: 'bg-red-900/40', text: 'text-white' },
 };
 
 const STATUS_COLORS = {
@@ -30,9 +30,9 @@ const DEPARTMENTS = [
 
 const InfoRow = ({ icon: Icon, label, value }) => value ? (
     <div className="flex items-start gap-2 py-1.5">
-        <Icon className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+        <Icon className="w-4 h-4 text-white mt-0.5 flex-shrink-0" />
         <div>
-            <p className="text-xs text-gray-500">{label}</p>
+            <p className="text-xs text-white opacity-70">{label}</p>
             <p className="text-sm font-medium text-white">{value}</p>
         </div>
     </div>
@@ -143,7 +143,7 @@ const VisitDetail = () => {
                 </button>
                 <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                        <h1 className="text-2xl font-bold font-mono text-indigo-300">{visit.visitNumber}</h1>
+                        <h1 className="text-2xl font-bold font-mono text-white tracking-tight">{visit.visitNumber}</h1>
                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold ${typeCfg.bg} ${typeCfg.text}`}>
                             <TypeIcon className="w-4 h-4" />{typeCfg.label}
                         </span>
@@ -194,7 +194,7 @@ const VisitDetail = () => {
 
                 {/* Patient Info */}
                 <div className="card p-5 md:col-span-1">
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Patient</h3>
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-3">Patient</h3>
                     {p ? (
                         <div className="space-y-1">
                             <div className="flex items-center gap-3 mb-3">
@@ -220,7 +220,7 @@ const VisitDetail = () => {
 
                 {/* Visit Details */}
                 <div className="card p-5 md:col-span-1">
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Visit Details</h3>
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-3">Visit Details</h3>
                     <div className="space-y-1">
                         <InfoRow icon={MapPin} label="Department" value={visit.department?.departmentName || visit.assignedDepartment} />
                         <InfoRow icon={Shield} label="Scheme" value={visit.scheme?.schemeName} />
@@ -240,7 +240,7 @@ const VisitDetail = () => {
 
                 {/* Log Movement */}
                 <div className="card p-5 md:col-span-1">
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Log Movement</h3>
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-3">Log Movement</h3>
                     {visit.status === 'active' ? (
                         <form onSubmit={handleLogMovement} className="space-y-3">
                             <div className="form-group">
