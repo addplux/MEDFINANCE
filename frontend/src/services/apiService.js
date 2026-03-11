@@ -371,6 +371,7 @@ export const auditLogsAPI = {
     getAll: (params) => api.get('/audit-logs', { params }),
 };
 
+
 // Corporate portal (public — uses its own token)
 export const corporatePortalAPI = {
     login: (data) => api.post('/corporate/portal/login', data),
