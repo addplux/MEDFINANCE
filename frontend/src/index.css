@@ -208,8 +208,7 @@
 
   /* Layout */
   .page-container {
-    @apply space-y-6 pb-12;
-    padding: var(--spacing-xl);
+    @apply space-y-4 p-4 pb-12;
   }
 
   .page-header {

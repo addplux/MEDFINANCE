@@ -93,7 +93,7 @@ const PatientView = () => {
     const patientScheme = patient.schemeId ? schemes.find(s => s.id === patient.schemeId) : null;
 
     return (
-        <div className="space-y-5 pb-10 print:pb-0 print:space-y-2">
+        <div className="space-y-4 pb-6 print:pb-0 print:space-y-2">
             {/* Top nav */}
             <div className="flex items-center gap-3 flex-wrap print:hidden">
                 <button onClick={() => navigate('/app/patients')} className="btn btn-secondary">
