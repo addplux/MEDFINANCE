@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { schemeServicesAPI, setupAPI } from '../../../services/apiService';
-import { useToast } from '../../../context/ToastContext';
+import { schemeServicesAPI, setupAPI } from '../../services/apiService';
+import { useToast } from '../../context/ToastContext';
 import {
     ArrowLeft, Plus, Search, Trash2, RefreshCw, DollarSign,
     CheckCircle2, Shield, Edit2, Save, X

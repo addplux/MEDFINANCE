@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { corporatePortalAPI } from '../../services/apiService';
+import { corporatePortalAPI } from '../../../services/apiService';
 import { Building2, LogIn, DollarSign, Users, FileText, RefreshCw, LogOut, ChevronRight, Download } from 'lucide-react';
 
 const fmt = (n) => {

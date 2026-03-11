@@ -280,8 +280,8 @@ const OPDBilling = () => {
                         </div>
                     )
                 }
-            </div >
-        </div >
+            </div>
+        </div>
     );
 };
 

@@ -665,7 +665,7 @@ const EditPatient = () => {
                     </div>
                 )
             }
-        </div >
+        </div>
     );
 };
 
