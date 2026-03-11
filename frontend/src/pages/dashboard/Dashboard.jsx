@@ -158,13 +158,52 @@ const Dashboard = () => {
     }, [overview]);
 
     const weeklyTrend = useMemo(() => {
-        if (!trendData.length) return [];
         return trendData.map(d => ({
             day: dayName(d.date),
             revenue: d.revenue,
             patients: Math.round(d.revenue / 500) // Rough estimation if actual count not in chart data
         }));
     }, [trendData]);
+
+    const activityFeed = useMemo(() => {
+        if (!recentData) return [];
+        const { recentPayments = [], recentBills = [], recentPatients = [] } = recentData;
+
+        const feed = [
+            ...recentPayments.map(p => ({
+                id: `pay-${p.id}`,
+                type: 'payment',
+                timestamp: new Date(p.createdAt),
+                title: 'Payment Received',
+                description: `Patient ${p.patient?.patientNumber || ''} payment of ${fmt(p.amount)}${p.receiptNumber ? ` (Ref: ${p.receiptNumber})` : ''}`,
+                icon: <DollarSign size={16} />,
+                colorClass: 'text-emerald-400',
+                bgClass: 'bg-emerald-500/10 border-emerald-500/20'
+            })),
+            ...recentBills.map(b => ({
+                id: `bill-${b.id}`,
+                type: 'bill',
+                timestamp: new Date(b.createdAt),
+                title: 'Service Requested',
+                description: `Patient ${b.patient?.patientNumber || ''} queued for ${b.service?.serviceName || 'General OPD'}`,
+                icon: <Activity size={16} />,
+                colorClass: 'text-blue-400',
+                bgClass: 'bg-blue-500/10 border-blue-500/20'
+            })),
+            ...recentPatients.map(pt => ({
+                id: `pt-${pt.patientNumber}`,
+                type: 'registration',
+                timestamp: new Date(pt.createdAt),
+                title: 'Patient Registered',
+                description: `New patient registered: ${pt.firstName} ${pt.lastName} (${pt.patientNumber})`,
+                icon: <Users size={16} />,
+                colorClass: 'text-purple-400',
+                bgClass: 'bg-purple-500/10 border-purple-500/20'
+            }))
+        ];
+
+        return feed.sort((a, b) => b.timestamp - a.timestamp).slice(0, 6);
+    }, [recentData]);
 
     const todayString = new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -324,32 +363,37 @@ const Dashboard = () => {
             {/* ── Bottom Section ─────────────────────────────────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                {/* Recent Operational Activity */}
-                <div className="glass-card p-6 border-white/10 overflow-hidden">
+                {/* Recent Operational Activity / Master Activity Feed */}
+                <div className="glass-card p-6 border-white/10 overflow-hidden flex flex-col">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                             <Activity size={18} className="text-accent" />
-                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white">Clinical Flow</h2>
+                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white">System Activity Feed</h2>
                         </div>
-                        <button onClick={() => navigate('/app/visits')} className="text-[10px] font-black uppercase text-accent hover:underline flex items-center gap-1">
-                            Live Queue <ChevronRight size={10} />
+                        <button onClick={() => navigate('/app/setup/audit-logs')} className="text-[10px] font-black uppercase text-accent hover:underline flex items-center gap-1">
+                            Full Audit Log <ChevronRight size={10} />
                         </button>
                     </div>
-                    <div className="space-y-4">
-                        {(recentData.bills || []).slice(0, 5).map((bill, i) => (
-                            <div key={i} className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:bg-white/5 transition-colors">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center font-black text-xs text-accent uppercase">
-                                        {bill.patient?.firstName?.[0]}{bill.patient?.lastName?.[0]}
+                    <div className="space-y-4 flex-1">
+                        {activityFeed.length === 0 ? (
+                            <div className="h-full flex items-center justify-center text-xs text-text-secondary">No recent activities available.</div>
+                        ) : activityFeed.map((item) => (
+                            <div key={item.id} className="flex flex-col p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:bg-white/5 transition-colors shadow-sm">
+                                <div className="flex items-center justify-between w-full">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-8 h-8 rounded-full border flex items-center justify-center ${item.bgClass} ${item.colorClass}`}>
+                                            {item.icon}
+                                        </div>
+                                        <span className={`text-[10px] font-black tracking-widest uppercase ${item.colorClass}`}>
+                                            {item.title}
+                                        </span>
                                     </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-white uppercase group-hover:text-accent transition-colors">{bill.patient?.firstName} {bill.patient?.lastName}</span>
-                                        <span className="text-[9px] font-black text-text-secondary tracking-widest uppercase">ID: {bill.patient?.patientNumber} — {bill.service?.serviceName || 'GENERAL_OPD'}</span>
-                                    </div>
+                                    <span className="text-[9px] font-black text-white/30 uppercase tracking-widest whitespace-nowrap">
+                                        {item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-xs font-black text-white">{fmt(bill.netAmount)}</p>
-                                    <p className="text-[9px] font-bold text-text-secondary uppercase mt-1">{new Date(bill.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                <div className="mt-3 text-xs font-medium text-white/80 leading-relaxed pl-[44px]">
+                                    {item.description}
                                 </div>
                             </div>
                         ))}

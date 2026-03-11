@@ -144,9 +144,17 @@ const getRecentActivities = async (req, res) => {
             ]
         });
 
+        // Get recent patients (registrations)
+        const recentPatients = await Patient.findAll({
+            limit,
+            order: [['createdAt', 'DESC']],
+            attributes: ['firstName', 'lastName', 'patientNumber', 'gender', 'createdAt']
+        });
+
         res.json({
             recentPayments,
-            recentBills
+            recentBills,
+            recentPatients
         });
     } catch (error) {
         console.error('Get recent activities error:', error);
