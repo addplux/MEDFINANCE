@@ -47,8 +47,8 @@ const getOverview = async (req, res) => {
             PharmacyBill.count({ where: { status: 'pending' } }),
             LabBill.count({ where: { status: 'pending' } }),
             RadiologyBill.count({ where: { status: 'pending' } }),
-            MaternityBill?.count({ where: { status: 'pending' } }) || Promise.resolve(0),
-            TheatreBill?.count({ where: { status: 'pending' } }) || Promise.resolve(0)
+            MaternityBill?.count() || Promise.resolve(0),
+            TheatreBill?.count() || Promise.resolve(0)
         ]);
 
         const totalPendingBills = pendingOPD + pendingIPD + pendingPharmacy + pendingLab + pendingRadiology;
