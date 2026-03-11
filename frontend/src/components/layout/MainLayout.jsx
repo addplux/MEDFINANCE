@@ -337,10 +337,10 @@ const MainLayout = ({ children }) => {
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-semibold text-white/40 leading-none">
+                                <span className={`text-[10px] font-semibold ${isDark ? 'text-white/40' : 'text-slate-400'} leading-none`}>
                                     &copy; {new Date().getFullYear()} TechElevate SaaS
                                 </span>
-                                <span className="text-xs font-bold text-white truncate max-w-[110px] leading-tight mt-0.5">
+                                <span className={`text-xs font-bold ${isDark ? 'text-white' : 'text-slate-800'} truncate max-w-[110px] leading-tight mt-0.5`}>
                                     {orgName}
                                 </span>
                             </div>
@@ -358,7 +358,7 @@ const MainLayout = ({ children }) => {
                     )}
                     <button
                         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                        className="hidden lg:flex p-2 hover:bg-white/5 rounded-xl transition-all text-text-secondary hover:text-white"
+                        className={`hidden lg:flex p-2 rounded-xl transition-all ${isDark ? 'hover:bg-white/5 text-text-secondary hover:text-white' : 'hover:bg-black/5 text-slate-400 hover:text-slate-800'}`}
                     >
                         <ChevronLeft className={`w-5 h-5 transition-transform duration-500 ${sidebarCollapsed ? 'rotate-180' : ''} `} />
                     </button>
@@ -385,10 +385,10 @@ const MainLayout = ({ children }) => {
                                 <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-bg-primary"></div>
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-bold text-white truncate">
+                                <div className={`text-sm font-bold truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>
                                     {user?.firstName} {user?.lastName}
                                 </div>
-                                <div className="text-[11px] font-medium text-text-secondary uppercase tracking-widest flex items-center gap-1.5">
+                                <div className={`text-[11px] font-medium uppercase tracking-widest flex items-center gap-1.5 ${isDark ? 'text-text-secondary' : 'text-slate-500'}`}>
                                     <span className="w-1 h-1 rounded-full bg-primary/60"></span>
                                     {user?.role?.replace('_', ' ')}
                                 </div>
@@ -405,7 +405,7 @@ const MainLayout = ({ children }) => {
                                 return (
                                     <div
                                         key={`heading-${index}`}
-                                        className={`px-3 pt-5 pb-1 text-[11px] font-semibold text-white/30 uppercase tracking-widest ${sidebarCollapsed ? 'text-center' : ''}`}
+                                        className={`px-3 pt-5 pb-1 text-[11px] font-semibold uppercase tracking-widest ${sidebarCollapsed ? 'text-center' : ''} ${isDark ? 'text-white/30' : 'text-slate-400'}`}
                                     >
                                         {sidebarCollapsed ? '⋯' : item.label}
                                     </div>
@@ -428,7 +428,9 @@ const MainLayout = ({ children }) => {
                                                 transition-all duration-200 group text-sm font-medium
                                                 ${hasActiveChild
                                                     ? 'bg-blue-600 text-white'
-                                                    : 'text-white/60 hover:bg-white/5 hover:text-white'
+                                                    : isDark
+                                                        ? 'text-white/60 hover:bg-white/5 hover:text-white'
+                                                        : 'text-slate-500 hover:bg-black/5 hover:text-slate-900'
                                                 }
                                                 ${sidebarCollapsed ? 'justify-center' : ''}
                                             `}
@@ -459,7 +461,9 @@ const MainLayout = ({ children }) => {
                                                                 transition-all duration-200 text-[13px] font-medium
                                                                 ${isActive
                                                                     ? 'text-blue-400'
-                                                                    : 'text-white/40 hover:text-white'
+                                                                    : isDark
+                                                                        ? 'text-white/40 hover:text-white'
+                                                                        : 'text-slate-400 hover:text-slate-800'
                                                                 }
                                                             `}
                                                         >
@@ -486,8 +490,10 @@ const MainLayout = ({ children }) => {
                                         w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
                                         transition-all duration-200 text-sm font-medium group
                                         ${active
-                                            ? 'bg-blue-600 text-white'
-                                            : 'text-white/60 hover:bg-white/5 hover:text-white'
+                                            ? 'bg-blue-600 text-white shadow-lg'
+                                            : isDark
+                                                ? 'text-white/60 hover:bg-white/5 hover:text-white'
+                                                : 'text-slate-500 hover:bg-black/5 hover:text-slate-900'
                                         }
                                         ${sidebarCollapsed ? 'justify-center' : ''}
                                     `}
