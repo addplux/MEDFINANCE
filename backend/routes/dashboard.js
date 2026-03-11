@@ -14,4 +14,6 @@ router.get('/administrator', dashboardController.getAdministratorDashboard);
 router.get('/accounts', dashboardController.getAccountsDashboard);
 router.get('/ministry', dashboardController.getMinistryDashboard);
 
+router.get('/recent-payments', dashboardController.getRecentPayments);
+
 module.exports = router;

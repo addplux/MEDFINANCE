@@ -121,6 +121,7 @@ export const receivablesAPI = {
             },
         }),
         updateMemberStatus: (schemeId, patientId, status) => api.put(`/receivables/schemes/${schemeId}/members/${patientId}/status`, { status }),
+        addMember: (schemeId, data) => api.post(`/corporate/${schemeId}/members/add`, data),
     },
 };
 
@@ -357,9 +358,37 @@ export const dashboardAPI = {
     getOverview: () => api.get('/dashboard/overview'),
     getRecentActivities: () => api.get('/dashboard/recent-activities'),
     getRevenueChart: () => api.get('/dashboard/revenue-chart'),
+    getRecentPayments: (params) => api.get('/dashboard/recent-payments', { params }),
 };
 
 // Utilisation
 export const utilisationAPI = {
     getReport: () => api.get('/utilisation/report'),
 };
+
+// Audit Logs
+export const auditLogsAPI = {
+    getAll: (params) => api.get('/audit-logs', { params }),
+};
+
+// Corporate portal (public — uses its own token)
+export const corporatePortalAPI = {
+    login: (data) => api.post('/corporate/portal/login', data),
+    getAccount: (token) => api.get('/corporate/portal/account', { headers: { Authorization: `Bearer ${token}` } }),
+    getTransactions: (token, params) => api.get('/corporate/portal/transactions', { headers: { Authorization: `Bearer ${token}` }, params }),
+};
+
+// Scheme Service Coverage & Pricing
+export const schemeServicesAPI = {
+    getByCoverageScheme: (schemeId) => api.get(`/scheme-services/${schemeId}`),
+    upsert: (schemeId, data) => api.post(`/scheme-services/${schemeId}`, data),
+    remove: (schemeId, serviceId) => api.delete(`/scheme-services/${schemeId}/${serviceId}`),
+    getEffectivePrice: (schemeId, serviceId) => api.get(`/scheme-services/${schemeId}/price/${serviceId}`),
+};
+
+// Prepaid Patient Statement
+export const prepaidStatementAPI = {
+    generate: (patientId, params) => api.get(`/billing/patient/${patientId}/statement`, { params }),
+};
+
+

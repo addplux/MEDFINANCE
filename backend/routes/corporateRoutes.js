@@ -22,4 +22,14 @@ router.post('/:accountId/members/upload', authorize('admin', 'accountant'), uplo
 // Update member status (activate/suspend)
 router.put('/:accountId/members/:id/status', authorize('admin', 'accountant'), corporateMemberController.updateMemberStatus);
 
+// Add a single patient to a corporate scheme manually
+router.post('/:accountId/members/add', authorize('admin', 'accountant', 'cashier'), corporateMemberController.addSingleMember);
+
+// ── Corporate Self-Service Portal ──────────────────────────────────────────────
+// Public: no authMiddleware — companies authenticate with their own credentials
+router.post('/portal/login', corporateMemberController.portalLogin);
+// Portal authenticated routes use a lighter token check inside the controller
+router.get('/portal/account', corporateMemberController.portalAccount);
+router.get('/portal/transactions', corporateMemberController.portalTransactions);
+
 module.exports = router;

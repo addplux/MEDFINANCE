@@ -49,6 +49,7 @@ const SystemLog = require('./SystemLog');
 const Ward = require('./Ward');
 const Bed = require('./Bed');
 const Admission = require('./Admission');
+const SchemeService = require('./SchemeService');
 
 // Define relationships
 
@@ -107,6 +108,12 @@ Service.hasMany(OPDBill, { foreignKey: 'serviceId', as: 'opdBills' });
 // Scheme relationships
 Scheme.hasMany(Patient, { foreignKey: 'schemeId', as: 'patients' });
 Patient.belongsTo(Scheme, { foreignKey: 'schemeId', as: 'scheme' });
+
+// SchemeService relationships (service coverage & pricing per scheme)
+Scheme.hasMany(SchemeService, { foreignKey: 'schemeId', as: 'services' });
+SchemeService.belongsTo(Scheme, { foreignKey: 'schemeId', as: 'scheme' });
+Service.hasMany(SchemeService, { foreignKey: 'serviceId', as: 'schemeServices' });
+SchemeService.belongsTo(Service, { foreignKey: 'serviceId', as: 'service' });
 
 // Billing relationships
 OPDBill.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
@@ -319,7 +326,8 @@ module.exports = {
     SystemLog,
     Ward,
     Bed,
-    Admission
+    Admission,
+    SchemeService
 };
 
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { setupAPI } from '../../services/apiService';
 import NotificationBell from '../ui/NotificationBell';
 import {
@@ -32,13 +33,16 @@ import {
     Radio,
     Wrench,
     Layers,
-    Terminal
+    Terminal,
+    Sun,
+    Moon
 } from 'lucide-react';
 
 const MainLayout = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { user, logout } = useAuth();
+    const { isDark, toggleTheme } = useTheme();
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
     const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
     const [orgName, setOrgName] = React.useState('MEDFINANCE360');
@@ -299,12 +303,16 @@ const MainLayout = ({ children }) => {
           fixed top-4 left-4 h-[calc(100vh-2rem)] z-40
           transform transition-all duration-300 lg:translate-x-0
           flex flex-col rounded-2xl
-          border border-white/10
-          shadow-[0_8px_40px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)]
+          shadow-[0_8px_40px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.05)]
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${sidebarCollapsed ? 'w-20' : 'w-64'}
 `}
-                style={{ background: 'linear-gradient(160deg, #0d1b3e 0%, #0a1628 60%, #081020 100%)' }}
+                style={{
+                    background: isDark
+                        ? 'linear-gradient(160deg, #0d1b3e 0%, #0a1628 60%, #081020 100%)'
+                        : 'linear-gradient(160deg, #FFFFFF 0%, #F7FAFC 60%, #EDF2F7 100%)',
+                    border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)'
+                }}
             >
                 {/* Logo & Collapse Button */}
                 <div className="h-20 px-4 flex items-center justify-between border-b border-white/10 rounded-t-2xl">
@@ -483,14 +491,79 @@ const MainLayout = ({ children }) => {
                     </div>
                 </nav>
 
-                {/* Logout Button */}
-                <div className="p-4 border-t border-white/10 rounded-b-2xl" style={{ background: 'rgba(0,0,0,0.2)' }}>
+                {/* Theme Toggle + Logout */}
+                <div
+                    className="p-4 border-t rounded-b-2xl space-y-1"
+                    style={{
+                        background: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.03)',
+                        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'
+                    }}
+                >
+                    {/* Theme Toggle */}
+                    {sidebarCollapsed ? (
+                        /* Collapsed: icon only */
+                        <button
+                            onClick={toggleTheme}
+                            title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                            className={`
+                                w-full flex items-center justify-center px-3 py-2.5 rounded-lg
+                                transition-all duration-200 text-sm font-medium
+                                ${isDark
+                                    ? 'text-white/40 hover:bg-white/5 hover:text-yellow-300'
+                                    : 'text-slate-400 hover:bg-black/5 hover:text-indigo-500'
+                                }
+                            `}
+                        >
+                            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                        </button>
+                    ) : (
+                        /* Expanded: label + pill switch */
+                        <div
+                            className={`
+                                w-full flex items-center justify-between px-3 py-2.5 rounded-lg
+                                transition-all duration-200
+                                ${isDark ? 'hover:bg-white/5' : 'hover:bg-black/5'}
+                            `}
+                        >
+                            <div className={`flex items-center gap-2 text-sm font-medium ${isDark ? 'text-white/50' : 'text-slate-500'}`}>
+                                {isDark
+                                    ? <Moon className="w-4 h-4" />
+                                    : <Sun className="w-4 h-4 text-yellow-500" />
+                                }
+                                <span>{isDark ? 'Dark Mode' : 'Light Mode'}</span>
+                            </div>
+                            {/* Pill toggle */}
+                            <button
+                                onClick={toggleTheme}
+                                aria-label="Toggle theme"
+                                className={`
+                                    relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full
+                                    border-2 border-transparent transition-colors duration-300 ease-in-out
+                                    focus:outline-none
+                                    ${isDark ? 'bg-white/10' : 'bg-indigo-500'}
+                                `}
+                            >
+                                <span
+                                    className={`
+                                        pointer-events-none inline-block h-4 w-4 transform rounded-full
+                                        shadow ring-0 transition-transform duration-300 ease-in-out
+                                        ${isDark ? 'translate-x-0 bg-white/30' : 'translate-x-4 bg-white'}
+                                    `}
+                                />
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Logout */}
                     <button
                         onClick={handleLogout}
                         className={`
                             w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
-                            text-sm font-medium text-white/40 hover:bg-red-500/10 hover:text-red-400
-                            transition-all duration-200
+                            text-sm font-medium transition-all duration-200
+                            ${isDark
+                                ? 'text-white/40 hover:bg-red-500/10 hover:text-red-400'
+                                : 'text-slate-400 hover:bg-red-50 hover:text-red-500'
+                            }
                             ${sidebarCollapsed ? 'justify-center' : ''}
                         `}
                     >

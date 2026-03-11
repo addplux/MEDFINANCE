@@ -159,3 +159,157 @@ exports.updateMemberStatus = async (req, res) => {
         res.status(500).json({ error: 'Failed to update member status.' });
     }
 };
+
+// ── Add single patient to a corporate scheme manually ─────────────────────────
+exports.addSingleMember = async (req, res) => {
+    const t = await Patient.sequelize.transaction();
+    try {
+        const { accountId } = req.params;
+        const { patientId, schemeId, policyNumber, memberRank, creditLimit } = req.body;
+
+        if (!patientId || !schemeId) {
+            return res.status(400).json({ error: 'patientId and schemeId are required.' });
+        }
+
+        const patient = await Patient.findByPk(patientId, { transaction: t });
+        if (!patient) {
+            await t.rollback();
+            return res.status(404).json({ error: 'Patient not found.' });
+        }
+
+        // Enroll patient in the scheme
+        await patient.update({
+            paymentMethod: 'corporate',
+            schemeId: schemeId,
+            policyNumber: policyNumber || patient.patientNumber,
+            memberRank: memberRank || 'principal',
+            memberStatus: 'active',
+            balance: creditLimit || patient.balance || 0
+        }, { transaction: t });
+
+        await t.commit();
+        res.json({
+            success: true,
+            message: `${patient.firstName} ${patient.lastName} enrolled successfully.`,
+            patient
+        });
+    } catch (error) {
+        await t.rollback();
+        console.error('Error adding single member:', error);
+        res.status(500).json({ error: 'Failed to enroll member.' });
+    }
+};
+
+// ── Corporate Self-Service Portal ─────────────────────────────────────────────
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+
+exports.portalLogin = async (req, res) => {
+    try {
+        const { schemeCode, pin } = req.body;
+        if (!schemeCode || !pin) {
+            return res.status(400).json({ error: 'Scheme code and PIN are required.' });
+        }
+
+        // Look up the scheme by code
+        const scheme = await Scheme.findOne({ where: { schemeCode } });
+        if (!scheme) {
+            return res.status(401).json({ error: 'Invalid scheme code or PIN.' });
+        }
+
+        // Verify PIN (stored as portalPin on the scheme, hashed)
+        const isValid = scheme.portalPin
+            ? await bcrypt.compare(String(pin), scheme.portalPin)
+            : String(pin) === '1234'; // fallback default during setup
+
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid scheme code or PIN.' });
+        }
+
+        const token = jwt.sign(
+            { schemeId: scheme.id, schemeCode: scheme.schemeCode, type: 'corporate_portal' },
+            process.env.JWT_SECRET || 'medfinance_secret',
+            { expiresIn: '8h' }
+        );
+
+        res.json({ success: true, token, scheme: { id: scheme.id, name: scheme.schemeName, code: scheme.schemeCode } });
+    } catch (error) {
+        console.error('Portal login error:', error);
+        res.status(500).json({ error: 'Portal login failed.' });
+    }
+};
+
+const verifyPortalToken = (req) => {
+    const auth = req.headers.authorization;
+    if (!auth || !auth.startsWith('Bearer ')) throw new Error('Unauthorized');
+    const token = auth.split(' ')[1];
+    return jwt.verify(token, process.env.JWT_SECRET || 'medfinance_secret');
+};
+
+exports.portalAccount = async (req, res) => {
+    try {
+        const { schemeId } = verifyPortalToken(req);
+        const scheme = await Scheme.findByPk(schemeId, {
+            attributes: ['id', 'schemeName', 'schemeCode', 'schemeType', 'creditLimit', 'usedCredit', 'status']
+        });
+        if (!scheme) return res.status(404).json({ error: 'Scheme not found.' });
+
+        const creditLimit = parseFloat(scheme.creditLimit || 0);
+        const usedCredit = parseFloat(scheme.usedCredit || 0);
+        const balance = creditLimit - usedCredit;
+
+        res.json({
+            success: true,
+            account: {
+                schemeName: scheme.schemeName,
+                schemeCode: scheme.schemeCode,
+                creditLimit,
+                usedCredit,
+                balance: Math.max(0, balance),
+                status: scheme.status
+            }
+        });
+    } catch (error) {
+        if (error.name === 'JsonWebTokenError' || error.message === 'Unauthorized') {
+            return res.status(401).json({ error: 'Unauthorized.' });
+        }
+        console.error('Portal account error:', error);
+        res.status(500).json({ error: 'Failed to load account.' });
+    }
+};
+
+exports.portalTransactions = async (req, res) => {
+    try {
+        const { schemeId } = verifyPortalToken(req);
+        const { startDate, endDate, page = 1, limit = 50 } = req.query;
+        const { Op } = Patient.sequelize.Sequelize;
+
+        const where = { schemeId };
+        // Get all scheme members
+        const members = await Patient.findAll({ where: { schemeId }, attributes: ['id'] });
+        const patientIds = members.map(m => m.id);
+
+        // Query OPD bills for scheme patients
+        const { OPDBill } = require('../models');
+        const billWhere = { patientId: { [Op.in]: patientIds } };
+        if (startDate) billWhere.createdAt = { ...(billWhere.createdAt || {}), [Op.gte]: new Date(startDate) };
+        if (endDate) billWhere.createdAt = { ...(billWhere.createdAt || {}), [Op.lte]: new Date(endDate + 'T23:59:59') };
+
+        const bills = await OPDBill.findAll({
+            where: billWhere,
+            include: [{ association: 'patient', attributes: ['firstName', 'lastName', 'patientNumber', 'policyNumber'] }],
+            order: [['createdAt', 'DESC']],
+            limit: Number(limit),
+            offset: (Number(page) - 1) * Number(limit)
+        });
+
+        res.json({ success: true, data: bills });
+    } catch (error) {
+        if (error.name === 'JsonWebTokenError' || error.message === 'Unauthorized') {
+            return res.status(401).json({ error: 'Unauthorized.' });
+        }
+        console.error('Portal transactions error:', error);
+        res.status(500).json({ error: 'Failed to load transactions.' });
+    }
+};
+

@@ -347,6 +347,28 @@ const getMinistryDashboard = async (req, res) => {
     }
 };
 
+// Recent Payments Feed — visible to all staff on dashboard
+const getRecentPayments = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 50;
+        const { Op } = sequelize.Sequelize;
+
+        const payments = await Payment.findAll({
+            order: [['createdAt', 'DESC']],
+            limit,
+            include: [
+                { association: 'patient', attributes: ['firstName', 'lastName', 'patientNumber', 'paymentMethod'] },
+                { association: 'receiver', attributes: ['firstName', 'lastName'] }
+            ]
+        });
+
+        res.json({ success: true, data: payments });
+    } catch (error) {
+        console.error('Get recent payments error:', error);
+        res.status(500).json({ error: 'Failed to get recent payments' });
+    }
+};
+
 module.exports = {
     getOverview,
     getRecentActivities,
@@ -354,5 +376,6 @@ module.exports = {
     getMedicalSuperintendentDashboard,
     getAdministratorDashboard,
     getAccountsDashboard,
-    getMinistryDashboard
+    getMinistryDashboard,
+    getRecentPayments
 };

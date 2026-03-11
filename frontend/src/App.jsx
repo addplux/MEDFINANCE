@@ -44,6 +44,7 @@ import UtilisationTracking from './pages/schemes/private/UtilisationTracking';
 
 // Scheme Manager - Corporate
 import CorporateMemberManagement from './pages/schemes/corporate/CorporateMemberManagement';
+import CorporatePortal from './pages/schemes/corporate/CorporatePortal';
 import CreditLimit from './pages/schemes/corporate/CreditLimit';
 import PaymentTerms from './pages/schemes/corporate/PaymentTerms';
 import MonthlyBilling from './pages/schemes/corporate/MonthlyBilling';
@@ -71,10 +72,12 @@ import CorporateAccountForm from './pages/receivables/CorporateAccountForm';
 import Schemes from './pages/receivables/Schemes';
 import SchemeForm from './pages/receivables/SchemeForm';
 import SchemeDetails from './pages/receivables/SchemeDetails';
+import SchemeServiceManager from './pages/receivables/SchemeServiceManager';
 import SchemeInvoices from './pages/receivables/SchemeInvoices';
 import InvoiceView from './pages/receivables/InvoiceView';
 import FamilyLedger from './pages/receivables/FamilyLedger';
 import DebtorAgeing from './pages/receivables/DebtorAgeing';
+import PrepaidStatementGenerator from './pages/schemes/private/PrepaidStatementGenerator';
 
 // Reports
 import Reports from './pages/reports/Reports';
@@ -345,12 +348,20 @@ function App() {
                         <Route path="setup/audit-logs" element={<RoleRoute roles={[]}><SystemLogs /></RoleRoute>} />
                         <Route path="setup/pending-approvals" element={<RoleRoute roles={[]}><PendingApprovals /></RoleRoute>} />
 
+                        {/* ── Scheme Service Manager & Prepaid Statement ─────────────── */}
+                        <Route path="receivables/schemes/:id/services" element={<RoleRoute roles={[]}><SchemeServiceManager /></RoleRoute>} />
+                        <Route path="prepaid/statement" element={<RoleRoute roles={[]}><PrepaidStatementGenerator /></RoleRoute>} />
+
                         <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
                       </Routes>
                     </MainLayout>
                   </ProtectedRoute>
                 }
               />
+
+              {/* ── Public Corporate Self-Service Portal ── */}
+              <Route path="/corporate-portal" element={<CorporatePortal />} />
+
             </Routes>
           </Router>
         </AuthProvider>

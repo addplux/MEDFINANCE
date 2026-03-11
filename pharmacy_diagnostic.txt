@@ -1,0 +1,25 @@
+All Departments:
+- ID 1: Outpatient Department (OPD)
+- ID 2: Inpatient Department (IPD)
+- ID 3: Pharmacy (PHARM)
+- ID 4: Laboratory (LAB)
+- ID 5: Radiology (RAD)
+- ID 6: Administration (ADMIN)
+- ID 7: Finance (FIN)
+- ID 8: Zeroday Ward (5009)
+
+Detected Pharmacy Department: ID 3 (Pharmacy)
+
+Found 9 total active visits:
+- Visit VIS-20260225-0001: Patient KALIBUKU PERRY, Dept: Finance (ID: 7), AssignedDept: None, Status: active, Queue: pending_triage
+- Visit VIS-20260225-0002: Patient KATONGO MULENGA, Dept: None (ID: null), AssignedDept: None, Status: active, Queue: pending_triage
+- Visit VIS-20260302-0001: Patient John Doe, Dept: Radiology (ID: 5), AssignedDept: None, Status: active, Queue: pending_triage
+- Visit VIS-20260302-0002: Patient PRUDENCE KALUNGA, Dept: Radiology (ID: 5), AssignedDept: None, Status: active, Queue: pending_triage
+- Visit VIS-20260303-0001: Patient 2.HARA  JETHROW, Dept: None (ID: null), AssignedDept: OPD, Status: active, Queue: pending_triage
+- Visit VIS-20260303-0003: Patient 2.HARA  JETHROW, Dept: None (ID: null), AssignedDept: Maternity, Status: active, Queue: pending_triage
+- Visit TEST-1772545750937: Patient Grace Mutale, Dept: None (ID: null), AssignedDept: OPD, Status: active, Queue: pending_triage
+- Visit VIS-20260303-0005: Patient 2.HARA  JETHROW, Dept: None (ID: null), AssignedDept: Maternity, Status: active, Queue: pending_triage
+- Visit VIS-20260303-0006: Patient 2.HARA  JETHROW, Dept: None (ID: null), AssignedDept: Pharmacy, Status: active, Queue: pending_triage
+
+Visits matching Pharmacy Queue criteria (Logic in billingController): 1
+- VIS-20260303-0006 (2.HARA  JETHROW)

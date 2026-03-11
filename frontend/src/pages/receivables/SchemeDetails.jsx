@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Printer, Calendar, FileText, Download, Users } from 'lucide-react';
+import { ArrowLeft, Printer, Calendar, FileText, Download, Users, Shield } from 'lucide-react';
 import api from '../../services/apiClient';
 import SchemeMembers from './SchemeMembers';
 import SchemeInvoices from './SchemeInvoices';
@@ -109,6 +109,13 @@ const SchemeDetails = () => {
                                 }`}
                         >
                             Invoices
+                        </button>
+                        <button
+                            onClick={() => navigate(`/app/receivables/schemes/${id}/services`)}
+                            className="pb-2 text-[10px] font-black uppercase tracking-widest border-b-2 border-transparent text-white/40 hover:text-white flex items-center gap-1.5 transition-all"
+                        >
+                            <Shield className="w-3 h-3" />
+                            Services & Pricing
                         </button>
                     </div>
 

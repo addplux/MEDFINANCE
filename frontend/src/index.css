@@ -31,6 +31,84 @@
     --shadow-glow-accent: 0 0 20px rgba(0, 234, 255, 0.2);
   }
 
+  /* ── Light Theme Overrides ─────────────────────────────────────────── */
+  html.light {
+    --bg-primary: #F0F4F8;
+    --bg-secondary: #FFFFFF;
+    --bg-tertiary: #E8EDF2;
+    --bg-elevated: #FFFFFF;
+
+    --text-primary: #1A202C;
+    --text-secondary: #4A5568;
+    --text-tertiary: #718096;
+
+    --border-color: #CBD5E0;
+    --border-hover: #A0AEC0;
+
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(0, 0, 0, 0.08);
+
+    --shadow-glow: 0 0 20px rgba(255, 0, 204, 0.12);
+    --shadow-glow-accent: 0 0 20px rgba(0, 234, 255, 0.12);
+  }
+
+  html.light body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  html.light .glass {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  html.light .glass-panel {
+    background-color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+  }
+
+  html.light .glass-card {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0) 100%);
+    border: 1px solid rgba(0, 0, 0, 0.07);
+  }
+
+  html.light .card {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+  }
+
+  html.light .form-input,
+  html.light .form-select,
+  html.light .form-textarea {
+    background-color: #FFFFFF;
+    color: var(--text-primary);
+    border-color: var(--border-color);
+  }
+
+  html.light .form-input:focus,
+  html.light .form-select:focus,
+  html.light .form-textarea:focus {
+    background-color: #FFFFFF;
+  }
+
+  html.light .form-select option {
+    background-color: #FFFFFF;
+    color: var(--text-primary);
+  }
+
+  html.light ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  html.light ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
+  }
+
+  html.light {
+    scrollbar-color: #CBD5E0 transparent;
+  }
+
   html {
     font-size: 16px;
     -webkit-font-smoothing: antialiased;

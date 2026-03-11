@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Download, Upload, Search, Link as LinkIcon, AlertCircle, CheckCircle, XCircle, Users } from 'lucide-react';
+﻿import React, { useState, useEffect } from 'react';
+import { Download, Upload, Search, Link as LinkIcon, AlertCircle, CheckCircle, XCircle, Users, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { receivablesAPI } from '../../../services/apiService';
 import { useToast } from '../../../context/ToastContext';
+import AddMemberModal from './AddMemberModal';
 
 const CorporateMemberManagement = () => {
     const navigate = useNavigate();
@@ -15,6 +16,7 @@ const CorporateMemberManagement = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [showUpload, setShowUpload] = useState(false);
+    const [showAddMember, setShowAddMember] = useState(false);
 
     // Fetch Corporate Schemes on mount
     useEffect(() => {
@@ -194,7 +196,7 @@ const CorporateMemberManagement = () => {
                 </div>
             )}
 
-            {/* Upload Section — visible if explicitly toggled on or if scheme has no members */}
+            {/* Upload Section â€” visible if explicitly toggled on or if scheme has no members */}
             {selectedScheme && showUpload && (
                 <div className="p-6 bg-white/5 shadow-sm border border-white/10 rounded-xl relative">
                     <button
@@ -250,6 +252,15 @@ const CorporateMemberManagement = () => {
                             >
                                 <Upload className="w-4 h-4" />
                                 Import Roster
+                            </button>
+                        )}
+                        {selectedScheme && (
+                            <button
+                                onClick={() => setShowAddMember(true)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+                            >
+                                <UserPlus className="w-4 h-4" />
+                                Add Member
                             </button>
                         )}
                     </div>
@@ -341,7 +352,16 @@ const CorporateMemberManagement = () => {
                     </table>
                 </div>
             </div>
-        </div>
+        {/* Add Member Modal */}
+        {showAddMember && selectedScheme && (
+            <AddMemberModal
+                schemeId={selectedScheme}
+                schemeName={selectedSchemeName}
+                onClose={() => setShowAddMember(false)}
+                onSuccess={() => fetchMembers(selectedScheme)}
+            />
+        )}
+    </div>
     );
 };
 

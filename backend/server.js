@@ -128,6 +128,8 @@ app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/prepaid-plans', require('./routes/prepaidPlans'));
 app.use('/api/utilisation', require('./routes/utilisation'));
 app.use('/api/system-logs', require('./routes/systemLogs'));
+app.use('/api/audit-logs', require('./routes/auditLogs'));
+app.use('/api/scheme-services', require('./routes/schemeServices'));
 app.use('/api/vitals', require('./routes/vitals'));
 
 // Error handling middleware
@@ -181,7 +183,7 @@ const startServer = async () => {
         // Sync database models
         console.log('⏳ Syncing database models...');
         try {
-            // Schema is already in sync — use alter: false so startup is instant
+            // Schema is in sync — use alter: false so startup is fast
             await syncDatabase({ alter: false });
             console.log('✅ Database synchronized successfully');
         } catch (syncError) {
