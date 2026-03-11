@@ -69,6 +69,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
     const filteredVisits = visits.filter(v => {
         if (title === 'OPD') {
             if (filter === 'triage') return v.queueStatus === 'pending_triage';
+            if (filter === 'cashier') return v.queueStatus === 'pending_cashier';
             if (filter === 'doctor') return v.queueStatus === 'waiting_doctor' || v.queueStatus === 'with_doctor';
             if (filter === 'results') return v.queueStatus === 'pending_results';
             if (filter === 'discharge') return v.queueStatus === 'ready_for_discharge';
@@ -94,6 +95,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
     const opdFilters = [
         { id: 'all_opd', label: 'ALL OPD', count: visits.length },
         { id: 'triage', label: 'TRIAGE', count: visits.filter(v => v.queueStatus === 'pending_triage').length },
+        { id: 'cashier', label: 'AT CASHIER', count: visits.filter(v => v.queueStatus === 'pending_cashier').length },
         { id: 'doctor', label: 'DOCTOR Q', count: visits.filter(v => v.queueStatus === 'waiting_doctor' || v.queueStatus === 'with_doctor').length },
         { id: 'results', label: 'PENDING RESULTS', count: visits.filter(v => v.queueStatus === 'pending_results').length },
         { id: 'discharge', label: 'BILLING & EXIT', count: visits.filter(v => v.queueStatus === 'ready_for_discharge').length }
@@ -235,30 +237,33 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                     <div className="flex items-center gap-1.5 flex-wrap flex-1 min-w-0 pr-2">
                                         {/* Status Dot */}
                                         <div className={`w-1.5 h-1.5 flex-shrink-0 rounded-full ${v.queueStatus === 'pending_triage' ? 'bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.6)] animate-pulse' :
-                                            v.queueStatus === 'waiting_doctor' ? 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)] animate-pulse' :
-                                                v.queueStatus === 'with_doctor' ? 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]' :
-                                                    v.queueStatus === 'pending_results' ? 'bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]' :
-                                                        v.billingSummary?.status === 'pending' ? 'bg-primary shadow-[0_0_8px_rgba(255,0,204,0.6)]' :
-                                                            v.billingSummary?.status === 'cleared' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' :
-                                                                'bg-white/10'
+                                            v.queueStatus === 'pending_cashier' ? 'bg-yellow-400 shadow-[0_0_8px_rgba(234,179,8,0.6)] animate-pulse' :
+                                                v.queueStatus === 'waiting_doctor' ? 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)] animate-pulse' :
+                                                    v.queueStatus === 'with_doctor' ? 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]' :
+                                                        v.queueStatus === 'pending_results' ? 'bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]' :
+                                                            v.billingSummary?.status === 'pending' ? 'bg-primary shadow-[0_0_8px_rgba(255,0,204,0.6)]' :
+                                                                v.billingSummary?.status === 'cleared' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' :
+                                                                    'bg-white/10'
                                             }`} />
 
                                         {/* Dynamic Status Text */}
                                         <span className={`text-[9px] font-black uppercase tracking-widest truncate ${v.queueStatus === 'pending_triage' ? 'text-orange-400' :
-                                            v.queueStatus === 'waiting_doctor' ? 'text-blue-400' :
-                                                v.queueStatus === 'with_doctor' ? 'text-purple-400' :
-                                                    v.queueStatus === 'pending_results' ? 'text-yellow-400' :
-                                                        v.billingSummary?.status === 'pending' ? 'text-primary' :
-                                                            v.billingSummary?.status === 'cleared' ? 'text-green-500' :
-                                                                'text-white/20'
+                                                v.queueStatus === 'pending_cashier' ? 'text-yellow-400' :
+                                                    v.queueStatus === 'waiting_doctor' ? 'text-blue-400' :
+                                                        v.queueStatus === 'with_doctor' ? 'text-purple-400' :
+                                                            v.queueStatus === 'pending_results' ? 'text-yellow-400' :
+                                                                v.billingSummary?.status === 'pending' ? 'text-primary' :
+                                                                    v.billingSummary?.status === 'cleared' ? 'text-green-500' :
+                                                                        'text-white/20'
                                             }`}>
                                             {
                                                 v.queueStatus === 'pending_triage' ? 'AWAITING TRIAGE' :
-                                                    v.queueStatus === 'waiting_doctor' ? 'TO SEE DOCTOR' :
-                                                        v.queueStatus === 'with_doctor' ? 'IN CONSULTATION' :
-                                                            v.queueStatus === 'pending_results' ? 'AWAITING LABS/XRAY' :
-                                                                v.billingSummary?.status === 'pending' ? `K${v.billingSummary.totalAmount} UNPAID` :
-                                                                    v.billingSummary?.status === 'cleared' ? 'BILL CLEARED' : 'NO BILL'
+                                                    v.queueStatus === 'pending_cashier' ? 'AWAITING PAYMENT' :
+                                                        v.queueStatus === 'waiting_doctor' ? 'TO SEE DOCTOR' :
+                                                            v.queueStatus === 'with_doctor' ? 'IN CONSULTATION' :
+                                                                v.queueStatus === 'pending_results' ? 'AWAITING LABS/XRAY' :
+                                                                    v.billingSummary?.status === 'pending' ? `K${v.billingSummary.totalAmount} UNPAID` :
+                                                                        v.billingSummary?.status === 'cleared' ? 'BILL CLEARED' : 'NO BILL'
                                             }
                                         </span>
                                     </div>

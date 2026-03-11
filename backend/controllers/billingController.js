@@ -101,6 +101,16 @@ const createOPDBill = async (req, res) => {
         const discountAmount = parseFloat(discount) || 0;
         const netAmount = totalAmount - discountAmount;
 
+        const isPrepaid = tier === 'private_prepaid' || tier === 'private prepaid';
+
+        if (isPrepaid) {
+            if (parseFloat(patient.balance || 0) < netAmount) {
+                return res.status(400).json({
+                    error: `Insufficient prepaid balance. Available: K${parseFloat(patient.balance || 0).toFixed(2)}, Required: K${netAmount.toFixed(2)}`
+                });
+            }
+        }
+
         // Generate bill number
         const billCount = await OPDBill.count();
         const billNumber = `OPD${String(billCount + 1).padStart(6, '0')}`;
@@ -155,6 +165,8 @@ const createOPDBill = async (req, res) => {
             discount: discountAmount,
             netAmount,
             paymentMethod,
+            status: isPrepaid ? 'paid' : 'pending',
+            paymentStatus: isPrepaid ? 'paid' : 'unpaid',
             notes,
             createdBy: req.user.id
         });

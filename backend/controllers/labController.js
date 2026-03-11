@@ -140,7 +140,7 @@ const createRequest = async (req, res) => {
             clinicalNotes,
             status: 'requested',
             totalAmount,
-            paymentStatus: 'unpaid'
+            paymentStatus: isPrepaid ? 'paid' : 'unpaid'
         }, { transaction: t });
 
         // Create empty results for each test (to be filled later)

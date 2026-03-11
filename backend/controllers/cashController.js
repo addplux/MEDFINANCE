@@ -113,9 +113,27 @@ const createPayment = async (req, res) => {
                 }
                 if (model) {
                     await model.update({ paymentStatus: 'paid' }, { where: { id: b.id }, transaction: t });
+
+                    // ── Auto-advance Cashier → Doctor queue ─────────────────────────────
+                    // When an OPD bill is paid, if the linked visit is still at 'pending_cashier',
+                    // advance it to 'waiting_doctor' (cashier → doctor handoff).
+                    if ((b.type === 'OPD' || b.type === 'OPDBill') && b.id) {
+                        const bill = await OPDBill.findByPk(b.id, { transaction: t });
+                        if (bill && bill.visitId) {
+                            const { Visit } = require('../models');
+                            const linkedVisit = await Visit.findByPk(bill.visitId, { transaction: t });
+                            if (linkedVisit && linkedVisit.queueStatus === 'pending_cashier') {
+                                await linkedVisit.update(
+                                    { queueStatus: 'waiting_doctor' },
+                                    { transaction: t }
+                                );
+                            }
+                        }
+                    }
                 }
             }
         }
+
 
         // Handle Payroll Deduction Creation
         if (paymentMethod === 'payroll') {
@@ -123,7 +141,7 @@ const createPayment = async (req, res) => {
             if (patient && patient.staffId) {
                 const now = new Date();
                 const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-                
+
                 await PayrollDeduction.create({
                     staffId: patient.staffId,
                     amount: amount,

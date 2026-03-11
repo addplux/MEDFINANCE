@@ -122,15 +122,18 @@ const MainLayout = ({ children }) => {
             // Every role sees the dashboard
         },
 
-        // Patients: clinical staff + cashier + admin (NOT dept-only staff)
+        // ── RECORDS (Step 1: Patient Registration & Lookup) ──────────────
+        { isHeading: true, label: 'RECORDS', roles: ['doctor', 'nurse', 'cashier', ...SUPER_ROLES] },
+
+        // Patient registry — clinical staff + cashier + admin
         {
-            path: '/app/patients', icon: Users, label: 'Patients',
+            path: '/app/patients', icon: Users, label: 'Patient Registry',
             roles: ['doctor', 'nurse', 'cashier', ...SUPER_ROLES]
         },
 
-        // Visits: clinical staff only (nurses & doctors manage visits)
+        // Active visits — clinical staff only
         {
-            path: '/app/visits', icon: ClipboardList, label: 'Visits',
+            path: '/app/visits', icon: ClipboardList, label: 'Encounters',
             roles: CLINICAL
         },
 
@@ -218,10 +221,16 @@ const MainLayout = ({ children }) => {
         // ── DEPARTMENTAL QUEUES ──────────────────────────────────────────
         { isHeading: true, label: 'DEPARTMENTAL QUEUES', roles: [...CLINICAL, 'pharmacist', 'lab_technician', 'radiographer', 'cashier'] },
 
-        // OPD — doctors, nurses, cashier (billing), admin
+        // Doctor Dashboard — doctors, nurses, admin see the queue
         {
-            path: '/app/opd/dashboard', icon: Stethoscope, label: 'OPD',
-            roles: [...CLINICAL, 'cashier']
+            path: '/app/opd/dashboard', icon: Stethoscope, label: 'Doctor Dashboard',
+            roles: CLINICAL
+        },
+
+        // Cashier can see patients waiting to pay before seeing doctor
+        {
+            path: '/app/cash/payments', icon: DollarSign, label: 'OPD Cashier Queue',
+            roles: ['cashier', ...SUPER_ROLES]
         },
         // Laboratory — lab techs enter results; doctors & nurses submit requests
         {

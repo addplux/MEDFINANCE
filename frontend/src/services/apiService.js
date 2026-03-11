@@ -49,6 +49,7 @@ export const visitAPI = {
     getAll: (params) => api.get('/visits', { params }),
     getById: (id) => api.get(`/visits/${id}`),
     create: (data) => api.post('/visits', data),
+    createConsultation: (data) => api.post('/visits/consultation', data),
     update: (id, data) => api.put(`/visits/${id}`, data),
     updateQueueStatus: (id, queueStatus) => api.put(`/visits/${id}/queue-status`, { queueStatus }),
     discharge: (id) => api.post(`/visits/${id}/discharge`),

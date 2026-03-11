@@ -88,7 +88,19 @@ exports.createRequest = async (req, res) => {
             return res.status(e.statusCode || 403).json({ error: e.message, code: e.code });
         }
 
-        const initialPaymentStatus = 'unpaid';
+        const isPrepaid = patientMethod === 'private_prepaid' || patientMethod === 'private prepaid';
+
+        if (isPrepaid) {
+            // Check Prepaid Balance
+            if (parseFloat(patientRecord.balance || 0) < totalAmount) {
+                await transaction.rollback();
+                return res.status(400).json({
+                    error: `Insufficient prepaid balance. Available: K${parseFloat(patientRecord.balance || 0).toFixed(2)}, Required: K${totalAmount.toFixed(2)}`
+                });
+            }
+        }
+
+        const initialPaymentStatus = isPrepaid ? 'paid' : 'unpaid';
 
         const bill = await RadiologyBill.create({
             billNumber,
@@ -109,6 +121,13 @@ exports.createRequest = async (req, res) => {
         await postChargeToGL(bill, '4000', transaction);
 
         await transaction.commit();
+
+        // Auto-deduct prepaid balance AFTER commit so balanceUpdater sees the new transaction
+        if (isPrepaid && totalAmount > 0) {
+            const { updatePatientBalance } = require('../utils/balanceUpdater');
+            await updatePatientBalance(patientId);
+        }
+
         res.status(201).json({ message: 'Radiology request created successfully', visit, bill });
     } catch (error) {
         await transaction.rollback();

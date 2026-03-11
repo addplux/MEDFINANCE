@@ -168,6 +168,8 @@ const dispenseMedication = async (req, res) => {
         }
 
         const isCashPatient = CASH_METHODS.includes(patient.paymentMethod);
+        const isPrepaid = patient.paymentMethod === 'private_prepaid' || patient.paymentMethod === 'private prepaid';
+
         if (isCashPatient) {
             // For cash patients, we require explicit confirmation that payment has been made.
             // The frontend must pass paymentConfirmed: true after the cashier has processed payment.
@@ -180,6 +182,33 @@ const dispenseMedication = async (req, res) => {
                 });
             }
         }
+
+        // Pre-calculate total amount to check prepaid balance
+        let requestedTotalAmount = 0;
+        for (const item of items) {
+            let batch;
+            if (item.batchId) {
+                batch = await PharmacyBatch.findByPk(item.batchId, { transaction: t });
+            } else {
+                batch = await PharmacyBatch.findOne({
+                    where: { medicationId: item.medicationId, quantityOnHand: { [Op.gte]: item.quantity }, expiryDate: { [Op.gt]: new Date() } },
+                    order: [['expiryDate', 'ASC']],
+                    transaction: t
+                });
+            }
+            if (batch) requestedTotalAmount += (batch.sellingPrice * item.quantity) - (item.discount || 0);
+        }
+
+        if (isPrepaid) {
+            if (parseFloat(patient.balance || 0) < requestedTotalAmount) {
+                await t.rollback();
+                return res.status(400).json({
+                    error: `Insufficient prepaid balance. Available: K${parseFloat(patient.balance || 0).toFixed(2)}, Required: K${requestedTotalAmount.toFixed(2)}`
+                });
+            }
+        }
+
+        const bills = [];
 
         for (const item of items) {
             const { medicationId, batchId, quantity, discount } = item;
@@ -238,7 +267,8 @@ const dispenseMedication = async (req, res) => {
                 totalAmount,
                 discount: discount || 0,
                 netAmount,
-                status: 'pending', // Or 'paid' if cash
+                status: 'paid', // Dispensed
+                paymentStatus: isPrepaid ? 'paid' : (isCashPatient ? 'paid' : 'unpaid'),
                 createdBy: req.user.id
             }, { transaction: t });
 

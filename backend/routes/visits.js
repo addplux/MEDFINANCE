@@ -8,6 +8,7 @@ router.use(authMiddleware);
 
 router.get('/', checkPermission('patients', 'read'), visitController.getAllVisits);
 router.post('/', checkPermission('patients', 'write'), visitController.createVisit);
+router.post('/consultation', checkPermission('patients', 'write'), visitController.createConsultationVisit);
 router.get('/:id', checkPermission('patients', 'read'), visitController.getVisit);
 router.put('/:id', checkPermission('patients', 'write'), visitController.updateVisit);
 router.put('/:id/queue-status', checkPermission('patients', 'write'), visitController.updateQueueStatus);
@@ -15,3 +16,4 @@ router.post('/:id/discharge', checkPermission('patients', 'write'), visitControl
 router.get('/:id/movements', checkPermission('patients', 'read'), visitController.getVisitMovements);
 
 module.exports = router;
+

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { patientAPI, receivablesAPI } from '../../services/apiService';
+import { patientAPI, receivablesAPI, visitAPI } from '../../services/apiService';
 import {
     ArrowLeft, Edit, History, Phone, Mail, MapPin, User, CreditCard,
-    Shield, Clipboard, Printer, Calendar, AlertCircle, PlusCircle
+    Shield, Clipboard, Printer, Calendar, AlertCircle, PlusCircle, Stethoscope
 } from 'lucide-react';
 import NewAdmissionModal from '../../components/admissions/NewAdmissionModal';
 
@@ -51,6 +51,8 @@ const PatientView = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isAdmissionModalOpen, setIsAdmissionModalOpen] = useState(false);
+    const [sendingToDoctor, setSendingToDoctor] = useState(false);
+    const [sendToDoctorResult, setSendToDoctorResult] = useState(null);
 
     useEffect(() => {
         const load = async () => {
@@ -302,29 +304,78 @@ const PatientView = () => {
                 </Section>
             </div>
 
+
             {/* Visit History shortcut */}
-            <div className="card p-6 flex flex-col sm:flex-row items-center justify-between gap-6 mt-4 print:hidden">
-                <div>
-                    <h3 className="text-lg font-bold text-white">Patient Actions & History</h3>
-                    <p className="text-sm text-gray-500 mt-1">Manage admissions, or view all OPD, IPD, Lab, and Pharmacy records.</p>
+            <div className="card p-6 flex flex-col gap-6 mt-4 print:hidden">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h3 className="text-lg font-bold text-white">Patient Actions & History</h3>
+                        <p className="text-sm text-gray-500 mt-1">Manage admissions, or view all OPD, IPD, Lab, and Pharmacy records.</p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3 flex-wrap justify-end">
+                        {/* Send to Doctor */}
+                        <button
+                            disabled={sendingToDoctor}
+                            onClick={async () => {
+                                if (!window.confirm(`Send ${patient.firstName} ${patient.lastName} to the doctor?\n\nThis will create a visit and auto-generate a consultation fee.`)) return;
+                                setSendingToDoctor(true);
+                                setSendToDoctorResult(null);
+                                try {
+                                    const res = await visitAPI.createConsultation({ patientId: patient.id });
+                                    setSendToDoctorResult({ ok: true, msg: res.data.message, visitId: res.data.visit?.id });
+                                } catch (err) {
+                                    setSendToDoctorResult({ ok: false, msg: err.response?.data?.error || 'Failed to send patient to doctor.' });
+                                } finally {
+                                    setSendingToDoctor(false);
+                                }
+                            }}
+                            className="btn bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0 disabled:opacity-60 flex items-center gap-2"
+                        >
+                            <Stethoscope className="w-4 h-4" />
+                            {sendingToDoctor ? 'Sending…' : 'Send to Doctor'}
+                        </button>
+
+                        <button
+                            onClick={() => setIsAdmissionModalOpen(true)}
+                            className="btn btn-primary bg-indigo-600 hover:bg-indigo-700 text-white flex-shrink-0"
+                        >
+                            <PlusCircle className="w-5 h-5 mr-1" />
+                            Admit Patient (IPD)
+                        </button>
+                        <button
+                            onClick={() => navigate(`/app/patients/${id}/history`)}
+                            className="btn btn-secondary flex-shrink-0"
+                        >
+                            <History className="w-4 h-4" />
+                            View Full History
+                        </button>
+                    </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-3">
-                    <button
-                        onClick={() => setIsAdmissionModalOpen(true)}
-                        className="btn btn-primary bg-indigo-600 hover:bg-indigo-700 text-white flex-shrink-0"
-                    >
-                        <PlusCircle className="w-5 h-5 mr-1" />
-                        Admit Patient (IPD)
-                    </button>
-                    <button
-                        onClick={() => navigate(`/app/patients/${id}/history`)}
-                        className="btn btn-secondary flex-shrink-0"
-                    >
-                        <History className="w-4 h-4" />
-                        View Full History
-                    </button>
-                </div>
+
+                {/* Send to Doctor result banner */}
+                {sendToDoctorResult && (
+                    <div className={`w-full rounded-xl px-5 py-3 text-sm font-semibold flex items-start gap-3 ${sendToDoctorResult.ok
+                            ? 'bg-green-500/10 border border-green-500/30 text-green-400'
+                            : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                        }`}>
+                        <span className="text-lg">{sendToDoctorResult.ok ? '✅' : '❌'}</span>
+                        <div className="flex-1">
+                            <p>{sendToDoctorResult.msg}</p>
+                            {sendToDoctorResult.ok && sendToDoctorResult.visitId && (
+                                <button
+                                    onClick={() => navigate(`/app/visits/${sendToDoctorResult.visitId}`)}
+                                    className="mt-1 underline text-blue-400 text-xs"
+                                >
+                                    Open Visit →
+                                </button>
+                            )}
+                        </div>
+                        <button onClick={() => setSendToDoctorResult(null)} className="text-white/40 hover:text-white transition-colors">✕</button>
+                    </div>
+                )}
             </div>
+
+
 
             {/* Modals */}
             <NewAdmissionModal
