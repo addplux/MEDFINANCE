@@ -310,27 +310,62 @@ const Dashboard = () => {
             {/* ── Charts Row 2 ─────────────────────────────────────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                {/* Growth Trends */}
-                <div className="glass-card p-8 border-white/10">
-                    <div className="flex items-center gap-3 mb-8">
-                        <TrendingUp size={18} className="text-emerald-400" />
-                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white">Daily Growth Trends</h2>
+                {/* Live Payment Feed (Replaced Growth Trends) */}
+                <div className="glass-card p-6 border-white/10 flex flex-col h-[300px]">
+                    <div className="flex items-center justify-between mb-4 shrink-0">
+                        <div className="flex items-center gap-3">
+                            <Banknote size={18} className="text-emerald-400" />
+                            <div>
+                                <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white">Live Payment Feed</h2>
+                                <p className="text-[9px] text-text-secondary mt-0.5 uppercase tracking-widest">Auto-refreshes every 30s</p>
+                            </div>
+                        </div>
+                        <button onClick={loadRecentPayments} className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-text-secondary hover:text-white transition-all">
+                            <RefreshCw size={14} />
+                        </button>
                     </div>
-                    <div className="h-[220px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={weeklyTrend}>
-                                <defs>
-                                    <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#10B981" stopOpacity={0.3} />
-                                        <stop offset="100%" stopColor="#10B981" stopOpacity={0.01} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid stroke="#FFFFFF05" vertical={false} />
-                                <XAxis dataKey="day" tick={{ fontSize: 10, fontWeight: 900, fill: '#64748B' }} axisLine={false} tickLine={false} />
-                                <Tooltip content={<ChartTip />} />
-                                <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#10B981" strokeWidth={3} fill="url(#trendGradient)" dot={{ r: 4, fill: '#10B981', strokeWidth: 2, stroke: '#0F172A' }} />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                    <div className="flex-1 overflow-auto pr-2 custom-scrollbar">
+                        <table className="w-full text-left">
+                            <thead className="sticky top-0 bg-[#0f172a] z-10">
+                                <tr className="border-b border-white/5 text-[9px] uppercase tracking-widest font-black text-text-secondary">
+                                    <th className="pb-2 pr-4">Time</th>
+                                    <th className="pb-2 pr-4">Patient</th>
+                                    <th className="pb-2 pr-4">Amount</th>
+                                    <th className="pb-2 pr-4">Method</th>
+                                    <th className="pb-2 pr-4">Ref No.</th>
+                                    <th className="pb-2">Posted By</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/[0.03]">
+                                {recentPayments.length === 0 ? (
+                                    <tr><td colSpan={6} className="py-8 text-center text-text-secondary text-xs">No payments posted yet today.</td></tr>
+                                ) : recentPayments.slice(0, 20).map((p, i) => (
+                                    <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
+                                        <td className="py-2.5 pr-4 text-[9px] text-text-secondary font-mono whitespace-nowrap">
+                                            {new Date(p.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </td>
+                                        <td className="py-2.5 pr-4">
+                                            <div className="text-[10px] font-bold text-white group-hover:text-accent transition-colors truncate max-w-[100px]">
+                                                {p.patient?.firstName} {p.patient?.lastName}
+                                            </div>
+                                            <div className="text-[8px] text-text-secondary font-mono">{p.patient?.patientNumber}</div>
+                                        </td>
+                                        <td className="py-2.5 pr-4">
+                                            <span className="text-[10px] font-black text-emerald-400">{fmt(p.amount)}</span>
+                                        </td>
+                                        <td className="py-2.5 pr-4">
+                                            <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-white/5 text-white/60 border border-white/10">
+                                                {p.paymentMethod || p.patient?.paymentMethod || 'cash'}
+                                            </span>
+                                        </td>
+                                        <td className="py-2.5 pr-4 text-[9px] font-mono text-text-secondary truncate max-w-[80px]">{p.receiptNumber || p.referenceNumber || '—'}</td>
+                                        <td className="py-2.5 text-[9px] text-text-secondary truncate max-w-[80px]">
+                                            {p.receiver?.firstName} {p.receiver?.lastName}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -438,64 +473,6 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* ── Payment Visibility Feed ──────────────────────────────────── */}
-            <div className="glass-card p-6 border-white/10">
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                        <Banknote size={18} className="text-emerald-400" />
-                        <div>
-                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white">Live Payment Feed</h2>
-                            <p className="text-[9px] text-text-secondary mt-0.5 uppercase tracking-widest">All posted payments — auto-refreshes every 30s</p>
-                        </div>
-                    </div>
-                    <button onClick={loadRecentPayments} className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-text-secondary hover:text-white transition-all">
-                        <RefreshCw size={14} />
-                    </button>
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="border-b border-white/5 text-[9px] uppercase tracking-widest font-black text-text-secondary">
-                                <th className="pb-3 pr-4">Time</th>
-                                <th className="pb-3 pr-4">Patient</th>
-                                <th className="pb-3 pr-4">Amount</th>
-                                <th className="pb-3 pr-4">Method</th>
-                                <th className="pb-3 pr-4">Ref No.</th>
-                                <th className="pb-3">Posted By</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/[0.03]">
-                            {recentPayments.length === 0 ? (
-                                <tr><td colSpan={6} className="py-8 text-center text-text-secondary text-xs">No payments posted yet today.</td></tr>
-                            ) : recentPayments.slice(0, 20).map((p, i) => (
-                                <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
-                                    <td className="py-3 pr-4 text-[10px] text-text-secondary font-mono whitespace-nowrap">
-                                        {new Date(p.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </td>
-                                    <td className="py-3 pr-4">
-                                        <div className="text-xs font-bold text-white group-hover:text-accent transition-colors">
-                                            {p.patient?.firstName} {p.patient?.lastName}
-                                        </div>
-                                        <div className="text-[9px] text-text-secondary font-mono">{p.patient?.patientNumber}</div>
-                                    </td>
-                                    <td className="py-3 pr-4">
-                                        <span className="text-xs font-black text-emerald-400">{fmt(p.amount)}</span>
-                                    </td>
-                                    <td className="py-3 pr-4">
-                                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-white/5 text-white/60 border border-white/10">
-                                            {p.paymentMethod || p.patient?.paymentMethod || 'cash'}
-                                        </span>
-                                    </td>
-                                    <td className="py-3 pr-4 text-[10px] font-mono text-text-secondary">{p.receiptNumber || p.referenceNumber || '—'}</td>
-                                    <td className="py-3 text-[10px] text-text-secondary">
-                                        {p.receiver?.firstName} {p.receiver?.lastName}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
     );
 };
