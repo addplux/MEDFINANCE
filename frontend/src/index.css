@@ -33,14 +33,16 @@
 
   /* ── Light Theme Overrides ─────────────────────────────────────────── */
   html.light {
-    --bg-primary: #F9FAFB;
+    --bg-primary: #F0F4F8;
+    /* Cold White (Blue-tinted neutral) */
     --bg-secondary: #FFFFFF;
-    --bg-tertiary: #F1F5F9;
+    --bg-tertiary: #E2E8F0;
+    /* Brighter, colder gray */
     --bg-elevated: #FFFFFF;
 
     --text-primary: #0F172A;
     --text-secondary: #475569;
-    --text-tertiary: #94A3B8;
+    --text-tertiary: #64748B;
 
     --border-color: #E2E8F0;
     --border-hover: #CBD5E0;
