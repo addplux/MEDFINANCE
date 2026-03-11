@@ -1,4 +1,4 @@
-const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, Patient, Department, User, sequelize } = require('../models');
+const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, MaternityBill, TheatreBill, Payment, Patient, Department, User, sequelize } = require('../models');
 
 // Get dashboard overview statistics
 const getOverview = async (req, res) => {
