@@ -20,20 +20,22 @@ const TYPE_BADGE = {
 
 const InfoRow = ({ icon: Icon, label, value }) => (
     value ? (
-        <div className="flex items-start gap-3 py-2 print:py-0">
-            <Icon className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-            <div>
-                <p className="text-[10px] uppercase tracking-wider text-text-secondary leading-none mb-0.5 print:text-[8px]">{label}</p>
-                <p className="text-sm font-medium text-text-primary print:text-black print:text-[11px] print:leading-tight">{value}</p>
+        <div className="flex items-start gap-2 py-1 print:py-0">
+            <Icon className="w-3.5 h-3.5 text-text-tertiary mt-0.5 flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+                <p className="text-[9px] uppercase tracking-wider text-text-tertiary font-bold leading-none mb-0.5 print:text-[8px]">{label}</p>
+                <p className="text-[13px] font-semibold text-text-primary print:text-black print:text-[11px] print:leading-tight truncate">{value}</p>
             </div>
         </div>
     ) : null
 );
 
 const Section = ({ title, children }) => (
-    <div className="card p-6 space-y-2 print:p-2 print:space-y-0.5 print:border print:border-gray-200">
-        <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-4 print:mb-1 print:text-black print:font-black print:text-[9px]">{title}</h3>
-        {children}
+    <div className="card p-4 print:p-2 print:space-y-0.5 print:border print:border-gray-200">
+        <h3 className="text-[9px] font-black text-text-tertiary uppercase tracking-[0.1em] mb-2 print:mb-1 print:text-black print:text-[9px]">{title}</h3>
+        <div className="space-y-1">
+            {children}
+        </div>
     </div>
 );
 
@@ -100,8 +102,8 @@ const PatientView = () => {
                     <ArrowLeft className="w-4 h-4" />
                 </button>
                 <div className="flex-1">
-                    <h1 className="text-[11px] font-bold text-text-primary uppercase tracking-wider print:text-black">Patient Master Record</h1>
-                    <p className="text-xs text-text-secondary">Complete patient profile and classification</p>
+                    <h1 className="text-[10px] font-black text-text-primary uppercase tracking-[0.2em] print:text-black">Patient Master Record</h1>
+                    <p className="text-[10px] text-text-tertiary uppercase font-bold tracking-widest">Profile & Category</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                     <button
@@ -129,7 +131,7 @@ const PatientView = () => {
             </div>
 
             {/* Profile card */}
-            <div className="card p-4 print:p-2 print:border-none print:shadow-none">
+            <div className="card p-3 print:p-2 print:border-none print:shadow-none">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 print:gap-4 print:items-center">
                     {/* Photo */}
                     <div className="flex-shrink-0">
@@ -137,11 +139,11 @@ const PatientView = () => {
                             <img
                                 src={`${apiBase}${patient.photoUrl}`}
                                 alt={patient.firstName}
-                                className="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-lg"
+                                className="w-20 h-20 rounded-xl object-cover border-2 border-white/10 shadow-lg"
                             />
                         ) : (
-                            <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg print:shadow-none print:border print:border-gray-200 print:from-gray-100 print:to-gray-100">
-                                <span className="text-white print:text-black text-3xl font-bold">
+                            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg print:shadow-none print:border print:border-gray-200 print:from-gray-100 print:to-gray-100">
+                                <span className="text-white print:text-black text-2xl font-bold">
                                     {patient.firstName?.[0]}{patient.lastName?.[0]}
                                 </span>
                             </div>
@@ -209,7 +211,7 @@ const PatientView = () => {
             </div>
 
             {/* Details grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 print:grid-cols-2 gap-6 print:gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 print:grid-cols-2 gap-3 print:gap-2">
 
                 {/* Contact Info */}
                 <Section title="Contact Information">
