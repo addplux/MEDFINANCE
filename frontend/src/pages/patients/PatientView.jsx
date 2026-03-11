@@ -23,8 +23,8 @@ const InfoRow = ({ icon: Icon, label, value }) => (
         <div className="flex items-start gap-3 py-2 print:py-0">
             <Icon className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
             <div>
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 leading-none mb-0.5 print:text-[8px]">{label}</p>
-                <p className="text-sm font-medium text-white print:text-black print:text-[11px] print:leading-tight">{value}</p>
+                <p className="text-[10px] uppercase tracking-wider text-text-secondary leading-none mb-0.5 print:text-[8px]">{label}</p>
+                <p className="text-sm font-medium text-text-primary print:text-black print:text-[11px] print:leading-tight">{value}</p>
             </div>
         </div>
     ) : null
@@ -32,7 +32,7 @@ const InfoRow = ({ icon: Icon, label, value }) => (
 
 const Section = ({ title, children }) => (
     <div className="card p-6 space-y-2 print:p-2 print:space-y-0.5 print:border print:border-gray-200">
-        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4 print:mb-1 print:text-black print:font-black print:text-[9px]">{title}</h3>
+        <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-4 print:mb-1 print:text-black print:font-black print:text-[9px]">{title}</h3>
         {children}
     </div>
 );
@@ -100,8 +100,8 @@ const PatientView = () => {
                     <ArrowLeft className="w-4 h-4" />
                 </button>
                 <div className="flex-1">
-                    <h1 className="text-[11px] font-bold text-white uppercase tracking-wider print:text-black">Patient Master Record</h1>
-                    <p className="text-xs text-gray-500">Complete patient profile and classification</p>
+                    <h1 className="text-[11px] font-bold text-text-primary uppercase tracking-wider print:text-black">Patient Master Record</h1>
+                    <p className="text-xs text-text-secondary">Complete patient profile and classification</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                     <button
@@ -151,7 +151,7 @@ const PatientView = () => {
                     {/* Identity */}
                     <div className="flex-1 text-center sm:text-left space-y-2">
                         <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                            <h2 className="text-2xl font-bold text-white print:text-black">
+                            <h2 className="text-2xl font-bold text-text-primary print:text-black">
                                 {patient.firstName} {patient.lastName}
                             </h2>
                             <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-bold border ${badge.bg} ${badge.text} ${badge.border}`}>
@@ -166,17 +166,17 @@ const PatientView = () => {
                                 </span>
                             </div>
                         )}
-                        <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2 text-sm text-gray-500">
+                        <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2 text-sm text-text-secondary">
                             <span className="capitalize">{patient.gender}</span>
                             {age !== null && (
                                 <>
-                                    <span className="text-gray-600">•</span>
+                                    <span className="text-text-tertiary">•</span>
                                     <span>{age} years old</span>
                                 </>
                             )}
                             {patient.dateOfBirth && (
                                 <>
-                                    <span className="text-gray-600">•</span>
+                                    <span className="text-text-tertiary">•</span>
                                     <span>DOB: {new Date(patient.dateOfBirth).toLocaleDateString()}</span>
                                 </>
                             )}
@@ -191,18 +191,18 @@ const PatientView = () => {
 
                     {/* Balance & Visit Summary */}
                     <div className="flex-shrink-0 flex flex-col sm:flex-row print:flex-row gap-3 min-w-[200px] print:min-w-0">
-                        <div className="bg-gray-50 rounded-2xl p-4 print:p-2 print:bg-transparent print:border-none border border-gray-200 text-center shadow-sm print:shadow-none">
-                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider print:text-[8px]">Outstanding Balance</p>
-                            <p className={`text-2xl print:text-sm font-bold mt-2 print:mt-0 ${parseFloat(patient.balance) > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        <div className="bg-bg-secondary rounded-2xl p-4 print:p-2 print:bg-transparent print:border-none border border-border-color text-center shadow-sm print:shadow-none">
+                            <p className="text-[10px] text-text-secondary font-bold uppercase tracking-wider print:text-[8px]">Outstanding Balance</p>
+                            <p className={`text-2xl print:text-sm font-bold mt-2 print:mt-0 ${parseFloat(patient.balance) > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
                                 ZMW {parseFloat(patient.balance || 0).toLocaleString('en-ZM', { minimumFractionDigits: 2 })}
                             </p>
                         </div>
                         <div
-                            className="bg-indigo-50 rounded-2xl p-4 print:p-2 print:bg-transparent print:border-none border border-indigo-100 text-center cursor-pointer hover:bg-indigo-100 transition-colors shadow-sm print:shadow-none"
+                            className="bg-primary/5 rounded-2xl p-4 print:p-2 print:bg-transparent print:border-none border border-primary/20 text-center cursor-pointer hover:bg-primary/10 transition-colors shadow-sm print:shadow-none"
                             onClick={() => navigate(`/app/visits?search=${patient.patientNumber}`)}
                         >
-                            <p className="text-[10px] text-gray-500 print:text-gray-600 font-bold uppercase tracking-wider print:text-[8px]">Total Hospital Visits</p>
-                            <p className="text-xl print:text-sm font-bold text-indigo-600 print:text-black mt-1 print:mt-0">{patient.totalVisits || 0}</p>
+                            <p className="text-[10px] text-text-secondary print:text-gray-600 font-bold uppercase tracking-wider print:text-[8px]">Total Hospital Visits</p>
+                            <p className="text-xl print:text-sm font-bold text-primary print:text-black mt-1 print:mt-0">{patient.totalVisits || 0}</p>
                         </div>
                     </div>
                 </div>
@@ -268,9 +268,9 @@ const PatientView = () => {
                         { label: 'Sundries', key: 'sundries' },
                         { label: 'Antenatal', key: 'antenatal' },
                     ].filter(f => parseFloat(patient[f.key] || 0) !== 0).map(f => (
-                        <div key={f.key} className="flex justify-between items-center py-1 text-sm border-b border-gray-50 last:border-0">
-                            <span className="text-gray-500">{f.label}</span>
-                            <span className="font-semibold text-white">ZMW {parseFloat(patient[f.key]).toFixed(2)}</span>
+                        <div key={f.key} className="flex justify-between items-center py-1 text-sm border-b border-border-color last:border-0">
+                            <span className="text-text-secondary">{f.label}</span>
+                            <span className="font-semibold text-text-primary">ZMW {parseFloat(patient[f.key]).toFixed(2)}</span>
                         </div>
                     ))}
                     {[
@@ -285,12 +285,12 @@ const PatientView = () => {
                 <Section title="Visit Summary">
                     <div className="flex flex-col gap-3 py-1 print:py-0 print:gap-1">
                         <div className="flex justify-between items-center text-sm print:text-[11px]">
-                            <span className="text-gray-500 print:text-black">Total Encounters</span>
-                            <span className="font-bold text-white print:text-black">{patient.totalVisits || 0}</span>
+                            <span className="text-text-secondary print:text-black">Total Encounters</span>
+                            <span className="font-bold text-text-primary print:text-black">{patient.totalVisits || 0}</span>
                         </div>
                         <button
                             onClick={() => navigate(`/app/visits?search=${patient.patientNumber}`)}
-                            className="w-full py-2.5 px-4 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2 mt-2"
+                            className="w-full py-2.5 px-4 bg-primary/5 text-primary rounded-full text-xs font-bold hover:bg-primary/10 transition-colors flex items-center justify-center gap-2 mt-2"
                         >
                             <Clipboard className="w-3.5 h-3.5" />
                             View Encounter History
@@ -309,8 +309,8 @@ const PatientView = () => {
             <div className="card p-6 flex flex-col gap-6 mt-4 print:hidden">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
                     <div>
-                        <h3 className="text-lg font-bold text-white">Patient Actions & History</h3>
-                        <p className="text-sm text-gray-500 mt-1">Manage admissions, or view all OPD, IPD, Lab, and Pharmacy records.</p>
+                        <h3 className="text-lg font-bold text-text-primary">Patient Actions & History</h3>
+                        <p className="text-sm text-text-secondary mt-1">Manage admissions, or view all OPD, IPD, Lab, and Pharmacy records.</p>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3 flex-wrap justify-end">
                         {/* Send to Doctor */}
@@ -355,8 +355,8 @@ const PatientView = () => {
                 {/* Send to Doctor result banner */}
                 {sendToDoctorResult && (
                     <div className={`w-full rounded-xl px-5 py-3 text-sm font-semibold flex items-start gap-3 ${sendToDoctorResult.ok
-                            ? 'bg-green-500/10 border border-green-500/30 text-green-400'
-                            : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                        ? 'bg-green-500/10 border border-green-500/30 text-green-400'
+                        : 'bg-red-500/10 border border-red-500/30 text-red-400'
                         }`}>
                         <span className="text-lg">{sendToDoctorResult.ok ? '✅' : '❌'}</span>
                         <div className="flex-1">

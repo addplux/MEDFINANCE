@@ -151,10 +151,10 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-950">
+      <div className="flex items-center justify-center min-h-screen bg-bg-primary">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-white/40 text-sm font-medium">Loading...</p>
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-text-tertiary text-sm font-medium">Loading...</p>
         </div>
       </div>
     );
@@ -186,9 +186,9 @@ const RoleRoute = ({ children, roles }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
       <div className="text-6xl mb-4">🔒</div>
-      <h2 className="text-2xl font-black text-white mb-2">Access Denied</h2>
-      <p className="text-white/40 mb-6 max-w-sm">
-        Your role (<span className="text-white/70 font-semibold">{user?.role?.replace('_', ' ')}</span>) does not have permission to view this page.
+      <h2 className="text-2xl font-black text-text-primary mb-2">Access Denied</h2>
+      <p className="text-text-tertiary mb-6 max-w-sm">
+        Your role (<span className="text-text-secondary font-semibold">{user?.role?.replace('_', ' ')}</span>) does not have permission to view this page.
       </p>
       <button
         onClick={() => window.history.back()}

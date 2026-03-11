@@ -43,19 +43,19 @@ export default {
                     500: '#FF9500',
                 },
                 bg: {
-                    primary: '#080808', // Deep Black
-                    secondary: '#121212', // Dark Charcoal
-                    tertiary: '#1A1A1A', // Slate Gray
-                    elevated: '#242424',
+                    primary: 'var(--bg-primary)',
+                    secondary: 'var(--bg-secondary)',
+                    tertiary: 'var(--bg-tertiary)',
+                    elevated: 'var(--bg-elevated)',
                 },
                 text: {
-                    primary: '#FFFFFF',
-                    secondary: '#A1A1A1',
-                    tertiary: '#717171',
+                    primary: 'var(--text-primary)',
+                    secondary: 'var(--text-secondary)',
+                    tertiary: 'var(--text-tertiary)',
                 },
                 border: {
-                    color: '#2A2A2A',
-                    hover: '#3A3A3A',
+                    color: 'var(--border-color)',
+                    hover: 'var(--border-hover)',
                 }
             },
             fontFamily: {

@@ -104,7 +104,7 @@ const InvoiceView = () => {
 
         const waText = encodeURIComponent(
           shareData.message ||
-            `Hello, please find your invoice ${invNum} attached.`,
+          `Hello, please find your invoice ${invNum} attached.`,
         );
         const waUrl = `https://wa.me/${shareData.recipient.replace(/[^0-9+]/g, "")}?text=${waText}`;
         window.open(waUrl, "_blank");
@@ -137,8 +137,8 @@ const InvoiceView = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin h-10 w-10 border-4 border-blue-600 border-t-transparent rounded-full" />
-          <p className="text-gray-500 text-sm">Loading invoice...</p>
+          <div className="animate-spin h-10 w-10 border-4 border-primary/20 border-t-primary rounded-full" />
+          <p className="text-text-secondary text-sm">Loading invoice...</p>
         </div>
       </div>
     );
@@ -183,27 +183,27 @@ const InvoiceView = () => {
     totals?.grandTotal || services.reduce((s, r) => s + r.value, 0);
   const periodLabel = invoice.periodStart
     ? new Date(invoice.periodStart).toLocaleString("default", {
-        month: "long",
-        year: "numeric",
-      })
+      month: "long",
+      year: "numeric",
+    })
     : "";
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-20 animate-fade-in">
+    <div className="min-h-screen bg-bg-primary pb-20 animate-fade-in">
       {/* Toolbar — hidden on print */}
-      <div className="print:hidden sticky top-0 z-30 bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center shadow-sm">
+      <div className="print:hidden sticky top-0 z-30 bg-bg-primary/80 backdrop-blur-md border-b border-border-color px-6 py-3 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-900 transition-colors"
+            className="p-2 hover:bg-bg-secondary rounded-lg text-text-secondary hover:text-text-primary transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="font-bold text-gray-900 text-sm">
+            <h1 className="font-bold text-text-primary text-sm">
               Invoice #{invoice.invoiceNumber}
             </h1>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-text-secondary">
               {scheme?.schemeName} — {periodLabel}
             </p>
           </div>
@@ -211,7 +211,7 @@ const InvoiceView = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={handlePrint}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-bg-secondary hover:bg-bg-tertiary text-text-primary border border-border-color rounded-lg text-sm font-medium transition-colors"
           >
             <Printer className="w-4 h-4" />
             Print
@@ -684,42 +684,44 @@ const InvoiceView = () => {
 
           {/* ── MEMBER BREAKDOWN (visible on screen, print-hidden for summary view) ── */}
           {rows && rows.length > 0 && (
-            <div className="mt-10 print:hidden">
-              <h3 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide border-b border-gray-200 pb-1">
-                Member Billing Detail — {periodLabel}
-              </h3>
+            <div className="mt-10 print:hidden overflow-hidden rounded-2xl border border-border-color shadow-xl bg-bg-secondary">
+              <div className="px-6 py-4 bg-bg-tertiary border-b border-border-color">
+                <h3 className="text-sm font-black text-text-primary uppercase tracking-widest italic">
+                  Member Billing Detail — {periodLabel}
+                </h3>
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs border-collapse">
                   <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 px-2 py-2 text-left font-bold">
+                    <tr className="bg-bg-tertiary">
+                      <th className="border-b border-border-color px-4 py-3 text-left font-black uppercase text-[10px] tracking-widest text-text-secondary">
                         Policy #
                       </th>
-                      <th className="border border-gray-300 px-2 py-2 text-left font-bold">
+                      <th className="border-b border-border-color px-4 py-3 text-left font-black uppercase text-[10px] tracking-widest text-text-secondary">
                         Patient
                       </th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-bold">
+                      <th className="border-b border-border-color px-4 py-3 text-right font-black uppercase text-[10px] tracking-widest text-text-secondary">
                         Consult
                       </th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-bold">
+                      <th className="border-b border-border-color px-4 py-3 text-right font-black uppercase text-[10px] tracking-widest text-text-secondary">
                         Nursing
                       </th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-bold">
+                      <th className="border-b border-border-color px-4 py-3 text-right font-black uppercase text-[10px] tracking-widest text-text-secondary">
                         Lab
                       </th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-bold">
+                      <th className="border-b border-border-color px-4 py-3 text-right font-black uppercase text-[10px] tracking-widest text-text-secondary">
                         Radio
                       </th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-bold">
+                      <th className="border-b border-border-color px-4 py-3 text-right font-black uppercase text-[10px] tracking-widest text-text-secondary">
                         Dental
                       </th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-bold">
+                      <th className="border-b border-border-color px-4 py-3 text-right font-black uppercase text-[10px] tracking-widest text-text-secondary">
                         Pharmacy
                       </th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-bold">
+                      <th className="border-b border-border-color px-4 py-3 text-right font-black uppercase text-[10px] tracking-widest text-text-secondary">
                         Other
                       </th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-bold bg-gray-200">
+                      <th className="border-b border-border-color px-4 py-3 text-right font-black uppercase text-[10px] tracking-widest text-text-primary bg-primary/10">
                         Total
                       </th>
                     </tr>
@@ -728,37 +730,37 @@ const InvoiceView = () => {
                     {rows.map((row, i) => (
                       <tr
                         key={i}
-                        className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                        className={`hover:bg-bg-tertiary transition-colors ${i % 2 === 0 ? "bg-bg-secondary" : "bg-bg-tertiary/30"}`}
                         style={{ pageBreakInside: "avoid" }}
                       >
-                        <td className="border border-gray-200 px-2 py-1 font-mono text-gray-600">
+                        <td className="border-b border-border-color px-4 py-2 font-mono text-text-secondary">
                           {row.policyNumber || row.manNumber || "-"}
                         </td>
-                        <td className="border border-gray-200 px-2 py-1 font-medium">
+                        <td className="border-b border-border-color px-4 py-2 font-medium text-text-primary">
                           {row.patientName}
                         </td>
-                        <td className="border border-gray-200 px-2 py-1 text-right tabular-nums">
+                        <td className="border-b border-border-color px-4 py-2 text-right tabular-nums text-text-secondary">
                           {fmt(row.consultation)}
                         </td>
-                        <td className="border border-gray-200 px-2 py-1 text-right tabular-nums">
+                        <td className="border-b border-border-color px-4 py-2 text-right tabular-nums text-text-secondary">
                           {fmt(row.nursingCare)}
                         </td>
-                        <td className="border border-gray-200 px-2 py-1 text-right tabular-nums">
+                        <td className="border-b border-border-color px-4 py-2 text-right tabular-nums text-text-secondary">
                           {fmt(row.laboratory)}
                         </td>
-                        <td className="border border-gray-200 px-2 py-1 text-right tabular-nums">
+                        <td className="border-b border-border-color px-4 py-2 text-right tabular-nums text-text-secondary">
                           {fmt(row.radiology)}
                         </td>
-                        <td className="border border-gray-200 px-2 py-1 text-right tabular-nums">
+                        <td className="border-b border-border-color px-4 py-2 text-right tabular-nums text-text-secondary">
                           {fmt(row.dental)}
                         </td>
-                        <td className="border border-gray-200 px-2 py-1 text-right tabular-nums">
+                        <td className="border-b border-border-color px-4 py-2 text-right tabular-nums text-text-secondary">
                           {fmt(row.pharmacy)}
                         </td>
-                        <td className="border border-gray-200 px-2 py-1 text-right tabular-nums">
+                        <td className="border-b border-border-color px-4 py-2 text-right tabular-nums text-text-secondary">
                           {fmt(row.other)}
                         </td>
-                        <td className="border border-gray-200 px-2 py-1 text-right font-bold bg-gray-100 tabular-nums">
+                        <td className="border-b border-border-color px-4 py-2 text-right font-black bg-primary/5 text-text-primary tabular-nums">
                           {fmt(row.total)}
                         </td>
                       </tr>

@@ -112,12 +112,12 @@ const AccountForm = () => {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate('/app/ledger/accounts')}
-                        className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-text-secondary hover:text-white transition-all shadow-lg"
+                        className="p-3 bg-bg-secondary hover:bg-bg-tertiary border border-border-color rounded-2xl text-text-secondary hover:text-text-primary transition-all shadow-lg"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div>
-                        <h1 className="text-3xl font-black text-white tracking-tight">
+                        <h1 className="text-3xl font-black text-text-primary tracking-tight">
                             {isEditing ? 'Modify Account' : 'Initialize Account'}
                         </h1>
                         <p className="text-sm text-text-secondary mt-1">
@@ -134,9 +134,9 @@ const AccountForm = () => {
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left Column: Essential Info */}
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="glass-card p-8 border-white/10 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                            <BookOpen size={64} />
+                    <div className="glass-card p-8 border-border-color relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-5">
+                            <BookOpen size={64} className="text-text-primary" />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
@@ -151,7 +151,7 @@ const AccountForm = () => {
                                     onChange={handleChange}
                                     required
                                     placeholder="e.g. 1001"
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent/50 focus:border-accent outline-none transition-all placeholder:text-white/20"
+                                    className="w-full bg-bg-secondary border border-border-color rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent/50 focus:border-accent outline-none transition-all placeholder:text-text-tertiary text-text-primary"
                                 />
                                 <p className="text-[9px] text-text-secondary italic">Unique numerical identifier within the COA.</p>
                             </div>
@@ -167,7 +167,7 @@ const AccountForm = () => {
                                     onChange={handleChange}
                                     required
                                     placeholder="e.g. Petty Cash"
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent/50 focus:border-accent outline-none transition-all placeholder:text-white/20"
+                                    className="w-full bg-bg-secondary border border-border-color rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent/50 focus:border-accent outline-none transition-all placeholder:text-text-tertiary text-text-primary"
                                 />
                                 <p className="text-[9px] text-text-secondary italic">Human-readable description for reports.</p>
                             </div>
@@ -182,19 +182,19 @@ const AccountForm = () => {
                                     onChange={handleChange}
                                     rows="4"
                                     placeholder="What will this account track? (e.g., Records all daily cash collections from OPD)"
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent/50 focus:border-accent outline-none transition-all placeholder:text-white/20 resize-none"
+                                    className="w-full bg-bg-secondary border border-border-color rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent/50 focus:border-accent outline-none transition-all placeholder:text-text-tertiary text-text-primary resize-none"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-6 glass-card border-white/10">
+                    <div className="flex items-center justify-between p-6 glass-card border-border-color">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/5 rounded-xl">
+                            <div className="p-2 bg-bg-secondary rounded-xl">
                                 <AlertCircle className="text-amber-400" size={20} />
                             </div>
                             <div>
-                                <p className="text-sm font-bold text-white">Double-Check Accuracy</p>
+                                <p className="text-sm font-bold text-text-primary">Double-Check Accuracy</p>
                                 <p className="text-[10px] text-text-secondary uppercase tracking-widest">Post-creation adjustments require journal corrections.</p>
                             </div>
                         </div>
@@ -202,7 +202,7 @@ const AccountForm = () => {
                             <button
                                 type="button"
                                 onClick={() => navigate('/app/ledger/accounts')}
-                                className="px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 hover:bg-white/5 transition-all text-text-secondary hover:text-white"
+                                className="px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-border-color hover:bg-bg-secondary transition-all text-text-secondary hover:text-text-primary"
                             >
                                 Discard
                             </button>
@@ -229,7 +229,7 @@ const AccountForm = () => {
                                         key={type}
                                         type="button"
                                         onClick={() => setFormData(prev => ({ ...prev, accountType: type }))}
-                                        className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-black uppercase tracking-widest transition-all ${formData.accountType === type ? 'bg-accent/10 border-accent text-accent shadow-lg shadow-accent/5' : 'bg-white/5 border-white/5 text-text-secondary hover:border-white/20'}`}
+                                        className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-black uppercase tracking-widest transition-all ${formData.accountType === type ? 'bg-accent/10 border-accent text-accent shadow-lg shadow-accent/5' : 'bg-bg-secondary border-border-color text-text-secondary hover:border-accent/40'}`}
                                     >
                                         {type}
                                         {formData.accountType === type && <CheckCircle size={14} className="animate-in fade-in zoom-in duration-300" />}
@@ -244,11 +244,11 @@ const AccountForm = () => {
                                 name="parentId"
                                 value={formData.parentId}
                                 onChange={handleChange}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all text-white appearance-none"
+                                className="w-full bg-bg-secondary border border-border-color rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all text-text-primary appearance-none"
                             >
-                                <option value="" className="bg-slate-900 border-none">Root (No Parent)</option>
+                                <option value="" className="bg-bg-primary text-text-primary border-none">Root (No Parent)</option>
                                 {parentAccounts.map((acct) => (
-                                    <option key={acct.id} value={acct.id} className="bg-slate-900 border-none">
+                                    <option key={acct.id} value={acct.id} className="bg-bg-primary text-text-primary border-none">
                                         {acct.accountCode} — {acct.accountName}
                                     </option>
                                 ))}
@@ -256,10 +256,10 @@ const AccountForm = () => {
                         </div>
 
                         {isEditing && (
-                            <div className="pt-4 border-t border-white/5 space-y-4">
+                            <div className="pt-4 border-t border-border-color space-y-4">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary">Operational Status</label>
-                                <label className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10 cursor-pointer group hover:border-white/20 transition-all">
-                                    <span className="text-xs font-bold text-text-secondary group-hover:text-white transition-colors">Mark as Active</span>
+                                <label className="flex items-center justify-between p-3 bg-bg-secondary rounded-xl border border-border-color cursor-pointer group hover:border-accent/40 transition-all">
+                                    <span className="text-xs font-bold text-text-secondary group-hover:text-text-primary transition-colors">Mark as Active</span>
                                     <div className="relative inline-flex items-center cursor-pointer">
                                         <input
                                             type="checkbox"
@@ -268,7 +268,7 @@ const AccountForm = () => {
                                             onChange={handleChange}
                                             className="sr-only peer"
                                         />
-                                        <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/20 after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-accent peer-checked:after:bg-white"></div>
+                                        <div className="w-9 h-5 bg-border-color peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/20 after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-accent peer-checked:after:bg-white"></div>
                                     </div>
                                 </label>
                             </div>

@@ -112,8 +112,8 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                         <Icon className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                        <h1 className="text-xl font-black tracking-tight text-white">{title === 'OPD' ? 'OPD' : `${title} Queue`}</h1>
-                        <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/40">
+                        <h1 className="text-xl font-black tracking-tight text-text-primary">{title === 'OPD' ? 'OPD' : `${title} Queue`}</h1>
+                        <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-text-tertiary">
                             <span className="flex items-center gap-1">
                                 <Users className="w-3 h-3" /> {visits.length} PATIENTS
                             </span>
@@ -126,17 +126,17 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
 
                 <div className="flex items-center gap-2">
                     <div className="relative group">
-                        <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" />
+                        <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-primary transition-colors" />
                         <input
                             type="text"
                             placeholder="Find patient..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            className="pl-10 pr-4 py-2 bg-white/[0.03] border border-white/5 rounded-full text-xs focus:ring-2 focus:ring-primary/20 focus:bg-white/10 transition-all w-48 placeholder-white/20 font-bold text-white"
+                            className="pl-10 pr-4 py-2 bg-bg-secondary border border-border-color rounded-full text-xs focus:ring-2 focus:ring-primary/20 focus:bg-bg-tertiary transition-all w-48 placeholder-text-tertiary font-bold text-text-primary"
                         />
                     </div>
-                    <button onClick={loadData} className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-all border border-white/5">
-                        <RefreshCw className={`w-4 h-4 text-white/60 ${loading ? 'animate-spin' : ''}`} />
+                    <button onClick={loadData} className="p-2 bg-bg-secondary hover:bg-bg-tertiary rounded-full transition-all border border-border-color">
+                        <RefreshCw className={`w-4 h-4 text-text-secondary ${loading ? 'animate-spin' : ''}`} />
                     </button>
                     {(['theatre', 'maternity', 'lab', 'radiology'].includes(type)) && (
                         <button
@@ -160,13 +160,13 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                         key={f.id}
                         onClick={() => setFilter(f.id)}
                         className={`relative px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border flex items-center gap-2 ${filter === f.id
-                            ? 'bg-white text-black border-white'
-                            : 'bg-white/5 text-white/40 border-white/5 hover:border-white/20'
+                            ? 'bg-text-primary text-bg-primary border-text-primary'
+                            : 'bg-bg-secondary text-text-tertiary border-border-color hover:border-text-tertiary'
                             }`}
                     >
                         {f.label}
                         {f.count > 0 && f.id !== 'all' && (
-                            <span className={`flex items-center justify-center px-1.5 py-0.5 text-[9px] font-black rounded-full shadow-md ${filter === f.id ? 'bg-primary text-white border border-primary/50' : 'bg-bg-tertiary text-white/80 border border-white/10'}`}>
+                            <span className={`flex items-center justify-center px-1.5 py-0.5 text-[9px] font-black rounded-full shadow-md ${filter === f.id ? 'bg-primary text-white border border-primary/50' : 'bg-bg-tertiary text-text-secondary border border-border-color'}`}>
                                 {f.count}
                             </span>
                         )}
@@ -177,8 +177,8 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
             {/* Compact Grid */}
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                 {filteredVisits.length === 0 ? (
-                    <div className="h-64 glass-panel border-dashed border-white/5 rounded-[2rem] flex flex-col items-center justify-center text-white/20">
-                        <Users className="w-12 h-12 mb-2 opacity-10" />
+                    <div className="h-64 glass border-dashed border-border-color rounded-[2rem] flex flex-col items-center justify-center text-text-tertiary">
+                        <Users className="w-12 h-12 mb-2 opacity-5" />
                         <p className="text-sm font-bold tracking-tight">Zero patients in {filter.replace('_', ' ').toLowerCase()}</p>
                     </div>
                 ) : (
@@ -187,7 +187,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                             <div
                                 key={v.id}
                                 onClick={() => v.visitId ? navigate(`/app/visits/${v.visitId}`) : navigate(`/app/patients/${v.patient?.id}`)}
-                                className="group relative glass-panel hover:bg-white/[0.04] p-4 border-white/5 hover:border-white/10 transition-all cursor-pointer rounded-[1.5rem]"
+                                className="group relative glass hover:bg-bg-tertiary p-4 border-border-color hover:border-primary/50 transition-all cursor-pointer rounded-[1.5rem]"
                             >
                                 {/* Check-in Count Badge */}
                                 {v.dailyCheckInCount > 1 && (
@@ -198,13 +198,13 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
 
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 group-hover:border-primary/30 group-hover:bg-primary/5 transition-all">
-                                            <span className="text-[10px] font-black text-white/40 group-hover:text-primary transition-colors">
+                                        <div className="w-8 h-8 rounded-xl bg-bg-secondary flex items-center justify-center border border-border-color group-hover:border-primary/30 group-hover:bg-primary/5 transition-all">
+                                            <span className="text-[10px] font-black text-text-tertiary group-hover:text-primary transition-colors">
                                                 {v.patient?.firstName?.charAt(0)}{v.patient?.lastName?.charAt(0)}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <h3 className="text-sm font-bold text-white tracking-tight leading-none">
+                                            <h3 className="text-sm font-bold text-text-primary tracking-tight leading-none">
                                                 {v.patient?.firstName} {v.patient?.lastName}
                                             </h3>
                                             {v.patient?.paymentMethod && PAYMENT_METHOD_STYLES[v.patient.paymentMethod] && (
@@ -213,7 +213,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                                 </span>
                                             )}
                                         </div>
-                                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mt-1">
+                                        <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mt-1">
                                             {v.patient?.patientNumber}
                                         </p>
                                     </div>
@@ -226,8 +226,8 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                 </div>
 
                                 {/* Reason for visit */}
-                                <div className="bg-white/[0.02] border border-white/5 rounded-xl p-2.5 mb-3 group-hover:bg-white/[0.04] transition-all">
-                                    <p className="text-[11px] font-semibold text-white/60 line-clamp-2 italic leading-relaxed">
+                                <div className="bg-bg-primary/50 border border-border-color rounded-xl p-2.5 mb-3 group-hover:bg-bg-tertiary transition-all">
+                                    <p className="text-[11px] font-semibold text-text-secondary line-clamp-2 italic leading-relaxed">
                                         "{v.notes || 'No specific clinical notes added for this encounter.'}"
                                     </p>
                                 </div>
@@ -248,13 +248,13 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
 
                                         {/* Dynamic Status Text */}
                                         <span className={`text-[9px] font-black uppercase tracking-widest truncate ${v.queueStatus === 'pending_triage' ? 'text-orange-400' :
-                                                v.queueStatus === 'pending_cashier' ? 'text-yellow-400' :
-                                                    v.queueStatus === 'waiting_doctor' ? 'text-blue-400' :
-                                                        v.queueStatus === 'with_doctor' ? 'text-purple-400' :
-                                                            v.queueStatus === 'pending_results' ? 'text-yellow-400' :
-                                                                v.billingSummary?.status === 'pending' ? 'text-primary' :
-                                                                    v.billingSummary?.status === 'cleared' ? 'text-green-500' :
-                                                                        'text-white/20'
+                                            v.queueStatus === 'pending_cashier' ? 'text-yellow-400' :
+                                                v.queueStatus === 'waiting_doctor' ? 'text-blue-400' :
+                                                    v.queueStatus === 'with_doctor' ? 'text-purple-400' :
+                                                        v.queueStatus === 'pending_results' ? 'text-yellow-400' :
+                                                            v.billingSummary?.status === 'pending' ? 'text-primary' :
+                                                                v.billingSummary?.status === 'cleared' ? 'text-green-500' :
+                                                                    'text-white/20'
                                             }`}>
                                             {
                                                 v.queueStatus === 'pending_triage' ? 'AWAITING TRIAGE' :

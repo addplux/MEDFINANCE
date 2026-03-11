@@ -76,8 +76,8 @@ const OPDBilling = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">OPD Billing</h1>
-                    <p className="text-gray-600 mt-1">Manage outpatient department bills</p>
+                    <h1 className="text-3xl font-bold text-text-primary">OPD Billing</h1>
+                    <p className="text-text-secondary mt-1">Manage outpatient department bills</p>
                 </div>
                 <button
                     onClick={() => navigate('/app/billing/opd/new')}
@@ -195,16 +195,16 @@ const OPDBilling = () => {
                 {/* Mobile Card View */}
                 <div className="grid grid-cols-1 gap-4 md:hidden">
                     {filteredBills.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
+                        <div className="text-center py-8 text-text-secondary">
                             No bills found
                         </div>
                     ) : (
                         filteredBills.map((bill) => (
-                            <div key={bill.id} className="bg-white p-4 rounded-lg shadow border border-gray-100 space-y-3">
+                            <div key={bill.id} className="bg-bg-secondary p-4 rounded-lg shadow border border-border-color space-y-3">
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <div className="font-medium text-gray-900">{bill.billNumber}</div>
-                                        <div className="text-sm text-gray-500">{new Date(bill.billDate).toLocaleDateString()}</div>
+                                        <div className="font-medium text-text-primary">{bill.billNumber}</div>
+                                        <div className="text-sm text-text-secondary">{new Date(bill.billDate).toLocaleDateString()}</div>
                                     </div>
                                     <span className={getStatusBadge(bill.status)}>
                                         {bill.status}
@@ -216,16 +216,16 @@ const OPDBilling = () => {
 
                                 <div className="space-y-1">
                                     <div className="text-sm">
-                                        <span className="text-gray-500">Patient:</span>{' '}
-                                        <span className="font-medium">{bill.patient?.firstName} {bill.patient?.lastName}</span>
+                                        <span className="text-text-secondary">Patient:</span>{' '}
+                                        <span className="font-medium text-text-primary">{bill.patient?.firstName} {bill.patient?.lastName}</span>
                                     </div>
                                     <div className="text-sm">
-                                        <span className="text-gray-500">Service:</span>{' '}
-                                        <span className="font-medium">{bill.service?.serviceName}</span>
+                                        <span className="text-text-secondary">Service:</span>{' '}
+                                        <span className="font-medium text-text-primary">{bill.service?.serviceName}</span>
                                     </div>
                                     <div className="text-sm">
-                                        <span className="text-gray-500">Amount:</span>{' '}
-                                        <span className="font-bold text-primary-600">K {bill.netAmount?.toLocaleString()}</span>
+                                        <span className="text-text-secondary">Amount:</span>{' '}
+                                        <span className="font-bold text-primary">K {bill.netAmount?.toLocaleString()}</span>
                                     </div>
                                 </div>
 

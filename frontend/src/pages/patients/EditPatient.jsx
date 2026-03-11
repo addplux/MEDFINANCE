@@ -222,27 +222,27 @@ const EditPatient = () => {
                     <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Edit Patient</h1>
-                    <p className="text-gray-600 mt-1">Update patient information</p>
+                    <h1 className="text-3xl font-black text-text-primary tracking-tight">Edit Patient</h1>
+                    <p className="text-text-secondary mt-1">Update patient information</p>
                 </div>
             </div>
 
             {/* Tabs Navigation */}
-            <div className="flex border-b border-gray-200 mb-6">
+            <div className="flex border-b border-border-color mb-8">
                 <button
-                    className={`px-4 py-2 font-medium text-sm ${activeTab === 'details' ? 'border-b-2 border-primary-600 text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`px-6 py-3 font-black text-[10px] uppercase tracking-widest transition-all ${activeTab === 'details' ? 'border-b-2 border-primary text-primary' : 'text-text-secondary hover:text-text-primary'}`}
                     onClick={() => setActiveTab('details')}
                 >
                     Patient Details
                 </button>
                 <button
-                    className={`px-4 py-2 font-medium text-sm ${activeTab === 'history' ? 'border-b-2 border-primary-600 text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`px-6 py-3 font-black text-[10px] uppercase tracking-widest transition-all ${activeTab === 'history' ? 'border-b-2 border-primary text-primary' : 'text-text-secondary hover:text-text-primary'}`}
                     onClick={() => setActiveTab('history')}
                 >
                     Visit History
                 </button>
                 <button
-                    className={`px-4 py-2 font-medium text-sm ${activeTab === 'movement' ? 'border-b-2 border-primary-600 text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`px-6 py-3 font-black text-[10px] uppercase tracking-widest transition-all ${activeTab === 'movement' ? 'border-b-2 border-primary text-primary' : 'text-text-secondary hover:text-text-primary'}`}
                     onClick={() => setActiveTab('movement')}
                 >
                     Patient Movement
@@ -254,8 +254,8 @@ const EditPatient = () => {
                 <form onSubmit={handleSubmit} className="card p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Photo Upload Section */}
-                        <div className="md:col-span-2 flex flex-col items-center justify-center mb-6">
-                            <div className="relative w-32 h-32 mb-4 group cursor-pointer overflow-hidden rounded-full border-4 border-gray-100 shadow-sm">
+                        <div className="md:col-span-2 flex flex-col items-center justify-center mb-8">
+                            <div className="relative w-32 h-32 mb-4 group cursor-pointer overflow-hidden rounded-full border-4 border-border-color shadow-2xl">
                                 {photoPreview ? (
                                     <img
                                         src={photoPreview}
@@ -273,11 +273,11 @@ const EditPatient = () => {
                                     onChange={handlePhotoChange}
                                     className="absolute inset-0 opacity-0 cursor-pointer"
                                 />
-                                <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span className="text-white text-xs font-medium">Upload Photo</span>
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+                                    <span className="text-white text-[10px] font-black uppercase tracking-widest">Update</span>
                                 </div>
                             </div>
-                            <p className="text-sm text-gray-500">Click to update patient photo</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary">Patient Identifer Photo</p>
                         </div>
 
                         <div className="form-group">
@@ -569,11 +569,11 @@ const EditPatient = () => {
                     <div className="overflow-x-auto">
                         <table className="table w-full">
                             <thead>
-                                <tr className="text-left bg-gray-50 border-b">
-                                    <th className="p-3">Date</th>
-                                    <th className="p-3">Service / Visit</th>
-                                    <th className="p-3">Amount</th>
-                                    <th className="p-3">Status</th>
+                                <tr className="text-left bg-bg-tertiary border-b border-border-color">
+                                    <th className="p-4 text-[10px] font-black uppercase tracking-widest text-text-secondary">Date</th>
+                                    <th className="p-4 text-[10px] font-black uppercase tracking-widest text-text-secondary">Service / Visit</th>
+                                    <th className="p-4 text-[10px] font-black uppercase tracking-widest text-text-secondary">Amount</th>
+                                    <th className="p-4 text-[10px] font-black uppercase tracking-widest text-text-secondary">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -604,8 +604,8 @@ const EditPatient = () => {
                             <h3 className="font-bold text-lg mb-4">Log New Movement</h3>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="label">Current Location</label>
-                                    <div className="p-3 bg-gray-100 rounded text-gray-700 font-medium">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary mb-2 block">Current Location</label>
+                                    <div className="p-4 bg-bg-tertiary border border-border-color rounded-xl text-text-primary font-bold">
                                         {formData.ward || 'Not Associated'}
                                     </div>
                                 </div>
@@ -644,10 +644,10 @@ const EditPatient = () => {
                             <h3 className="font-bold text-lg mb-4">Movement Log</h3>
                             <div className="space-y-4">
                                 {movements.map((move, idx) => (
-                                    <div key={idx} className="flex gap-4 p-4 border rounded-lg bg-gray-50 relative">
-                                        <div className="mt-1"><Clock className="w-5 h-5 text-gray-400" /></div>
+                                    <div key={idx} className="flex gap-4 p-5 border border-border-color rounded-2xl bg-bg-secondary hover:bg-bg-tertiary transition-all relative">
+                                        <div className="mt-1"><Clock className="w-5 h-5 text-text-tertiary" /></div>
                                         <div>
-                                            <p className="font-semibold text-gray-900">
+                                            <p className="font-bold text-text-primary">
                                                 Moved from {move.fromDepartment} to {move.toDepartment}
                                             </p>
                                             <p className="text-sm text-gray-500">

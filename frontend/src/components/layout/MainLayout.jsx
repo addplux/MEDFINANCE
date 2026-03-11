@@ -312,7 +312,9 @@ const MainLayout = ({ children }) => {
           fixed top-4 left-4 h-[calc(100vh-2rem)] z-40
           transform transition-all duration-300 lg:translate-x-0
           flex flex-col rounded-2xl
-          shadow-[0_8px_40px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.05)]
+          ${isDark
+                        ? 'shadow-[0_8px_40px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.05)]'
+                        : 'shadow-[0_8px_40px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.02)]'}
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${sidebarCollapsed ? 'w-20' : 'w-64'}
 `}
@@ -324,7 +326,7 @@ const MainLayout = ({ children }) => {
                 }}
             >
                 {/* Logo & Collapse Button */}
-                <div className="h-20 px-4 flex items-center justify-between border-b border-white/10 rounded-t-2xl">
+                <div className={`h-20 px-4 flex items-center justify-between border-b rounded-t-2xl ${isDark ? 'border-white/10' : 'border-black/5'}`}>
                     {!sidebarCollapsed && (
                         <div className="flex items-center gap-3">
                             {/* ZER0DAY Logo */}
@@ -372,7 +374,7 @@ const MainLayout = ({ children }) => {
 
                 {/* User Profile - Suno Style */}
                 {!sidebarCollapsed && (
-                    <div className="mx-4 mt-6 mb-2 p-4 rounded-2xl bg-gradient-to-br from-white/[0.03] to-transparent border border-white/5">
+                    <div className={`mx-4 mt-6 mb-2 p-4 rounded-2xl border ${isDark ? 'bg-gradient-to-br from-white/[0.03] to-transparent border-white/5' : 'bg-white/40 border-black/5 shadow-sm'}`}>
                         <div className="flex items-center gap-3">
                             <div className="relative">
                                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-primary via-primary to-accent p-[2px]">
@@ -446,7 +448,7 @@ const MainLayout = ({ children }) => {
 
                                         {/* Submenu items */}
                                         {isExpanded && !sidebarCollapsed && (
-                                            <div className="mt-1 ml-7 space-y-0.5 border-l border-white/10 pl-3">
+                                            <div className={`mt-1 ml-7 space-y-0.5 border-l pl-3 ${isDark ? 'border-white/10' : 'border-black/5'}`}>
                                                 {item.submenu.map((subItem) => {
                                                     const isActive = location.pathname === subItem.path;
                                                     return (
@@ -599,7 +601,7 @@ const MainLayout = ({ children }) => {
             {/* Main Content */}
             <div className={`flex-1 flex flex-col transition-all duration-500 bg-bg-primary ${sidebarCollapsed ? 'lg:pl-28' : 'lg:pl-72'} `}>
                 {/* Mobile Header */}
-                <header className="lg:hidden h-16 bg-black/40 backdrop-blur-xl border-b border-white/5 px-6 flex items-center justify-between sticky top-0 z-20">
+                <header className={`lg:hidden h-16 backdrop-blur-xl border-b px-6 flex items-center justify-between sticky top-0 z-20 ${isDark ? 'bg-black/40 border-white/5' : 'bg-white/60 border-black/5'}`}>
                     <button
                         onClick={() => setSidebarOpen(true)}
                         className="p-2 hover:bg-white/5 rounded-xl transition-all"
