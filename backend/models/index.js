@@ -50,6 +50,8 @@ const Ward = require('./Ward');
 const Bed = require('./Bed');
 const Admission = require('./Admission');
 const SchemeService = require('./SchemeService');
+const FileRequest = require('./FileRequest');
+const OnlineTransaction = require('./OnlineTransaction');
 
 // Define relationships
 
@@ -235,6 +237,14 @@ Visit.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
 Visit.hasMany(Vitals, { foreignKey: 'visitId', as: 'vitals' });
 Visit.hasMany(Admission, { foreignKey: 'visitId', as: 'admissions' });
 Patient.hasMany(Visit, { foreignKey: 'patientId', as: 'visits' });
+
+// File Request relationships
+FileRequest.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
+FileRequest.belongsTo(User, { foreignKey: 'requestedById', as: 'requester' });
+FileRequest.belongsTo(User, { foreignKey: 'assignedToId', as: 'assignee' });
+Patient.hasMany(FileRequest, { foreignKey: 'patientId', as: 'fileRequests' });
+User.hasMany(FileRequest, { foreignKey: 'requestedById', as: 'requestedFiles' });
+User.hasMany(FileRequest, { foreignKey: 'assignedToId', as: 'assignedFiles' });
 Scheme.hasMany(Visit, { foreignKey: 'schemeId', as: 'visits' });
 Department.hasMany(Visit, { foreignKey: 'departmentId', as: 'visits' });
 
@@ -327,7 +337,9 @@ module.exports = {
     Ward,
     Bed,
     Admission,
-    SchemeService
+    SchemeService,
+    FileRequest,
+    OnlineTransaction
 };
 
 

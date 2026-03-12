@@ -152,6 +152,9 @@ import OfflineBanner from './components/ui/OfflineBanner';
 // ── BILLING ──────────────────────────────────────────────────────────
 const PatientRunningBill = lazy(() => import('./pages/billing/PatientRunningBill'));
 
+// ── PUBLIC / PATIENT PORTAL ──────────────────────────────────────────
+const PatientPaymentPortal = lazy(() => import('./pages/public/PatientPaymentPortal'));
+
 // Protected Route Component — checks authentication
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
@@ -243,6 +246,7 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/pay" element={<PatientPaymentPortal />} />
               <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
 
               {/* Protected Routes */}

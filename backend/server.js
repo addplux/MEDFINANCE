@@ -131,6 +131,8 @@ app.use('/api/system-logs', require('./routes/systemLogs'));
 app.use('/api/audit-logs', require('./routes/auditLogs'));
 app.use('/api/scheme-services', require('./routes/schemeServices'));
 app.use('/api/vitals', require('./routes/vitals'));
+app.use('/api/records', require('./routes/recordsRoutes'));
+app.use('/api/public', require('./routes/publicRoutes'));
 
 // Error handling middleware
 app.use(async (err, req, res, next) => {
@@ -194,6 +196,9 @@ const startServer = async () => {
         try {
             const runPaymentEnumMigration = require('./migrations/addPaymentEnums');
             await runPaymentEnumMigration();
+
+            const runRecordsEnumMigration = require('./migrations/addRecordsEnums');
+            await runRecordsEnumMigration();
         } catch (migErr) {
             console.error('⚠️ Migration runner error (non-fatal):', migErr.message);
         }

@@ -13,6 +13,12 @@ export const authAPI = {
     rejectUser: (id, data) => api.put(`/auth/reject/${id}`, data),
 };
 
+// Public Access (Patient Portal)
+export const publicAPI = {
+    getPatientBalance: (patientNumber) => api.get(`/public/patient-balance/${patientNumber}`),
+    initiatePayment: (data) => api.post('/public/initiate-payment', data),
+};
+
 // Notifications
 export const notificationsAPI = {
     getAll: () => api.get('/notifications'),
