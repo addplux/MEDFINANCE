@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { visitAPI } from '../../../services/apiService';
-import { Stethoscope, ClipboardList, Send, CheckCircle } from 'lucide-react';
+import { Stethoscope, ClipboardList, Send, CheckCircle, Info, Activity, Beaker, Radio } from 'lucide-react';
 
 const DoctorWorkspace = ({ visitId, queueStatus, notes, onStatusChange }) => {
     const [loading, setLoading] = useState(false);
@@ -66,20 +66,55 @@ const DoctorWorkspace = ({ visitId, queueStatus, notes, onStatusChange }) => {
                         </button>
                     )}
 
+                    {queueStatus === 'pending_results' && (
+                        <div className="w-full mb-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
+                            <Info className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                            <div className="text-xs text-blue-200 leading-relaxed">
+                                <p className="font-bold mb-1 uppercase tracking-wider">Awaiting Diagnostics</p>
+                                This patient has been moved to the pending results queue. Once lab results or X-rays are ready, click <b>Resume Consultation</b> below to finalize findings.
+                            </div>
+                        </div>
+                    )}
+
                     {queueStatus === 'with_doctor' && (
                         <>
                             <button
                                 onClick={() => handleUpdateStatus('pending_results')}
                                 disabled={loading}
                                 className="btn btn-secondary border-yellow-500 text-yellow-700 hover:bg-yellow-50 text-sm py-1.5"
+                                title="Move to pending while patient goes for diagnostics"
                             >
                                 <ClipboardList className="w-4 h-4 text-yellow-500" /> Awaiting Labs/X-Ray
                             </button>
 
                             <button
+                                onClick={() => handleUpdateStatus('waiting_theatre', 'Theatre')}
+                                disabled={loading}
+                                className="btn bg-red-900/40 hover:bg-red-800 text-red-200 border-red-800 text-sm py-1.5"
+                            >
+                                <Activity className="w-4 h-4" /> Send to Theatre
+                            </button>
+
+                            <button
+                                onClick={() => handleUpdateStatus('waiting_lab', 'Laboratory')}
+                                disabled={loading}
+                                className="btn bg-blue-900/40 hover:bg-blue-800 text-blue-200 border-blue-800 text-sm py-1.5"
+                            >
+                                <Beaker className="w-4 h-4" /> Send to Lab
+                            </button>
+
+                            <button
+                                onClick={() => handleUpdateStatus('waiting_radiology', 'Radiology')}
+                                disabled={loading}
+                                className="btn bg-indigo-900/40 hover:bg-indigo-800 text-indigo-200 border-indigo-800 text-sm py-1.5"
+                            >
+                                <Radio className="w-4 h-4" /> Send to Radiology
+                            </button>
+
+                            <button
                                 onClick={() => handleUpdateStatus('ready_for_discharge', 'Pharmacy')}
                                 disabled={loading}
-                                className="btn bg-green-500 hover:bg-green-600 text-white border-green-500 text-sm py-1.5"
+                                className="btn bg-green-500 hover:bg-green-600 text-white border-green-500 text-sm py-1.5 ml-auto"
                             >
                                 <Send className="w-4 h-4" /> Send to Pharmacy
                             </button>

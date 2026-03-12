@@ -150,6 +150,11 @@ const VisitDetail = () => {
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${STATUS_COLORS[visit.status] || ''}`}>
                             {visit.status}
                         </span>
+                        {visit.queueStatus === 'pending_results' && (
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                <Activity className="w-3 h-3" /> Awaiting Diagnostics
+                            </span>
+                        )}
                     </div>
                     <p className="text-sm text-gray-400 mt-0.5">
                         Admitted: {visit.admissionDate ? new Date(visit.admissionDate).toLocaleString() : '—'}
@@ -157,9 +162,13 @@ const VisitDetail = () => {
                     </p>
                 </div>
                 <div className="flex gap-2 flex-wrap items-center">
-                    {visit.billingSummary?.status === 'pending' && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-bold mr-2">
-                            <AlertTriangle className="w-4 h-4" /> Unpaid Bills (K{visit.billingSummary.totalAmount})
+                    {visit.billingSummary?.status === 'pending' ? (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-900/30 border border-red-500/30 text-red-400 text-xs font-bold mr-2">
+                            <AlertCircle className="w-4 h-4" /> UNPAID (K{visit.billingSummary.totalAmount})
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-900/30 border border-green-500/30 text-green-400 text-xs font-bold mr-2">
+                            <CheckCircle className="w-4 h-4" /> FULLY PAID
                         </div>
                     )}
                     {p && (
@@ -211,7 +220,18 @@ const VisitDetail = () => {
                                 </div>
                             </div>
                             <InfoRow icon={Phone} label="Phone" value={p.phone} />
-                            <InfoRow icon={Shield} label="Patient Type" value={p.paymentMethod?.toUpperCase()} />
+                            <div className="flex items-start gap-2 py-1.5 border-t border-white/5 mt-2 pt-2">
+                                <Shield className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="text-[10px] text-white/50 uppercase tracking-tighter">Billing Category</p>
+                                    <p className={`text-xs font-black px-2 py-0.5 rounded mt-0.5 inline-block ${p.paymentMethod === 'prepaid' ? 'bg-purple-500/20 text-purple-300' :
+                                        p.paymentMethod === 'corporate' ? 'bg-blue-500/20 text-blue-300' :
+                                            'bg-green-500/20 text-green-300'
+                                        }`}>
+                                        {p.paymentMethod?.toUpperCase()}
+                                    </p>
+                                </div>
+                            </div>
                             <InfoRow icon={User} label="NRC" value={p.nrc} />
                             <InfoRow icon={User} label="Gender" value={p.gender} />
                         </div>

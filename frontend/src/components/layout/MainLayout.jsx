@@ -111,6 +111,9 @@ const MainLayout = ({ children }) => {
     const PHARMA_QUEUE = ['pharmacist', 'doctor', 'nurse', ...SUPER_ROLES];
     const RADIO_VISIBLE = ['radiographer', 'doctor', 'nurse', ...SUPER_ROLES];
 
+    // Records: clerical staff + doctors + admin
+    const RECORDS_VISIBLE = ['records_clerk', 'doctor', 'nurse', 'cashier', ...SUPER_ROLES];
+
     // Helper: does the current user's role appear in the allowed list?
     const hasRole = (...allowedRoles) => allowedRoles.flat().includes(user?.role);
 
@@ -123,12 +126,17 @@ const MainLayout = ({ children }) => {
         },
 
         // ── RECORDS (Step 1: Patient Registration & Lookup) ──────────────
-        { isHeading: true, label: 'RECORDS', roles: ['doctor', 'nurse', 'cashier', ...SUPER_ROLES] },
+        { isHeading: true, label: 'RECORDS', roles: RECORDS_VISIBLE },
+
+        {
+            path: '/app/records/dashboard', icon: LayoutDashboard, label: 'Records Dashboard',
+            roles: ['records_clerk', ...SUPER_ROLES]
+        },
 
         // Patient registry — clinical staff + cashier + admin
         {
             path: '/app/patients', icon: Users, label: 'Patient Registry',
-            roles: ['doctor', 'nurse', 'cashier', ...SUPER_ROLES]
+            roles: RECORDS_VISIBLE
         },
 
         // Active visits — clinical staff only
