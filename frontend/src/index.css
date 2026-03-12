@@ -100,6 +100,18 @@
   html.light [class*="hover\:bg-white\/"]:hover {
     background-color: #F3F4F6 !important;
   }
+  
+  /* ── Override hardcoded text colors ── */
+  html.light .text-white,
+  html.light [class*="text-white\/"] {
+    color: #111827 !important;
+  }
+  html.light .text-gray-100, html.light .text-gray-200, html.light .text-gray-300 {
+    color: #374151 !important;
+  }
+  html.light .text-gray-400, html.light .text-gray-500 {
+    color: #4B5563 !important;
+  }
 
   html.light .glass {
     background: rgba(255, 255, 255, 0.95);
