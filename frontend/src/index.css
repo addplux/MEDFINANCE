@@ -63,46 +63,60 @@
   }
 
   html.light body {
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
+    background-color: #FFFFFF;
+    color: #000000;
   }
 
   html.light {
-    background-color: var(--bg-primary);
+    background-color: #FFFFFF;
   }
 
   /* ── Explicit light-mode class overrides ── */
-  html.light .bg-bg-primary { background-color: #F0F4F8; }
-  html.light .bg-bg-secondary { background-color: #FFFFFF; }
-  html.light .bg-bg-tertiary { background-color: #E2E8F0; }
-  html.light .bg-bg-elevated { background-color: #FFFFFF; }
+  html.light .bg-bg-primary    { background-color: #FFFFFF; }
+  html.light .bg-bg-secondary  { background-color: #FFFFFF; }
+  html.light .bg-bg-tertiary   { background-color: #F0F4F8; }
+  html.light .bg-bg-elevated   { background-color: #FFFFFF; }
 
-  html.light .text-text-primary { color: #000000; }
-  html.light .text-text-secondary { color: #000000; }
-  html.light .text-text-tertiary { color: #000000; }
+  html.light .text-text-primary   { color: #000000; }
+  html.light .text-text-secondary { color: #374151; }
+  html.light .text-text-tertiary  { color: #6B7280; }
 
   html.light body,
   html.light #root,
   html.light .min-h-screen {
-    background-color: #F0F4F8;
+    background-color: #FFFFFF;
     color: #000000;
   }
 
+  /* ── Override hardcoded dark-glass Tailwind utilities in light mode ── */
+  /* These classes are used throughout page components and stay dark w/o override */
+  html.light [class*="bg-white\/"] {
+    background-color: #FFFFFF !important;
+    border-color: #E5E7EB !important;
+  }
+  html.light [class*="border-white\/"] {
+    border-color: #E5E7EB !important;
+  }
+  html.light [class*="hover\:bg-white\/"]:hover {
+    background-color: #F3F4F6 !important;
+  }
+
   html.light .glass {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #E5E7EB;
     backdrop-filter: blur(12px);
   }
 
   html.light .glass-panel {
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: var(--shadow-xl);
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
 
   html.light .glass-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
-    border: 1px solid rgba(255, 255, 255, 1);
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
 
   html.light .card {
