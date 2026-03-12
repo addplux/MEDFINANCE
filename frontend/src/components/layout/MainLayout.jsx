@@ -144,6 +144,10 @@ const MainLayout = ({ children }) => {
             path: '/app/visits', icon: ClipboardList, label: 'Encounters',
             roles: CLINICAL
         },
+        {
+            path: '/app/visits/waiting-room', icon: Activity, label: 'Waiting Room',
+            roles: CLINICAL
+        },
 
         // ── SCHEME MANAGER (Finance + Cashier) ───────────────────────────
         { isHeading: true, label: 'SCHEME MANAGER', roles: CASHIER_ROLES },

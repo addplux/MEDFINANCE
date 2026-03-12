@@ -31,6 +31,7 @@ import PatientVisitHistory from './pages/patients/PatientVisitHistory';
 import Visits from './pages/visits/Visits';
 import CreateVisit from './pages/visits/CreateVisit';
 const VisitDetail = lazy(() => import('./pages/visits/VisitDetail'));
+const WaitingRoom = lazy(() => import('./pages/visits/WaitingRoom'));
 
 const RecordsDashboard = lazy(() => import('./pages/patients/RecordsDashboard'));
 const PatientRegistration = lazy(() => import('./pages/patients/PatientRegistration'));
@@ -261,10 +262,11 @@ function App() {
                         <Route path="patients/:id" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><PatientView /></RoleRoute>} />
                         <Route path="patients/:id/edit" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><EditPatient /></RoleRoute>} />
                         <Route path="patients/:id/history" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><PatientVisitHistory /></RoleRoute>} />
-
-                        <Route path="visits" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><Visits /></RoleRoute>} />
-                        <Route path="visits/new" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><CreateVisit /></RoleRoute>} />
-                        <Route path="visits/:id" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><VisitDetail /></RoleRoute>} />
+                        {/* Visits */}
+                        <Route path="visits" element={<RoleRoute roles={['administrator', 'accountant', 'superintendent', 'doctor', 'nurse', 'receptionist']}><Visits /></RoleRoute>} />
+                        <Route path="visits/new" element={<RoleRoute roles={['administrator', 'superintendent', 'doctor', 'nurse', 'receptionist']}><CreateVisit /></RoleRoute>} />
+                        <Route path="visits/waiting-room" element={<RoleRoute roles={['administrator', 'superintendent', 'doctor', 'nurse', 'receptionist']}><WaitingRoom /></RoleRoute>} />
+                        <Route path="visits/:id" element={<RoleRoute roles={['administrator', 'accountant', 'superintendent', 'doctor', 'nurse', 'receptionist']}><VisitDetail /></RoleRoute>} />
 
                         {/* ── OPD Billing ─────────────────────────────────────────────── */}
                         <Route path="billing/opd" element={<RoleRoute roles={['cashier', 'accountant']}><OPDBilling /></RoleRoute>} />
