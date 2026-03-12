@@ -607,7 +607,7 @@ const MainLayout = ({ children }) => {
             )}
 
             {/* Main Content */}
-            <div className={`flex-1 flex flex-col transition-all duration-500 bg-bg-primary ${sidebarCollapsed ? 'lg:pl-28' : 'lg:pl-64'} `}>
+            <div className={`flex-1 flex flex-col transition-all duration-500 bg-bg-primary ${sidebarCollapsed ? 'lg:pl-[104px]' : 'lg:pl-72'} `}>
                 {/* Mobile Header */}
                 <header className={`lg:hidden h-16 backdrop-blur-xl border-b px-6 flex items-center justify-between sticky top-0 z-20 ${isDark ? 'bg-black/40 border-white/5' : 'bg-white/60 border-black/5'}`}>
                     <button
