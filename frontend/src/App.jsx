@@ -149,6 +149,9 @@ import { ToastProvider } from './context/ToastContext';
 import { OfflineProvider } from './context/OfflineContext';
 import OfflineBanner from './components/ui/OfflineBanner';
 
+// ── BILLING ──────────────────────────────────────────────────────────
+const PatientRunningBill = lazy(() => import('./pages/billing/PatientRunningBill'));
+
 // Protected Route Component — checks authentication
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
@@ -271,6 +274,13 @@ function App() {
                         {/* ── OPD Billing ─────────────────────────────────────────────── */}
                         <Route path="billing/opd" element={<RoleRoute roles={['cashier', 'accountant']}><OPDBilling /></RoleRoute>} />
                         <Route path="billing/opd/new" element={<RoleRoute roles={['cashier', 'accountant']}><CreateOPDBill /></RoleRoute>} />
+
+                        {/* ── Cash & Banking — cashier + finance ──────────────────────── */}
+                        <Route path="cash/payments" element={<RoleRoute roles={['cashier', 'accountant']}><Payments /></RoleRoute>} />
+                        <Route path="cash/payments/new" element={<RoleRoute roles={['cashier', 'accountant']}><PaymentForm /></RoleRoute>} />
+                        <Route path="cash/payments/:id/edit" element={<RoleRoute roles={['cashier', 'accountant']}><PaymentForm /></RoleRoute>} />
+                        <Route path="cash/shift-report" element={<RoleRoute roles={['cashier', 'accountant']}><ShiftReport /></RoleRoute>} />
+                        <Route path="billing/master" element={<RoleRoute roles={['cashier', 'accountant']}><PatientRunningBill /></RoleRoute>} />
 
                         {/* ── Scheme Manager — cashier + finance ──────────────────────── */}
                         <Route path="schemes/private/members" element={<RoleRoute roles={['cashier', 'accountant']}><MembershipRegistration /></RoleRoute>} />

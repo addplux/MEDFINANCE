@@ -180,6 +180,10 @@ const MainLayout = ({ children }) => {
         // ── FINANCE (Accountant + Superintendent) ────────────────────────
         { isHeading: true, label: 'FINANCE & OPERATIONS', roles: CASHIER_ROLES },
         {
+            path: '/app/billing/master', icon: Receipt, label: 'Master Cashier',
+            roles: CASHIER_ROLES
+        },
+        {
             path: '/app/payables/suppliers', icon: CreditCard, label: 'Payables',
             roles: FINANCE
         },
