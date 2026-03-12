@@ -17,16 +17,8 @@ const createVisit = async (req, res) => {
             initialVitals
         } = req.body;
 
-        // Check patient payment method to determine initial queue status
+        // All patients default to Triage since registration is free
         let initialQueueStatus = 'pending_triage';
-        const patient = await Patient.findByPk(patientId);
-        if (patient) {
-            const prepayMethods = ['private prepaid', 'private_prepaid', 'corporate', 'scheme', 'staff'];
-            if (prepayMethods.includes(patient.paymentMethod)) {
-                // Auto-queue for consultation since they don't need to pay upfront at cashier
-                initialQueueStatus = 'waiting_doctor';
-            }
-        }
 
         // Generate visit number
         const count = await Visit.count();
@@ -311,98 +303,34 @@ const createConsultationVisit = async (req, res) => {
             reasonForVisit: reasonForVisit || 'Consultation',
             admissionDate: new Date(),
             status: 'active',
-            queueStatus: initialQueueStatus,
-            admittedById: req.user.id
-        }, { transaction: t });
-
-        // ── Find the consultation service ──────────────────────────────────
-        let consultService = null;
-        if (serviceId) {
-            consultService = await Service.findByPk(serviceId, { transaction: t });
-        }
-        if (!consultService) {
-            // Fall back to ANY active OPD-category service that looks like a consultation
-            consultService = await Service.findOne({
-                where: { category: 'opd', isActive: true },
-                order: [['id', 'ASC']],
-                transaction: t
-            });
-        }
-
-        if (consultService) {
-            // Pick the correct price tier
-            let unitPrice = parseFloat(consultService.price || 0);
-            if (patient.paymentMethod === 'cash') unitPrice = parseFloat(consultService.cashPrice || unitPrice);
-            else if (patient.paymentMethod === 'corporate') unitPrice = parseFloat(consultService.corporatePrice || unitPrice);
-            else if (patient.paymentMethod === 'scheme') unitPrice = parseFloat(consultService.schemePrice || unitPrice);
-            else if (patient.paymentMethod === 'staff') unitPrice = parseFloat(consultService.staffPrice || unitPrice);
-
-            // Generate bill number
-            const billCount = await OPDBill.count({ transaction: t });
-            const billNumber = `OPD${String(billCount + 1).padStart(6, '0')}`;
-
-            const billPaymentStatus = isPrepaid ? 'paid' : 'unpaid';
-            const billStatus = isPrepaid ? 'paid' : 'pending';
-
-            await OPDBill.create({
-                billNumber,
-                patientId,
-                visitId: visit.id,
-                serviceId: consultService.id,
-                billDate: new Date(),
-                quantity: 1,
-                unitPrice,
-                totalAmount: unitPrice,
-                discount: 0,
-                netAmount: unitPrice,
-                status: billStatus,
-                paymentStatus: billPaymentStatus,
-                notes: `Auto-generated consultation fee — ${visitNumber}`,
-                createdBy: req.user.id
+                queueStatus: 'pending_triage',
+                admittedById: req.user.id
             }, { transaction: t });
-
-            // If prepaid: deduct balance now
-            if (isPrepaid && unitPrice > 0) {
-                const currentBalance = parseFloat(patient.balance || 0);
-                if (currentBalance < unitPrice) {
-                    await t.rollback();
-                    return res.status(400).json({
-                        error: `Insufficient prepaid balance. Balance: ${currentBalance.toFixed(2)}, Required: ${unitPrice.toFixed(2)}`
-                    });
-                }
-                await patient.update(
-                    { balance: currentBalance - unitPrice },
-                    { transaction: t }
-                );
-            }
-        }
-
-        // Patient movement log
-        await PatientMovement.create({
-            patientId,
-            fromDepartment: 'Records',
-            toDepartment: isPrepaid ? 'Doctor Queue' : 'Cashier',
-            notes: 'Sent to Doctor via Reception',
-            movementDate: new Date(),
-            admittedBy: req.user.id
-        }, { transaction: t });
-
-        await t.commit();
-
-        const fullVisit = await Visit.findByPk(visit.id, {
-            include: [
-                { model: Patient, as: 'patient' },
-                { model: Department, as: 'department' }
-            ]
-        });
-
-        res.status(201).json({
-            visit: fullVisit,
-            queueStatus: initialQueueStatus,
-            message: isPrepaid
-                ? 'Patient queued directly for doctor — consultation fee auto-deducted.'
-                : 'Patient sent to cashier for consultation fee payment before seeing the doctor.'
-        });
+    
+            // Patient movement log
+            await PatientMovement.create({
+                patientId,
+                fromDepartment: 'Reception',
+                toDepartment: 'Triage / Vitals',
+                notes: 'Free Registration - Sent to Triage',
+                movementDate: new Date(),
+                admittedBy: req.user.id
+            }, { transaction: t });
+    
+            await t.commit();
+    
+            const fullVisit = await Visit.findByPk(visit.id, {
+                include: [
+                    { model: Patient, as: 'patient' },
+                    { model: Department, as: 'department' }
+                ]
+            });
+    
+            res.status(201).json({
+                visit: fullVisit,
+                queueStatus: 'pending_triage',
+                message: 'Patient registered successfully and sent to Triage.'
+            });
     } catch (error) {
         await t.rollback();
         console.error('Create consultation visit error:', error);
