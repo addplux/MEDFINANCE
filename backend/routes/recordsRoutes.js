@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const recordsController = require('../controllers/recordsController');
-const { protect } = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
 
-router.use(protect);
+router.use(authMiddleware);
 
 router.get('/stats', recordsController.getStats);
 router.get('/requests', recordsController.getAllRequests);
