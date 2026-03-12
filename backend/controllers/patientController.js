@@ -154,8 +154,6 @@ const createPatient = async (req, res) => {
         // For standard cash patients with an explicit initial deposit — create a Payment record too
         if (initialDeposit && !isNaN(Number(initialDeposit)) && Number(initialDeposit) > 0 && paymentMethod !== 'private_prepaid') {
             const paymentCount = await Payment.count({ transaction: t });
-            const receiptNumber = `RCP${String(paymentCount + 1).padStart(6, '0')}`;
-
             await Payment.create({
                 receiptNumber,
                 patientId: patient.id,
@@ -169,8 +167,50 @@ const createPatient = async (req, res) => {
             await updatePatientBalance(patient.id, t);
         }
 
+        // ==========================================
+        // AUTOMATED CHECK-IN / VISIT CREATION
+        // ==========================================
+        const { targetDepartment, reasonForVisit } = req.body;
+        
+        let visit = null;
+        let departmentName = 'General OPD'; // Fallback
+        
+        // Generate visit number
+        const visitCount = await Visit.count({ transaction: t });
+        const visitNumber = `VIS${String(visitCount + 1).padStart(6, '0')}`;
+        
+        // Fetch target department name if ID provided
+        if (targetDepartment) {
+            const { Department } = require('../models');
+            const dept = await Department.findByPk(targetDepartment, { transaction: t });
+            if (dept) departmentName = dept.departmentName;
+        }
+
+        visit = await Visit.create({
+            visitNumber,
+            patientId: patient.id,
+            visitType: patientType || 'opd',
+            departmentId: targetDepartment || null,
+            assignedDepartment: departmentName,
+            reasonForVisit: reasonForVisit || 'Initial Consultation / Registration',
+            admissionDate: new Date(),
+            status: 'active',
+            queueStatus: 'pending_triage', // Straight to Triage (no fee)
+            admittedById: req.user?.id || 1
+        }, { transaction: t });
+
+        // Log the movement for Zack's journey history
+        await PatientMovement.create({
+            patientId: patient.id,
+            fromDepartment: 'Reception / Registration',
+            toDepartment: 'Triage / Vitals',
+            notes: 'Automated Check-in (Free Registration)',
+            movementDate: new Date(),
+            admittedBy: req.user?.id || 1
+        }, { transaction: t });
+
         await t.commit();
-        res.status(201).json(patient);
+        res.status(201).json({ ...patient.toJSON(), initialVisit: visit });
     } catch (error) {
         await t.rollback();
         console.error('Create patient error:', error);

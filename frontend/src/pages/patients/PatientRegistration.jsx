@@ -4,7 +4,8 @@ import { patientAPI, setupAPI, receivablesAPI } from '../../services/apiService'
 import {
     ArrowLeft, Save, User, UserPlus, Shield,
     CreditCard, Calendar, Phone, MapPin,
-    Briefcase, AlertCircle, Camera, CheckCircle2
+    Briefcase, AlertCircle, Camera, CheckCircle2,
+    Stethoscope
 } from 'lucide-react';
 
 const PatientRegistration = () => {
@@ -26,15 +27,19 @@ const PatientRegistration = () => {
         nextOfKinRelationship: '',
         patientType: 'opd',
         schemeId: '',
-        initialDeposit: ''
+        initialDeposit: '',
+        targetDepartment: '',
+        reasonForVisit: ''
     });
     const [photoFile, setPhotoFile] = useState(null);
     const [photoPreview, setPhotoPreview] = useState(null);
     const [schemes, setSchemes] = useState([]);
+    const [departments, setDepartments] = useState([]);
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
         fetchSchemes();
+        fetchDepartments();
     }, []);
 
     const fetchSchemes = async () => {
@@ -43,6 +48,15 @@ const PatientRegistration = () => {
             setSchemes(response.data || []);
         } catch (error) {
             console.error('Failed to fetch schemes:', error);
+        }
+    };
+
+    const fetchDepartments = async () => {
+        try {
+            const response = await setupAPI.departments.getAll({ status: 'active' });
+            setDepartments(response.data || []);
+        } catch (error) {
+            console.error('Failed to fetch departments:', error);
         }
     };
 
@@ -65,6 +79,7 @@ const PatientRegistration = () => {
         if (!formData.lastName) newErrors.lastName = 'Last name is required';
         if (!formData.gender) newErrors.gender = 'Gender is required';
         if (!formData.paymentMethod) newErrors.paymentMethod = 'Payment method is required';
+        if (!formData.targetDepartment) newErrors.targetDepartment = 'Target department is required for initial visit';
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -308,6 +323,39 @@ const PatientRegistration = () => {
                                 </div>
                             </section>
                         )}
+
+                        {/* Initial Visit Details */}
+                        <section className="space-y-6 animate-in slide-in-from-top-4 duration-300">
+                            <div className="flex items-center gap-3 pb-2 border-b border-white/5">
+                                <Stethoscope className="w-4 h-4 text-rose-400" />
+                                <h2 className="text-sm font-black text-white uppercase tracking-widest">Initial Visit & Triage</h2>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="form-group">
+                                    <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">Target Department *</label>
+                                    <select
+                                        value={formData.targetDepartment}
+                                        onChange={e => setFormData({ ...formData, targetDepartment: e.target.value })}
+                                        className="form-select bg-white/[0.02] border-white/10 text-white rounded-xl"
+                                    >
+                                        <option value="">Select where to send patient...</option>
+                                        {departments.map(d => (
+                                            <option key={d.id} value={d.id}>{d.departmentName}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">Reason for Visit</label>
+                                    <input
+                                        type="text"
+                                        value={formData.reasonForVisit}
+                                        onChange={e => setFormData({ ...formData, reasonForVisit: e.target.value })}
+                                        className="form-input bg-white/[0.02] border-white/10 text-white py-3 rounded-xl"
+                                        placeholder="E.g., General Checkup, Fever..."
+                                    />
+                                </div>
+                            </div>
+                        </section>
                     </div>
 
                     <div className="flex items-center justify-between gap-6">
