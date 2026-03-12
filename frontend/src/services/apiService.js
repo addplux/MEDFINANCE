@@ -373,7 +373,18 @@ export const auditLogsAPI = {
 };
 
 
-// Corporate portal (public — uses its own token)
+// Records
+export const recordsAPI = {
+    fileRequests: {
+        getAll: (params) => api.get('/records/requests', { params }),
+        getById: (id) => api.get(`/records/requests/${id}`),
+        create: (data) => api.post('/records/requests', data),
+        update: (id, data) => api.put(`/records/requests/${id}`, data),
+        fulfill: (id, location) => api.post(`/records/requests/${id}/fulfill`, { location }),
+        getStats: () => api.get('/records/stats'),
+    }
+};
+
 export const corporatePortalAPI = {
     login: (data) => api.post('/corporate/portal/login', data),
     getAccount: (token) => api.get('/corporate/portal/account', { headers: { Authorization: `Bearer ${token}` } }),
