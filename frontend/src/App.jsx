@@ -3,7 +3,7 @@
  * Developed: 2026
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
 
@@ -233,6 +233,7 @@ function App() {
         <AuthProvider>
           <Router>
             <OfflineBanner />
+            <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-bg-primary"><div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<LandingPage />} />
@@ -390,6 +391,7 @@ function App() {
               <Route path="/corporate-portal" element={<CorporatePortal />} />
 
             </Routes>
+            </Suspense>
           </Router>
         </AuthProvider>
       </OfflineProvider>
