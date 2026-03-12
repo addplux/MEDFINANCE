@@ -30,7 +30,10 @@ import PatientVisitHistory from './pages/patients/PatientVisitHistory';
 // Visits
 import Visits from './pages/visits/Visits';
 import CreateVisit from './pages/visits/CreateVisit';
-import VisitDetail from './pages/visits/VisitDetail';
+const VisitDetail = lazy(() => import('./pages/visits/VisitDetail'));
+
+const RecordsDashboard = lazy(() => import('./pages/patients/RecordsDashboard'));
+const PatientRegistration = lazy(() => import('./pages/patients/PatientRegistration'));
 
 // Receivables
 
@@ -146,7 +149,7 @@ import { OfflineProvider } from './context/OfflineContext';
 import OfflineBanner from './components/ui/OfflineBanner';
 
 // Protected Route Component — checks authentication
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -162,6 +165,28 @@ const ProtectedRoute = ({ children }) => {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // If allowedRoles are specified, check if the user's role is in the allowed list
+  if (allowedRoles && allowedRoles.length > 0) {
+    const SUPER = ['superintendent', 'admin'];
+    if (!SUPER.includes(user?.role) && !allowedRoles.includes(user?.role)) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
+          <div className="text-6xl mb-4">🔒</div>
+          <h2 className="text-2xl font-black text-text-primary mb-2">Access Denied</h2>
+          <p className="text-text-tertiary mb-6 max-w-sm">
+            Your role (<span className="text-text-secondary font-semibold">{user?.role?.replace('_', ' ')}</span>) does not have permission to view this page.
+          </p>
+          <button
+            onClick={() => window.history.back()}
+            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      );
+    }
   }
 
   return children;
@@ -226,17 +251,19 @@ function App() {
                         <Route path="/" element={<Dashboard />} />
                         <Route path="dashboard" element={<Dashboard />} />
 
-                        {/* ── Patients & Visits — clinical + cashier ──────────────────── */}
-                        <Route path="patients" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><Patients /></RoleRoute>} />
-                        <Route path="patients/new" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><CreatePatient /></RoleRoute>} />
-                        <Route path="patients/merge" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><MergePatients /></RoleRoute>} />
-                        <Route path="patients/:id" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><PatientView /></RoleRoute>} />
-                        <Route path="patients/:id/edit" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><EditPatient /></RoleRoute>} />
-                        <Route path="patients/:id/history" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><PatientVisitHistory /></RoleRoute>} />
+                        {/* ── Patients & Visits — clinical + cashier + records ────────── */}
+                        <Route path="patients" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><Patients /></RoleRoute>} />
+                        <Route path="patients/new" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><CreatePatient /></RoleRoute>} />
+                        <Route path="patients/registration" element={<ProtectedRoute allowedRoles={['records_clerk']}><PatientRegistration /></ProtectedRoute>} />
+                        <Route path="records/dashboard" element={<ProtectedRoute allowedRoles={['records_clerk']}><RecordsDashboard /></ProtectedRoute>} />
+                        <Route path="patients/merge" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><MergePatients /></RoleRoute>} />
+                        <Route path="patients/:id" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><PatientView /></RoleRoute>} />
+                        <Route path="patients/:id/edit" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><EditPatient /></RoleRoute>} />
+                        <Route path="patients/:id/history" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><PatientVisitHistory /></RoleRoute>} />
 
-                        <Route path="visits" element={<RoleRoute roles={['doctor', 'nurse']}><Visits /></RoleRoute>} />
-                        <Route path="visits/new" element={<RoleRoute roles={['doctor', 'nurse']}><CreateVisit /></RoleRoute>} />
-                        <Route path="visits/:id" element={<RoleRoute roles={['doctor', 'nurse']}><VisitDetail /></RoleRoute>} />
+                        <Route path="visits" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><Visits /></RoleRoute>} />
+                        <Route path="visits/new" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><CreateVisit /></RoleRoute>} />
+                        <Route path="visits/:id" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><VisitDetail /></RoleRoute>} />
 
                         {/* ── OPD Billing ─────────────────────────────────────────────── */}
                         <Route path="billing/opd" element={<RoleRoute roles={['cashier', 'accountant']}><OPDBilling /></RoleRoute>} />
@@ -366,7 +393,7 @@ function App() {
           </Router>
         </AuthProvider>
       </OfflineProvider>
-    </ToastProvider>
+    </ToastProvider >
   );
 }
 
