@@ -4,7 +4,7 @@ import { recordsAPI, patientAPI } from '../../services/apiService';
 import {
     Search, FileText, UserPlus, Clock, CheckCircle2,
     AlertCircle, Filter, MoreHorizontal, ChevronRight,
-    LayoutDashboard, Activity, Database
+    LayoutDashboard, Activity, Database, Users, Eye
 } from 'lucide-react';
 
 const RecordsDashboard = () => {
@@ -14,7 +14,9 @@ const RecordsDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const [allPatients, setAllPatients] = useState([]);
     const [searching, setSearching] = useState(false);
+    const [patientsLoading, setPatientsLoading] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -23,12 +25,14 @@ const RecordsDashboard = () => {
     const loadData = async () => {
         try {
             setLoading(true);
-            const [statsRes, requestsRes] = await Promise.all([
+            const [statsRes, requestsRes, patientsRes] = await Promise.all([
                 recordsAPI.fileRequests.getStats(),
-                recordsAPI.fileRequests.getAll()
+                recordsAPI.fileRequests.getAll(),
+                patientAPI.getAll({ limit: 10 })
             ]);
             setStats(statsRes.data);
             setRequests(requestsRes.data);
+            setAllPatients(patientsRes.data.data || []);
         } catch (error) {
             console.error('Failed to load records data', error);
         } finally {
@@ -197,6 +201,63 @@ const RecordsDashboard = () => {
                                                 <MoreHorizontal className="w-4 h-4" />
                                             </button>
                                         </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* All Patients Registry */}
+                    <div className="card overflow-hidden border-white/5">
+                        <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                            <h2 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                                <Users className="w-4 h-4 text-blue-400" />
+                                Patient Registry
+                            </h2>
+                            <button 
+                                onClick={() => navigate('/app/patients')}
+                                className="text-[10px] font-black text-blue-400 hover:text-blue-300 uppercase tracking-widest transition-colors"
+                            >
+                                View All
+                            </button>
+                        </div>
+
+                        {loading ? (
+                            <div className="py-12 flex justify-center">
+                                <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                        ) : allPatients.length === 0 ? (
+                            <div className="py-12 text-center text-white/20 text-sm">No patients registered yet</div>
+                        ) : (
+                            <div className="divide-y divide-white/5">
+                                {allPatients.map(p => (
+                                    <div key={p.id} className="p-4 hover:bg-white/[0.02] flex items-center justify-between group transition-colors">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold border border-blue-500/20 group-hover:scale-105 transition-transform">
+                                                {p.firstName?.[0]}{p.lastName?.[0]}
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-white uppercase group-hover:text-blue-400 transition-colors">{p.firstName} {p.lastName}</p>
+                                                <div className="flex items-center gap-2 mt-0.5">
+                                                    <span className="text-[10px] text-white/40 font-mono tracking-tighter bg-white/5 px-1.5 py-0.5 rounded uppercase">
+                                                        {p.patientNumber}
+                                                    </span>
+                                                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${
+                                                        p.paymentMethod === 'corporate' ? 'bg-purple-500/20 text-purple-400' :
+                                                        p.paymentMethod === 'private_prepaid' ? 'bg-yellow-500/20 text-yellow-400' :
+                                                        'bg-green-500/20 text-green-400'
+                                                    }`}>
+                                                        {p.paymentMethod}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button 
+                                            onClick={() => navigate(`/app/patients/${p.id}`)}
+                                            className="p-2 bg-white/5 hover:bg-blue-600 text-white/40 hover:text-white rounded-xl transition-all border border-white/5"
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                        </button>
                                     </div>
                                 ))}
                             </div>
