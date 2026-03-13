@@ -27,6 +27,16 @@ function assertPatientActive(patient) {
         err.code = 'ACCOUNT_CLOSED';
         throw err;
     }
+
+    // AUTOMATIC "RED" STATUS: Block overdrawn prepaid accounts
+    if (patient.paymentMethod === 'private_prepaid' && parseFloat(patient.balance || 0) < 0) {
+        const err = new Error(
+            `CREDIT STOP: The prepaid account for ${patient.firstName} ${patient.lastName} is in the RED (K${Math.abs(parseFloat(patient.balance)).toFixed(2)} debt). Please top up before receiving further services.`
+        );
+        err.statusCode = 403;
+        err.code = 'RED_ACCOUNT';
+        throw err;
+    }
 }
 
 module.exports = { assertPatientActive };

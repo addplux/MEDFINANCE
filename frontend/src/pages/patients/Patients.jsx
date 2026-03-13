@@ -31,15 +31,22 @@ const PatientTypeBadge = ({ patient }) => {
     const cfg = TYPE_BADGE[type] || { label: type, bg: 'bg-gray-100', text: 'text-gray-700' };
 
     return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.text}`}>
-            {cfg.label}
-            {type === 'private_prepaid' && patient?.balance !== undefined && (
-                <span className="flex items-center gap-0.5 ml-1 pl-2 border-l border-current/20">
-                    <Battery className="w-3.5 h-3.5" />
-                    <span>ZK {Number(patient.balance).toLocaleString()}</span>
+        <div className="flex flex-col gap-1 items-start">
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.text}`}>
+                {cfg.label}
+                {type === 'private_prepaid' && patient?.balance !== undefined && (
+                    <span className={`flex items-center gap-0.5 ml-1 pl-2 border-l border-current/20 ${Number(patient.balance) < 0 ? 'text-red-500 font-bold' : ''}`}>
+                        <Battery className="w-3.5 h-3.5" />
+                        <span>ZK {Number(patient.balance).toLocaleString()}</span>
+                    </span>
+                )}
+            </span>
+            {type === 'private_prepaid' && Number(patient?.balance || 0) < 0 && (
+                <span className="text-[10px] font-black uppercase tracking-tighter text-red-500 animate-pulse px-1 border border-red-500/30 rounded bg-red-500/10">
+                    RED / CREDIT STOP
                 </span>
             )}
-        </span>
+        </div>
     );
 };
 

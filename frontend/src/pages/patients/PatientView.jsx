@@ -195,7 +195,11 @@ const PatientView = () => {
                     <div className="flex-shrink-0 flex flex-col sm:flex-row print:flex-row gap-3 min-w-[200px] print:min-w-0">
                         <div className="bg-bg-secondary rounded-2xl p-4 print:p-2 print:bg-transparent print:border-none border border-border-color text-center shadow-sm print:shadow-none">
                             <p className="text-[10px] text-text-secondary font-bold uppercase tracking-wider print:text-[8px]">Outstanding Balance</p>
-                            <p className={`text-2xl print:text-sm font-bold mt-2 print:mt-0 ${parseFloat(patient.balance) > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                            <p className={`text-2xl print:text-sm font-bold mt-2 print:mt-0 ${
+                                patient.paymentMethod === 'private_prepaid' 
+                                    ? (parseFloat(patient.balance || 0) < 0 ? 'text-rose-500' : 'text-emerald-500')
+                                    : (parseFloat(patient.balance || 0) > 0 ? 'text-rose-500' : 'text-emerald-500')
+                            }`}>
                                 ZMW {parseFloat(patient.balance || 0).toLocaleString('en-ZM', { minimumFractionDigits: 2 })}
                             </p>
                         </div>
@@ -212,6 +216,25 @@ const PatientView = () => {
 
             {/* Details grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 print:grid-cols-2 gap-3 print:gap-2">
+
+                {/* RED ACCOUNT / CREDIT STOP WARNING */}
+                {patient.paymentMethod === 'private_prepaid' && parseFloat(patient.balance || 0) < 0 && (
+                    <div className="md:col-span-2 xl:col-span-3 bg-red-600/10 border-2 border-red-500 rounded-2xl p-4 flex items-center gap-4 animate-pulse">
+                        <div className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center shrink-0">
+                            <AlertCircle className="w-8 h-8 text-white" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-red-500 font-black uppercase tracking-widest text-sm">Credit Stop — Account in the Red</h3>
+                            <p className="text-red-400 text-xs font-semibold">This prepaid account is overdrawn by ZMW {Math.abs(parseFloat(patient.balance)).toFixed(2)}. Services are automatically restricted.</p>
+                        </div>
+                        <button 
+                            onClick={() => navigate(`/app/receivables/prepaid?search=${patient.patientNumber}`)}
+                            className="btn btn-sm bg-red-600 hover:bg-red-700 text-white border-none px-4"
+                        >
+                            Process Top-Up
+                        </button>
+                    </div>
+                )}
 
                 {/* Contact Info */}
                 <Section title="Contact Information">
