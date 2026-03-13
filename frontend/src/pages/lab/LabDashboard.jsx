@@ -3,12 +3,14 @@ import { labAPI } from '../../services/apiService';
 import { Activity, Clock, FileText, CheckCircle, AlertTriangle, DollarSign, Beaker, Users, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getPaymentStatusBadge } from '../../utils/statusBadges';
+import ServiceCatalogPanel from '../../components/shared/ServiceCatalogPanel';
 
 const LabDashboard = () => {
     const navigate = useNavigate();
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all'); // all, requested, sample_collected, completed
+    const [isCatalogOpen, setIsCatalogOpen] = useState(false);
 
     useEffect(() => {
         fetchRequests();
@@ -70,9 +72,10 @@ const LabDashboard = () => {
 
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={() => navigate('/app/lab/tests')}
+                        onClick={() => setIsCatalogOpen(true)}
                         className="btn btn-secondary btn-sm border-white/10"
                     >
+                        <FileText className="w-3.5 h-3.5 mr-1 inline" />
                         Test Catalog
                     </button>
                     <button onClick={fetchRequests} className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-all border border-white/5 ml-1">
@@ -210,6 +213,12 @@ const LabDashboard = () => {
                     </div>
                 </div>
             )}
+
+            <ServiceCatalogPanel 
+                isOpen={isCatalogOpen} 
+                onClose={() => setIsCatalogOpen(false)} 
+                department="Laboratory" 
+            />
         </div>
     );
 };

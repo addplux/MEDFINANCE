@@ -216,9 +216,14 @@ const Dispense = () => {
                                 onChange={e => setSelectedMedication(e.target.value)}
                             >
                                 <option value="">-- Choose Medication --</option>
-                                {medications.map(m => (
-                                    <option key={m.id} value={m.id}>{m.name} (Stock: {m.totalStock})</option>
-                                ))}
+                                {medications.map(m => {
+                                    const outOfStock = m.totalStock <= 0;
+                                    return (
+                                        <option key={m.id} value={m.id} disabled={outOfStock}>
+                                            {m.name} {outOfStock ? '(OUT OF STOCK)' : `(Stock: ${m.totalStock})`}
+                                        </option>
+                                    );
+                                })}
                             </select>
                         </div>
                         <div>

@@ -34,6 +34,9 @@ const LabRequestForm = () => {
     };
 
     const toggleTest = (testId) => {
+        const test = tests.find(t => t.id === testId);
+        if (test && test.isActive === false) return; // Block inactive selection
+
         if (selectedTests.includes(testId)) {
             setSelectedTests(selectedTests.filter(id => id !== testId));
         } else {
@@ -149,25 +152,34 @@ const LabRequestForm = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-color">
-                                {filteredTests.map(test => (
-                                    <tr
-                                        key={test.id}
-                                        className={`hover:bg-bg-tertiary/50 cursor-pointer ${selectedTests.includes(test.id) ? 'bg-primary-50' : ''}`}
-                                        onClick={() => toggleTest(test.id)}
-                                    >
-                                        <td className="p-3">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedTests.includes(test.id)}
-                                                readOnly
-                                                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                                            />
-                                        </td>
-                                        <td className="p-3 font-medium">{test.name || 'Unnamed Test'}</td>
-                                        <td className="p-3 text-sm text-text-secondary">{test.category || 'N/A'}</td>
-                                        <td className="p-3 text-right">K{parseFloat(test.price || 0).toFixed(2)}</td>
-                                    </tr>
-                                ))}
+                                {filteredTests.map(test => {
+                                    const isInactive = test.isActive === false;
+                                    return (
+                                        <tr
+                                            key={test.id}
+                                            className={`hover:bg-bg-tertiary/50 transition-colors ${isInactive ? 'opacity-50 cursor-not-allowed bg-gray-50/50' : 'cursor-pointer'} ${selectedTests.includes(test.id) ? 'bg-primary/10' : ''}`}
+                                            onClick={() => !isInactive && toggleTest(test.id)}
+                                        >
+                                            <td className="p-3">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedTests.includes(test.id)}
+                                                    readOnly
+                                                    disabled={isInactive}
+                                                    className="rounded border-gray-300 text-primary focus:ring-primary disabled:opacity-50"
+                                                />
+                                            </td>
+                                            <td className="p-3 font-medium flex items-center gap-2">
+                                                {test.name || 'Unnamed Test'}
+                                                {isInactive && (
+                                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-red-900/30 text-red-400 border border-red-700/50">Unavailable</span>
+                                                )}
+                                            </td>
+                                            <td className="p-3 text-sm text-text-secondary">{test.category || 'N/A'}</td>
+                                            <td className="p-3 text-right font-medium">K{parseFloat(test.price || 0).toFixed(2)}</td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>

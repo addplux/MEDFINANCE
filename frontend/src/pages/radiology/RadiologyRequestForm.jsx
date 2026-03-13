@@ -44,6 +44,9 @@ const RadiologyRequestForm = () => {
     };
 
     const toggleScan = (scanId) => {
+        const scan = scans.find(s => s.id === scanId);
+        if (scan && scan.isActive === false) return; // Block inactive selection
+
         if (selectedScans.includes(scanId)) {
             setSelectedScans(selectedScans.filter(id => id !== scanId));
         } else {
@@ -160,25 +163,34 @@ const RadiologyRequestForm = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-color">
-                                {filteredScans.map(scan => (
-                                    <tr
-                                        key={scan.id}
-                                        className={`hover:bg-bg-tertiary/50 cursor-pointer ${selectedScans.includes(scan.id) ? 'bg-primary-50' : ''}`}
-                                        onClick={() => toggleScan(scan.id)}
-                                    >
-                                        <td className="p-3">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedScans.includes(scan.id)}
-                                                readOnly
-                                                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                                            />
-                                        </td>
-                                        <td className="p-3 font-medium">{scan.serviceName || 'Unnamed Scan'}</td>
-                                        <td className="p-3 text-sm text-text-secondary">{scan.category || 'N/A'}</td>
-                                        <td className="p-3 text-right">K{parseFloat(scan.price || 0).toFixed(2)}</td>
-                                    </tr>
-                                ))}
+                                {filteredScans.map(scan => {
+                                    const isInactive = scan.isActive === false;
+                                    return (
+                                        <tr
+                                            key={scan.id}
+                                            className={`hover:bg-bg-tertiary/50 transition-colors ${isInactive ? 'opacity-50 cursor-not-allowed bg-gray-50/50' : 'cursor-pointer'} ${selectedScans.includes(scan.id) ? 'bg-primary/10' : ''}`}
+                                            onClick={() => !isInactive && toggleScan(scan.id)}
+                                        >
+                                            <td className="p-3">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedScans.includes(scan.id)}
+                                                    readOnly
+                                                    disabled={isInactive}
+                                                    className="rounded border-gray-300 text-primary focus:ring-primary disabled:opacity-50"
+                                                />
+                                            </td>
+                                            <td className="p-3 font-medium flex items-center gap-2">
+                                                {scan.serviceName || 'Unnamed Scan'}
+                                                {isInactive && (
+                                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-red-900/30 text-red-400 border border-red-700/50">Unavailable</span>
+                                                )}
+                                            </td>
+                                            <td className="p-3 text-sm text-text-secondary">{scan.category || 'N/A'}</td>
+                                            <td className="p-3 text-right font-medium">K{parseFloat(scan.price || 0).toFixed(2)}</td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>

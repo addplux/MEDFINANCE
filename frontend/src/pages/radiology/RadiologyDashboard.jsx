@@ -3,12 +3,14 @@ import { radiologyAPI } from '../../services/apiService';
 import { Radio, Clock, CheckCircle, AlertTriangle, FileText, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getPaymentStatusBadge } from '../../utils/statusBadges';
+import ServiceCatalogPanel from '../../components/shared/ServiceCatalogPanel';
 
 const RadiologyDashboard = () => {
     const navigate = useNavigate();
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
+    const [isCatalogOpen, setIsCatalogOpen] = useState(false);
 
     useEffect(() => {
         fetchRequests();
@@ -70,6 +72,13 @@ const RadiologyDashboard = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setIsCatalogOpen(true)}
+                        className="btn btn-secondary btn-sm border-white/10"
+                    >
+                        <FileText className="w-3.5 h-3.5 mr-1 inline" />
+                        Scan Catalog
+                    </button>
                     <button onClick={fetchRequests} className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-all border border-white/5 ml-1">
                         <Activity className={`w-4 h-4 text-white/60 ${loading ? 'animate-spin' : ''}`} />
                     </button>
@@ -197,6 +206,12 @@ const RadiologyDashboard = () => {
                     </div>
                 </div>
             )}
+
+            <ServiceCatalogPanel 
+                isOpen={isCatalogOpen} 
+                onClose={() => setIsCatalogOpen(false)} 
+                department="Radiology" 
+            />
         </div>
     );
 };
