@@ -240,7 +240,11 @@ const MainLayout = ({ children }) => {
 
         // Doctor Dashboard — doctors, nurses, admin see the queue
         {
-            path: '/app/opd/dashboard', icon: Stethoscope, label: 'Doctor Dashboard',
+            path: '/app/visits/doctor-orders', icon: Stethoscope, label: "Doctor's Orders",
+            roles: CLINICAL
+        },
+        {
+            path: '/app/opd/dashboard', icon: LayoutDashboard, label: 'Doctor Dashboard',
             roles: CLINICAL
         },
 

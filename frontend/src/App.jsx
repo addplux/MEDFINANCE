@@ -35,6 +35,7 @@ const WaitingRoom = lazy(() => import('./pages/visits/WaitingRoom'));
 
 const RecordsDashboard = lazy(() => import('./pages/patients/RecordsDashboard'));
 const PatientRegistration = lazy(() => import('./pages/patients/PatientRegistration'));
+const DoctorOrders = lazy(() => import('./pages/visits/DoctorOrders'));
 
 // Receivables
 
@@ -273,6 +274,7 @@ function App() {
                         <Route path="visits" element={<RoleRoute roles={['administrator', 'accountant', 'superintendent', 'doctor', 'nurse', 'receptionist']}><Visits /></RoleRoute>} />
                         <Route path="visits/new" element={<RoleRoute roles={['administrator', 'superintendent', 'doctor', 'nurse', 'receptionist']}><CreateVisit /></RoleRoute>} />
                         <Route path="visits/waiting-room" element={<RoleRoute roles={['administrator', 'superintendent', 'doctor', 'nurse', 'receptionist']}><WaitingRoom /></RoleRoute>} />
+                        <Route path="visits/doctor-orders" element={<RoleRoute roles={['administrator', 'superintendent', 'doctor', 'nurse']}><DoctorOrders /></RoleRoute>} />
                         <Route path="visits/:id" element={<RoleRoute roles={['administrator', 'accountant', 'superintendent', 'doctor', 'nurse', 'receptionist']}><VisitDetail /></RoleRoute>} />
 
                         {/* ── OPD Billing ─────────────────────────────────────────────── */}

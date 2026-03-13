@@ -1,0 +1,54 @@
+﻿
+> frontend@0.0.0 build
+> vite build
+
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 20 modules transformed.
+[inject-sw-assets] Injected 4 assets into sw.js
+node.exe : [31mΓ£ù[39m 
+Build failed in 2.52s
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" "C:\U
+sers\flyst\AppData\Roaming\ 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: ([31m  
+  Γ£ù[39m Build failed i   
+ n 2.52s:String) [], Rem    
+oteException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+[31merror during build:
+[31mCould not resolve "./pa
+ges/setup/ServiceSetup" 
+from "src/App.jsx"[31m
+file: [36mD:/MEDFINANCE360/
+frontend/src/App.jsx[31m
+    at getRollupError (file:
+///D:/MEDFINANCE360/frontend
+/node_modules/rollup/dist/es
+/shared/parseAst.js:402:41)
+    at error (file:///D:/MED
+FINANCE360/frontend/node_mod
+ules/rollup/dist/es/shared/p
+arseAst.js:398:42)
+    at ModuleLoader.handleIn
+validResolvedId (file:///D:/
+MEDFINANCE360/frontend/node_
+modules/rollup/dist/es/share
+d/node-entry.js:21687:24)
+    at ModuleLoader.resolveD
+ynamicImport (file:///D:/MED
+FINANCE360/frontend/node_mod
+ules/rollup/dist/es/shared/n
+ode-entry.js:21747:58)
+    at async file:///D:/MEDF
+INANCE360/frontend/node_modu
+les/rollup/dist/es/shared/no
+de-entry.js:21631:32[39m

@@ -36,6 +36,7 @@ const User = sequelize.define('User', {
             'pharmacist',     // Pharmacist / Dispenser
             'lab_technician', // Laboratory Technician
             'radiographer',   // Radiographer
+            'records_clerk',  // Medical Records Officer
             'billing_staff',  // Legacy: kept for backward compatibility
             'viewer'          // Read-only observer
         ),

@@ -611,6 +611,10 @@ html.light body {
   color: var(--text-primary);
 }
 
+html.light {
+  background-color: var(--bg-primary);
+}
+
 html.light .glass {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);

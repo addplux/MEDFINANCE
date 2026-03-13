@@ -43,7 +43,7 @@ const Visit = sequelize.define('Visit', {
         defaultValue: 'active'
     },
     queueStatus: {
-        type: DataTypes.ENUM('pending_triage', 'pending_cashier', 'waiting_doctor', 'with_doctor', 'pending_results', 'ready_for_discharge'),
+        type: DataTypes.ENUM('pending_triage', 'pending_cashier', 'waiting_doctor', 'with_doctor', 'pending_results', 'ready_for_discharge', 'waiting_theatre', 'waiting_lab', 'waiting_radiology', 'waiting_specialist'),
         allowNull: false,
         defaultValue: 'pending_triage'
     },
