@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, X, Activity, DollarSign, Beaker, Pill, Stethoscope, BriefcaseMedical } from 'lucide-react';
-import { setupAPI } from '../../../services/apiService';
+import { setupAPI } from '../../services/apiService';
 
 const ServiceCatalogPanel = ({ isOpen, onClose, department }) => {
     const [services, setServices] = useState([]);
