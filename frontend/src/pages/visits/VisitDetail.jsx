@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { visitAPI } from '../../services/apiService';
+import { visitAPI } from '@/services/apiService';
 import {
     ArrowLeft, User, RefreshCw, LogOut, Move,
     Stethoscope, BedDouble, Baby, Siren, ClipboardList,
-    Phone, Shield, Calendar, MapPin, AlertCircle, AlertTriangle
+    Phone, Shield, Calendar, MapPin, AlertCircle, AlertTriangle,
+    Activity, CheckCircle
 } from 'lucide-react';
 import TriageWidget from './components/TriageWidget';
 import DoctorWorkspace from './components/DoctorWorkspace';
