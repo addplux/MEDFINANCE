@@ -103,16 +103,16 @@ const CorporateMemberManagement = () => {
     const selectedSchemeName = corporateSchemes.find(s => String(s.id) === String(selectedScheme))?.schemeName || 'Scheme';
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-8 flex flex-col gap-8 animate-in fade-in duration-700">
+        <div className="min-h-screen bg-bg-primary p-6 lg:p-8 flex flex-col gap-8 animate-in fade-in duration-700">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-border-color">
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600/80">Corporate Intelligence</span>
                     </div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">Member <span className="text-slate-400 font-light">Ecosystem</span></h1>
-                    <p className="text-slate-500 font-medium text-sm mt-1">Manage corporate enrollments, utilization limits, and membership statuses.</p>
+                    <h1 className="text-4xl font-black text-text-primary tracking-tight leading-tight">Member <span className="text-text-secondary font-light">Ecosystem</span></h1>
+                    <p className="text-text-secondary font-medium text-sm mt-1">Manage corporate enrollments, utilization limits, and membership statuses.</p>
                 </div>
             </div>
 
@@ -126,20 +126,20 @@ const CorporateMemberManagement = () => {
                             onClick={() => setSelectedScheme(String(scheme.id))}
                             className={`group relative p-5 rounded-[1.5rem] border transition-all duration-300 ${
                                 isSelected 
-                                ? 'bg-white border-blue-200 shadow-xl shadow-blue-500/5 ring-1 ring-blue-100' 
-                                : 'bg-white/50 border-slate-200 hover:bg-white hover:border-slate-300'
+                                ? 'bg-bg-secondary border-blue-500/50 shadow-xl shadow-blue-500/10 ring-1 ring-blue-500/20' 
+                                : 'bg-bg-secondary/50 border-border-color hover:bg-bg-secondary hover:border-border-hover'
                             }`}
                         >
                             <div className="flex items-start justify-between mb-4">
-                                <div className={`p-2 rounded-xl ${isSelected ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
+                                <div className={`p-2 rounded-xl ${isSelected ? 'bg-blue-600/10 text-blue-500' : 'bg-bg-tertiary text-text-tertiary'}`}>
                                     <Users className="w-5 h-5" />
                                 </div>
-                                <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-blue-600' : 'bg-slate-300'}`} />
+                                <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.5)]' : 'bg-text-tertiary/20'}`} />
                             </div>
-                            <h3 className={`font-black text-sm uppercase tracking-tight mb-1 ${isSelected ? 'text-slate-900' : 'text-slate-500'}`}>
+                            <h3 className={`font-black text-sm uppercase tracking-tight mb-1 ${isSelected ? 'text-text-primary' : 'text-text-secondary'}`}>
                                 {scheme.schemeName}
                             </h3>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{scheme.schemeCode}</p>
+                            <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-tighter">{scheme.schemeCode}</p>
                         </button>
                     );
                 })}
@@ -149,16 +149,16 @@ const CorporateMemberManagement = () => {
             {selectedScheme ? (
                 <div className="flex flex-col gap-6">
                     {/* Action Bar */}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-[2rem] border border-slate-200 shadow-sm">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-bg-secondary p-4 rounded-[2rem] border border-border-color shadow-sm">
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <div className="relative flex-1 sm:w-80">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
                                 <input 
                                     type="text" 
                                     placeholder="Find member by name or ID..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-medium focus:outline-none focus:bg-white focus:border-blue-400 transition-all"
+                                    className="w-full pl-11 pr-4 py-3 bg-bg-tertiary/50 border border-border-color rounded-2xl text-sm font-medium focus:outline-none focus:bg-bg-tertiary focus:border-blue-500/50 transition-all text-text-primary placeholder:text-text-tertiary"
                                 />
                             </div>
                         </div>
@@ -166,14 +166,14 @@ const CorporateMemberManagement = () => {
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <button 
                                 onClick={() => setShowUpload(!showUpload)}
-                                className={`h-12 px-5 font-bold rounded-2xl transition-all flex items-center gap-2 ${showUpload ? 'bg-slate-100 text-slate-900' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                                className={`h-12 px-5 font-bold rounded-2xl transition-all flex items-center gap-2 ${showUpload ? 'bg-bg-tertiary text-text-primary' : 'bg-bg-secondary border border-border-color text-text-secondary hover:bg-bg-tertiary'}`}
                             >
                                 <Upload className="w-4 h-4" />
                                 Import
                             </button>
                             <button 
                                 onClick={() => setShowAddMember(true)}
-                                className="h-12 px-6 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 transition-all flex items-center gap-2 shadow-xl shadow-slate-900/10"
+                                className="h-12 px-6 bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-black rounded-2xl hover:opacity-90 transition-all flex items-center gap-2 shadow-xl shadow-black/10"
                             >
                                 <UserPlus className="w-4 h-4" />
                                 Add Member
@@ -183,19 +183,19 @@ const CorporateMemberManagement = () => {
 
                     {/* Upload Area */}
                     {showUpload && (
-                        <div className="bg-blue-50/50 border border-blue-100 rounded-[2rem] p-8 animate-in slide-in-from-top-4 duration-300">
+                        <div className="bg-blue-500/5 border border-blue-500/10 rounded-[2rem] p-8 animate-in slide-in-from-top-4 duration-300">
                             <div className="max-w-xl mx-auto text-center">
-                                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Upload className="w-6 h-6 text-blue-600" />
+                                <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Upload className="w-6 h-6 text-blue-500" />
                                 </div>
-                                <h3 className="text-lg font-black text-slate-900 mb-2">Import Membership Roster</h3>
-                                <p className="text-slate-500 text-sm mb-6">Drop your Excel file here to auto-enroll patients into <b>{selectedSchemeName}</b>.</p>
+                                <h3 className="text-lg font-black text-text-primary mb-2">Import Membership Roster</h3>
+                                <p className="text-text-secondary text-sm mb-6">Drop your Excel file here to auto-enroll patients into <b>{selectedSchemeName}</b>.</p>
                                 
                                 <div className="flex flex-col sm:flex-row gap-3">
                                     <input 
                                         type="file" 
                                         onChange={handleFileChange}
-                                        className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm"
+                                        className="flex-1 px-4 py-3 bg-bg-secondary border border-border-color rounded-2xl text-sm text-text-primary"
                                     />
                                     <button 
                                         onClick={handleUpload}
@@ -210,62 +210,62 @@ const CorporateMemberManagement = () => {
                     )}
 
                     {/* Table Container */}
-                    <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden mb-12">
+                    <div className="bg-bg-secondary rounded-[2.5rem] border border-border-color shadow-sm overflow-hidden mb-12">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="border-b border-slate-100">
-                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Membership Identity</th>
-                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Personal Info</th>
-                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Tier</th>
-                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Utilization</th>
-                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Status</th>
-                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Control</th>
+                                    <tr className="border-b border-border-color">
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Membership Identity</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Personal Info</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-text-tertiary text-center">Tier</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-text-tertiary text-right">Utilization</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-text-tertiary text-center">Status</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-text-tertiary text-right">Control</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-50">
+                                <tbody className="divide-y divide-border-color/50">
                                     {loading ? (
-                                        <tr><td colSpan="6" className="py-20 text-center text-slate-400 font-black uppercase tracking-widest">Synchronizing...</td></tr>
+                                        <tr><td colSpan="6" className="py-20 text-center text-text-tertiary font-black uppercase tracking-widest">Synchronizing...</td></tr>
                                     ) : filteredMembers.length === 0 ? (
-                                        <tr><td colSpan="6" className="py-20 text-center text-slate-400 font-black uppercase tracking-widest text-[10px]">No matches found</td></tr>
+                                        <tr><td colSpan="6" className="py-20 text-center text-text-tertiary font-black uppercase tracking-widest text-[10px]">No matches found</td></tr>
                                     ) : (
                                         filteredMembers.map((member) => (
-                                            <tr key={member.id} className="group hover:bg-slate-50/50 transition-colors">
+                                            <tr key={member.id} className="group hover:bg-bg-tertiary/30 transition-colors">
                                                 <td className="px-8 py-6">
-                                                    <p className="font-mono font-black text-slate-400 text-[11px] tracking-tighter uppercase mb-1">
+                                                    <p className="font-mono font-black text-text-tertiary text-[11px] tracking-tighter uppercase mb-1">
                                                         {member.patientNumber || member.policyNumber || 'GEN-000'}
                                                     </p>
-                                                    <p className="text-xs font-bold text-slate-500">{member.nrc || 'No NRC Record'}</p>
+                                                    <p className="text-xs font-bold text-text-secondary">{member.nrc || 'No NRC Record'}</p>
                                                 </td>
                                                 <td className="px-8 py-6">
-                                                    <p className="font-black text-slate-900 text-sm tracking-tight uppercase group-hover:text-blue-600 transition-colors">
+                                                    <p className="font-black text-text-primary text-sm tracking-tight uppercase group-hover:text-blue-500 transition-colors">
                                                         {member.firstName} {member.lastName}
                                                     </p>
                                                 </td>
                                                 <td className="px-8 py-6 text-center">
-                                                    <span className="text-[10px] font-black px-3 py-1 bg-slate-100 text-slate-600 rounded-full uppercase">
+                                                    <span className="text-[10px] font-black px-3 py-1 bg-bg-tertiary text-text-secondary rounded-full uppercase">
                                                         {member.memberRank || 'Principal'}
                                                     </span>
                                                 </td>
                                                 <td className="px-8 py-6 text-right">
-                                                    <p className="font-black text-slate-900 text-sm">K{Number(member.balance || 0).toLocaleString()}</p>
+                                                    <p className="font-black text-text-primary text-sm">K{Number(member.balance || 0).toLocaleString()}</p>
                                                 </td>
                                                 <td className="px-8 py-6">
                                                     <div className="flex justify-center">
-                                                        <div className={`w-2 h-2 rounded-full ${member.memberStatus === 'active' ? 'bg-emerald-500' : 'bg-rose-500'} shadow-[0_0_8px_rgba(16,185,129,0.3)]`} />
+                                                        <div className={`w-2 h-2 rounded-full ${member.memberStatus === 'active' ? 'bg-emerald-500' : 'bg-rose-500'} ${member.memberStatus === 'active' ? 'shadow-[0_0_8px_rgba(16,185,129,0.3)]' : 'shadow-[0_0_8px_rgba(244,63,94,0.3)]'}`} />
                                                     </div>
                                                 </td>
                                                 <td className="px-8 py-6">
                                                     <div className="flex items-center justify-end gap-2">
                                                         <button 
                                                             onClick={() => toggleStatus(member.id, member.memberStatus)}
-                                                            className={`p-2 rounded-xl transition-all ${member.memberStatus === 'active' ? 'text-rose-400 hover:bg-rose-50' : 'text-emerald-400 hover:bg-emerald-50'}`}
+                                                            className={`p-2 rounded-xl transition-all ${member.memberStatus === 'active' ? 'text-rose-500 hover:bg-rose-500/10' : 'text-emerald-500 hover:bg-emerald-500/10'}`}
                                                         >
                                                             {member.memberStatus === 'active' ? <XCircle className="w-5 h-5" /> : <CheckCircle className="w-5 h-5" />}
                                                         </button>
                                                         <button 
                                                             onClick={() => navigate(`/app/patients/${member.id}`)}
-                                                            className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                                                            className="p-2 text-text-tertiary hover:text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all"
                                                         >
                                                             <LinkIcon className="w-5 h-5" />
                                                         </button>
@@ -280,13 +280,13 @@ const CorporateMemberManagement = () => {
                     </div>
                 </div>
             ) : (
-                <div className="flex-1 flex items-center justify-center p-20 text-center bg-white rounded-[3rem] border border-dashed border-slate-200">
+                <div className="flex-1 flex items-center justify-center p-20 text-center bg-bg-secondary rounded-[3rem] border border-dashed border-border-color">
                     <div>
-                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <Users className="w-10 h-10 text-slate-200" />
+                        <div className="w-20 h-20 bg-bg-tertiary rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Users className="w-10 h-10 text-text-tertiary/20" />
                         </div>
-                        <h2 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-widest">Select Operational Unit</h2>
-                        <p className="text-slate-400 text-sm font-medium">Choose a corporate scheme from the cards above to manage membership data.</p>
+                        <h2 className="text-xl font-black text-text-primary mb-2 uppercase tracking-widest">Select Operational Unit</h2>
+                        <p className="text-text-tertiary text-sm font-medium">Choose a corporate scheme from the cards above to manage membership data.</p>
                     </div>
                 </div>
             )}
