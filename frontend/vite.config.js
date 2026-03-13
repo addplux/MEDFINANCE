@@ -60,6 +60,11 @@ function injectSwAssets() {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), injectSwAssets()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+    },
+  },
   server: {
     port: 5181,
     strictPort: true,
