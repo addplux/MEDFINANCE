@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
-import { Download, Upload, Search, Link as LinkIcon, AlertCircle, CheckCircle, XCircle, Users, UserPlus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Download, Upload, Search, Link as LinkIcon, CheckCircle, XCircle, Users, UserPlus, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { receivablesAPI } from '../../../services/apiService';
 import { useToast } from '../../../context/ToastContext';
@@ -18,12 +18,10 @@ const CorporateMemberManagement = () => {
     const [showUpload, setShowUpload] = useState(false);
     const [showAddMember, setShowAddMember] = useState(false);
 
-    // Fetch Corporate Schemes on mount
     useEffect(() => {
         fetchSchemes();
     }, []);
 
-    // Fetch members when a scheme is selected
     useEffect(() => {
         if (selectedScheme) {
             fetchMembers(selectedScheme);
@@ -48,11 +46,7 @@ const CorporateMemberManagement = () => {
             const response = await receivablesAPI.schemes.getMembers(schemeId);
             const data = response.data || [];
             setMembers(data);
-            if (data.length === 0) {
-                setShowUpload(true);
-            } else {
-                setShowUpload(false);
-            }
+            setShowUpload(data.length === 0);
         } catch (error) {
             console.error('Failed to fetch members:', error);
             addToast('error', 'Failed to load member list.');
@@ -61,29 +55,7 @@ const CorporateMemberManagement = () => {
         }
     };
 
-    // Auto-detect scheme when file is chosen
-    useEffect(() => {
-        if (selectedFile && corporateSchemes.length > 0 && !selectedScheme) {
-            try {
-                const fileName = selectedFile.name.toLowerCase();
-                const matchedScheme = corporateSchemes.find(scheme => {
-                    const sName = scheme.schemeName ? scheme.schemeName.toLowerCase() : '';
-                    const sCode = scheme.schemeCode ? scheme.schemeCode.toLowerCase() : '';
-                    return (sName && fileName.includes(sName)) || (sCode && fileName.includes(sCode));
-                });
-                if (matchedScheme) {
-                    setSelectedScheme(String(matchedScheme.id));
-                }
-            } catch (err) {
-                console.error('Auto-detect failed:', err);
-            }
-        }
-    }, [selectedFile, corporateSchemes]);
-
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        setSelectedFile(file);
-    };
+    const handleFileChange = (event) => setSelectedFile(event.target.files[0]);
 
     const handleUpload = async () => {
         if (!selectedFile || !selectedScheme) {
@@ -97,20 +69,12 @@ const CorporateMemberManagement = () => {
         setUploading(true);
         try {
             const response = await receivablesAPI.schemes.importMembers(selectedScheme, formData);
-
             const { summary } = response.data;
-            if (summary) {
-                addToast('success', `Upload successful! Added: ${summary.added}, Updated: ${summary.updated}`);
-            } else {
-                addToast('success', `Upload successful!`);
-            }
-
+            addToast('success', summary ? `Imported: ${summary.added}, Updated: ${summary.updated}` : `Upload successful!`);
             setSelectedFile(null);
             fetchMembers(selectedScheme);
         } catch (error) {
-            console.error('Upload error:', error);
-            const msg = error.response?.data?.error || 'Failed to upload roster. Check column names.';
-            addToast('error', msg);
+            addToast('error', error.response?.data?.error || 'Failed to upload roster.');
         } finally {
             setUploading(false);
         }
@@ -118,250 +82,225 @@ const CorporateMemberManagement = () => {
 
     const toggleStatus = async (patientId, currentStatus) => {
         const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
-        if (!window.confirm(`Are you sure you want to ${newStatus === 'active' ? 'activate' : 'suspend'} this member?`)) return;
+        if (!window.confirm(`Confirm member ${newStatus}?`)) return;
 
         try {
             await receivablesAPI.schemes.updateMemberStatus(selectedScheme, patientId, newStatus);
             setMembers(members.map(m => m.id === patientId ? { ...m, memberStatus: newStatus } : m));
-            addToast('success', `Member ${newStatus === 'active' ? 'activated' : 'suspended'} successfully.`);
+            addToast('success', `Status updated successfully.`);
         } catch (error) {
-            console.error('Status update error:', error);
-            addToast('error', 'Failed to update member status.');
+            addToast('error', 'Failed to update status.');
         }
     };
 
     const filteredMembers = members.filter(m =>
         m.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         m.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (m.patientNumber && m.patientNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (m.nrc && m.nrc.toLowerCase().includes(searchTerm.toLowerCase()))
+        m.patientNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        m.nrc?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const selectedSchemeName = corporateSchemes.find(s => String(s.id) === String(selectedScheme))?.schemeName || 'Scheme';
 
     return (
-        <div className="space-y-6 animate-fade-in">
-            {/* Page Header */}
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight text-white">Scheme Member Management</h1>
-                <p className="text-sm text-white/50 mt-1">Select a scheme below to view and manage its members</p>
+        <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-8 flex flex-col gap-8 animate-in fade-in duration-700">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200">
+                <div>
+                    <div className="flex items-center gap-2 mb-1">
+                        <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600/80">Corporate Intelligence</span>
+                    </div>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">Member <span className="text-slate-400 font-light">Ecosystem</span></h1>
+                    <p className="text-slate-500 font-medium text-sm mt-1">Manage corporate enrollments, utilization limits, and membership statuses.</p>
+                </div>
             </div>
 
-            {/* Corporate Schemes Cards */}
-            {corporateSchemes.length === 0 ? (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-8 text-center">
-                    <p className="text-amber-700 font-semibold">No active schemes found.</p>
-                    <p className="text-amber-600 text-sm mt-1">
-                        Please create a scheme under <strong>'All Schemes'</strong>.
-                    </p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {corporateSchemes.map(scheme => {
-                        const isSelected = String(selectedScheme) === String(scheme.id);
-                        return (
-                            <button
-                                key={scheme.id}
-                                onClick={() => setSelectedScheme(String(scheme.id))}
-                                className={`text-left p-5 rounded-xl border-2 transition-all shadow-sm hover:shadow-md ${isSelected
-                                    ? 'border-primary bg-primary/10 ring-2 ring-primary/30'
-                                    : 'border-white/10 bg-white/5 hover:border-white/30'
-                                    }`}
-                            >
-                                <div className="flex items-start justify-between gap-2">
-                                    <div>
-                                        <p className="font-bold text-white text-base">{scheme.schemeName || 'Unnamed Scheme'}</p>
-                                        <p className="text-xs text-white/40 mt-0.5 font-mono">{scheme.schemeCode}</p>
-                                    </div>
-                                    <span className={`shrink-0 text-xs px-2 py-1 rounded-full font-medium ${isSelected ? 'bg-primary text-white' : 'bg-white/10 text-white/60'
-                                        }`}>
-                                        {isSelected ? 'Selected' : 'Select'}
-                                    </span>
-                                </div>
-                                <div className="mt-3 flex items-center gap-3 text-xs">
-                                    {(() => {
-                                        const t = (scheme.schemeType || scheme.scheme_type || '').toLowerCase();
-                                        const colors = { corporate: 'bg-blue-100 text-blue-700', insurance: 'bg-purple-100 text-purple-700', government: 'bg-amber-100 text-amber-700' };
-                                        return <span className={`px-2 py-0.5 rounded-full font-medium capitalize ${colors[t] || 'bg-slate-100 text-slate-600'}`}>{t || 'other'}</span>;
-                                    })()}
-                                    <span className="text-white/50">Discount: <strong className="text-white/80">{scheme.discountRate || 0}%</strong></span>
-                                    <span className="inline-flex items-center gap-1 text-white/50">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                        Active
-                                    </span>
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-            )}
-
-            {/* Upload Section â€” visible if explicitly toggled on or if scheme has no members */}
-            {selectedScheme && showUpload && (
-                <div className="p-6 bg-white/5 shadow-sm border border-white/10 rounded-xl relative">
-                    <button
-                        onClick={() => setShowUpload(false)}
-                        className="absolute top-4 right-4 text-white/40 hover:text-white/80 transition-colors"
-                        title="Hide Upload"
-                    >
-                        <XCircle className="w-5 h-5" />
-                    </button>
-                    <label className="block text-sm font-semibold text-white/80 mb-2">
-                        Upload Roster for <span className="text-primary">{selectedSchemeName}</span> (Excel)
-                    </label>
-                    <div className="flex flex-col sm:flex-row gap-4 items-center">
-                        <div className="flex-1 w-full">
-                            <input
-                                type="file"
-                                accept=".xlsx, .xls, .csv"
-                                onChange={handleFileChange}
-                                className="block w-full text-sm text-slate-900 border border-slate-300 rounded-lg cursor-pointer bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary-500 file:mr-4 file:py-2.5 file:px-4 file:border-0 file:text-sm file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
-                            />
-                        </div>
+            {/* Scheme Selection */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {corporateSchemes.map(scheme => {
+                    const isSelected = String(selectedScheme) === String(scheme.id);
+                    return (
                         <button
-                            onClick={handleUpload}
-                            disabled={uploading}
-                            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium whitespace-nowrap shadow-sm min-w-[140px]"
+                            key={scheme.id}
+                            onClick={() => setSelectedScheme(String(scheme.id))}
+                            className={`group relative p-5 rounded-[1.5rem] border transition-all duration-300 ${
+                                isSelected 
+                                ? 'bg-white border-blue-200 shadow-xl shadow-blue-500/5 ring-1 ring-blue-100' 
+                                : 'bg-white/50 border-slate-200 hover:bg-white hover:border-slate-300'
+                            }`}
                         >
-                            {uploading ? (
-                                <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> Uploading...</>
-                            ) : (
-                                <><Upload className="h-4 w-4" /> Upload</>
-                            )}
+                            <div className="flex items-start justify-between mb-4">
+                                <div className={`p-2 rounded-xl ${isSelected ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
+                                    <Users className="w-5 h-5" />
+                                </div>
+                                <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-blue-600' : 'bg-slate-300'}`} />
+                            </div>
+                            <h3 className={`font-black text-sm uppercase tracking-tight mb-1 ${isSelected ? 'text-slate-900' : 'text-slate-500'}`}>
+                                {scheme.schemeName}
+                            </h3>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{scheme.schemeCode}</p>
                         </button>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-3">Required columns: 'Employee number', 'NRC', 'Name'. Missing patients will be auto-created.</p>
-                </div>
-            )}
+                    );
+                })}
+            </div>
 
-            {/* Members Table */}
-            <div className="bg-white shadow-sm border border-slate-200 rounded-xl overflow-hidden mt-6">
-                <div className="p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/50">
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <Users className="w-5 h-5 text-primary-500" />
-                            {selectedScheme
-                                ? <>{selectedSchemeName} Members <span className="px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 text-xs">{members.length} Total</span></>
-                                : 'Registered Members'
-                            }
-                        </h2>
-                        {selectedScheme && !showUpload && (
-                            <button
-                                onClick={() => setShowUpload(true)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 text-sm font-medium rounded-md hover:bg-slate-50 hover:text-primary-600 transition-colors"
+            {/* Main Content */}
+            {selectedScheme ? (
+                <div className="flex flex-col gap-6">
+                    {/* Action Bar */}
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-[2rem] border border-slate-200 shadow-sm">
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <div className="relative flex-1 sm:w-80">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input 
+                                    type="text" 
+                                    placeholder="Find member by name or ID..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-medium focus:outline-none focus:bg-white focus:border-blue-400 transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <button 
+                                onClick={() => setShowUpload(!showUpload)}
+                                className={`h-12 px-5 font-bold rounded-2xl transition-all flex items-center gap-2 ${showUpload ? 'bg-slate-100 text-slate-900' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                             >
                                 <Upload className="w-4 h-4" />
-                                Import Roster
+                                Import
                             </button>
-                        )}
-                        {selectedScheme && (
-                            <button
+                            <button 
                                 onClick={() => setShowAddMember(true)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+                                className="h-12 px-6 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 transition-all flex items-center gap-2 shadow-xl shadow-slate-900/10"
                             >
                                 <UserPlus className="w-4 h-4" />
                                 Add Member
                             </button>
-                        )}
+                        </div>
                     </div>
-                    <div className="relative w-full sm:w-72">
-                        <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                        <input
-                            type="text"
-                            placeholder="Search by name, NRC or Emp No..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 py-2 w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition-all"
-                        />
-                    </div>
-                </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-slate-50 border-b border-slate-200 text-sm font-semibold text-slate-600">
-                                <th className="p-4">Emp No. / Policy</th>
-                                <th className="p-4">NRC</th>
-                                <th className="p-4">Name</th>
-                                <th className="p-4">Rank</th>
-                                <th className="p-4">Utilisation (Bal)</th>
-                                <th className="p-4">Status</th>
-                                <th className="p-4 text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 text-sm">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan="7" className="text-center p-8 text-slate-500">
-                                        <div className="flex justify-center items-center gap-3">
-                                            <div className="animate-spin h-5 w-5 border-2 border-primary-500 border-t-transparent rounded-full" />
-                                            Loading members...
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : filteredMembers.length === 0 ? (
-                                <tr>
-                                    <td colSpan="7" className="text-center p-12 text-slate-500 bg-slate-50/50">
-                                        {selectedScheme ? 'No members found. Upload an Excel roster to get started.' : 'Select a scheme above to view its members.'}
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredMembers.map((member) => (
-                                    <tr key={member.id} className="hover:bg-slate-50/80 transition-colors">
-                                        <td className="p-4 font-mono text-slate-600">{member.patientNumber || member.policyNumber || '-'}</td>
-                                        <td className="p-4 text-slate-500">{member.nrc || '-'}</td>
-                                        <td className="p-4 font-medium text-slate-800">{member.firstName} {member.lastName}</td>
-                                        <td className="p-4">
-                                            <span className="capitalize text-slate-600">{member.memberRank || 'Principal'}</span>
-                                        </td>
-                                        <td className="p-4 text-slate-700 font-medium">
-                                            K{Number(member.balance || 0).toLocaleString()}
-                                        </td>
-                                        <td className="p-4">
-                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${member.memberStatus === 'active'
-                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                : 'bg-rose-50 text-rose-700 border-rose-200'
-                                                }`}>
-                                                <span className={`w-1.5 h-1.5 rounded-full ${member.memberStatus === 'active' ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
-                                                {member.memberStatus === 'active' ? 'Active' : 'Suspended'}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 w-40">
-                                            <div className="flex justify-center items-center gap-2">
-                                                <button
-                                                    onClick={() => toggleStatus(member.id, member.memberStatus)}
-                                                    className={`p-1.5 rounded hover:bg-slate-200 transition-colors ${member.memberStatus === 'active' ? 'text-rose-600' : 'text-emerald-600'
-                                                        }`}
-                                                    title={member.memberStatus === 'active' ? 'Suspend Member' : 'Activate Member'}
-                                                >
-                                                    {member.memberStatus === 'active' ? <XCircle className="w-5 h-5" /> : <CheckCircle className="w-5 h-5" />}
-                                                </button>
-                                                <button
-                                                    onClick={() => navigate(`/app/patients/${member.id}`)}
-                                                    className="p-1.5 rounded text-blue-600 hover:bg-blue-50 transition-colors"
-                                                    title="View Full Patient File"
-                                                >
-                                                    <LinkIcon className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        </td>
+                    {/* Upload Area */}
+                    {showUpload && (
+                        <div className="bg-blue-50/50 border border-blue-100 rounded-[2rem] p-8 animate-in slide-in-from-top-4 duration-300">
+                            <div className="max-w-xl mx-auto text-center">
+                                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Upload className="w-6 h-6 text-blue-600" />
+                                </div>
+                                <h3 className="text-lg font-black text-slate-900 mb-2">Import Membership Roster</h3>
+                                <p className="text-slate-500 text-sm mb-6">Drop your Excel file here to auto-enroll patients into <b>{selectedSchemeName}</b>.</p>
+                                
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <input 
+                                        type="file" 
+                                        onChange={handleFileChange}
+                                        className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm"
+                                    />
+                                    <button 
+                                        onClick={handleUpload}
+                                        disabled={uploading || !selectedFile}
+                                        className="h-12 px-8 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 disabled:opacity-50"
+                                    >
+                                        {uploading ? 'Processing...' : 'Upload Now'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Table Container */}
+                    <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden mb-12">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-slate-100">
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Membership Identity</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Personal Info</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Tier</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Utilization</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Status</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Control</th>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {loading ? (
+                                        <tr><td colSpan="6" className="py-20 text-center text-slate-400 font-black uppercase tracking-widest">Synchronizing...</td></tr>
+                                    ) : filteredMembers.length === 0 ? (
+                                        <tr><td colSpan="6" className="py-20 text-center text-slate-400 font-black uppercase tracking-widest text-[10px]">No matches found</td></tr>
+                                    ) : (
+                                        filteredMembers.map((member) => (
+                                            <tr key={member.id} className="group hover:bg-slate-50/50 transition-colors">
+                                                <td className="px-8 py-6">
+                                                    <p className="font-mono font-black text-slate-400 text-[11px] tracking-tighter uppercase mb-1">
+                                                        {member.patientNumber || member.policyNumber || 'GEN-000'}
+                                                    </p>
+                                                    <p className="text-xs font-bold text-slate-500">{member.nrc || 'No NRC Record'}</p>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <p className="font-black text-slate-900 text-sm tracking-tight uppercase group-hover:text-blue-600 transition-colors">
+                                                        {member.firstName} {member.lastName}
+                                                    </p>
+                                                </td>
+                                                <td className="px-8 py-6 text-center">
+                                                    <span className="text-[10px] font-black px-3 py-1 bg-slate-100 text-slate-600 rounded-full uppercase">
+                                                        {member.memberRank || 'Principal'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-8 py-6 text-right">
+                                                    <p className="font-black text-slate-900 text-sm">K{Number(member.balance || 0).toLocaleString()}</p>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex justify-center">
+                                                        <div className={`w-2 h-2 rounded-full ${member.memberStatus === 'active' ? 'bg-emerald-500' : 'bg-rose-500'} shadow-[0_0_8px_rgba(16,185,129,0.3)]`} />
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <button 
+                                                            onClick={() => toggleStatus(member.id, member.memberStatus)}
+                                                            className={`p-2 rounded-xl transition-all ${member.memberStatus === 'active' ? 'text-rose-400 hover:bg-rose-50' : 'text-emerald-400 hover:bg-emerald-50'}`}
+                                                        >
+                                                            {member.memberStatus === 'active' ? <XCircle className="w-5 h-5" /> : <CheckCircle className="w-5 h-5" />}
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => navigate(`/app/patients/${member.id}`)}
+                                                            className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                                                        >
+                                                            <LinkIcon className="w-5 h-5" />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        {/* Add Member Modal */}
-        {showAddMember && selectedScheme && (
-            <AddMemberModal
-                schemeId={selectedScheme}
-                schemeName={selectedSchemeName}
-                onClose={() => setShowAddMember(false)}
-                onSuccess={() => fetchMembers(selectedScheme)}
-            />
-        )}
-    </div>
+            ) : (
+                <div className="flex-1 flex items-center justify-center p-20 text-center bg-white rounded-[3rem] border border-dashed border-slate-200">
+                    <div>
+                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Users className="w-10 h-10 text-slate-200" />
+                        </div>
+                        <h2 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-widest">Select Operational Unit</h2>
+                        <p className="text-slate-400 text-sm font-medium">Choose a corporate scheme from the cards above to manage membership data.</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Modals */}
+            {showAddMember && selectedScheme && (
+                <AddMemberModal
+                    schemeId={selectedScheme}
+                    schemeName={selectedSchemeName}
+                    onClose={() => setShowAddMember(false)}
+                    onSuccess={() => fetchMembers(selectedScheme)}
+                />
+            )}
+        </div>
     );
 };
 
