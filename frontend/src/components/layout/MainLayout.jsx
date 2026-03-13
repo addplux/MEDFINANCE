@@ -10,6 +10,7 @@ import {
     Users,
     DollarSign,
     CreditCard,
+    Receipt,
     BookOpen,
     Wallet,
     TrendingUp,
