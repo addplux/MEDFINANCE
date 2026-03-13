@@ -1,3 +1,4 @@
+const {
     Patient, OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill,
     TheatreBill, MaternityBill, SpecialistClinicBill,
     Payment, LabRequest, Visit, PatientMovement, sequelize
