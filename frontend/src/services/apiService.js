@@ -388,7 +388,8 @@ export const recordsAPI = {
         update: (id, data) => api.put(`/records/requests/${id}`, data),
         fulfill: (id, location) => api.post(`/records/requests/${id}/fulfill`, { location }),
         getStats: () => api.get('/records/stats'),
-    }
+    },
+    getActivityLog: (params) => api.get('/records/activity', { params })
 };
 
 export const corporatePortalAPI = {
