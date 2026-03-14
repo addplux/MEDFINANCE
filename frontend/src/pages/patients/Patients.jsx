@@ -164,40 +164,42 @@ const Patients = () => {
             </div>
 
             {/* Type filter chips */}
-            <div className="card p-3 flex items-center gap-2 flex-wrap">
-                {PATIENT_TYPES.map(t => (
-                    <button
-                        key={t.value}
-                        onClick={() => {
-                            setCategoryFilter(t.value);
-                            setCurrentPage(1);
-                        }}
-                        className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-semibold border transition-colors ${categoryFilter === t.value
-                            ? 'bg-indigo-600 text-white border-indigo-600'
-                            : 'bg-white/5 text-white/60 border-white/10 hover:border-indigo-400 hover:text-white'
-                            }`}
-                    >
-                        <t.icon className="w-3.5 h-3.5" />
-                        {t.label}
-                    </button>
-                ))}
-
-                <div className="flex-1" />
-
-                {/* Search */}
-                <div className="relative">
-                    <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Search patient…"
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        className="form-input rounded-full pl-8 py-2 text-sm w-48 sm:w-64 bg-white/5 border-white/10 text-white placeholder:text-gray-500"
-                    />
+            <div className="card p-3 flex flex-col md:flex-row items-center gap-4">
+                <div className="flex items-center gap-2 flex-wrap flex-1">
+                    {PATIENT_TYPES.map(t => (
+                        <button
+                            key={t.value}
+                            onClick={() => {
+                                setCategoryFilter(t.value);
+                                setCurrentPage(1);
+                            }}
+                            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-semibold border transition-colors ${categoryFilter === t.value
+                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                : 'bg-white/5 text-white/60 border-white/10 hover:border-indigo-400 hover:text-white'
+                                }`}
+                        >
+                            <t.icon className="w-3.5 h-3.5" />
+                            {t.label}
+                        </button>
+                    ))}
                 </div>
-                <button onClick={() => { setCurrentPage(1); loadPatients(); }} className="btn btn-secondary rounded-full p-2" title="Refresh">
-                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                </button>
+
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                    {/* Search */}
+                    <div className="relative flex-1 md:flex-none">
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+                        <input
+                            type="text"
+                            placeholder="Search patient…"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            className="form-input rounded-full pl-10 py-2.5 text-sm w-full md:w-64 bg-white/5 border-white/10 text-white placeholder:text-white/20"
+                        />
+                    </div>
+                    <button onClick={() => { setCurrentPage(1); loadPatients(); }} className="btn btn-secondary rounded-full p-2.5" title="Refresh">
+                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                    </button>
+                </div>
             </div>
 
             {/* Patients Table */}
@@ -317,7 +319,7 @@ const Patients = () => {
                         </div>
                     ) : (
                         patients.map((patient) => (
-                            <div key={patient.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
+                            <div key={patient.id} className="card p-4 space-y-4">
                                 <div className="flex items-start gap-3">
                                     {patient.photoUrl ? (
                                         <img
@@ -331,17 +333,19 @@ const Patients = () => {
                                         </div>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <div className="font-semibold text-gray-900 truncate">{patient.firstName} {patient.lastName}</div>
-                                        <div className="text-xs text-gray-500">{patient.patientNumber}</div>
-                                        <PatientTypeBadge patient={patient} />
+                                        <div className="font-bold text-white uppercase tracking-tight truncate">{patient.firstName} {patient.lastName}</div>
+                                        <div className="text-[10px] font-mono text-white/40 mt-0.5">{patient.patientNumber}</div>
+                                        <div className="mt-2">
+                                            <PatientTypeBadge patient={patient} />
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                                    <div><span className="text-gray-400">Gender: </span><span className="capitalize">{patient.gender}</span></div>
-                                    <div><span className="text-gray-400">Phone: </span>{patient.phone || '—'}</div>
-                                    <div><span className="text-gray-400">NRC: </span>{patient.nrc || '—'}</div>
+                                <div className="grid grid-cols-2 gap-2 text-xs text-white/40">
+                                    <div><span className="text-white/20">Gender: </span><span className="capitalize text-white/60">{patient.gender}</span></div>
+                                    <div><span className="text-white/20">Phone: </span><span className="text-white/60">{patient.phone || '—'}</span></div>
+                                    <div><span className="text-white/20">NRC: </span><span className="text-white/60">{patient.nrc || '—'}</span></div>
                                 </div>
-                                <div className="pt-3 border-t border-gray-100 flex gap-2 flex-wrap">
+                                <div className="pt-3 border-t border-white/10 flex gap-2 flex-wrap">
                                     <button onClick={() => navigate(`/app/patients/${patient.id}`)} className="btn btn-sm btn-secondary rounded-full flex-1 justify-center">
                                         <Eye className="w-3.5 h-3.5 mr-1" /> View
                                     </button>
