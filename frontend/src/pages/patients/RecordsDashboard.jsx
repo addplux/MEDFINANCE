@@ -9,7 +9,7 @@ import {
 
 const RecordsDashboard = () => {
     const navigate = useNavigate();
-    const [stats, setStats] = useState({ totalRequests: 0, pendingRequests: 0, fulfilledToday: 0 });
+    const [stats, setStats] = useState({ totalRequests: 0, pendingRequests: 0, fulfilledToday: 0, totalPatients: 0 });
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -47,7 +47,7 @@ const RecordsDashboard = () => {
             setSearching(true);
             try {
                 const res = await patientAPI.getAll({ search: query, limit: 10 });
-                setSearchResults(res.data.patients || []);
+                setSearchResults(res.data.data || []);
             } catch (error) {
                 console.error('Search failed', error);
             } finally {
@@ -227,7 +227,21 @@ const RecordsDashboard = () => {
                                 <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                             </div>
                         ) : allPatients.length === 0 ? (
-                            <div className="py-12 text-center text-white/20 text-sm">No patients registered yet</div>
+                            <div className="py-16 text-center space-y-4">
+                                <div className="p-4 bg-white/5 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                                    <Users className="w-8 h-8 text-white/10" />
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-white font-bold">No patients registered yet</p>
+                                    <p className="text-white/30 text-xs">Start by adding your first patient to the registry</p>
+                                </div>
+                                <button 
+                                    onClick={() => navigate('/app/patients/registration')}
+                                    className="btn btn-secondary border-none bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 px-6"
+                                >
+                                    Register Patient
+                                </button>
+                            </div>
                         ) : (
                             <div className="divide-y divide-white/5">
                                 {allPatients.map(p => (
@@ -271,9 +285,19 @@ const RecordsDashboard = () => {
                     <div className="grid grid-cols-1 gap-4">
                         <div className="card p-5 bg-gradient-to-br from-blue-600 to-blue-800 border-none relative overflow-hidden group shadow-lg shadow-blue-500/20">
                             <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
-                            <h4 className="text-[10px] font-black text-white/60 uppercase tracking-widest">Total Active Files</h4>
-                            <p className="text-4xl font-black text-white mt-2">{stats.totalRequests.toLocaleString()}</p>
+                            <h4 className="text-[10px] font-black text-white/60 uppercase tracking-widest">Registered Patients</h4>
+                            <p className="text-4xl font-black text-white mt-2">{(stats.totalPatients || 0).toLocaleString()}</p>
                             <p className="text-xs text-white/50 mt-1">Growth: +12% this month</p>
+                        </div>
+
+                        <div className="card p-5 bg-white/[0.03] border-white/5 flex items-center justify-between group hover:bg-white/[0.05] transition-all">
+                            <div>
+                                <h4 className="text-[10px] font-black text-white/40 uppercase tracking-widest">Active File Requests</h4>
+                                <p className="text-2xl font-black text-white mt-1">{(stats.totalRequests || 0).toLocaleString()}</p>
+                            </div>
+                            <div className="p-3 bg-blue-500/10 rounded-2xl group-hover:bg-blue-500/20 transition-colors">
+                                <FileText className="w-6 h-6 text-blue-500" />
+                            </div>
                         </div>
 
                         <div className="card p-5 bg-white/[0.03] border-white/5 flex items-center justify-between">

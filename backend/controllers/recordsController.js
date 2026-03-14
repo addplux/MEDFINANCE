@@ -14,11 +14,13 @@ exports.getStats = async (req, res) => {
                 fulfilledAt: { [Op.gte]: today }
             }
         });
+        const totalPatients = await Patient.count();
 
         res.json({
             totalRequests,
             pendingRequests,
-            fulfilledToday
+            fulfilledToday,
+            totalPatients
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
