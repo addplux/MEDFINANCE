@@ -158,8 +158,8 @@ const RecordsDashboard = () => {
                                 {requests.map(req => (
                                     <div key={req.id} className="p-4 hover:bg-white/[0.02] flex items-center justify-between gap-4">
                                         <div className="flex items-center gap-4 flex-1">
-                                            <div className={`p-2 rounded-xl flex-shrink-0 ${req.urgency === 'urgent' ? 'bg-red-500/10 text-red-500' :
-                                                    req.urgency === 'soon' ? 'bg-orange-500/10 text-orange-400' :
+                                            <div className={`p-2 rounded-xl flex-shrink-0 ${req.urgency === 'emergency' ? 'bg-red-500/20 text-red-500 animate-pulse' :
+                                                    req.urgency === 'urgent' ? 'bg-red-500/10 text-red-400' :
                                                         'bg-blue-500/10 text-blue-400'
                                                 }`}>
                                                 <FileText className="w-5 h-5" />
@@ -172,8 +172,11 @@ const RecordsDashboard = () => {
                                                     >
                                                         {req.patient?.firstName} {req.patient?.lastName}
                                                     </p>
-                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${req.urgency === 'urgent' ? 'bg-red-500 text-white' : 'bg-white/10 text-white/60'
-                                                        }`}>
+                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                                                        req.urgency === 'emergency' ? 'bg-red-600 text-white' :
+                                                        req.urgency === 'urgent' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 
+                                                        'bg-white/10 text-white/60'
+                                                    }`}>
                                                         {req.urgency}
                                                     </span>
                                                 </div>

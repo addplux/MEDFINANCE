@@ -10,7 +10,7 @@ exports.getStats = async (req, res) => {
         const pendingRequests = await FileRequest.count({ where: { status: 'pending' } });
         const fulfilledToday = await FileRequest.count({
             where: {
-                status: 'fulfilled',
+                status: 'delivered',
                 fulfilledAt: { [Op.gte]: today }
             }
         });
@@ -82,7 +82,7 @@ exports.fulfillRequest = async (req, res) => {
         if (!request) return res.status(404).json({ error: 'Request not found' });
 
         await request.update({
-            status: 'fulfilled',
+            status: 'delivered',
             location,
             fulfilledAt: new Date(),
             assignedToId: req.user.id
