@@ -12,8 +12,9 @@ const NotificationBell = () => {
     const [unreadCount, setUnreadCount] = useState(0);
     const dropdownRef = useRef(null);
 
-    // Only show for admins
-    if (!user || user.role !== 'admin') return null;
+    // Only show for admins OR clinical staff
+    const rolesWithNotifications = ['admin', 'superintendent', 'doctor', 'nurse'];
+    if (!user || !rolesWithNotifications.includes(user.role)) return null;
 
     const fetchCount = async () => {
         try {
@@ -70,6 +71,8 @@ const NotificationBell = () => {
         }
         if (notification.type === 'registration_request') {
             navigate('/app/setup/pending-approvals');
+        } else if (notification.type === 'wait_time_alert') {
+            navigate('/app/visits/waiting-room');
         }
         setOpen(false);
     };
@@ -84,6 +87,17 @@ const NotificationBell = () => {
         return `${Math.floor(hrs / 24)}d ago`;
     };
 
+    const getIconDetails = (type) => {
+        switch (type) {
+            case 'registration_request':
+                return { icon: <UserCheck className="w-4 h-4" />, colors: 'bg-amber-500/15 text-amber-400' };
+            case 'wait_time_alert':
+                return { icon: <Bell className="w-4 h-4" />, colors: 'bg-red-500/15 text-red-500 border border-red-500/30' };
+            default:
+                return { icon: <Bell className="w-4 h-4" />, colors: 'bg-primary-500/15 text-primary-400' };
+        }
+    };
+
     return (
         <div className="relative" ref={dropdownRef}>
             {/* Bell button */}
@@ -94,7 +108,7 @@ const NotificationBell = () => {
             >
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center">
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]">
                         {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                 )}
@@ -130,14 +144,16 @@ const NotificationBell = () => {
                                 No notifications
                             </div>
                         ) : (
-                            notifications.map(n => (
+                            notifications.map(n => {
+                                const { icon, colors } = getIconDetails(n.type);
+                                return (
                                 <button
                                     key={n.id}
                                     onClick={() => handleNotificationClick(n)}
                                     className={`w-full text-left px-4 py-3 border-b border-white/5 hover:bg-white/5 transition-colors flex items-start gap-3 ${!n.isRead ? 'bg-primary-500/5' : ''}`}
                                 >
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${n.type === 'registration_request' ? 'bg-amber-500/15 text-amber-400' : 'bg-primary-500/15 text-primary-400'}`}>
-                                        <UserCheck className="w-4 h-4" />
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${colors}`}>
+                                        {icon}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium text-white truncate">{n.title}</p>
