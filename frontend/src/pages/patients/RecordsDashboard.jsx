@@ -323,7 +323,7 @@ const RecordsDashboard = () => {
                                 <p className="text-2xl font-black text-green-400 mt-1">{stats.fulfilledToday}</p>
                             </div>
                             <div className="p-3 bg-green-500/10 rounded-2xl">
-                                <CheckCircle2 className="w-6 h-6 text-green-500" />
+                                <CircleCheckBig className="w-6 h-6 text-green-500" />
                             </div>
                         </div>
                     </div>

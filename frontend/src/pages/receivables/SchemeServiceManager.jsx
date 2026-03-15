@@ -4,7 +4,7 @@ import { schemeServicesAPI, setupAPI } from '../../services/apiService';
 import { useToast } from '../../context/ToastContext';
 import {
     ArrowLeft, Plus, Search, Trash2, RefreshCw, DollarSign,
-    CheckCircle2, Shield, Edit2, Save, X
+    CircleCheckBig, Shield, Edit2, Save, X
 } from 'lucide-react';
 
 const categoryColors = {
@@ -120,7 +120,7 @@ const SchemeServiceManager = () => {
             <div className="card overflow-hidden">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
                     <div className="flex items-center gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                        <CircleCheckBig className="w-5 h-5 text-emerald-400" />
                         <h2 className="text-sm font-bold text-white">Covered Services</h2>
                         <span className="px-2 py-0.5 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">{covered.length} services</span>
                     </div>

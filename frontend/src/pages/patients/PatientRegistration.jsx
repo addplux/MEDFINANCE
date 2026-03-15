@@ -4,7 +4,7 @@ import { patientAPI, setupAPI, receivablesAPI } from '../../services/apiService'
 import {
     ArrowLeft, Save, User, UserPlus, Shield,
     CreditCard, Calendar, Phone, MapPin,
-    Briefcase, AlertCircle, Camera, CheckCircle2,
+    Briefcase, AlertCircle, Camera, CircleCheckBig,
     Stethoscope
 } from 'lucide-react';
 
@@ -184,7 +184,7 @@ const PatientRegistration = () => {
                                         onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
                                         className="hidden"
                                     />
-                                    {formData.paymentMethod === method && <CheckCircle2 className="w-4 h-4" />}
+                                    {formData.paymentMethod === method && <CircleCheckBig className="w-4 h-4" />}
                                 </label>
                             ))}
                         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { vitalsAPI } from '../../../services/apiService';
-import { Activity, Heart, Thermometer, Wind, Scale, Save, CheckCircle2 } from 'lucide-react';
+import { Activity, Heart, Thermometer, Wind, Scale, Save, CircleCheckBig } from 'lucide-react';
 
 const TriageWidget = ({ visitId, patientId, queueStatus, onVitalsSaved }) => {
     const [loading, setLoading] = useState(false);
@@ -71,7 +71,7 @@ const TriageWidget = ({ visitId, patientId, queueStatus, onVitalsSaved }) => {
             <div className="card p-5 bg-gradient-to-br from-blue-900 to-indigo-900 border border-blue-800">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-accent" /> Triage Completed
+                        <CircleCheckBig className="w-5 h-5 text-accent" /> Triage Completed
                     </h3>
                     <span className="text-xs text-white opacity-70 font-medium">Recorded by {vitals.recordedBy?.firstName} {vitals.recordedBy?.lastName}</span>
                 </div>

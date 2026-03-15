@@ -7,7 +7,7 @@ import {
     FileText, Search, Filter, Plus, Send,
     ChevronDown, ChevronRight, Calendar,
     Hash, User, ArrowUpRight, ArrowDownRight,
-    Activity, Clock, CheckCircle2, MoreHorizontal
+    Activity, Clock, CircleCheckBig, MoreHorizontal
 } from 'lucide-react';
 
 const JournalEntries = () => {
@@ -97,7 +97,7 @@ const JournalEntries = () => {
                     {[
                         { id: '', label: 'All Entries', icon: Activity },
                         { id: 'draft', label: 'Drafts', icon: Clock },
-                        { id: 'posted', label: 'Posted', icon: CheckCircle2 },
+                        { id: 'posted', label: 'Posted', icon: CircleCheckBig },
                     ].map(tab => (
                         <button
                             key={tab.id}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ledgerAPI } from '../../services/apiService';
 import { 
     FileText, Calendar, RefreshCw, Printer, 
-    CheckCircle2, AlertTriangle, TrendingUp, 
+    CircleCheckBig, AlertTriangle, TrendingUp, 
     TrendingDown, Calculator, Scale, Layers
 } from 'lucide-react';
 
@@ -124,7 +124,7 @@ const TrialBalance = () => {
                         <div className="flex items-center gap-3">
                             {data.balanced ? (
                                 <div className="p-2 bg-emerald-500/20 rounded-full text-emerald-400">
-                                    <CheckCircle2 size={16} />
+                                    <CircleCheckBig size={16} />
                                 </div>
                             ) : (
                                 <div className="p-2 bg-rose-500/20 rounded-full text-rose-400 animate-pulse">

@@ -6,7 +6,7 @@ import {
     Printer, Calendar, Edit3, Download, Save, 
     RefreshCw, Eye, Wallet, CreditCard, Smartphone, 
     TrendingUp, ArrowDownRight, User, Clock, 
-    CheckCircle2, FileText, Settings, ChevronRight
+    CircleCheckBig, FileText, Settings, ChevronRight
 } from 'lucide-react';
 import ReceiptModal from '../../components/common/ReceiptModal';
 

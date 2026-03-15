@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { systemLogsAPI, auditLogsAPI } from '../../services/apiService';
 import {
     Terminal, Trash2, RefreshCw, AlertTriangle, AlertCircle,
-    Info, CheckCircle2, ClipboardList, Search, ChevronLeft, ChevronRight,
+    Info, CircleCheckBig, ClipboardList, Search, ChevronLeft, ChevronRight,
     User, Clock, Database, Shield
 } from 'lucide-react';
 
@@ -292,7 +292,7 @@ const SystemErrors = () => {
                 ) : filtered.length === 0 ? (
                     <div className="p-12 text-center">
                         <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-                            <CheckCircle2 className="w-7 h-7 text-emerald-400" />
+                            <CircleCheckBig className="w-7 h-7 text-emerald-400" />
                         </div>
                         <h3 className="text-base font-semibold text-white mb-1">System is Healthy</h3>
                         <p className="text-text-secondary text-sm">No errors or exceptions found matching your criteria.</p>
@@ -326,7 +326,7 @@ const SystemErrors = () => {
                                         </td>
                                         <td className="px-5 py-3.5 text-xs">
                                             {log.resolved
-                                                ? <span className="text-emerald-400 flex items-center gap-1 font-semibold"><CheckCircle2 className="w-3 h-3" /> Resolved</span>
+                                                ? <span className="text-emerald-400 flex items-center gap-1 font-semibold"><CircleCheckBig className="w-3 h-3" /> Resolved</span>
                                                 : <span className="text-amber-400 font-semibold">Pending</span>}
                                         </td>
                                         <td className="px-5 py-3.5 text-right">
