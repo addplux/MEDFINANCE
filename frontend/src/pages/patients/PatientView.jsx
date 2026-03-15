@@ -221,7 +221,18 @@ const PatientView = () => {
                                     ? (parseFloat(patient.balance || 0) < 0 ? 'text-rose-500' : 'text-emerald-500')
                                     : (parseFloat(patient.balance || 0) > 0 ? 'text-rose-500' : 'text-emerald-500')
                             }`}>
-                                ZMW {parseFloat(patient.balance || 0).toLocaleString('en-ZM', { minimumFractionDigits: 2 })}
+                                {patient.paymentMethod === 'private_prepaid'
+                                    ? (parseFloat(patient.balance || 0) > 0 
+                                        ? `ZMW ${parseFloat(patient.balance || 0).toLocaleString('en-ZM', { minimumFractionDigits: 2 })} (Credit)`
+                                        : parseFloat(patient.balance || 0) < 0 
+                                            ? `-ZMW ${Math.abs(parseFloat(patient.balance || 0)).toLocaleString('en-ZM', { minimumFractionDigits: 2 })} (Debt)`
+                                            : `ZMW 0.00`)
+                                    : (parseFloat(patient.balance || 0) < 0 
+                                        ? `ZMW ${Math.abs(parseFloat(patient.balance || 0)).toLocaleString('en-ZM', { minimumFractionDigits: 2 })} (Credit)`
+                                        : parseFloat(patient.balance || 0) > 0 
+                                            ? `-ZMW ${parseFloat(patient.balance || 0).toLocaleString('en-ZM', { minimumFractionDigits: 2 })} (Debt)`
+                                            : `ZMW 0.00`)
+                                }
                             </p>
                         </div>
                         <div
