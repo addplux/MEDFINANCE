@@ -147,24 +147,25 @@ const NotificationBell = () => {
                             notifications.map(n => {
                                 const { icon, colors } = getIconDetails(n.type);
                                 return (
-                                <button
-                                    key={n.id}
-                                    onClick={() => handleNotificationClick(n)}
-                                    className={`w-full text-left px-4 py-3 border-b border-white/5 hover:bg-white/5 transition-colors flex items-start gap-3 ${!n.isRead ? 'bg-primary-500/5' : ''}`}
-                                >
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${colors}`}>
-                                        {icon}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-white truncate">{n.title}</p>
-                                        <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">{n.message}</p>
-                                        <p className="text-xs text-gray-600 mt-1">{timeAgo(n.createdAt)}</p>
-                                    </div>
-                                    {!n.isRead && (
-                                        <div className="w-2 h-2 rounded-full bg-primary-500 flex-shrink-0 mt-2" />
-                                    )}
-                                </button>
-                            ))
+                                    <button
+                                        key={n.id}
+                                        onClick={() => handleNotificationClick(n)}
+                                        className={`w-full text-left px-4 py-3 border-b border-white/5 hover:bg-white/5 transition-colors flex items-start gap-3 ${!n.isRead ? 'bg-primary-500/5' : ''}`}
+                                    >
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${colors}`}>
+                                            {icon}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-white truncate">{n.title}</p>
+                                            <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">{n.message}</p>
+                                            <p className="text-xs text-gray-600 mt-1">{timeAgo(n.createdAt)}</p>
+                                        </div>
+                                        {!n.isRead && (
+                                            <div className="w-2 h-2 rounded-full bg-primary-500 flex-shrink-0 mt-2" />
+                                        )}
+                                    </button>
+                                );
+                            })
                         )}
                     </div>
 
