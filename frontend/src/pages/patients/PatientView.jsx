@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { patientAPI, receivablesAPI, visitAPI, recordsAPI } from '../../services/apiService';
 import {
     ArrowLeft, Edit, History, Phone, Mail, MapPin, User, CreditCard,
-    Shield, Clipboard, Printer, Calendar, AlertCircle, PlusCircle, Stethoscope, FileText
+    Shield, Clipboard, Printer, Calendar, AlertCircle, PlusCircle, Stethoscope
 } from 'lucide-react';
 import NewAdmissionModal from '../../components/admissions/NewAdmissionModal';
 
