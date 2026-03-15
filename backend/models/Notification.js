@@ -19,7 +19,7 @@ const Notification = sequelize.define('Notification', {
         comment: 'Recipient user (admin)'
     },
     type: {
-        type: DataTypes.ENUM('registration_request', 'account_approved', 'account_rejected', 'general'),
+        type: DataTypes.ENUM('registration_request', 'account_approved', 'account_rejected', 'wait_time_alert', 'general'),
         allowNull: false,
         defaultValue: 'general'
     },

@@ -19,7 +19,15 @@ const initCronJobs = () => {
         timezone: "Africa/Lusaka"
     });
 
-    // You can register other jobs here
+    // Waiting Room Notifications Job
+    // Runs every 5 minutes to check for patients waiting > 30 mins
+    cron.schedule('*/5 * * * *', () => {
+        const waitTimesJob = require('./waitTimesJob');
+        waitTimesJob.checkWaitTimes();
+    }, {
+        scheduled: true,
+        timezone: "Africa/Lusaka"
+    });
 };
 
 module.exports = {

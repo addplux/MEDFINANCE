@@ -199,6 +199,9 @@ const startServer = async () => {
 
             const runRecordsEnumMigration = require('./migrations/addRecordsEnums');
             await runRecordsEnumMigration();
+
+            const runNotificationEnumMigration = require('./migrations/addNotificationEnums');
+            await runNotificationEnumMigration();
         } catch (migErr) {
             console.error('⚠️ Migration runner error (non-fatal):', migErr.message);
         }
