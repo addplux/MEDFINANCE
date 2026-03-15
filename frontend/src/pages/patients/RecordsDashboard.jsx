@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { recordsAPI, patientAPI } from '../../services/apiService';
 import {
-    Search, FileText, UserPlus, Clock, CheckCircle2,
+    Search, FileText, UserPlus, Clock, CircleCheckBig,
     AlertCircle, Filter, MoreHorizontal, ChevronRight,
-    LayoutDashboard, Activity, Database, Users, Eye, History, Stethoscope, UserPlus
+    LayoutDashboard, Activity, Database, Users, Eye, History, Stethoscope
 } from 'lucide-react';
 
 const RecordsDashboard = () => {
@@ -200,7 +200,7 @@ const RecordsDashboard = () => {
                                                 </button>
                                             ) : (
                                                 <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 text-green-400 rounded-xl text-xs font-bold">
-                                                    <CheckCircle2 className="w-4 h-4" />
+                                                    <CircleCheckBig className="w-4 h-4" />
                                                     {req.location}
                                                 </div>
                                             )}

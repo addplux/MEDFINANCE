@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { visitAPI } from '../../services/apiService';
 import { 
     Users, Activity, CreditCard, Stethoscope, 
-    TestTube, ActivitySquare, Pill, Clock, AlertCircle, ArrowRight, UserPlus, Scissors
+    TestTube, SquareActivity, Pill, Clock, AlertCircle, ArrowRight, UserPlus, Scissors
 } from 'lucide-react';
 
 const QUEUE_STAGES = [
@@ -12,7 +12,7 @@ const QUEUE_STAGES = [
     { id: 'waiting_doctor', title: 'Consultation', icon: Users, dot: 'bg-blue-500' },
     { id: 'with_doctor', title: 'Clinical Unit', icon: Stethoscope, dot: 'bg-emerald-500' },
     { id: 'waiting_lab', title: 'Laboratory', icon: TestTube, dot: 'bg-violet-500' },
-    { id: 'waiting_radiology', title: 'Imaging', icon: ActivitySquare, dot: 'bg-indigo-500' },
+    { id: 'waiting_radiology', title: 'Imaging', icon: SquareActivity, dot: 'bg-indigo-500' },
     { id: 'waiting_theatre', title: 'Theatre', icon: Scissors, dot: 'bg-rose-500' },
     { id: 'ready_for_discharge', title: 'Discharge/Rx', icon: Pill, dot: 'bg-teal-500' }
 ];
