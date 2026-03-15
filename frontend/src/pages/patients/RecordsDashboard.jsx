@@ -360,7 +360,7 @@ const RecordsDashboard = () => {
                 </div>
 
                 {/* Records Activity Log - Moved to Sidebar */}
-                <div className="card border-white/5 flex flex-col h-[600px] lg:col-span-1 lg:-mt-[600px] lg:translate-y-[624px] xl:col-span-1 xl:translate-y-0 xl:mt-0 z-10 hidden xl:flex">
+                <div className="card border-white/5 flex flex-col h-[600px]">
                     <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02] shrink-0">
                         <h2 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
                             <History className="w-4 h-4 text-purple-400" />
