@@ -185,7 +185,7 @@ const RecordsDashboard = () => {
                                                     </span>
                                                 </div>
                                                 <p className="text-xs text-white/40 mt-0.5">
-                                                    Requested by <span className="text-white/70">{req.requestedBy?.firstName}</span> · {new Date(req.requestedAt).toLocaleTimeString()}
+                                                    Requested by <span className="text-white/70">{req.requester?.firstName} {req.requester?.lastName}</span> · {new Date(req.requestedAt).toLocaleTimeString()}
                                                 </p>
                                             </div>
                                         </div>

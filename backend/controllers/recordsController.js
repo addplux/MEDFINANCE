@@ -39,8 +39,8 @@ exports.getAllRequests = async (req, res) => {
             where,
             include: [
                 { model: Patient, as: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] },
-                { model: User, as: 'requestedBy', attributes: ['id', 'firstName', 'lastName'] },
-                { model: User, as: 'assignedTo', attributes: ['id', 'firstName', 'lastName'] }
+                { model: User, as: 'requester', attributes: ['id', 'firstName', 'lastName'] },
+                { model: User, as: 'assignee', attributes: ['id', 'firstName', 'lastName'] }
             ],
             order: [['requestedAt', 'DESC']],
             limit: 50
@@ -135,7 +135,7 @@ exports.createRequest = async (req, res) => {
         const fullRequest = await FileRequest.findByPk(request.id, {
             include: [
                 { model: Patient, as: 'patient' },
-                { model: User, as: 'requestedBy' }
+                { model: User, as: 'requester' }
             ]
         });
 

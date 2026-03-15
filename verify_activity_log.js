@@ -1,8 +1,10 @@
-const { Patient, Visit, PatientMovement, User, FileRequest } = require('./backend/models');
+const { Patient, Visit, PatientMovement, User, FileRequest, sequelize } = require('./backend/models');
 const { getActivityLog } = require('./backend/controllers/recordsController');
 
 async function testActivityLog() {
     try {
+        console.log('Connecting to DB...');
+        await sequelize.authenticate();
         console.log('Testing Activity Log Logic...');
         
         // Mock req and res
@@ -11,19 +13,19 @@ async function testActivityLog() {
             user: { id: 1 }
         };
         const res = {
-            json: (data) => console.log('Response:', JSON.stringify(data, null, 2)),
+            json: (data) => console.log('SUCCESS Response length:', data.length),
             status: (code) => {
-                console.log('Status:', code);
-                return res;
+                console.log('FAILED with Status:', code);
+                return { json: (err) => console.error('Error Details:', err) };
             }
         };
 
         await getActivityLog(req, res);
     } catch (error) {
-        console.error('Test failed:', error);
+        console.error('Test script failed:', error);
+    } finally {
+        await sequelize.close();
     }
 }
 
-// Note: This script is for logical verification only and won't run without a full environment.
-// I'll just review the code carefully.
-console.log('Verification: Code review completed.');
+testActivityLog();
