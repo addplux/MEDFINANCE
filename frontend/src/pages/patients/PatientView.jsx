@@ -114,7 +114,7 @@ const PatientView = () => {
                                 await recordsAPI.fileRequests.create({
                                     patientId: id,
                                     requestType: 'retrieval',
-                                    urgency: 'routine',
+                                    urgency: 'normal',
                                     notes: notes || 'Standard retrieval'
                                 });
                                 alert('File request sent to Records department successfully!');
