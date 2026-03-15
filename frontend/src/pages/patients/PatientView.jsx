@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { patientAPI, receivablesAPI, visitAPI } from '../../services/apiService';
+import { patientAPI, receivablesAPI, visitAPI, recordsAPI } from '../../services/apiService';
 import {
     ArrowLeft, Edit, History, Phone, Mail, MapPin, User, CreditCard,
-    Shield, Clipboard, Printer, Calendar, AlertCircle, PlusCircle, Stethoscope
+    Shield, Clipboard, Printer, Calendar, AlertCircle, PlusCircle, Stethoscope, FileText
 } from 'lucide-react';
 import NewAdmissionModal from '../../components/admissions/NewAdmissionModal';
 
@@ -106,6 +106,27 @@ const PatientView = () => {
                     <p className="text-[10px] text-text-tertiary uppercase font-bold tracking-widest">Profile & Category</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
+                    <button
+                        onClick={async () => {
+                            try {
+                                const notes = window.prompt('Reason for file request? (e.g. Doctor Consult, Audit):');
+                                if (notes === null) return;
+                                await recordsAPI.fileRequests.create({
+                                    patientId: id,
+                                    requestType: 'retrieval',
+                                    urgency: 'routine',
+                                    notes: notes || 'Standard retrieval'
+                                });
+                                alert('File request sent to Records department successfully!');
+                            } catch (e) {
+                                alert('Failed to create file request.');
+                            }
+                        }}
+                        className="btn btn-secondary border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+                    >
+                        <Clipboard className="w-4 h-4" />
+                        Request File
+                    </button>
                     <button
                         onClick={() => navigate(`/app/patients/${id}/history`)}
                         className="btn btn-secondary"
