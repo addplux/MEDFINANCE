@@ -12,7 +12,7 @@ const { sendSuspensionSMS } = require('../utils/smsService');
 // Get all patients
 const getAllPatients = async (req, res) => {
     try {
-        const { page = 1, limit = 20, search, paymentMethod } = req.query;
+        const { page = 1, limit = 20, search, paymentMethod, onlyPrincipals } = req.query;
         const offset = (page - 1) * limit;
 
         const where = {};
@@ -22,12 +22,16 @@ const getAllPatients = async (req, res) => {
                 { lastName: { [Op.iLike]: `%${search}%` } },
                 { patientNumber: { [Op.iLike]: `%${search}%` } },
                 { policyNumber: { [Op.iLike]: `%${search}%` } },
-                { nrc: { [Op.iLike]: `%${search}%` } } // Added NRC search
+                { nrc: { [Op.iLike]: `%${search}%` } }
             ];
         }
 
         if (paymentMethod) {
             where.paymentMethod = paymentMethod;
+        }
+
+        if (onlyPrincipals === 'true') {
+            where.memberRank = 'principal';
         }
 
         const { count, rows } = await Patient.findAndCountAll({
