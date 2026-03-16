@@ -9,6 +9,7 @@ const Schemes = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [typeFilter, setTypeFilter] = useState('all');
 
     useEffect(() => {
         fetchSchemes();
@@ -27,11 +28,16 @@ const Schemes = () => {
         }
     };
 
-    const filteredSchemes = schemes.filter(scheme =>
-        scheme.schemeName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        scheme.schemeCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        scheme.schemeType?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredSchemes = schemes.filter(scheme => {
+        const matchesSearch = scheme.schemeName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            scheme.schemeCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            scheme.schemeType?.toLowerCase().includes(searchTerm.toLowerCase());
+            
+        const schemeTypeRaw = scheme.schemeType || 'other';
+        const matchesType = typeFilter === 'all' || schemeTypeRaw === typeFilter;
+        
+        return matchesSearch && matchesType;
+    });
 
     return (
         <div className="space-y-8 animate-fade-in pb-20">
@@ -52,9 +58,20 @@ const Schemes = () => {
                                     return acc;
                                 }, {})
                             ).map(([type, count]) => (
-                                <span key={type} className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-white border border-white/10 flex items-center gap-2">
-                                    {type === 'other' ? 'prepaid' : type.replace(/_/g, ' ')} Schemes <span className="bg-primary/20 text-primary px-2 py-0.5 rounded-full">{count}</span>
-                                </span>
+                                <button 
+                                    key={type} 
+                                    onClick={() => setTypeFilter(typeFilter === type ? 'all' : type)}
+                                    className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border flex items-center gap-2 transition-all active:scale-95 ${
+                                        typeFilter === type 
+                                            ? 'bg-primary text-white border-primary shadow-[0_0_15px_rgba(255,0,204,0.3)]' 
+                                            : 'bg-white/5 text-white border-white/10 hover:bg-white/10 hover:border-white/20'
+                                    }`}
+                                >
+                                    {type === 'other' ? 'prepaid' : type.replace(/_/g, ' ')} Schemes 
+                                    <span className={`px-2 py-0.5 rounded-full ${typeFilter === type ? 'bg-white/20 text-white' : 'bg-primary/20 text-primary'}`}>
+                                        {count}
+                                    </span>
+                                </button>
                             ))}
                         </div>
                     </div>
