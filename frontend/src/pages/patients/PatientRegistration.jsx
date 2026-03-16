@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { patientAPI, setupAPI, receivablesAPI } from '../../services/apiService';
+import { patientAPI, setupAPI, prepaidPlanAPI } from '../../services/apiService';
 import {
-    ArrowLeft, Save, User, UserPlus, Shield,
-    CreditCard, Calendar, Phone, MapPin,
-    Briefcase, AlertCircle, Camera, CircleCheckBig,
+    ArrowLeft, Save, User, Shield,
+    CreditCard, Phone,
+    AlertCircle, Camera, CircleCheckBig,
     Stethoscope
 } from 'lucide-react';
 
@@ -26,28 +26,28 @@ const PatientRegistration = () => {
         emergencyPhone: '',
         nextOfKinRelationship: '',
         patientType: 'opd',
-        schemeId: '',
+        memberPlan: '',
         initialDeposit: '',
         targetDepartment: '',
         reasonForVisit: ''
     });
     const [photoFile, setPhotoFile] = useState(null);
     const [photoPreview, setPhotoPreview] = useState(null);
-    const [schemes, setSchemes] = useState([]);
+    const [prepaidPlans, setPrepaidPlans] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
-        fetchSchemes();
+        fetchPrepaidPlans();
         fetchDepartments();
     }, []);
 
-    const fetchSchemes = async () => {
+    const fetchPrepaidPlans = async () => {
         try {
-            const response = await receivablesAPI.schemes.getAll({ status: 'active' });
-            setSchemes(response.data || []);
+            const response = await prepaidPlanAPI.getAll();
+            setPrepaidPlans(response.data || []);
         } catch (error) {
-            console.error('Failed to fetch schemes:', error);
+            console.error('Failed to fetch prepaid plans:', error);
         }
     };
 
@@ -79,7 +79,7 @@ const PatientRegistration = () => {
         if (!formData.lastName) newErrors.lastName = 'Last name is required';
         if (!formData.gender) newErrors.gender = 'Gender is required';
         if (!formData.paymentMethod) newErrors.paymentMethod = 'Payment method is required';
-        if (!formData.targetDepartment) newErrors.targetDepartment = 'Target department is required for initial visit';
+
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -160,7 +160,8 @@ const PatientRegistration = () => {
                     <div className="card p-6 border-white/5 space-y-4">
                         <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">Account Type</h3>
                         <div className="space-y-3">
-                            {['cash', 'corporate', 'private_prepaid'].map(method => (
+                            {['cash', 'private_prepaid'].map(method => (
+
                                 <label
                                     key={method}
                                     className={`
@@ -301,23 +302,23 @@ const PatientRegistration = () => {
                             </div>
                         </section>
 
-                        {/* Scheme Details (Conditional) */}
-                        {['corporate', 'private_prepaid'].includes(formData.paymentMethod) && (
+                        {/* Prepaid Plan Selection (for Private Prepaid patients) */}
+                        {formData.paymentMethod === 'private_prepaid' && (
                             <section className="space-y-6 animate-in slide-in-from-top-4 duration-300">
                                 <div className="flex items-center gap-3 pb-2 border-b border-white/5">
                                     <Shield className="w-4 h-4 text-emerald-400" />
-                                    <h2 className="text-sm font-black text-white uppercase tracking-widest">Scheme Information</h2>
+                                    <h2 className="text-sm font-black text-white uppercase tracking-widest">Prepaid Plan</h2>
                                 </div>
                                 <div className="form-group">
-                                    <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">Select Plan/Company *</label>
+                                    <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">Select Plan Tier</label>
                                     <select
-                                        value={formData.schemeId}
-                                        onChange={e => setFormData({ ...formData, schemeId: e.target.value })}
+                                        value={formData.memberPlan}
+                                        onChange={e => setFormData({ ...formData, memberPlan: e.target.value })}
                                         className="form-select bg-white/[0.02] border-white/10 text-white rounded-xl"
                                     >
-                                        <option value="">Choose available scheme...</option>
-                                        {schemes.map(s => (
-                                            <option key={s.id} value={s.id}>{s.schemeName} ({s.type})</option>
+                                        <option value="">Choose a prepaid plan...</option>
+                                        {prepaidPlans.filter(p => p.isActive).map(p => (
+                                            <option key={p.id} value={p.planKey}>{p.name}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -332,7 +333,8 @@ const PatientRegistration = () => {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="form-group">
-                                    <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">Target Department *</label>
+                                    <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">Target Department (Optional)</label>
+
                                     <select
                                         value={formData.targetDepartment}
                                         onChange={e => setFormData({ ...formData, targetDepartment: e.target.value })}
@@ -361,7 +363,8 @@ const PatientRegistration = () => {
                     <div className="flex items-center justify-between gap-6">
                         <div className="flex items-center gap-3 text-white/20">
                             <AlertCircle className="w-5 h-5" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">* Required fields must be completed</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">* Required fields must be completed. Others are optional.</span>
+
                         </div>
                         <div className="flex gap-4">
                             <button

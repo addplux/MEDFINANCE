@@ -107,7 +107,7 @@ const createPatient = async (req, res) => {
             paymentMethod, costCategory, staffId, serviceId, registeredService, ward,
             emergencyContact, emergencyPhone, nrc, patientType, schemeId, initialDeposit,
             // Prepaid / membership fields
-            balance, prepaidCredit, policyNumber, memberRank, memberSuffix, memberStatus
+            balance, prepaidCredit, policyNumber, memberRank, memberSuffix, memberStatus, memberPlan
         } = req.body;
 
         // Validate required fields
@@ -148,6 +148,7 @@ const createPatient = async (req, res) => {
             nrc,
             patientType: patientType || 'opd',
             schemeId: schemeId || null,
+            memberPlan: memberPlan || null,
             photoUrl,
             // Membership fields
             policyNumber: policyNumber || null,
@@ -178,46 +179,46 @@ const createPatient = async (req, res) => {
         }
 
         // ==========================================
-        // AUTOMATED CHECK-IN / VISIT CREATION
+        // AUTOMATED CHECK-IN / VISIT CREATION (OPTIONAL)
+        // Only create a visit if a target department is specified
         // ==========================================
         const { targetDepartment, reasonForVisit } = req.body;
         
         let visit = null;
-        let departmentName = 'General OPD'; // Fallback
-        
-        // Generate visit number
-        const visitCount = await Visit.count({ transaction: t });
-        const visitNumber = `VIS${String(visitCount + 1).padStart(6, '0')}`;
-        
-        // Fetch target department name if ID provided
+
         if (targetDepartment) {
+            let departmentName = 'General OPD';
             const { Department } = require('../models');
             const dept = await Department.findByPk(targetDepartment, { transaction: t });
             if (dept) departmentName = dept.departmentName;
+
+            // Generate visit number
+            const visitCount = await Visit.count({ transaction: t });
+            const visitNumber = `VIS${String(visitCount + 1).padStart(6, '0')}`;
+
+            visit = await Visit.create({
+                visitNumber,
+                patientId: patient.id,
+                visitType: patientType || 'opd',
+                departmentId: targetDepartment || null,
+                assignedDepartment: departmentName,
+                reasonForVisit: reasonForVisit || 'Initial Consultation / Registration',
+                admissionDate: new Date(),
+                status: 'active',
+                queueStatus: 'pending_triage',
+                admittedById: req.user?.id || 1
+            }, { transaction: t });
+
+            // Log the movement
+            await PatientMovement.create({
+                patientId: patient.id,
+                fromDepartment: 'Reception / Registration',
+                toDepartment: departmentName,
+                notes: 'Automated Check-in on Registration',
+                movementDate: new Date(),
+                admittedBy: req.user?.id || 1
+            }, { transaction: t });
         }
-
-        visit = await Visit.create({
-            visitNumber,
-            patientId: patient.id,
-            visitType: patientType || 'opd',
-            departmentId: targetDepartment || null,
-            assignedDepartment: departmentName,
-            reasonForVisit: reasonForVisit || 'Initial Consultation / Registration',
-            admissionDate: new Date(),
-            status: 'active',
-            queueStatus: 'pending_triage', // Straight to Triage (no fee)
-            admittedById: req.user?.id || 1
-        }, { transaction: t });
-
-        // Log the movement for Zack's journey history
-        await PatientMovement.create({
-            patientId: patient.id,
-            fromDepartment: 'Reception / Registration',
-            toDepartment: 'Triage / Vitals',
-            notes: 'Automated Check-in (Free Registration)',
-            movementDate: new Date(),
-            admittedBy: req.user?.id || 1
-        }, { transaction: t });
 
         await t.commit();
         res.status(201).json({ ...patient.toJSON(), initialVisit: visit });
