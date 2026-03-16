@@ -65,8 +65,9 @@ const PatientRow = ({ patient, navigate, handleStatusChange, handleDelete, statu
             setLoadingFamily(true);
             try {
                 const res = await patientAPI.getFamilyMembers(patient.id);
-                // Filter out the principal themselves if returned
-                setFamily(res.data.filter(f => f.id !== patient.id));
+                // The backend returns { principal, family }
+                const familyData = res.data.family || [];
+                setFamily(familyData.filter(f => f.id !== patient.id));
             } catch (err) {
                 console.error("Failed to fetch family:", err);
             } finally {
