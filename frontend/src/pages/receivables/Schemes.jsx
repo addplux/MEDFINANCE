@@ -38,11 +38,26 @@ const Schemes = () => {
             {/* Page Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-2">Insurance Schemes</h1>
-                    <p className="text-white/70 text-xs font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                        <Shield className="w-3 h-3 text-primary" />
-                        Manage healthcare provider programs and credit lines
-                    </p>
+                    <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-2">All Schemes</h1>
+                    <div className="flex flex-col gap-3 mt-1">
+                        <p className="text-white/70 text-xs font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                            <Shield className="w-3 h-3 text-primary" />
+                            Manage healthcare provider programs and credit lines
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                            {Object.entries(
+                                schemes.reduce((acc, curr) => {
+                                    const type = curr.schemeType || 'other';
+                                    acc[type] = (acc[type] || 0) + 1;
+                                    return acc;
+                                }, {})
+                            ).map(([type, count]) => (
+                                <span key={type} className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-white border border-white/10 flex items-center gap-2">
+                                    {type.replace(/_/g, ' ')} Schemes <span className="bg-primary/20 text-primary px-2 py-0.5 rounded-full">{count}</span>
+                                </span>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
                 <button
