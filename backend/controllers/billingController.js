@@ -284,72 +284,233 @@ const getPatientStatement = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Fetch all activities
-        const payments = await Payment.findAll({
-            where: { patientId: id },
-            order: [['paymentDate', 'ASC']]
-        });
+        // Fetch all activities in parallel
+        const [
+            payments,
+            opdBills,
+            ipdBills,
+            pharmacyBills,
+            labBills,
+            labRequests,
+            radiologyBills,
+            theatreBills,
+            maternityBills,
+            specialistBills
+        ] = await Promise.all([
+            Payment.findAll({ where: { patientId: id } }),
+            OPDBill.findAll({ where: { patientId: id }, include: [{ association: 'service', attributes: ['serviceName'] }] }),
+            IPDBill.findAll({ where: { patientId: id } }),
+            PharmacyBill.findAll({ where: { patientId: id }, include: [{ association: 'medicationDetails', attributes: ['name'] }] }),
+            LabBill.findAll({ where: { patientId: id } }),
+            LabRequest.findAll({ where: { patientId: id }, include: [{ model: LabResult, as: 'results', include: [{ model: LabTest, as: 'test' }] }] }),
+            RadiologyBill.findAll({ where: { patientId: id } }),
+            TheatreBill ? TheatreBill.findAll({ where: { patientId: id } }).catch(() => []) : [],
+            MaternityBill ? MaternityBill.findAll({ where: { patientId: id } }).catch(() => []) : [],
+            SpecialistClinicBill ? SpecialistClinicBill.findAll({ where: { patientId: id } }).catch(() => []) : []
+        ]);
 
-        const opdBills = await OPDBill.findAll({ where: { patientId: id } });
-        const ipdBills = await IPDBill.findAll({ where: { patientId: id } });
-        // Add other bill types as needed
-
-        // Combine and sort
         const activities = [];
 
+        // Map Payments (Credits)
         payments.forEach(p => {
             activities.push({
-                date: p.paymentDate,
+                date: p.paymentDate || p.createdAt,
                 type: 'PAYMENT',
                 reference: p.receiptNumber || `PAY-${p.id}`,
                 description: `Payment via ${p.paymentMethod}`,
                 debit: 0,
-                credit: parseFloat(p.amount)
+                credit: parseFloat(p.amount || 0)
             });
         });
 
+        // Map OPD Bills
         opdBills.forEach(b => {
             activities.push({
-                date: b.createdAt,
+                date: b.billDate || b.createdAt,
                 type: 'BILL',
                 reference: b.billNumber,
-                description: 'OPD Services',
-                debit: parseFloat(b.netAmount),
+                description: b.service?.serviceName || 'OPD Service',
+                debit: parseFloat(b.netAmount || b.totalAmount || 0),
                 credit: 0
             });
         });
 
+        // Map IPD Bills
         ipdBills.forEach(b => {
             activities.push({
                 date: b.createdAt,
                 type: 'BILL',
-                reference: b.billNumber || `IPD-${b.id}`, // Fallback if no bill number
-                description: 'Inpatient Services',
-                debit: parseFloat(b.totalAmount),
+                reference: b.billNumber || `IPD-${b.id}`,
+                description: 'Inpatient services',
+                debit: parseFloat(b.totalAmount || 0),
                 credit: 0
             });
         });
 
-        // Sort by date
+        // Map Pharmacy Bills
+        pharmacyBills.forEach(b => {
+            activities.push({
+                date: b.billDate || b.createdAt,
+                type: 'BILL',
+                reference: b.billNumber || `PHM-${b.id}`,
+                description: `Pharmacy: ${b.medicationDetails?.name || 'Medication'}`,
+                debit: parseFloat(b.netAmount || b.totalAmount || 0),
+                credit: 0
+            });
+        });
+
+        // Map Lab Bills
+        labBills.forEach(b => {
+            activities.push({
+                date: b.billDate || b.createdAt,
+                type: 'BILL',
+                reference: b.billNumber || `LAB-${b.id}`,
+                description: `Lab: ${b.testName || 'Laboratory Test'}`,
+                debit: parseFloat(b.netAmount || b.amount || b.totalAmount || 0),
+                credit: 0
+            });
+        });
+
+        // Map Lab Requests (some labs use requests directly)
+        labRequests.forEach(r => {
+            const testNames = r.results?.map(res => res.test?.name).filter(Boolean).join(', ') || 'Lab Tests';
+            activities.push({
+                date: r.createdAt,
+                type: 'BILL',
+                reference: r.requestNumber || `LRQ-${r.id}`,
+                description: `Lab Request: ${testNames}`,
+                debit: parseFloat(r.totalAmount || 0),
+                credit: 0
+            });
+        });
+
+        // Map Radiology
+        radiologyBills.forEach(b => {
+            activities.push({
+                date: b.billDate || b.createdAt,
+                type: 'BILL',
+                reference: b.billNumber || `RAD-${b.id}`,
+                description: `Radiology: ${b.scanType || 'Scan'}`,
+                debit: parseFloat(b.netAmount || b.amount || 0),
+                credit: 0
+            });
+        });
+
+        // Map Theatre
+        theatreBills.forEach(b => {
+            activities.push({
+                date: b.procedureDate || b.createdAt,
+                type: 'BILL',
+                reference: b.billNumber || `THR-${b.id}`,
+                description: `Theatre: ${b.procedureType || 'Surgery'}`,
+                debit: parseFloat(b.totalAmount || b.netAmount || 0),
+                credit: 0
+            });
+        });
+
+        // Map Maternity
+        maternityBills.forEach(b => {
+            activities.push({
+                date: b.admissionDate || b.createdAt,
+                type: 'BILL',
+                reference: b.billNumber || `MAT-${b.id}`,
+                description: `Maternity: ${b.deliveryType || 'Delivery'}`,
+                debit: parseFloat(b.totalAmount || b.netAmount || 0),
+                credit: 0
+            });
+        });
+
+        // Map Specialist Clinic
+        specialistBills.forEach(b => {
+            activities.push({
+                date: b.consultationDate || b.createdAt,
+                type: 'BILL',
+                reference: b.billNumber || `SPC-${b.id}`,
+                description: `Specialist: ${b.clinicType || 'Consultation'}`,
+                debit: parseFloat(b.totalAmount || b.netAmount || 0),
+                credit: 0
+            });
+        });
+
+        // Sort by date ascending
         activities.sort((a, b) => new Date(a.date) - new Date(b.date));
 
         // Calculate running balance
-        let balance = 0;
+        let runningBalance = 0;
         const statement = activities.map(item => {
-            balance += item.debit - item.credit;
+            runningBalance += (item.debit - item.credit);
             return {
                 ...item,
-                balance: balance.toFixed(2)
+                balance: runningBalance.toFixed(2)
             };
         });
 
         res.json({
             patientId: id,
+            finalBalance: runningBalance.toFixed(2),
             statement
         });
     } catch (error) {
         console.error('Get patient statement error:', error);
-        res.status(500).json({ error: 'Failed to get patient statement' });
+        res.status(500).json({ error: 'Failed to get patient statement', details: error.message });
+    }
+};
+
+// Create a manual charge for a patient
+const createManualCharge = async (req, res) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const { patientId, description, amount, category, paymentMethod, notes } = req.body;
+
+        if (!patientId || !amount || !description) {
+            return res.status(400).json({ error: 'Patient, amount, and description are required' });
+        }
+
+        const patient = await Patient.findByPk(patientId);
+        if (!patient) return res.status(404).json({ error: 'Patient not found' });
+
+        // We use a "Manual Adjustment" placeholder or similar if serviceId is required.
+        // Let's look for a service named "Manual Adjustment" or create one if it doesn't exist.
+        let service = await Service.findOne({ where: { serviceName: 'Manual Adjustment' } });
+        if (!service) {
+            service = await Service.create({
+                serviceCode: 'MANUAL-ADJ',
+                serviceName: 'Manual Adjustment',
+                category: category || 'others',
+                price: 0,
+                isActive: true
+            }, { transaction });
+        }
+
+        const billCount = await OPDBill.count();
+        const billNumber = `MAN${String(billCount + 1).padStart(6, '0')}`;
+
+        const bill = await OPDBill.create({
+            billNumber,
+            patientId,
+            serviceId: service.id,
+            quantity: 1,
+            unitPrice: parseFloat(amount),
+            totalAmount: parseFloat(amount),
+            discount: 0,
+            netAmount: parseFloat(amount),
+            paymentMethod: paymentMethod || patient.paymentMethod || 'cash',
+            status: 'pending',
+            paymentStatus: 'unpaid',
+            notes: `Manual Charge: ${description}${notes ? ' - ' + notes : ''}`,
+            createdBy: req.user.id
+        }, { transaction });
+
+        await transaction.commit();
+
+        // Update balance after commit
+        await updatePatientBalance(patientId);
+
+        res.status(201).json({ message: 'Manual charge recorded successfully', bill });
+    } catch (error) {
+        if (transaction) await transaction.rollback();
+        console.error('Create manual charge error:', error);
+        res.status(500).json({ error: 'Failed to create manual charge', details: error.message });
     }
 };
 
@@ -661,5 +822,6 @@ module.exports = {
     getPatientStatement,
     getUnpaidPatientBills,
     getPendingQueue,
-    getPharmacyQueue
+    getPharmacyQueue,
+    createManualCharge
 };

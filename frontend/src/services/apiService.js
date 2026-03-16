@@ -39,6 +39,7 @@ export const patientAPI = {
     getVisitHistory: (id) => api.get(`/patients/${id}/visit-history`),
     topup: (id, amount) => api.post(`/patients/${id}/topup`, { amount }),
     uploadPrepaidLedger: (formData) => api.post('/patients/upload-prepaid-ledger', formData),
+    getFamilyMembers: (id) => api.get(`/patients/${id}/family`),
 };
 
 // Prepaid Plans
@@ -97,7 +98,8 @@ export const billingAPI = {
         getStatement: (id) => api.get(`/billing/patient/${id}/statement`),
         getUnpaidBills: (id) => api.get(`/billing/patient/${id}/unpaid`),
         getPendingQueue: () => api.get('/billing/pending-queue'),
-        getPharmacyQueue: () => api.get('/billing/pharmacy-queue')
+        getPharmacyQueue: () => api.get('/billing/pharmacy-queue'),
+        createManualCharge: (data) => api.post('/billing/manual-charge', data)
     }
 };
 

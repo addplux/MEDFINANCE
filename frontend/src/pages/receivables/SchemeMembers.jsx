@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, FileText, Search, Edit, Upload, Download, AlertCircle, CheckCircle, ChevronDown, Activity, ChevronRight, X } from 'lucide-react';
 import api from '../../services/apiClient';
@@ -354,14 +354,14 @@ const SchemeMembers = ({ schemeId }) => {
                     {params.row.policyNumber && (
                         <button
                             onClick={() => navigate(`/app/receivables/ledger/${params.row.policyNumber}`)}
-                            className="p-1 hover:bg-blue-50 text-gray-500 hover:text-blue-600 rounded transition-colors"
+                            className="p-1 hover:bg-bg-tertiary text-text-tertiary hover:text-primary rounded transition-colors"
                             title="View Family Ledger"
                         >
                             <FileText className="w-4 h-4" />
                         </button>
                     )}
                     <button
-                        className="p-1 hover:bg-gray-100 text-gray-500 hover:text-gray-700 rounded transition-colors"
+                        className="p-1 hover:bg-bg-tertiary text-text-tertiary hover:text-text-primary rounded transition-colors"
                         title="Edit Member"
                         onClick={() => navigate(`/app/patients/${params.row.id}/edit`)}
                     >
@@ -374,10 +374,10 @@ const SchemeMembers = ({ schemeId }) => {
 
     return (
 
-        <div className="flex flex-col h-full space-y-3 min-w-0 bg-transparent text-white p-4">
+        <div className="flex flex-col h-full space-y-3 min-w-0 bg-transparent text-text-primary p-4">
             {/* Import Status Message */}
             {importResult && (
-                <div className={`p-4 rounded-xl flex items-start gap-3 animate-fade-in ${importResult.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+                <div className={`p-4 rounded-xl flex items-start gap-3 animate-fade-in ${importResult.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
                     }`}>
                     {importResult.type === 'success' ? (
                         <>
@@ -389,9 +389,9 @@ const SchemeMembers = ({ schemeId }) => {
                                     <li>Updated: {importResult.summary.updated}</li>
                                     <li>Failed: {importResult.summary.failed}</li>
                                 </ul>
-                                {importResult.summary.errors?.length > 0 && (
-                                    <div className="mt-2 text-xs bg-gray-100 p-3 rounded-xl border border-gray-200 max-h-32 overflow-y-auto">
-                                        <p className="font-bold mb-1 uppercase tracking-widest text-[10px] text-gray-500">Error Log:</p>
+                                 {importResult.summary.errors?.length > 0 && (
+                                    <div className="mt-2 text-xs bg-bg-tertiary p-3 rounded-xl border border-border-color max-h-32 overflow-y-auto">
+                                        <p className="font-bold mb-1 uppercase tracking-widest text-[10px] text-text-tertiary">Error Log:</p>
                                         {importResult.summary.errors.map((err, i) => <div key={i} className="mb-1">{err}</div>)}
                                     </div>
                                 )}
@@ -406,27 +406,27 @@ const SchemeMembers = ({ schemeId }) => {
                             </div>
                         </>
                     )}
-                    <button onClick={() => setImportResult(null)} className="ml-auto p-1 hover:bg-gray-200 rounded-lg transition-colors text-gray-500">&times;</button>
+                    <button onClick={() => setImportResult(null)} className="ml-auto p-1 hover:bg-bg-tertiary rounded-lg transition-colors text-text-tertiary">&times;</button>
                 </div>
             )}
 
-            <div className="flex flex-col flex-1 bg-white/[0.02] border border-white/10 overflow-hidden min-w-0 rounded-2xl shadow-sm">
+            <div className="flex flex-col flex-1 bg-bg-secondary/20 border border-border-color overflow-hidden min-w-0 rounded-2xl shadow-sm">
                 {/* Header / Filters (Compact Style) */}
-                <div className="p-3 border-b border-white/10 flex flex-wrap gap-3 items-center flex-shrink-0 bg-transparent backdrop-blur-md">
+                <div className="p-3 border-b border-border-color flex flex-wrap gap-3 items-center flex-shrink-0 bg-transparent backdrop-blur-md">
                     {/* Search & Filter */}
                     <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center">
                         <form onSubmit={handleSearch} className="flex items-center gap-2 w-full sm:w-auto">
                             <div className="relative flex-1 sm:w-64 group">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors w-3.5 h-3.5" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-primary transition-colors w-3.5 h-3.5" />
                                 <input
                                     type="text"
                                     placeholder="Search members..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-9 pr-3 py-1.5 bg-white/5 border border-white/10 rounded-md text-[11px] focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all w-full placeholder-white/30 font-medium text-white shadow-sm"
+                                    className="pl-9 pr-3 py-1.5 bg-bg-tertiary border border-border-color rounded-md text-[11px] focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all w-full placeholder-text-tertiary font-medium text-text-primary shadow-sm"
                                 />
                             </div>
-                            <button type="submit" className="px-4 py-1.5 bg-white/10 text-white hover:bg-white/20 rounded-md text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm border border-white/5">
+                            <button type="submit" className="px-4 py-1.5 bg-bg-tertiary text-text-primary hover:bg-bg-elevated rounded-md text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm border border-border-color">
                                 Search
                             </button>
                         </form>
@@ -435,14 +435,14 @@ const SchemeMembers = ({ schemeId }) => {
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
-                                className="w-full sm:w-auto px-4 py-1.5 bg-white/5 border border-white/10 rounded-md text-[11px] font-bold text-white focus:ring-1 focus:ring-primary/50 focus:border-primary/50 cursor-pointer appearance-none uppercase tracking-wide hover:bg-white/10 transition-all shadow-sm pr-8"
+                                className="w-full sm:w-auto px-4 py-1.5 bg-bg-tertiary border border-border-color rounded-md text-[11px] font-bold text-text-primary focus:ring-1 focus:ring-primary/50 focus:border-primary/50 cursor-pointer appearance-none uppercase tracking-wide hover:bg-bg-elevated transition-all shadow-sm pr-8"
                             >
                                 <option value="all" className="bg-bg-primary">All Status</option>
                                 <option value="active" className="bg-bg-primary">Active</option>
                                 <option value="suspended" className="bg-bg-primary">Suspended</option>
                                 <option value="closed" className="bg-bg-primary">Closed</option>
                             </select>
-                            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30 pointer-events-none" />
+                            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-tertiary pointer-events-none" />
                         </div>
                     </div>
 
@@ -450,7 +450,7 @@ const SchemeMembers = ({ schemeId }) => {
                     <div className="flex gap-2 w-full md:w-auto justify-end ml-auto">
                         <button
                             onClick={handleDownloadTemplate}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 rounded-md text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-bg-tertiary hover:bg-bg-elevated text-text-secondary hover:text-text-primary border border-border-color rounded-md text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm"
                             title="Download CSV Template"
                         >
                             <Download className="w-3.5 h-3.5" />
@@ -486,50 +486,50 @@ const SchemeMembers = ({ schemeId }) => {
                         }}
                         disableRowSelectionOnClick
                         density="compact"
-                        sx={{
+                         sx={{
                             border: 0,
                             backgroundColor: 'transparent',
                             fontFamily: 'inherit',
-                            color: '#ffffff',
+                            color: 'var(--text-primary)',
                             '& .MuiDataGrid-columnHeaders': {
-                                backgroundColor: 'transparent',
-                                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                                backgroundColor: 'var(--bg-tertiary)',
+                                borderBottom: '1px solid var(--border-color)',
                             },
                             '& .MuiDataGrid-columnHeaderTitle': {
-                                color: 'rgba(255,255,255,0.5)',
+                                color: 'var(--text-primary)',
                                 fontWeight: 800,
                                 fontSize: '10px',
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.06em',
                             },
                             '& .MuiDataGrid-columnHeader': {
-                                color: 'rgba(255,255,255,0.7)',
+                                color: 'var(--text-primary)',
                             },
                             '& .MuiDataGrid-cell': {
-                                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                borderBottom: '1px solid var(--border-color)',
                                 fontSize: '12px',
-                                color: 'rgba(255,255,255,0.8)',
+                                color: 'var(--text-primary)',
                                 fontWeight: 500,
                             },
                             '& .MuiDataGrid-row:hover': {
-                                backgroundColor: 'rgba(255,255,255,0.02)',
+                                backgroundColor: 'var(--bg-tertiary)',
                             },
                             '& .MuiDataGrid-footerContainer': {
-                                borderTop: '1px solid rgba(255,255,255,0.1)',
+                                borderTop: '1px solid var(--border-color)',
                                 backgroundColor: 'transparent',
-                                color: 'rgba(255,255,255,0.5)',
+                                color: 'var(--text-tertiary)',
                             },
                             '& .MuiTablePagination-root': {
-                                color: 'rgba(255,255,255,0.5)',
+                                color: 'var(--text-tertiary)',
                             },
                             '& .MuiIconButton-root': {
-                                color: 'rgba(255,255,255,0.5)',
+                                color: 'var(--text-tertiary)',
                             },
                             '& .MuiDataGrid-virtualScroller': {
                                 '&::-webkit-scrollbar': { width: '6px', height: '6px' },
                                 '&::-webkit-scrollbar-track': { background: 'transparent' },
-                                '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.1)', borderRadius: '6px' },
-                                '&::-webkit-scrollbar-thumb:hover': { background: 'rgba(255,255,255,0.2)' },
+                                '&::-webkit-scrollbar-thumb': { background: 'var(--border-color)', borderRadius: '6px' },
+                                '&::-webkit-scrollbar-thumb:hover': { background: 'var(--border-hover)' },
                             },
                         }}
                     />

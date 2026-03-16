@@ -654,6 +654,52 @@ const uploadPrepaidLedger = async (req, res) => {
     }
 };
 
+// Get family members (dependants) for a prepaid principal patient
+const getFamilyMembers = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const principal = await Patient.findByPk(id, {
+            attributes: ['id', 'firstName', 'lastName', 'patientNumber', 'policyNumber',
+                'memberRank', 'memberSuffix', 'memberStatus', 'photoUrl', 'balance',
+                'paymentMethod', 'schemeId', 'gender', 'dateOfBirth']
+        });
+
+        if (!principal) {
+            return res.status(404).json({ error: 'Patient not found' });
+        }
+
+        if (!principal.policyNumber) {
+            return res.json({ principal, family: [] });
+        }
+
+        // Fetch all patients sharing the same policyNumber (excluding the principal)
+        const family = await Patient.findAll({
+            where: {
+                policyNumber: principal.policyNumber,
+                id: { [Op.ne]: principal.id }
+            },
+            attributes: ['id', 'firstName', 'lastName', 'patientNumber', 'policyNumber',
+                'memberRank', 'memberSuffix', 'memberStatus', 'photoUrl', 'balance',
+                'paymentMethod', 'schemeId', 'gender', 'dateOfBirth'],
+            order: [
+                // Sort: spouse first, then children, then dependant, then other
+                [sequelize.literal(`CASE member_rank
+                    WHEN 'spouse' THEN 1
+                    WHEN 'child' THEN 2
+                    WHEN 'dependant' THEN 3
+                    ELSE 4 END`), 'ASC'],
+                ['memberSuffix', 'ASC'],
+                ['firstName', 'ASC']
+            ]
+        });
+
+        res.json({ principal, family });
+    } catch (error) {
+        console.error('Get family members error:', error);
+        res.status(500).json({ error: 'Failed to get family members', details: error.message });
+    }
+};
+
 module.exports = {
     getAllPatients,
     getPatient,
@@ -663,5 +709,6 @@ module.exports = {
     mergePatients,
     getVisitHistory,
     topupPrepaidBalance,
-    uploadPrepaidLedger
+    uploadPrepaidLedger,
+    getFamilyMembers
 };

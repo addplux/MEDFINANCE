@@ -44,9 +44,9 @@ const Schemes = () => {
             {/* Page Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-2">All Schemes</h1>
+                    <h1 className="text-4xl font-black text-text-primary uppercase tracking-tighter mb-2">All Schemes</h1>
                     <div className="flex flex-col gap-3 mt-1">
-                        <p className="text-white/70 text-xs font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                        <p className="text-text-secondary text-xs font-black uppercase tracking-[0.2em] flex items-center gap-2">
                             <Shield className="w-3 h-3 text-primary" />
                             Manage healthcare provider programs and credit lines
                         </p>
@@ -64,7 +64,7 @@ const Schemes = () => {
                                     className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border flex items-center gap-2 transition-all active:scale-95 ${
                                         typeFilter === type 
                                             ? 'bg-primary text-white border-primary shadow-[0_0_15px_rgba(255,0,204,0.3)]' 
-                                            : 'bg-white/5 text-white border-white/10 hover:bg-white/10 hover:border-white/20'
+                                            : 'bg-bg-tertiary text-text-primary border-border-color hover:bg-bg-elevated hover:border-border-hover'
                                     }`}
                                 >
                                     {type === 'other' ? 'prepaid' : type.replace(/_/g, ' ')} Schemes 
@@ -87,35 +87,35 @@ const Schemes = () => {
             </div>
 
             {/* Content Section */}
-            <div className="bg-black/40 border border-white/5 rounded-[3rem] shadow-2xl overflow-hidden backdrop-blur-sm p-2">
+            <div className="bg-bg-secondary/40 border border-border-color rounded-[3rem] shadow-2xl overflow-hidden backdrop-blur-sm p-2">
                 {/* Table Toolbar */}
-                <div className="flex flex-col md:flex-row gap-4 p-6 bg-white/[0.02] m-2 rounded-[2rem] border border-white/5">
+                <div className="flex flex-col md:flex-row gap-4 p-6 bg-bg-tertiary/20 m-2 rounded-[2rem] border border-border-color">
                     <div className="relative flex-1 group">
-                        <Search size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" />
+                        <Search size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-primary transition-colors" />
                         <input
                             type="text"
                             placeholder="SEARCH SCHEMES BY NAME, CODE OR TYPE..."
-                            className="w-full bg-white/5 border border-white/10 rounded-full py-3.5 pl-14 pr-8 text-[11px] font-black uppercase tracking-widest text-white placeholder:text-white/10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/10 transition-all"
+                            className="w-full bg-bg-tertiary border border-border-color rounded-full py-3.5 pl-14 pr-8 text-[11px] font-black uppercase tracking-widest text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-bg-elevated transition-all"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
 
                     <select
-                        className="bg-white/5 border border-white/10 rounded-full py-3.5 px-8 text-[11px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none min-w-[180px] cursor-pointer"
+                        className="bg-bg-tertiary border border-border-color rounded-full py-3.5 px-8 text-[11px] font-black uppercase tracking-widest text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none min-w-[180px] cursor-pointer"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
-                        <option value="all" className="bg-bg-primary text-white">ALL STATUS</option>
+                        <option value="all" className="bg-bg-primary text-text-primary">ALL STATUS</option>
                         <option value="active" className="bg-bg-primary text-green-500">ACTIVE ONLY</option>
                         <option value="suspended" className="bg-bg-primary text-highlight">SUSPENDED</option>
-                        <option value="inactive" className="bg-bg-primary text-white/40">INACTIVE</option>
+                        <option value="inactive" className="bg-bg-primary text-text-tertiary">INACTIVE</option>
                     </select>
                 </div>
 
                 <div className="overflow-x-auto custom-scrollbar">
                     <table className="w-full text-left border-collapse">
-                        <thead className="bg-white/5 text-[10px] font-black text-white/40 uppercase tracking-widest border-b border-white/5">
+                        <thead className="bg-bg-tertiary text-[10px] font-black text-text-tertiary uppercase tracking-widest border-b border-border-color">
                             <tr>
                                 <th className="p-8">Scheme Identity</th>
                                 <th className="p-8">Classification</th>
@@ -125,7 +125,7 @@ const Schemes = () => {
                                 <th className="p-8">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="text-sm font-bold text-white">
+                        <tbody className="text-sm font-bold text-text-primary">
                             {loading ? (
                                 <tr>
                                     <td colSpan="6" className="p-20 text-center">
@@ -151,15 +151,15 @@ const Schemes = () => {
                                 </tr>
                             ) : (
                                 filteredSchemes.map((scheme) => (
-                                    <tr key={scheme.id} className="hover:bg-white/[0.02] transition-colors border-b border-white/5 group">
+                                    <tr key={scheme.id} className="hover:bg-bg-secondary/40 transition-colors border-b border-border-color group">
                                         <td className="p-8">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:bg-primary/20 transition-all">
-                                                    <Shield className="w-6 h-6 text-white/20 group-hover:text-primary transition-colors" />
+                                                <div className="w-12 h-12 rounded-2xl bg-bg-tertiary flex items-center justify-center border border-border-color group-hover:bg-primary/20 transition-all">
+                                                    <Shield className="w-6 h-6 text-text-tertiary group-hover:text-primary transition-colors" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-black text-white uppercase tracking-tight">{scheme.schemeName}</p>
-                                                    <p className="text-[10px] text-white/70 font-black uppercase tracking-widest font-mono mt-0.5">{scheme.schemeCode}</p>
+                                                    <p className="font-black text-text-primary uppercase tracking-tight">{scheme.schemeName}</p>
+                                                    <p className="text-[10px] text-text-secondary font-black uppercase tracking-widest font-mono mt-0.5">{scheme.schemeCode}</p>
                                                 </div>
                                             </div>
                                         </td>

@@ -23,10 +23,18 @@ const UserForm = () => {
     const [error, setError] = useState(null);
 
     const roles = [
+        { id: 'superintendent', label: 'Superintendent (Medical Director)' },
         { id: 'admin', label: 'Administrator' },
-        { id: 'accountant', label: 'Accountant' },
-        { id: 'billing_staff', label: 'Billing Staff' },
-        { id: 'viewer', label: 'Viewer' }
+        { id: 'doctor', label: 'Doctor / Medical Officer' },
+        { id: 'nurse', label: 'Nurse / Ward Staff' },
+        { id: 'accountant', label: 'Accountant / Finance Officer' },
+        { id: 'cashier', label: 'Cashier / Billing Clerk' },
+        { id: 'pharmacist', label: 'Pharmacist / Dispenser' },
+        { id: 'lab_technician', label: 'Lab Technician' },
+        { id: 'radiographer', label: 'Radiographer' },
+        { id: 'records_clerk', label: 'Records Clerk (Medical Records Officer)' },
+        { id: 'billing_staff', label: 'Billing Staff (Legacy)' },
+        { id: 'viewer', label: 'Viewer (Read-only)' }
     ];
 
     useEffect(() => {

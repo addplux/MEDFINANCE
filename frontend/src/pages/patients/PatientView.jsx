@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { patientAPI, receivablesAPI, visitAPI, recordsAPI } from '../../services/apiService';
+import { patientAPI, receivablesAPI, visitAPI, recordsAPI, billingAPI } from '../../services/apiService';
 import {
     ArrowLeft, Edit, History, Phone, Mail, MapPin, User, CreditCard,
-    Shield, Clipboard, Printer, Calendar, AlertCircle, PlusCircle, Stethoscope
+    Shield, Clipboard, Printer, Calendar, AlertCircle, PlusCircle, Stethoscope,
+    Crown, Users, ChevronDown, ChevronUp, ExternalLink,
+    DollarSign, RefreshCw, Download, FileText, Activity
 } from 'lucide-react';
 import NewAdmissionModal from '../../components/admissions/NewAdmissionModal';
+import ManualChargeModal from '../../components/shared/ManualChargeModal';
+import { useToast } from '../../context/ToastContext';
 
 const TYPE_BADGE = {
     cash: { label: 'Cash', bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
@@ -39,10 +43,352 @@ const Section = ({ title, children }) => (
     </div>
 );
 
+
+
+// ── Rank badge colours ────────────────────────────────────────────────────────
+const RANK_BADGE = {
+    principal: { label: 'Principal', bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-800 dark:text-amber-300', border: 'border-amber-300 dark:border-amber-600' },
+    spouse:    { label: 'Spouse',    bg: 'bg-pink-100 dark:bg-pink-900/30',   text: 'text-pink-800 dark:text-pink-300',   border: 'border-pink-300 dark:border-pink-600' },
+    child:     { label: 'Child',     bg: 'bg-sky-100 dark:bg-sky-900/30',     text: 'text-sky-800 dark:text-sky-300',     border: 'border-sky-300 dark:border-sky-600' },
+    dependant: { label: 'Dependant', bg: 'bg-violet-100 dark:bg-violet-900/30', text: 'text-violet-800 dark:text-violet-300', border: 'border-violet-300 dark:border-violet-600' },
+    other:     { label: 'Other',     bg: 'bg-gray-100 dark:bg-gray-800',      text: 'text-gray-700 dark:text-gray-300',   border: 'border-gray-300 dark:border-gray-600' },
+};
+
+const STATUS_DOT = {
+    active:        'bg-emerald-500',
+    suspended:     'bg-amber-500',
+    closed:        'bg-red-500',
+    not_collected: 'bg-gray-400',
+};
+
 const calcAge = (dob) => {
     if (!dob) return null;
-    const diff = Date.now() - new Date(dob).getTime();
-    return Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
+    return Math.floor((Date.now() - new Date(dob).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+};
+
+// ── Family Member Card ────────────────────────────────────────────────────────
+const FamilyMemberCard = ({ member, navigate, apiBase }) => {
+    const rankInfo = RANK_BADGE[member.memberRank] || RANK_BADGE.other;
+    const age = calcAge(member.dateOfBirth);
+    const statusColor = STATUS_DOT[member.memberStatus] || 'bg-gray-400';
+
+    return (
+        <button
+            onClick={() => navigate(`/app/patients/${member.id}`)}
+            className="w-full text-left group flex items-center gap-3 p-3 rounded-xl border border-border-color hover:border-primary/40 hover:bg-primary/5 transition-all duration-200"
+        >
+            {/* Avatar */}
+            <div className="relative flex-shrink-0">
+                {member.photoUrl ? (
+                    <img src={`${apiBase}${member.photoUrl}`} alt={member.firstName}
+                        className="w-10 h-10 rounded-full object-cover border-2 border-white/10" />
+                ) : (
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                        {member.firstName?.[0]}{member.lastName?.[0]}
+                    </div>
+                )}
+                <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-bg-primary ${statusColor}`} />
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-text-primary truncate group-hover:text-primary transition-colors">
+                    {member.firstName} {member.lastName}
+                </p>
+                <p className="text-[11px] text-text-tertiary font-mono">{member.patientNumber}</p>
+                {age !== null && (
+                    <p className="text-[11px] text-text-tertiary">{age} yrs • {member.gender}</p>
+                )}
+            </div>
+
+            {/* Rank badge + arrow */}
+            <div className="flex flex-col items-end gap-1.5">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${rankInfo.bg} ${rankInfo.text} ${rankInfo.border} uppercase tracking-wider`}>
+                    {rankInfo.label}
+                </span>
+                <ExternalLink className="w-3 h-3 text-text-tertiary group-hover:text-primary transition-colors" />
+            </div>
+        </button>
+    );
+};
+
+// ── Financial History / Statement Section ───────────────────────────────────
+const BillingStatementSection = ({ patientId, onRefreshBalance }) => {
+    const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState(null);
+    const [error, setError] = useState(null);
+
+    const load = async () => {
+        if (!open) setOpen(true);
+        setLoading(true);
+        try {
+            const statementRes = await billingAPI.patient.getStatement(patientId);
+            setData(statementRes.data);
+        } catch (e) {
+            setError('Failed to load financial statement');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (open) load();
+    }, [open]);
+
+    const fmt = (n) => `K${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    const handlePrint = () => {
+        if (!data) return;
+        const win = window.open('', '_blank');
+        win.document.write(`
+            <html>
+                <head>
+                    <title>Patient Statement</title>
+                    <style>
+                        body { font-family: sans-serif; padding: 40px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background: #f4f4f4; font-size: 12px; }
+                        .text-right { text-align: right; }
+                        .font-bold { font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Patient Billing Statement</h1>
+                    <p>Generated: ${new Date().toLocaleString()}</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th class="text-right">Debit</th>
+                                <th class="text-right">Credit</th>
+                                <th class="text-right">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.statement.map(s => `
+                                <tr>
+                                    <td>${new Date(s.date).toLocaleDateString()}</td>
+                                    <td>${s.type}</td>
+                                    <td>${s.description}</td>
+                                    <td class="text-right">${s.debit > 0 ? fmt(s.debit) : '-'}</td>
+                                    <td class="text-right">${s.credit > 0 ? fmt(s.credit) : '-'}</td>
+                                    <td class="text-right font-bold">${fmt(s.balance)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </body>
+            </html>
+        `);
+        win.document.close();
+        win.print();
+    };
+
+    return (
+        <div className="card overflow-hidden">
+            <button
+                onClick={() => setOpen(!open)}
+                className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+            >
+                <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-pink-400" />
+                    <span className="text-sm font-bold text-text-primary">Financial History & Statements</span>
+                </div>
+                {open ? <ChevronUp className="w-4 h-4 text-text-tertiary" /> : <ChevronDown className="w-4 h-4 text-text-tertiary" />}
+            </button>
+
+            {open && (
+                <div className="px-4 pb-4">
+                    <div className="flex justify-between items-center mb-4">
+                        <p className="text-xs text-text-tertiary uppercase tracking-widest font-bold">Transaction History</p>
+                        <div className="flex gap-2">
+                            <button onClick={load} className="p-1.5 hover:bg-white/5 rounded-lg text-text-tertiary hover:text-white transition-colors">
+                                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                            </button>
+                            {data && (
+                                <button onClick={handlePrint} className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] font-bold text-white transition-colors">
+                                    <Printer className="w-3 h-3" />
+                                    Print Statement
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {loading && !data && (
+                        <div className="py-8 text-center text-text-tertiary text-sm">Loading transactions...</div>
+                    )}
+
+                    {error && <p className="text-red-400 text-sm py-4">{error}</p>}
+
+                    {data && (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead>
+                                    <tr className="text-[9px] uppercase tracking-widest text-text-tertiary border-b border-white/5">
+                                        <th className="px-4 py-3 font-black">Date</th>
+                                        <th className="px-4 py-3 font-black">Type</th>
+                                        <th className="px-4 py-3 font-black">Description</th>
+                                        <th className="px-4 py-3 font-black text-right">Debit</th>
+                                        <th className="px-4 py-3 font-black text-right">Credit</th>
+                                        <th className="px-4 py-3 font-black text-right">Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/[0.04]">
+                                    {data.statement.map((s, i) => (
+                                        <tr key={i} className="hover:bg-white/[0.02]">
+                                            <td className="px-4 py-2.5 text-xs text-text-tertiary font-mono">{new Date(s.date).toLocaleDateString()}</td>
+                                            <td className="px-4 py-2.5">
+                                                <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black uppercase border ${
+                                                    s.type === 'PAYMENT' || s.type === 'CREDIT' 
+                                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                                                        : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                                }`}>
+                                                    {s.type}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-2.5 text-xs text-white max-w-[200px] truncate">{s.description}</td>
+                                            <td className="px-4 py-2.5 text-xs text-white text-right">{s.debit > 0 ? fmt(s.debit) : '-'}</td>
+                                            <td className="px-4 py-2.5 text-xs text-emerald-400 text-right">{s.credit > 0 ? fmt(s.credit) : '-'}</td>
+                                            <td className="px-4 py-2.5 text-xs font-bold text-white text-right">{fmt(s.balance)}</td>
+                                        </tr>
+                                    ))}
+                                    {data.statement.length === 0 && (
+                                        <tr>
+                                            <td colSpan={6} className="px-4 py-8 text-center text-xs text-text-tertiary italic">No transactions found for this patient.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+const FamilyTreeSection = ({ patientId, navigate, apiBase }) => {
+    const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState(null);
+    const [error, setError] = useState(null);
+
+    const load = async () => {
+        if (data) { setOpen(o => !o); return; }
+        setOpen(true);
+        setLoading(true);
+        try {
+            const res = await patientAPI.getFamilyMembers(patientId);
+            setData(res.data);
+        } catch (e) {
+            setError('Failed to load family members');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const spouses    = data?.family?.filter(m => m.memberRank === 'spouse')    || [];
+    const children   = data?.family?.filter(m => m.memberRank === 'child')     || [];
+    const dependants = data?.family?.filter(m => m.memberRank === 'dependant') || [];
+    const others     = data?.family?.filter(m => !['spouse','child','dependant'].includes(m.memberRank)) || [];
+
+    const groups = [
+        { label: 'Spouse', members: spouses, color: 'text-pink-400' },
+        { label: 'Children', members: children, color: 'text-sky-400' },
+        { label: 'Dependants', members: dependants, color: 'text-violet-400' },
+        { label: 'Others', members: others, color: 'text-gray-400' },
+    ].filter(g => g.members.length > 0);
+
+    return (
+        <div className="card overflow-hidden">
+            {/* Header / Toggle */}
+            <button
+                onClick={load}
+                className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+            >
+                <div className="flex items-center gap-2">
+                    <Crown className="w-4 h-4 text-amber-400" />
+                    <span className="text-sm font-bold text-text-primary">Family Members</span>
+                    {data && (
+                        <span className="ml-1 px-2 py-0.5 text-[11px] font-bold rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                            {data.family.length}
+                        </span>
+                    )}
+                </div>
+                {open ? <ChevronUp className="w-4 h-4 text-text-tertiary" /> : <ChevronDown className="w-4 h-4 text-text-tertiary" />}
+            </button>
+
+            {/* Body */}
+            {open && (
+                <div className="px-4 pb-4">
+                    {loading && (
+                        <div className="flex items-center gap-2 py-4 text-text-tertiary text-sm">
+                            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                            Loading family members…
+                        </div>
+                    )}
+                    {error && <p className="text-red-400 text-sm py-2">{error}</p>}
+
+                    {data && data.family.length === 0 && (
+                        <p className="text-text-tertiary text-sm italic py-2">No linked family members found for policy <span className="font-mono font-bold text-text-secondary">{data.principal.policyNumber}</span>.</p>
+                    )}
+
+                    {data && data.family.length > 0 && (
+                        <div className="space-y-5">
+                            {/* Policy number pill */}
+                            <div className="flex items-center gap-2 py-1">
+                                <div className="h-px flex-1 bg-border-color" />
+                                <span className="text-[11px] font-mono font-bold text-text-tertiary px-2 py-0.5 bg-bg-tertiary rounded-full border border-border-color">
+                                    Policy: {data.principal.policyNumber}
+                                </span>
+                                <div className="h-px flex-1 bg-border-color" />
+                            </div>
+
+                            {/* Tree connector — principal node */}
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center flex-shrink-0">
+                                    <Crown className="w-4 h-4 text-amber-400" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-black text-text-primary">
+                                        {data.principal.firstName} {data.principal.lastName}
+                                    </p>
+                                    <p className="text-[11px] text-amber-400 font-bold uppercase tracking-wider">Principal</p>
+                                </div>
+                            </div>
+
+                            {/* Branch line + member groups */}
+                            <div className="ml-4 pl-4 border-l-2 border-dashed border-border-color space-y-4">
+                                {groups.map(group => (
+                                    <div key={group.label}>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Users className={`w-3.5 h-3.5 ${group.color}`} />
+                                            <span className={`text-[11px] font-black uppercase tracking-widest ${group.color}`}>
+                                                {group.label} ({group.members.length})
+                                            </span>
+                                        </div>
+                                        <div className="space-y-2">
+                                            {group.members.map(member => (
+                                                <FamilyMemberCard
+                                                    key={member.id}
+                                                    member={member}
+                                                    navigate={navigate}
+                                                    apiBase={apiBase}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
 };
 
 const PatientView = () => {
@@ -53,25 +399,27 @@ const PatientView = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isAdmissionModalOpen, setIsAdmissionModalOpen] = useState(false);
+    const [isManualChargeModalOpen, setIsManualChargeModalOpen] = useState(false);
     const [sendingToDoctor, setSendingToDoctor] = useState(false);
     const [sendToDoctorResult, setSendToDoctorResult] = useState(null);
 
+    const loadPatient = async () => {
+        try {
+            const [res, schemesRes] = await Promise.all([
+                patientAPI.getById(id),
+                receivablesAPI.schemes.getAll({ status: 'active' }).catch(() => ({ data: [] }))
+            ]);
+            setPatient(res.data);
+            setSchemes(schemesRes.data || []);
+        } catch (err) {
+            setError('Failed to load patient record.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const load = async () => {
-            try {
-                const [res, schemesRes] = await Promise.all([
-                    patientAPI.getById(id),
-                    receivablesAPI.schemes.getAll({ status: 'active' }).catch(() => ({ data: [] }))
-                ]);
-                setPatient(res.data);
-                setSchemes(schemesRes.data || []);
-            } catch (err) {
-                setError('Failed to load patient record.');
-            } finally {
-                setLoading(false);
-            }
-        };
-        load();
+        loadPatient();
     }, [id]);
 
     if (loading) return (
@@ -140,6 +488,13 @@ const PatientView = () => {
                     >
                         <Printer className="w-4 h-4" />
                         Print
+                    </button>
+                    <button
+                        onClick={() => setIsManualChargeModalOpen(true)}
+                        className="btn btn-secondary border-pink-500/30 text-pink-400 hover:bg-pink-500/10"
+                    >
+                        <DollarSign className="w-4 h-4" />
+                        Manual Charge
                     </button>
                     <button
                         onClick={() => navigate(`/app/patients/${id}/edit`)}
@@ -359,7 +714,25 @@ const PatientView = () => {
                     <InfoRow icon={Calendar} label="Registered On" value={patient.createdAt ? new Date(patient.createdAt).toLocaleString() : null} />
                     <InfoRow icon={Calendar} label="Last Updated" value={patient.updatedAt ? new Date(patient.updatedAt).toLocaleString() : null} />
                 </Section>
+
             </div>
+
+            {/* ── Financial History Section ───────────────────────────────────── */}
+            <BillingStatementSection 
+                patientId={id} 
+                onRefreshBalance={loadPatient}
+            />
+
+            {/* ── Family Hierarchy Tree — principal-rank patients only ─────────── */}
+            {patient.memberRank === 'principal' && patient.policyNumber && (
+                <FamilyTreeSection
+                    patientId={id}
+                    navigate={navigate}
+                    apiBase={apiBase}
+                />
+
+            )}
+
 
 
             {/* Visit History shortcut */}
@@ -440,10 +813,21 @@ const PatientView = () => {
                 onClose={() => setIsAdmissionModalOpen(false)}
                 initialPatient={patient}
                 onSuccess={(admission) => {
-                    // Could refresh patient data or navigate to admission details here
                     setIsAdmissionModalOpen(false);
                 }}
             />
+
+            {isManualChargeModalOpen && (
+                <ManualChargeModal
+                    patient={patient}
+                    onClose={() => setIsManualChargeModalOpen(false)}
+                    onSuccess={() => {
+                        loadPatient();
+                        // Trigger statement refresh if needed?
+                        // For now loadPatient updates balance in header
+                    }}
+                />
+            )}
         </div>
     );
 };

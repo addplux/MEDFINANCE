@@ -67,10 +67,10 @@ const SchemeInvoices = ({ schemeId }) => {
     };
 
     return (
-        <div className="bg-black/40 rounded-[3rem] shadow-2xl border border-white/5 overflow-hidden backdrop-blur-sm">
+        <div className="bg-bg-secondary/40 rounded-[3rem] shadow-2xl border border-border-color overflow-hidden backdrop-blur-sm">
             {/* Header */}
-            <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-                <h3 className="font-black text-white uppercase tracking-tighter">Monthly Invoices</h3>
+            <div className="p-8 border-b border-border-color flex justify-between items-center bg-bg-secondary/20">
+                <h3 className="font-black text-text-primary uppercase tracking-tighter">Monthly Invoices</h3>
                 <button
                     onClick={() => setShowModal(true)}
                     className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-primary to-primary/80 hover:scale-105 active:scale-95 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(255,0,204,0.3)]"
@@ -83,7 +83,7 @@ const SchemeInvoices = ({ schemeId }) => {
             {/* List */}
             <div className="overflow-x-auto custom-scrollbar">
                 <table className="w-full text-sm text-left">
-                    <thead className="text-[10px] text-white/40 uppercase font-black tracking-widest bg-white/[0.03] border-b border-white/5">
+                    <thead className="text-[10px] text-text-tertiary uppercase font-black tracking-widest bg-bg-tertiary border-b border-border-color">
                         <tr>
                             <th className="px-8 py-5">Invoice #</th>
                             <th className="px-8 py-5">Period</th>
@@ -93,46 +93,46 @@ const SchemeInvoices = ({ schemeId }) => {
                             <th className="px-8 py-5 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-border-color">
                         {loading ? (
-                            <tr><td colSpan="6" className="p-8 text-center text-gray-500">Loading invoices...</td></tr>
+                            <tr><td colSpan="6" className="p-8 text-center text-text-tertiary">Loading invoices...</td></tr>
                         ) : invoices.length === 0 ? (
-                            <tr><td colSpan="6" className="p-8 text-center text-gray-500">No invoices generated yet.</td></tr>
+                            <tr><td colSpan="6" className="p-8 text-center text-text-tertiary">No invoices generated yet.</td></tr>
                         ) : (
                             invoices.map((inv) => (
-                                <tr key={inv.id} className="hover:bg-white/[0.02] transition-colors group text-white/70">
+                                <tr key={inv.id} className="hover:bg-bg-secondary/40 transition-colors group text-text-secondary">
                                     <td className="px-8 py-5 font-mono text-primary font-bold tracking-tight">{inv.invoiceNumber}</td>
-                                    <td className="px-8 py-5 text-white/60 font-medium">
+                                    <td className="px-8 py-5 text-text-secondary font-medium">
                                         {new Date(inv.periodStart).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
                                     </td>
-                                    <td className="px-8 py-5 text-right font-black text-white tabular-nums">
+                                    <td className="px-8 py-5 text-right font-black text-text-primary tabular-nums">
                                         {Number(inv.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </td>
                                     <td className="px-8 py-5">
                                         <span className={getStatusBadge(inv.status)}>{inv.status}</span>
                                     </td>
-                                    <td className="px-8 py-5 text-white/30 text-[10px] font-black uppercase tracking-widest">
+                                    <td className="px-8 py-5 text-text-tertiary text-[10px] font-black uppercase tracking-widest">
                                         User #{inv.generatedBy}
                                     </td>
                                     <td className="px-8 py-5 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <button
                                                 onClick={() => navigate(`/app/receivables/invoices/${inv.id}`)}
-                                                className="p-3 hover:bg-white/5 text-white/40 hover:text-white rounded-2xl transition-all"
+                                                className="p-3 hover:bg-bg-tertiary text-text-tertiary hover:text-text-primary rounded-2xl transition-all"
                                                 title="View Details"
                                             >
                                                 <Eye className="w-5 h-5" />
                                             </button>
                                             <button
                                                 onClick={() => navigate(`/app/receivables/invoices/${inv.id}?download=true`)}
-                                                className="p-3 hover:bg-white/5 text-white/40 hover:text-white rounded-2xl transition-all"
+                                                className="p-3 hover:bg-bg-tertiary text-text-tertiary hover:text-text-primary rounded-2xl transition-all"
                                                 title="Download PDF"
                                             >
                                                 <Download className="w-5 h-5" />
                                             </button>
                                             <button
                                                 onClick={() => navigate(`/app/receivables/invoices/${inv.id}?share=true`)}
-                                                className="p-3 hover:bg-white/5 text-white/40 hover:text-green-400 rounded-2xl transition-all"
+                                                className="p-3 hover:bg-bg-tertiary text-text-tertiary hover:text-green-400 rounded-2xl transition-all"
                                                 title="Share Invoice"
                                             >
                                                 <Share2 className="w-5 h-5" />
@@ -149,10 +149,10 @@ const SchemeInvoices = ({ schemeId }) => {
             {/* Generate Modal */}
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md overflow-y-auto py-4 animate-fade-in">
-                    <div className="bg-bg-secondary border border-white/10 rounded-[3rem] shadow-[0_32px_120px_rgba(0,0,0,0.8)] w-full max-w-xl flex flex-col my-auto p-2">
+                    <div className="bg-bg-secondary border border-border-color rounded-[3rem] shadow-[0_32px_120px_rgba(0,0,0,0.8)] w-full max-w-xl flex flex-col my-auto p-2">
                         <div className="p-8">
-                            <h3 className="text-2xl font-black text-white mb-1 uppercase tracking-tighter">GENERATE INVOICE</h3>
-                            <p className="text-white/40 text-xs font-black uppercase tracking-widest mb-6">Select billing period</p>
+                            <h3 className="text-2xl font-black text-text-primary mb-1 uppercase tracking-tighter">GENERATE INVOICE</h3>
+                            <p className="text-text-tertiary text-xs font-black uppercase tracking-widest mb-6">Select billing period</p>
 
                             {error && (
                                 <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded border border-red-200">
@@ -163,27 +163,27 @@ const SchemeInvoices = ({ schemeId }) => {
                             <form onSubmit={handleGenerate} className="space-y-5">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-3">
-                                        <label className="block text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-2">Month</label>
+                                        <label className="block text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em] ml-2">Month</label>
                                         <select
                                             value={generateForm.month}
                                             onChange={(e) => setGenerateForm({ ...generateForm, month: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-3xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer hover:bg-white/10 transition-all uppercase tracking-widest"
+                                            className="w-full bg-bg-tertiary border border-border-color rounded-3xl px-6 py-4 text-sm font-bold text-text-primary focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer hover:bg-bg-elevated transition-all uppercase tracking-widest"
                                             required
                                         >
                                             {Array.from({ length: 12 }, (_, i) => (
-                                                <option key={i + 1} value={i + 1} className="bg-bg-primary">
+                                                <option key={i + 1} value={i + 1} className="bg-bg-primary text-text-primary">
                                                     {new Date(0, i).toLocaleString('default', { month: 'long' })}
                                                 </option>
                                             ))}
                                         </select>
                                     </div>
                                     <div className="space-y-3">
-                                        <label className="block text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-2">Year</label>
+                                        <label className="block text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em] ml-2">Year</label>
                                         <input
                                             type="number"
                                             value={generateForm.year}
                                             onChange={(e) => setGenerateForm({ ...generateForm, year: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-3xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-primary/20 hover:bg-white/10 transition-all"
+                                            className="w-full bg-bg-tertiary border border-border-color rounded-3xl px-6 py-4 text-sm font-bold text-text-primary focus:ring-2 focus:ring-primary/20 hover:bg-bg-elevated transition-all"
                                             min="2020"
                                             max="2030"
                                             required
@@ -195,7 +195,7 @@ const SchemeInvoices = ({ schemeId }) => {
                                     <button
                                         type="button"
                                         onClick={() => setShowModal(false)}
-                                        className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-3xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                        className="px-8 py-4 bg-bg-tertiary hover:bg-bg-elevated text-text-secondary hover:text-text-primary rounded-3xl text-[10px] font-black uppercase tracking-widest transition-all"
                                         disabled={generating}
                                     >
                                         Cancel

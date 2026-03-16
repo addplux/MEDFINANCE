@@ -16,6 +16,7 @@ router.get('/', checkPermission('patients', 'read'), patientController.getAllPat
 router.post('/merge', checkPermission('patients', 'write'), patientController.mergePatients);
 router.get('/:id', checkPermission('patients', 'read'), patientController.getPatient);
 router.get('/:id/visit-history', checkPermission('patients', 'read'), patientController.getVisitHistory);
+router.get('/:id/family', checkPermission('patients', 'read'), patientController.getFamilyMembers);
 router.post('/', checkPermission('patients', 'write'), upload.single('photo'), patientController.createPatient);
 router.put('/:id', checkPermission('patients', 'write'), upload.single('photo'), patientController.updatePatient);
 router.post('/:id/topup', checkPermission('patients', 'write'), patientController.topupPrepaidBalance);
