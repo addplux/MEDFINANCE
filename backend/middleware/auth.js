@@ -71,10 +71,59 @@ const checkPermission = (resource, action) => {
                 include: [{ model: Role, as: 'userRole' }]
             });
 
-            if (!user || !user.userRole) {
-                // Fallback: If no dynamic role, deny access to protected resource
-                return res.status(403).json({ error: 'Forbidden: No role assigned' });
+            if (!user) {
+                return res.status(401).json({ error: 'Unauthorized: User not found' });
             }
+
+            // Fallback: If no dynamic role object, use the role ENUM for basic permissions
+            if (!user.userRole) {
+                const enumRole = user.role;
+                
+                // Define standard permissions for ENUM roles
+                const defaultPermissions = {
+                    'records_clerk': { 
+                        'patients': ['read', 'write'],
+                        'records': ['read', 'write']
+                    },
+                    'doctor': {
+                        'patients': ['read', 'write'],
+                        'clinical': ['read', 'write'],
+                        'records': ['read']
+                    },
+                    'nurse': {
+                        'patients': ['read'],
+                        'clinical': ['read', 'write']
+                    },
+                    'pharmacist': {
+                        'pharmacy': ['read', 'write'],
+                        'inventory': ['read', 'write']
+                    },
+                    'lab_technician': {
+                        'laboratory': ['read', 'write']
+                    },
+                    'radiographer': {
+                        'radiology': ['read', 'write']
+                    },
+                    'cashier': {
+                        'billing': ['read', 'write'],
+                        'patients': ['read']
+                    },
+                    'accountant': {
+                        'finance': ['read', 'write'],
+                        'reports': ['read']
+                    }
+                };
+
+                const rolePermissions = defaultPermissions[enumRole] || {};
+                const resourcePerms = rolePermissions[resource] || [];
+
+                if (resourcePerms.includes(action) || resourcePerms.includes('*')) {
+                    return next();
+                }
+
+                return res.status(403).json({ error: `Forbidden: No dynamic role and ENUM role '${enumRole}' lacks permission for ${resource}` });
+            }
+
 
             const permissions = user.userRole.permissions || {};
 

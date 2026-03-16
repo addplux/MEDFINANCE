@@ -26,23 +26,50 @@ const RecordsDashboard = () => {
     const loadData = async () => {
         try {
             setLoading(true);
-            const [statsRes, requestsRes, patientsRes, activitiesRes] = await Promise.all([
-                recordsAPI.fileRequests.getStats(),
-                recordsAPI.fileRequests.getAll(),
-                patientAPI.getAll({ limit: 8 }),
-                recordsAPI.getActivityLog({ limit: 10 })
-            ]);
             
-            setStats(statsRes.data);
-            setRequests(requestsRes.data);
-            setAllPatients(patientsRes.data.data);
-            setActivities(activitiesRes.data || []);
+            // Separate calls to handle partial failures
+            const fetchStats = async () => {
+                try {
+                    const res = await recordsAPI.fileRequests.getStats();
+                    setStats(res.data);
+                } catch (e) { console.error('Stats failed', e); }
+            };
+
+            const fetchRequests = async () => {
+                try {
+                    const res = await recordsAPI.fileRequests.getAll();
+                    setRequests(res.data);
+                } catch (e) { console.error('Requests failed', e); }
+            };
+
+            const fetchPatients = async () => {
+                try {
+                    const res = await patientAPI.getAll({ limit: 8 });
+                    setAllPatients(res.data.data);
+                } catch (e) { console.error('Patients failed', e); }
+            };
+
+            const fetchActivities = async () => {
+                try {
+                    const res = await recordsAPI.getActivityLog({ limit: 10 });
+                    setActivities(res.data || []);
+                } catch (e) { console.error('Activities failed', e); }
+            };
+
+            await Promise.all([
+                fetchStats(),
+                fetchRequests(),
+                fetchPatients(),
+                fetchActivities()
+            ]);
+
         } catch (error) {
             console.error('Failed to load records data', error);
         } finally {
             setLoading(false);
         }
     };
+
 
     const handleSearch = async (e) => {
         const query = e.target.value;

@@ -31,8 +31,12 @@ const getAllPatients = async (req, res) => {
         }
 
         if (onlyPrincipals === 'true') {
-            where.memberRank = 'principal';
+            where[Op.or] = [
+                { memberRank: 'principal' },
+                { memberRank: null }
+            ];
         }
+
 
         const { count, rows } = await Patient.findAndCountAll({
             attributes: {
