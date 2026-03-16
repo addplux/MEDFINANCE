@@ -15,29 +15,34 @@ const getAllPatients = async (req, res) => {
         const { page = 1, limit = 20, search, paymentMethod, onlyPrincipals } = req.query;
         const offset = (page - 1) * limit;
 
-        const where = {};
+        const where = {
+            [Op.and]: []
+        };
+
         if (search) {
-            where[Op.or] = [
-                { firstName: { [Op.iLike]: `%${search}%` } },
-                { lastName: { [Op.iLike]: `%${search}%` } },
-                { patientNumber: { [Op.iLike]: `%${search}%` } },
-                { policyNumber: { [Op.iLike]: `%${search}%` } },
-                { nrc: { [Op.iLike]: `%${search}%` } }
-            ];
+            where[Op.and].push({
+                [Op.or]: [
+                    { firstName: { [Op.iLike]: `%${search}%` } },
+                    { lastName: { [Op.iLike]: `%${search}%` } },
+                    { patientNumber: { [Op.iLike]: `%${search}%` } },
+                    { policyNumber: { [Op.iLike]: `%${search}%` } },
+                    { nrc: { [Op.iLike]: `%${search}%` } }
+                ]
+            });
         }
 
         if (paymentMethod) {
-            where.paymentMethod = paymentMethod;
+            where[Op.and].push({ paymentMethod });
         }
 
         if (onlyPrincipals === 'true') {
-            where[Op.or] = [
-                { memberRank: 'principal' },
-                { memberRank: null }
-            ];
+            where[Op.and].push({
+                [Op.or]: [
+                    { memberRank: 'principal' },
+                    { memberRank: null }
+                ]
+            });
         }
-
-
         const { count, rows } = await Patient.findAndCountAll({
             attributes: {
                 include: [
