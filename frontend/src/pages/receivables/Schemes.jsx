@@ -53,7 +53,7 @@ const Schemes = () => {
                                 }, {})
                             ).map(([type, count]) => (
                                 <span key={type} className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-white border border-white/10 flex items-center gap-2">
-                                    {type.replace(/_/g, ' ')} Schemes <span className="bg-primary/20 text-primary px-2 py-0.5 rounded-full">{count}</span>
+                                    {type === 'other' ? 'prepaid' : type.replace(/_/g, ' ')} Schemes <span className="bg-primary/20 text-primary px-2 py-0.5 rounded-full">{count}</span>
                                 </span>
                             ))}
                         </div>
@@ -151,7 +151,7 @@ const Schemes = () => {
                                                 scheme.schemeType === 'government' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' :
                                                     'bg-amber-500/10 text-amber-500 border-amber-500/20'
                                                 }`}>
-                                                {scheme.schemeType}
+                                                {scheme.schemeType === 'other' ? 'prepaid' : scheme.schemeType}
                                             </span>
                                         </td>
                                         <td className="p-8 text-right">
