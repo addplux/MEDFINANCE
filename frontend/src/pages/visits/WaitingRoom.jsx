@@ -52,9 +52,9 @@ const WaitingRoom = () => {
     };
 
     return (
-        <div className="min-h-screen bg-bg-primary p-6 lg:p-8 flex flex-col gap-8 animate-in fade-in duration-1000">
+        <div className="min-h-screen bg-bg-primary p-4 lg:p-6 flex flex-col gap-6 animate-in fade-in duration-1000">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-border-color">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-border-color">
                 <div>
                     <div className="flex items-center gap-2 mb-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
@@ -84,11 +84,11 @@ const WaitingRoom = () => {
             </div>
 
             {/* Kanban View */}
-            <div className="flex-1 overflow-x-auto flex gap-6 pb-12 -mx-4 px-4 snap-x hide-scrollbar">
+            <div className="flex-1 overflow-x-auto flex gap-4 pb-8 -mx-4 px-4 snap-x hide-scrollbar">
                 {QUEUE_STAGES.map(stage => {
                     const stageVisits = visits.filter(v => v.queueStatus === stage.id);
                     return (
-                        <div key={stage.id} className="w-[305px] flex-shrink-0 flex flex-col gap-5 snap-start">
+                        <div key={stage.id} className="w-[280px] flex-shrink-0 flex flex-col gap-3 snap-start">
                             {/* Column Header */}
                             <div className="flex items-center justify-between px-1">
                                 <div className="flex items-center gap-3">
@@ -103,14 +103,14 @@ const WaitingRoom = () => {
                             </div>
 
                             {/* List Container */}
-                            <div className="flex-1 bg-bg-secondary/50 rounded-[2.5rem] p-3 space-y-3 min-h-[500px] border border-border-color/30 group/column transition-all duration-500 hover:bg-bg-secondary/80">
+                            <div className="flex-1 bg-bg-secondary/50 rounded-2xl p-2 space-y-2 min-h-[400px] border border-border-color/30 group/column transition-all duration-500 hover:bg-bg-secondary/80">
                                 {loading ? (
-                                    <div className="h-40 flex items-center justify-center">
+                                    <div className="h-32 flex items-center justify-center">
                                        <div className="w-4 h-4 rounded-full border-2 border-text-tertiary/20 border-t-text-tertiary animate-spin" />
                                     </div>
                                 ) : stageVisits.length === 0 ? (
-                                    <div className="h-40 flex flex-col items-center justify-center text-center opacity-10 select-none">
-                                        <stage.icon className="w-6 h-6 mb-2" />
+                                    <div className="h-32 flex flex-col items-center justify-center text-center opacity-10 select-none">
+                                        <stage.icon className="w-5 h-5 mb-2" />
                                         <span className="text-[10px] font-black uppercase tracking-widest">Idle</span>
                                     </div>
                                 ) : (
@@ -118,18 +118,18 @@ const WaitingRoom = () => {
                                         <div 
                                             key={visit.id} 
                                             onClick={() => handlePatientClick(visit.patientId)}
-                                            className="group relative bg-bg-elevated p-6 rounded-[1.75rem] shadow-sm hover:shadow-2xl hover:shadow-black/20 border border-border-color transition-all duration-500 cursor-pointer overflow-hidden active:scale-95"
+                                            className="group relative bg-bg-elevated p-4 rounded-xl shadow-sm hover:shadow-2xl hover:shadow-black/20 border border-border-color transition-all duration-500 cursor-pointer overflow-hidden active:scale-95"
                                         >
                                             {/* Top Section */}
-                                            <div className="flex justify-between items-start mb-6">
+                                            <div className="flex justify-between items-start mb-4">
                                                 <div>
-                                                    <h4 className="font-black text-text-primary text-sm tracking-tight group-hover:text-blue-500 transition-colors uppercase leading-none mb-1.5">
+                                                    <h4 className="font-bold text-text-primary text-xs tracking-tight group-hover:text-blue-500 transition-colors uppercase leading-none mb-1">
                                                         {visit.patient?.firstName} {visit.patient?.lastName}
                                                     </h4>
-                                                    <p className="text-[10px] font-mono font-bold text-text-tertiary tracking-tighter uppercase">{visit.patient?.patientNumber}</p>
+                                                    <p className="text-[9px] font-mono font-bold text-text-tertiary tracking-tighter uppercase">{visit.patient?.patientNumber}</p>
                                                 </div>
                                                 {visit.priority === 'urgent' && (
-                                                    <div className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]" />
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]" />
                                                 )}
                                             </div>
 
