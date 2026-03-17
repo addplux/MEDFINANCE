@@ -303,34 +303,37 @@ const createConsultationVisit = async (req, res) => {
             reasonForVisit: reasonForVisit || 'Consultation',
             admissionDate: new Date(),
             status: 'active',
-                queueStatus: 'pending_triage',
-                admittedById: req.user.id
-            }, { transaction: t });
-    
-            // Patient movement log
-            await PatientMovement.create({
-                patientId,
-                fromDepartment: 'Reception',
-                toDepartment: 'Triage / Vitals',
-                notes: 'Free Registration - Sent to Triage',
-                movementDate: new Date(),
-                admittedBy: req.user.id
-            }, { transaction: t });
-    
-            await t.commit();
-    
-            const fullVisit = await Visit.findByPk(visit.id, {
-                include: [
-                    { model: Patient, as: 'patient' },
-                    { model: Department, as: 'department' }
-                ]
-            });
-    
-            res.status(201).json({
-                visit: fullVisit,
-                queueStatus: 'pending_triage',
-                message: 'Patient registered successfully and sent to Triage.'
-            });
+            queueStatus: initialQueueStatus,
+            admittedById: req.user.id
+        }, { transaction: t });
+
+        // Patient movement log
+        const toDept = isPrepaid ? 'Doctor Queue' : 'Cashier';
+        await PatientMovement.create({
+            patientId,
+            fromDepartment: 'Reception',
+            toDepartment: toDept,
+            notes: isPrepaid ? 'Prepaid/Scheme - Sent directly to Doctor Queue' : 'Cash patient - Sent to Cashier first',
+            movementDate: new Date(),
+            admittedBy: req.user.id
+        }, { transaction: t });
+
+        await t.commit();
+
+        const fullVisit = await Visit.findByPk(visit.id, {
+            include: [
+                { model: Patient, as: 'patient' },
+                { model: Department, as: 'department' }
+            ]
+        });
+
+        res.status(201).json({
+            visit: fullVisit,
+            queueStatus: initialQueueStatus,
+            message: isPrepaid
+                ? 'Patient sent directly to Doctor Queue.'
+                : 'Cash patient sent to Cashier for payment processing.'
+        });
     } catch (error) {
         await t.rollback();
         console.error('Create consultation visit error:', error);

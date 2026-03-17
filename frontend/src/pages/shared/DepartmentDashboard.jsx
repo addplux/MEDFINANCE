@@ -44,12 +44,10 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                 const res = await billingAPI.patient.getPharmacyQueue();
                 data = res.data;
             } else {
-                // Fetch active visits for this department
-                const res = await visitAPI.getAll({
-                    status: 'active',
-                    departmentId: departmentId,
-                    search: search
-                });
+                // For OPD: fetch all active visits (no department filter) so queueStatus filtering works across all patients
+                const params = { status: 'active', search: search };
+                if (title !== 'OPD' && departmentId) params.departmentId = departmentId;
+                const res = await visitAPI.getAll(params);
                 data = res.data.visits || [];
             }
             setVisits(data);
