@@ -40,6 +40,9 @@ router.post('/schemes/invoices/:id/send', authorize('admin', 'accountant'), rece
 // Bulk Import
 router.post('/schemes/:id/import', authorize('admin', 'accountant'), upload.single('file'), receivablesController.importSchemeMembers);
 
+// Add single member
+router.post('/schemes/:id/members/add', authorize('admin', 'accountant'), receivablesController.addSchemeMember);
+
 // Update member status
 router.put('/schemes/:id/members/:patientId/status', authorize('admin', 'accountant'), receivablesController.updateMemberStatus);
 

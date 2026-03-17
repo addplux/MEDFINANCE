@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, FileText, Search, Edit, Upload, Download, AlertCircle, CheckCircle, ChevronDown, Activity, ChevronRight, X } from 'lucide-react';
+import { Users, FileText, Search, Edit, Upload, Download, AlertCircle, CheckCircle, ChevronDown, Activity, ChevronRight, X, UserPlus } from 'lucide-react';
+import { receivablesAPI, patientAPI } from '../../services/apiService';
 import api from '../../services/apiClient';
 import { DataGrid } from '@mui/x-data-grid';
 import * as XLSX from 'xlsx';
@@ -27,6 +28,15 @@ const SchemeMembers = ({ schemeId }) => {
         consultation: '', total: '',
         nursingCare: '', laboratory: '', radiology: '', dental: '', lodging: '', surgicals: '',
         drRound: '', food: '', physio: '', pharmacy: '', sundries: '', antenatal: ''
+    });
+    const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+    const [addMemberMode, setAddMemberMode] = useState('existing'); // 'existing' or 'new'
+    const [patientSearch, setPatientSearch] = useState('');
+    const [patientSearchResults, setPatientSearchResults] = useState([]);
+    const [isSearchingPatients, setIsSearchingPatients] = useState(false);
+    const [submittingAddMember, setSubmittingAddMember] = useState(false);
+    const [newMemberData, setNewMemberData] = useState({
+        firstName: '', lastName: '', policyNumber: '', gender: 'other', phone: '', dob: '', nrc: '', rank: 'principal', suffix: 1
     });
     const fileInputRef = useRef(null);
 
@@ -65,6 +75,54 @@ const SchemeMembers = ({ schemeId }) => {
     const handleSearch = (e) => {
         e.preventDefault();
         fetchMembers();
+    };
+
+    const handlePatientSearch = async (val) => {
+        setPatientSearch(val);
+        if (val.length < 2) {
+            setPatientSearchResults([]);
+            return;
+        }
+        try {
+            setIsSearchingPatients(true);
+            const res = await patientAPI.getAll({ search: val, limit: 5 });
+            setPatientSearchResults(Array.isArray(res.data) ? res.data : (res.data?.data || []));
+        } catch (err) {
+            console.error('Patient search failed', err);
+        } finally {
+            setIsSearchingPatients(false);
+        }
+    };
+
+    const handleAddMember = async (patientId = null) => {
+        try {
+            setSubmittingAddMember(true);
+            const payload = patientId ? { patientId } : newMemberData;
+            const response = await receivablesAPI.schemes.addMember(schemeId, payload);
+            
+            setImportResult({ 
+                type: 'success', 
+                summary: { 
+                    added: patientId ? 0 : 1, 
+                    updated: patientId ? 1 : 0, 
+                    failed: 0,
+                    message: response.data.message
+                } 
+            });
+            
+            setShowAddMemberModal(false);
+            fetchMembers();
+            
+            // Reset state
+            setNewMemberData({ firstName: '', lastName: '', policyNumber: '', gender: 'other', phone: '', dob: '', nrc: '', rank: 'principal', suffix: 1 });
+            setPatientSearch('');
+            setPatientSearchResults([]);
+        } catch (err) {
+            console.error('Failed to add member', err);
+            alert(err.response?.data?.error || 'Failed to add member');
+        } finally {
+            setSubmittingAddMember(false);
+        }
     };
 
     const getRankBadge = (rank) => {
@@ -456,6 +514,14 @@ const SchemeMembers = ({ schemeId }) => {
                             <Download className="w-3.5 h-3.5" />
                             <span className="hidden lg:inline">Template</span>
                         </button>
+                        <button
+                            onClick={() => setShowAddMemberModal(true)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-bg-tertiary hover:bg-bg-elevated text-text-secondary hover:text-text-primary border border-border-color rounded-md text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm"
+                            title="Add Member Manually"
+                        >
+                            <UserPlus className="w-3.5 h-3.5" />
+                            <span className="hidden lg:inline">Add Member</span>
+                        </button>
 
                         <label className={`flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-black rounded-md text-[11px] font-black uppercase tracking-wide transition-all shadow-sm cursor-pointer ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
                             <input
@@ -677,6 +743,167 @@ const SchemeMembers = ({ schemeId }) => {
                 </div>
             )
             }
+
+            {/* Add Member Modal */}
+            {showAddMemberModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 z-50 animate-fade-in text-white">
+                    <div className="bg-bg-secondary border border-white/5 rounded-[3rem] shadow-[0_32px_120px_rgba(0,0,0,0.8)] w-full max-w-2xl flex flex-col overflow-hidden">
+                        <div className="px-10 py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                            <div>
+                                <h3 className="font-black text-2xl uppercase tracking-tighter">Add Member</h3>
+                                <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">Manual enrollment into scheme</p>
+                            </div>
+                            <button onClick={() => setShowAddMemberModal(false)} className="p-2 hover:bg-white/5 rounded-xl text-white/40 hover:text-white transition-all">&times;</button>
+                        </div>
+
+                        <div className="flex border-b border-white/5 bg-white/[0.01]">
+                            <button
+                                onClick={() => setAddMemberMode('existing')}
+                                className={`flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${addMemberMode === 'existing' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-white/30 hover:text-white/50'}`}
+                            >
+                                Existing Patient
+                            </button>
+                            <button
+                                onClick={() => setAddMemberMode('new')}
+                                className={`flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${addMemberMode === 'new' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-white/30 hover:text-white/50'}`}
+                            >
+                                New Registration
+                            </button>
+                        </div>
+
+                        <div className="p-10 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                            {addMemberMode === 'existing' ? (
+                                <div className="space-y-6">
+                                    <div className="relative group">
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors w-4 h-4" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search by name, number or NRC..."
+                                            value={patientSearch}
+                                            onChange={(e) => handlePatientSearch(e.target.value)}
+                                            className="w-full pl-12 pr-4 py-4 bg-white/[0.03] border border-white/10 rounded-2xl text-sm font-bold placeholder:text-white/10 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                        />
+                                        {isSearchingPatients && (
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                                <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        {patientSearchResults.length > 0 ? (
+                                            patientSearchResults.map(p => (
+                                                <button
+                                                    key={p.id}
+                                                    onClick={() => handleAddMember(p.id)}
+                                                    disabled={submittingAddMember}
+                                                    className="w-full flex items-center justify-between p-4 bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 rounded-2xl transition-all group"
+                                                >
+                                                    <div className="text-left">
+                                                        <p className="font-black text-sm uppercase tracking-tight group-hover:text-primary transition-colors">{p.lastName}, {p.firstName}</p>
+                                                        <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-0.5">{p.patientNumber} | {p.nrc || 'No NRC'}</p>
+                                                    </div>
+                                                    <ChevronRight className="w-4 h-4 text-white/10 group-hover:text-primary transition-all translate-x-0 group-hover:translate-x-1" />
+                                                </button>
+                                            ))
+                                        ) : patientSearch.length >= 2 ? (
+                                            <div className="text-center py-10 text-white/20">
+                                                <Users className="w-8 h-8 mx-auto mb-2 opacity-10" />
+                                                <p className="text-[10px] font-black uppercase tracking-widest">No patients found</p>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-10 text-white/20">
+                                                <p className="text-[10px] font-black uppercase tracking-widest italic">Start typing to find patients...</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">First Name</label>
+                                        <input
+                                            type="text"
+                                            value={newMemberData.firstName}
+                                            onChange={(e) => setNewMemberData({ ...newMemberData, firstName: e.target.value })}
+                                            className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary/20 outline-none"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Last Name</label>
+                                        <input
+                                            type="text"
+                                            value={newMemberData.lastName}
+                                            onChange={(e) => setNewMemberData({ ...newMemberData, lastName: e.target.value })}
+                                            className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary/20 outline-none"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Policy Number</label>
+                                        <input
+                                            type="text"
+                                            value={newMemberData.policyNumber}
+                                            onChange={(e) => setNewMemberData({ ...newMemberData, policyNumber: e.target.value })}
+                                            className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary/20 outline-none"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">NRC</label>
+                                        <input
+                                            type="text"
+                                            value={newMemberData.nrc}
+                                            onChange={(e) => setNewMemberData({ ...newMemberData, nrc: e.target.value })}
+                                            className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary/20 outline-none"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Gender</label>
+                                        <select
+                                            value={newMemberData.gender}
+                                            onChange={(e) => setNewMemberData({ ...newMemberData, gender: e.target.value })}
+                                            className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary/20 appearance-none uppercase"
+                                        >
+                                            <option value="male" className="bg-bg-secondary">Male</option>
+                                            <option value="female" className="bg-bg-secondary">Female</option>
+                                            <option value="other" className="bg-bg-secondary">Other</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Member Rank</label>
+                                        <select
+                                            value={newMemberData.rank}
+                                            onChange={(e) => setNewMemberData({ ...newMemberData, rank: e.target.value })}
+                                            className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary/20 appearance-none uppercase"
+                                        >
+                                            <option value="principal" className="bg-bg-secondary">Principal</option>
+                                            <option value="spouse" className="bg-bg-secondary">Spouse</option>
+                                            <option value="child" className="bg-bg-secondary">Child</option>
+                                            <option value="dependant" className="bg-bg-secondary">Dependant</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {addMemberMode === 'new' && (
+                            <div className="px-10 py-6 border-t border-white/5 bg-white/[0.01] flex justify-end">
+                                <button
+                                    onClick={() => handleAddMember()}
+                                    disabled={submittingAddMember || !newMemberData.firstName || !newMemberData.lastName || !newMemberData.policyNumber}
+                                    className="px-10 py-3 bg-primary text-black font-black uppercase tracking-widest text-[10px] rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,0,204,0.3)] disabled:opacity-20 flex items-center gap-2"
+                                >
+                                    {submittingAddMember ? (
+                                        <span className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin"></span>
+                                    ) : (
+                                        <UserPlus className="w-3.5 h-3.5" />
+                                    )}
+                                    Enroll Member
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

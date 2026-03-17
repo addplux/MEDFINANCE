@@ -130,7 +130,7 @@ export const receivablesAPI = {
             },
         }),
         updateMemberStatus: (schemeId, patientId, status) => api.put(`/receivables/schemes/${schemeId}/members/${patientId}/status`, { status }),
-        addMember: (schemeId, data) => api.post(`/corporate/${schemeId}/members/add`, data),
+        addMember: (schemeId, data) => api.post(`/receivables/schemes/${schemeId}/members/add`, data),
     },
 };
 

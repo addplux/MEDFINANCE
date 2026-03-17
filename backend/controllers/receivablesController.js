@@ -1397,6 +1397,68 @@ const downloadSchemeInvoicePdf = async (req, res) => {
     }
 };
 
+// Add single member
+const addSchemeMember = async (req, res) => {
+    try {
+        const { id } = req.params; // Scheme ID
+        const { patientId } = req.body; 
+
+        const scheme = await Scheme.findByPk(id);
+        if (!scheme) {
+            return res.status(404).json({ error: 'Scheme not found' });
+        }
+
+        let paymentMethod = 'scheme';
+        if (scheme.schemeType === 'corporate') {
+            paymentMethod = 'corporate';
+        }
+
+        if (patientId) {
+            // Add existing patient
+            const patient = await Patient.findByPk(patientId);
+            if (!patient) {
+                return res.status(404).json({ error: 'Patient not found' });
+            }
+
+            await patient.update({ schemeId: id, paymentMethod });
+            return res.json({ message: 'Patient added to scheme successfully', patient });
+        } else {
+            // Create new patient
+            const { firstName, lastName, dateOfBirth, gender, phone, email, address, nrc, policyNumber, memberRank, memberSuffix } = req.body;
+
+            if (!firstName || !lastName || !policyNumber) {
+                return res.status(400).json({ error: 'First name, last name, and policy number are required' });
+            }
+
+            let currentPatientCount = await Patient.count();
+            const patientNumber = `P${String(currentPatientCount + 1).padStart(6, '0')}`;
+
+            const patient = await Patient.create({
+                patientNumber,
+                firstName,
+                lastName,
+                dateOfBirth: dateOfBirth || null,
+                gender: gender || 'other',
+                phone,
+                email,
+                address,
+                nrc,
+                policyNumber,
+                schemeId: id,
+                paymentMethod,
+                memberRank: memberRank || 'principal',
+                memberSuffix: memberSuffix || 1,
+                memberStatus: 'active'
+            });
+
+            return res.status(201).json({ message: 'New patient registered and added to scheme', patient });
+        }
+    } catch (error) {
+        console.error('Add scheme member error:', error);
+        res.status(500).json({ error: 'Failed to add member to scheme' });
+    }
+};
+
 module.exports = {
     getAllCorporateAccounts,
     createCorporateAccount,
@@ -1414,5 +1476,6 @@ module.exports = {
     getAllServices,
     updateMemberStatus,
     sendSchemeInvoiceEmail,
-    downloadSchemeInvoicePdf
+    downloadSchemeInvoicePdf,
+    addSchemeMember
 };
