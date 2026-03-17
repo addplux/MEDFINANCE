@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import { setupAPI } from '../../services/apiService';
+import { setupAPI, visitAPI } from '../../services/apiService';
 import NotificationBell from '../ui/NotificationBell';
 import {
     LayoutDashboard,
@@ -48,6 +48,7 @@ const MainLayout = ({ children }) => {
     const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
     const [orgName, setOrgName] = React.useState('MEDFINANCE360');
     const [expandedMenus, setExpandedMenus] = React.useState({});
+    const [waitingCount, setWaitingCount] = React.useState(0);
 
     React.useEffect(() => {
         const fetchOrgProfile = async () => {
@@ -70,6 +71,24 @@ const MainLayout = ({ children }) => {
             window.removeEventListener('org-profile-updated', fetchOrgProfile);
         };
     }, []);
+
+    // Poll waiting room count every 30s (for clinical roles)
+    const CLINICAL_ROLES = ['doctor', 'nurse', 'superintendent', 'admin'];
+    React.useEffect(() => {
+        if (!user || !CLINICAL_ROLES.includes(user.role)) return;
+
+        const fetchWaitingCount = async () => {
+            try {
+                const res = await visitAPI.getAll({ queueStatus: 'waiting_doctor', status: 'active', limit: 200 });
+                const visits = res.data?.data || res.data || [];
+                setWaitingCount(Array.isArray(visits) ? visits.length : (res.data?.total || 0));
+            } catch { /* silent */ }
+        };
+
+        fetchWaitingCount();
+        const interval = setInterval(fetchWaitingCount, 30000);
+        return () => clearInterval(interval);
+    }, [user]);
 
     // Auto-expand menus based on current path
     React.useEffect(() => {
@@ -147,7 +166,8 @@ const MainLayout = ({ children }) => {
         },
         {
             path: '/app/visits/waiting-room', icon: Activity, label: 'Waiting Room',
-            roles: CLINICAL
+            roles: CLINICAL,
+            badge: waitingCount
         },
 
         // ── SCHEME MANAGER (Finance + Cashier) ───────────────────────────
@@ -521,8 +541,22 @@ const MainLayout = ({ children }) => {
                                         ${sidebarCollapsed ? 'justify-center' : ''}
                                     `}
                                 >
-                                    <Icon className="w-4 h-4 flex-shrink-0" />
-                                    {!sidebarCollapsed && <span>{item.label}</span>}
+                                    <div className="relative flex-shrink-0">
+                                        <Icon className="w-4 h-4" />
+                                        {item.badge > 0 && sidebarCollapsed && (
+                                            <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-red-500 rounded-full text-[8px] font-black text-white flex items-center justify-center animate-pulse shadow-[0_0_6px_rgba(239,68,68,0.7)]">
+                                                {item.badge > 9 ? '9+' : item.badge}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {!sidebarCollapsed && (
+                                        <span className="flex-1 text-left">{item.label}</span>
+                                    )}
+                                    {!sidebarCollapsed && item.badge > 0 && (
+                                        <span className="ml-auto min-w-[20px] h-5 px-1.5 bg-red-500 rounded-full text-[10px] font-black text-white flex items-center justify-center animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]">
+                                            {item.badge > 99 ? '99+' : item.badge}
+                                        </span>
+                                    )}
                                 </button>
                             );
                         })}
