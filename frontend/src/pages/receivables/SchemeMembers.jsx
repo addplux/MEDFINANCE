@@ -552,36 +552,36 @@ const SchemeMembers = ({ schemeId }) => {
                         }}
                         disableRowSelectionOnClick
                         density="compact"
-                         sx={{
+                        sx={{
                             border: 0,
                             backgroundColor: 'transparent',
                             fontFamily: 'inherit',
                             color: 'var(--text-primary)',
                             '& .MuiDataGrid-columnHeaders': {
-                                backgroundColor: 'var(--bg-tertiary)',
-                                borderBottom: '1px solid var(--border-color)',
+                                backgroundColor: 'rgba(255,255,255,0.03)',
+                                borderBottom: '1px solid rgba(255,255,255,0.1)',
                             },
                             '& .MuiDataGrid-columnHeaderTitle': {
-                                color: 'var(--text-primary)',
-                                fontWeight: 800,
-                                fontSize: '10px',
+                                color: 'var(--text-secondary)',
+                                fontWeight: 'bold',
+                                fontSize: '11px',
                                 textTransform: 'uppercase',
-                                letterSpacing: '0.06em',
+                                letterSpacing: '0.05em',
                             },
                             '& .MuiDataGrid-columnHeader': {
                                 color: 'var(--text-primary)',
                             },
                             '& .MuiDataGrid-cell': {
-                                borderBottom: '1px solid var(--border-color)',
+                                borderBottom: '1px solid rgba(255,255,255,0.05)',
                                 fontSize: '12px',
                                 color: 'var(--text-primary)',
                                 fontWeight: 500,
                             },
                             '& .MuiDataGrid-row:hover': {
-                                backgroundColor: 'var(--bg-tertiary)',
+                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
                             },
                             '& .MuiDataGrid-footerContainer': {
-                                borderTop: '1px solid var(--border-color)',
+                                borderTop: '1px solid rgba(255,255,255,0.1)',
                                 backgroundColor: 'transparent',
                                 color: 'var(--text-tertiary)',
                             },
