@@ -1437,7 +1437,7 @@ const addSchemeMember = async (req, res) => {
                 patientNumber,
                 firstName,
                 lastName,
-                dateOfBirth: dateOfBirth || null,
+                dateOfBirth: dateOfBirth || '1900-01-01',
                 gender: gender || 'other',
                 phone,
                 email,

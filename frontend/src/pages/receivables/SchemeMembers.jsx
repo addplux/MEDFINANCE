@@ -848,6 +848,15 @@ const SchemeMembers = ({ schemeId }) => {
                                         />
                                     </div>
                                     <div className="space-y-2">
+                                        <label className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Date of Birth</label>
+                                        <input
+                                            type="date"
+                                            value={newMemberData.dob}
+                                            onChange={(e) => setNewMemberData({ ...newMemberData, dob: e.target.value })}
+                                            className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
                                         <label className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">NRC</label>
                                         <input
                                             type="text"
