@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { pharmacyAPI, patientAPI } from '../../services/apiService';
 import { ShoppingCart, User, Plus, Trash2, Save, Activity } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getPaymentStatusBadge } from '../../utils/statusBadges';
 
 const Dispense = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [patients, setPatients] = useState([]);
     const [medications, setMedications] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -40,8 +41,19 @@ const Dispense = () => {
                 patientAPI.getAll(),
                 pharmacyAPI.inventory.getAll()
             ]);
-            setPatients(pRes.data.data || []);
+            const pts = pRes.data.data || [];
+            setPatients(pts);
             setMedications(mRes.data || []);
+
+            // Auto-select patient if provided in URL (e.g., from Pharmacy Dashboard)
+            const urlPatientId = searchParams.get('patientId');
+            if (urlPatientId) {
+                const matched = pts.find(p => p.id == urlPatientId);
+                if (matched) {
+                    setSelectedPatient(matched.id);
+                    setSelectedPatientName(`${matched.patientNumber ? matched.patientNumber + ' — ' : ''}${matched.firstName} ${matched.lastName}`);
+                }
+            }
         } catch (error) {
             console.error('Failed to load data:', error);
         }

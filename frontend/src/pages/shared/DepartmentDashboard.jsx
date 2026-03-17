@@ -184,7 +184,13 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                         {filteredVisits.map((v) => (
                             <div
                                 key={v.id}
-                                onClick={() => v.visitId ? navigate(`/app/visits/${v.visitId}`) : navigate(`/app/patients/${v.patient?.id}`)}
+                                onClick={() => {
+                                    if (title === 'Pharmacy') {
+                                        navigate(`/app/pharmacy/dispense?patientId=${v.patient?.id || v.id}`);
+                                    } else {
+                                        v.visitId ? navigate(`/app/visits/${v.visitId}`) : navigate(`/app/patients/${v.patient?.id || v.id}`);
+                                    }
+                                }}
                                 className="group relative glass hover:bg-bg-tertiary p-4 border-border-color hover:border-primary/50 transition-all cursor-pointer rounded-[1.5rem]"
                             >
                                 {/* Check-in Count Badge */}
