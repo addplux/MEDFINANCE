@@ -147,6 +147,12 @@ const BillingStatementSection = ({ patientId, onRefreshBalance }) => {
                     <title>Patient Statement</title>
                     <style>
                         body { font-family: sans-serif; padding: 40px; }
+                        .gov-header { text-align: center; border-bottom: 3px double #222; padding-bottom: 16px; margin-bottom: 20px; }
+                        .gov-header .country { font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #555; font-weight: 600; }
+                        .gov-header .ministry { font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: #333; font-weight: 700; margin: 4px 0; }
+                        .gov-header .hospital { font-size: 22px; font-weight: 900; color: #111; margin: 6px 0 2px; }
+                        .gov-header .doc-title { font-size: 15px; font-weight: 600; color: #444; margin-top: 8px; letter-spacing: 1px; }
+                        .meta { font-size: 11px; color: #666; }
                         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
                         th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
                         th { background: #f4f4f4; font-size: 12px; }
@@ -155,8 +161,13 @@ const BillingStatementSection = ({ patientId, onRefreshBalance }) => {
                     </style>
                 </head>
                 <body>
-                    <h1>Patient Billing Statement</h1>
-                    <p>Generated: ${new Date().toLocaleString()}</p>
+                    <div class="gov-header">
+                        <div class="country">Republic of Zambia</div>
+                        <div class="ministry">Ministry of Health</div>
+                        <div class="hospital">Nchanga North General Hospital</div>
+                        <div class="doc-title">Patient Billing Statement</div>
+                    </div>
+                    <p class="meta">Generated: ${new Date().toLocaleString()}</p>
                     <table>
                         <thead>
                             <tr>
