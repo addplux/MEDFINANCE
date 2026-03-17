@@ -53,7 +53,7 @@ const roles = [
         isSystem: true,
         permissions: {
             dashboard: ['read'],
-            patients: ['write'],
+            patients: ['read', 'write'],
             visits: ['manage'],
             billing_opd: ['read'],
             laboratory: ['read'],
@@ -89,7 +89,7 @@ const roles = [
         isSystem: true,
         permissions: {
             dashboard: ['read'],
-            patients: ['write'],
+            patients: ['read', 'write'],
             billing_opd: ['write'],
             cash_payments: ['manage'],
             receivables: ['read'],

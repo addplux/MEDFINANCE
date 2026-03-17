@@ -425,6 +425,18 @@ const getVisitHistory = async (req, res) => {
             SpecialistClinicBill.findAll({ where, order: [['createdAt', 'DESC']], raw: true }).catch(() => []),
         ]);
 
+        let ledgerCharges = [];
+        if (patient.schemeId) {
+            ledgerCharges = await sequelize.query(`
+                SELECT id, tx_date AS "createdAt", description AS "notes", dr AS "totalAmount", 'paid' AS "status"
+                FROM individual_scheme_ledger
+                WHERE scheme_id = :schemeId AND dr > 0
+            `, {
+                replacements: { schemeId: patient.schemeId },
+                type: sequelize.QueryTypes.SELECT
+            }).catch(() => []);
+        }
+
         const tag = (records, type) => records.map(r => ({ ...r, visitType: type }));
 
         const allVisits = [
@@ -436,6 +448,7 @@ const getVisitHistory = async (req, res) => {
             ...tag(theatre, 'Theatre'),
             ...tag(maternity, 'Maternity'),
             ...tag(specialist, 'Specialist Clinic'),
+            ...tag(ledgerCharges, 'Scheme Charge'),
         ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         res.json({ patient, visits: allVisits, total: allVisits.length });
