@@ -377,22 +377,22 @@ const SchemeMembers = ({ schemeId }) => {
     };
 
     const columns = [
-        { field: 'policyNumber', headerName: 'Policy #', width: 110, renderCell: (params) => <span className="font-bold text-slate-800">{params.value}</span> },
-        { field: 'memberSuffix', headerName: 'Suf', width: 60, renderCell: (params) => <span className="font-semibold text-slate-500">{params.value || '-'}</span> },
-        { field: 'fullName', headerName: 'Name', width: 180, renderCell: (params) => <span className="font-bold text-slate-700">{`${params.row.lastName}, ${params.row.firstName}`}</span> },
-        { field: 'nursingCare', headerName: 'Nurs', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'laboratory', headerName: 'Lab', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'radiology', headerName: 'Rad', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'dental', headerName: 'Dent', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'lodging', headerName: 'Lodge', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'surgicals', headerName: 'Surg', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'drRound', headerName: 'Dr', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'food', headerName: 'Food', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-500">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'physio', headerName: 'Physio', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-400">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'pharmacy', headerName: 'Pharm', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-400">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'sundries', headerName: 'Sund', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-400">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'antenatal', headerName: 'Ante', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-slate-400">{Number(params.value || 0).toLocaleString()}</span> },
-        { field: 'balance', headerName: 'Total', width: 100, type: 'number', renderCell: (params) => <span className="font-black text-blue-600">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'policyNumber', headerName: 'Policy #', width: 110, renderCell: (params) => <span className="font-bold text-primary">{params.value}</span> },
+        { field: 'memberSuffix', headerName: 'Suf', width: 60, renderCell: (params) => <span className="font-semibold text-text-secondary">{params.value || '-'}</span> },
+        { field: 'fullName', headerName: 'Name', width: 180, renderCell: (params) => <span className="font-bold text-text-primary">{`${params.row.lastName}, ${params.row.firstName}`}</span> },
+        { field: 'nursingCare', headerName: 'Nurs', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-text-primary">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'laboratory', headerName: 'Lab', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-text-primary">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'radiology', headerName: 'Rad', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-text-primary">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'dental', headerName: 'Dent', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-text-primary">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'lodging', headerName: 'Lodge', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-text-primary">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'surgicals', headerName: 'Surg', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-text-primary">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'drRound', headerName: 'Dr', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-text-primary">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'food', headerName: 'Food', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-text-primary">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'physio', headerName: 'Physio', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-text-primary">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'pharmacy', headerName: 'Pharm', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-text-primary">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'sundries', headerName: 'Sund', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-text-primary">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'antenatal', headerName: 'Ante', width: 80, type: 'number', renderCell: (params) => <span className="font-semibold text-text-primary">{Number(params.value || 0).toLocaleString()}</span> },
+        { field: 'balance', headerName: 'Total', width: 100, type: 'number', renderCell: (params) => <span className="font-black text-accent">{Number(params.value || 0).toLocaleString()}</span> },
         {
             field: 'memberStatus', headerName: 'Sts', width: 70, renderCell: (params) => (
                 <span className={`px-2 py-0.5 inline-flex text-[9px] leading-tight font-black rounded-md uppercase tracking-widest ${params.value === 'active' ? 'bg-green-100/50 text-green-700 border border-green-200' : 'bg-red-100/50 text-red-700 border border-red-200'}`}>
