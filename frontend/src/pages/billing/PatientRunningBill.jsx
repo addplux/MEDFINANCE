@@ -18,6 +18,10 @@ const PatientRunningBill = () => {
     const [paymentMethod, setPaymentMethod] = useState('cash');
     const [paymentAmount, setPaymentAmount] = useState('');
 
+    // Pre-registration modal states
+    const [preRegModalOpen, setPreRegModalOpen] = useState(false);
+    const [preRegForm, setPreRegForm] = useState({ firstName: '', lastName: '', nrc: '', costCategory: 'standard', paymentMethod: 'cash' });
+
     // Fetch patient and their running bills
     const handleSearch = async (e) => {
         e.preventDefault();
@@ -108,6 +112,27 @@ const PatientRunningBill = () => {
         }
     };
 
+    const handlePreRegister = async (e) => {
+        e.preventDefault();
+        try {
+            setLoading(true);
+            const fee = preRegForm.costCategory === 'high_cost' ? 250 : 50;
+            const payload = {
+                ...preRegForm,
+                amount: fee
+            };
+            await cashAPI.payments.preRegister(payload);
+            alert('Pre-paid registration created successfully!');
+            setPreRegModalOpen(false);
+            setPreRegForm({ firstName: '', lastName: '', nrc: '', costCategory: 'standard', paymentMethod: 'cash' });
+        } catch (error) {
+            console.error('Pre-register error:', error);
+            alert(error.response?.data?.error || 'Failed to create pre-paid registration');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('en-ZM', { style: 'currency', currency: 'ZMW' }).format(amount || 0);
     };
@@ -135,6 +160,13 @@ const PatientRunningBill = () => {
                     </h1>
                     <p className="text-sm text-white/40 font-medium mt-1">Process deposits and generate final discharge bills automatically</p>
                 </div>
+                
+                <button
+                    onClick={() => setPreRegModalOpen(true)}
+                    className="btn btn-primary bg-emerald-600 hover:bg-emerald-700 font-black text-xs uppercase tracking-widest px-6 py-4 rounded-xl flex items-center gap-2 shadow-xl shadow-emerald-500/10"
+                >
+                    <User className="w-4 h-4" /> Add Pre-Paid Registration
+                </button>
             </div>
 
             {/* Search Bar */}
@@ -391,6 +423,62 @@ const PatientRunningBill = () => {
                                 {loading ? 'Processing...' : `Confirm ${formatCurrency(paymentAmount)} Payment`}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+            {preRegModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-bg-secondary w-full max-w-md rounded-3xl border border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                            <h2 className="text-lg font-black text-white tracking-widest uppercase flex items-center gap-2">
+                                <User className="w-5 h-5 text-emerald-400" />
+                                Pre-Paid Registration
+                            </h2>
+                            <button onClick={() => setPreRegModalOpen(false)} className="text-white/40 hover:text-white transition-colors">
+                                <ArrowLeft className="w-5 h-5 rotate-45" />
+                            </button>
+                        </div>
+                        <form onSubmit={handlePreRegister} className="p-6 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="form-group">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1 block">First Name</label>
+                                    <input type="text" required value={preRegForm.firstName} onChange={e => setPreRegForm({...preRegForm, firstName: e.target.value})} className="w-full bg-bg-primary border border-white/10 rounded-xl py-3 px-4 text-white text-sm focus:ring-emerald-500" placeholder="John" />
+                                </div>
+                                <div className="form-group">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1 block">Last Name</label>
+                                    <input type="text" required value={preRegForm.lastName} onChange={e => setPreRegForm({...preRegForm, lastName: e.target.value})} className="w-full bg-bg-primary border border-white/10 rounded-xl py-3 px-4 text-white text-sm focus:ring-emerald-500" placeholder="Doe" />
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1 block">NRC (Optional)</label>
+                                <input type="text" value={preRegForm.nrc} onChange={e => setPreRegForm({...preRegForm, nrc: e.target.value})} className="w-full bg-bg-primary border border-white/10 rounded-xl py-3 px-4 text-white text-sm focus:ring-emerald-500" placeholder="000000/00/0" />
+                            </div>
+                            <div className="form-group">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1 block">Cost Category</label>
+                                <div className="flex gap-2">
+                                    {[{v:'standard', l:'Low Cost (K50)'}, {v:'high_cost', l:'High Cost (K250)'}].map(c => (
+                                        <button type="button" key={c.v} onClick={() => setPreRegForm({...preRegForm, costCategory: c.v})} className={`flex-1 py-3 rounded-xl border text-xs font-black uppercase tracking-wider transition-all ${preRegForm.costCategory === c.v ? 'bg-emerald-600/20 border-emerald-500/50 text-emerald-400' : 'bg-white/5 border-white/10 text-white/40'}`}>
+                                            {c.l}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1 block">Payment Method</label>
+                                <select value={preRegForm.paymentMethod} onChange={e => setPreRegForm({...preRegForm, paymentMethod: e.target.value})} className="w-full bg-bg-primary border border-white/10 rounded-xl py-3 px-4 text-white text-sm focus:ring-emerald-500">
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Card</option>
+                                    <option value="mobile_money">Mobile Money</option>
+                                </select>
+                            </div>
+                            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 flex justify-between items-center mt-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Total to Collect</span>
+                                <span className="text-xl font-black text-white">K{preRegForm.costCategory === 'high_cost' ? 250 : 50}</span>
+                            </div>
+                            <button type="submit" disabled={loading} className="w-full btn btn-primary bg-emerald-600 hover:bg-emerald-700 py-3 font-black uppercase tracking-widest shadow-xl">
+                                {loading ? 'Processing...' : 'Confirm Registration Payment'}
+                            </button>
+                        </form>
                     </div>
                 </div>
             )}

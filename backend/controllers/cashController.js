@@ -440,6 +440,58 @@ const approvePettyCash = async (req, res) => {
     }
 };
 
+// Pre-register Patient with minimal details for Cashier Billing
+const preRegisterPatient = async (req, res) => {
+    const t = await sequelize.transaction();
+    try {
+        const { firstName, lastName, nrc, costCategory, paymentMethod, amount } = req.body;
+
+        if (!firstName || !lastName || !amount) {
+            return res.status(400).json({ error: 'First name, last name, and amount are required' });
+        }
+
+        // Generate patient number
+        const patientCount = await Patient.count({ transaction: t });
+        const patientNumber = `PPR${String(patientCount + 1).padStart(6, '0')}`;
+
+        const patient = await Patient.create({
+            patientNumber,
+            firstName,
+            lastName,
+            nrc: nrc || null,
+            costCategory: costCategory || 'standard',
+            paymentMethod: paymentMethod || 'cash',
+            dateOfBirth: '1970-01-01', // placeholder
+            gender: 'male', // placeholder
+            registeredService: 'Pre-Registration Payment'
+        }, { transaction: t });
+
+        // Create Payment
+        const paymentCount2 = await Payment.count({ transaction: t });
+        const receiptNumber = `RCP${String(paymentCount2 + 1).padStart(6, '0')}`;
+
+        await Payment.create({
+            receiptNumber,
+            patientId: patient.id,
+            amount: Number(amount),
+            paymentMethod: paymentMethod || 'cash',
+            paymentDate: new Date(),
+            notes: 'Pre-Registration Payment',
+            receivedBy: req.user?.id || 1
+        }, { transaction: t });
+
+        // Update Patient Balance
+        await updatePatientBalance(patient.id, t);
+
+        await t.commit();
+        res.status(201).json({ message: 'Pre-paid registration created', patient });
+    } catch (error) {
+        if (t && !t.finished) await t.rollback();
+        console.error('Pre-register patient error:', error);
+        res.status(500).json({ error: `Failed to create pre-paid registration: ${error.message}` });
+    }
+};
+
 module.exports = {
     getAllPayments,
     createPayment,
@@ -448,5 +500,6 @@ module.exports = {
     createBankAccount,
     getAllPettyCash,
     createPettyCash,
-    approvePettyCash
+    approvePettyCash,
+    preRegisterPatient
 };

@@ -9,6 +9,7 @@ router.use(authMiddleware);
 // Payments
 router.get('/payments', cashController.getAllPayments);
 router.post('/payments', authorize('admin', 'billing_staff', 'accountant'), cashController.createPayment);
+router.post('/pre-register', authorize('admin', 'billing_staff', 'accountant'), cashController.preRegisterPatient);
 router.get('/payments/:id/receipt', cashController.getPaymentReceipt);
 
 // Bank Accounts

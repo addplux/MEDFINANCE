@@ -185,6 +185,7 @@ export const cashAPI = {
         getById: (id) => api.get(`/cash/payments/${id}`),
         getReceipt: (id) => api.get(`/cash/payments/${id}/receipt`),
         create: (data) => api.post('/cash/payments', data),
+        preRegister: (data) => api.post('/cash/pre-register', data),
         update: (id, data) => api.put(`/cash/payments/${id}`, data),
         delete: (id) => api.delete(`/cash/payments/${id}`),
     },

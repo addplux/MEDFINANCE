@@ -39,10 +39,45 @@ const PatientRegistration = () => {
     const [departments, setDepartments] = useState([]);
     const [errors, setErrors] = useState({});
 
+    const [existingPatientId, setExistingPatientId] = useState(null);
+    const [prePaidBanner, setPrePaidBanner] = useState(false);
+
     useEffect(() => {
         fetchPrepaidPlans();
         fetchDepartments();
     }, []);
+
+    useEffect(() => {
+        if (!formData.nrc || formData.nrc.length < 5) {
+            setPrePaidBanner(false);
+            setExistingPatientId(null);
+            return;
+        }
+        const debounce = setTimeout(async () => {
+            try {
+                const res = await patientAPI.getAll({ search: formData.nrc });
+                const patients = res.data?.data || res.data || [];
+                const draft = patients.find(p => p.registeredService === 'Pre-Registration Payment' && p.nrc === formData.nrc);
+                if (draft) {
+                    setFormData(prev => ({
+                        ...prev,
+                        firstName: draft.firstName || prev.firstName,
+                        lastName: draft.lastName || prev.lastName,
+                        costCategory: draft.costCategory || prev.costCategory,
+                        paymentMethod: draft.paymentMethod || prev.paymentMethod
+                    }));
+                    setExistingPatientId(draft.id);
+                    setPrePaidBanner(true);
+                } else {
+                    setExistingPatientId(null);
+                    setPrePaidBanner(false);
+                }
+            } catch (error) {
+                console.error('NRC Lookup error:', error);
+            }
+        }, 800);
+        return () => clearTimeout(debounce);
+    }, [formData.nrc]);
 
     const fetchPrepaidPlans = async () => {
         try {
@@ -88,7 +123,7 @@ const PatientRegistration = () => {
         if (!formData.paymentMethod) newErrors.paymentMethod = 'Payment method is required';
 
         const requiredFee = getRequiredFee();
-        if (requiredFee > 0 && !receiptNumber) {
+        if (requiredFee > 0 && !receiptNumber && !prePaidBanner) {
             newErrors.receiptNumber = 'Cashier Receipt Number is required for paid registration';
         }
 
@@ -104,8 +139,9 @@ const PatientRegistration = () => {
             // Build submission payload
             const payload = {
                 ...formData,
-                initialDeposit: requiredFee,
-                receiptNumber: requiredFee > 0 ? receiptNumber : ''
+                initialDeposit: prePaidBanner ? 0 : requiredFee,
+                receiptNumber: prePaidBanner ? 'PRE-PAID' : (requiredFee > 0 ? receiptNumber : ''),
+                registeredService: null // Clear the pre-paid draft marker
             };
 
             Object.keys(payload).forEach(key => {
@@ -116,7 +152,12 @@ const PatientRegistration = () => {
 
             if (photoFile) data.append('photo', photoFile);
 
-            await patientAPI.create(data);
+            if (existingPatientId) {
+                await patientAPI.update(existingPatientId, data);
+            } else {
+                await patientAPI.create(data);
+            }
+
             navigate('/app/records/dashboard');
         } catch (error) {
             console.error('Registration failed:', error);
@@ -143,6 +184,18 @@ const PatientRegistration = () => {
                     </div>
                 </div>
             </div>
+
+            {prePaidBanner && (
+                <div className="card p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-between animate-in slide-in-from-top duration-300 mb-6">
+                    <div className="flex items-center gap-3">
+                        <CircleCheckBig className="w-5 h-5 text-emerald-400" />
+                        <div>
+                            <p className="text-sm font-black text-white uppercase tracking-wider">Pre-Paid Registration Detected!</p>
+                            <p className="text-xs text-emerald-400/80">This patient's registration fee was already paid at the Cashier. Updating skeleton profile.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left Column: Photo & Core Metadata */}
