@@ -49,6 +49,9 @@ export async function syncPendingRequests() {
                 const itemResult = result.results?.[i];
                 if (itemResult?.success) {
                     await remove(pending[i].id);
+                } else if (itemResult?.status >= 400 && itemResult?.status < 500) {
+                    // Client error (e.g. ValidationError) — won't succeed on retry, discard it
+                    await remove(pending[i].id);
                 } else {
                     const newRetries = (pending[i].retries || 0) + 1;
                     if (newRetries >= MAX_RETRIES) {
