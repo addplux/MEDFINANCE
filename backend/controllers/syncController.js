@@ -37,19 +37,23 @@ const processBatch = async (req, res) => {
             }
 
             // Build a synthetic request to forward internally
-            // We use axios to call our own server (localhost) to reuse all existing route logic
+            // We use axios to call our own server to reuse all existing route logic
             const axios = require('axios');
-            const port = process.env.PORT || 5000;
-            const baseUrl = `http://localhost:${port}/api`;
+            
+            // Reconstruct the base URL from the incoming request to support deployed environments
+            const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+            const host = req.headers.host;
+            const baseUrl = `${protocol}://${host}/api`;
 
-            // Strip /api prefix if present (url from client is already relative to /api)
-            const cleanUrl = url.startsWith('/api') ? url.slice(4) : url;
-            const fullUrl = `${baseUrl}${cleanUrl}`;
+            // Strip /api prefix if present
+            const cleanUrl = url.startsWith('/api') ? url.replace('/api', '') : url;
+            const fullUrl = `${baseUrl}${cleanUrl.startsWith('/') ? cleanUrl : '/' + cleanUrl}`;
 
             const response = await axios({
                 method: method.toLowerCase(),
                 url: fullUrl,
                 data: data || undefined,
+                timeout: 8000,
                 headers: {
                     'Content-Type': 'application/json',
                     // Forward the auth token from the original request
