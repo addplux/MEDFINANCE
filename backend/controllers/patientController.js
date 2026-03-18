@@ -168,7 +168,7 @@ const createPatient = async (req, res) => {
         // For standard cash patients with an explicit initial deposit — create a Payment record too
         if (initialDeposit && !isNaN(Number(initialDeposit)) && Number(initialDeposit) > 0 && paymentMethod !== 'private_prepaid') {
             const paymentCount = await Payment.count({ transaction: t });
-            const receiptNumber = `RCP${String(paymentCount + 1).padStart(6, '0')}`;
+            const receiptNumber = req.body.receiptNumber || `RCP${String(paymentCount + 1).padStart(6, '0')}`;
             
             await Payment.create({
                 receiptNumber,

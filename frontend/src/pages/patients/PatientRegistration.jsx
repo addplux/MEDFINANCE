@@ -20,7 +20,7 @@ const PatientRegistration = () => {
         email: '',
         address: '',
         paymentMethod: 'cash',
-        costCategory: 'standard',
+        costCategory: 'standard', // 'standard' = Low Cost, 'high_cost' = High Cost
         nrc: '',
         emergencyContact: '',
         emergencyPhone: '',
@@ -31,6 +31,8 @@ const PatientRegistration = () => {
         targetDepartment: '',
         reasonForVisit: ''
     });
+    const [hasReferral, setHasReferral] = useState(false);
+    const [receiptNumber, setReceiptNumber] = useState('');
     const [photoFile, setPhotoFile] = useState(null);
     const [photoPreview, setPhotoPreview] = useState(null);
     const [prepaidPlans, setPrepaidPlans] = useState([]);
@@ -70,6 +72,11 @@ const PatientRegistration = () => {
         }
     };
 
+    const getRequiredFee = () => {
+        if (hasReferral) return 0;
+        return formData.costCategory === 'high_cost' ? 250 : 50;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrors({});
@@ -80,6 +87,10 @@ const PatientRegistration = () => {
         if (!formData.gender) newErrors.gender = 'Gender is required';
         if (!formData.paymentMethod) newErrors.paymentMethod = 'Payment method is required';
 
+        const requiredFee = getRequiredFee();
+        if (requiredFee > 0 && !receiptNumber) {
+            newErrors.receiptNumber = 'Cashier Receipt Number is required for paid registration';
+        }
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -89,8 +100,18 @@ const PatientRegistration = () => {
         try {
             setLoading(true);
             const data = new FormData();
-            Object.keys(formData).forEach(key => {
-                if (formData[key]) data.append(key, formData[key]);
+            
+            // Build submission payload
+            const payload = {
+                ...formData,
+                initialDeposit: requiredFee,
+                receiptNumber: requiredFee > 0 ? receiptNumber : ''
+            };
+
+            Object.keys(payload).forEach(key => {
+                if (payload[key] !== undefined && payload[key] !== null && payload[key] !== '') {
+                    data.append(key, payload[key]);
+                }
             });
 
             if (photoFile) data.append('photo', photoFile);
@@ -190,6 +211,64 @@ const PatientRegistration = () => {
                             ))}
                         </div>
                     </div>
+
+                    <div className="card p-6 border-white/5 space-y-4">
+                        <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">Cost Category</h3>
+                        <div className="flex gap-2">
+                            {[
+                                { value: 'standard', label: 'Low Cost' },
+                                { value: 'high_cost', label: 'High Cost' }
+                            ].map(cat => (
+                                <button
+                                    key={cat.value}
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, costCategory: cat.value })}
+                                    className={`flex-1 py-3 rounded-xl text-xs font-black uppercase border transition-all ${formData.costCategory === cat.value ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}
+                                >
+                                    {cat.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="card p-6 border-white/5 space-y-4">
+                        <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">Referral Status</h3>
+                        <div className="flex gap-2">
+                            {[
+                                { value: false, label: 'Without Referral' },
+                                { value: true, label: 'With Referral' }
+                            ].map(ref => (
+                                <button
+                                    key={String(ref.value)}
+                                    type="button"
+                                    onClick={() => setHasReferral(ref.value)}
+                                    className={`flex-1 py-3 rounded-xl text-xs font-black uppercase border transition-all ${hasReferral === ref.value ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}
+                                >
+                                    {ref.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {getRequiredFee() > 0 && (
+                        <div className="card p-6 border-white/5 space-y-4 bg-blue-600/5 animate-in slide-in-from-top duration-300">
+                            <div className="flex justify-between items-center pb-2 border-b border-white/5">
+                                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Required Fee</span>
+                                <span className="text-xl font-black text-white">K{getRequiredFee()}</span>
+                            </div>
+                            <div className="form-group space-y-2">
+                                <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">Cashier Receipt Number</label>
+                                <input
+                                    type="text"
+                                    value={receiptNumber}
+                                    onChange={e => setReceiptNumber(e.target.value)}
+                                    className={`form-input bg-white/[0.02] border-white/10 text-white py-3 rounded-xl focus:ring-blue-500/50 ${errors.receiptNumber ? 'border-red-500/50 focus:border-red-500' : ''}`}
+                                    placeholder="Enter receipt number"
+                                />
+                                {errors.receiptNumber && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.receiptNumber}</p>}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Area: Form Fields */}
