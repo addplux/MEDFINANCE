@@ -214,7 +214,7 @@ const createPayment = async (req, res) => {
         }
         console.error('Create payment error:', error);
         res.status(500).json({
-            error: 'Failed to create payment',
+            error: `Failed to create payment: ${error.message}`,
             detail: error.message,
             fields: error.errors?.map(e => ({ field: e.path, message: e.message }))
         });
