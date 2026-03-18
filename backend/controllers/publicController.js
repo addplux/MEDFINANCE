@@ -6,13 +6,15 @@ const generateTransactionId = () => {
     return 'PAY-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
 };
 
+// ── Get Patient Balance (public self-service portal) ─────────────────────────
+// NOTE: Returns minimal info only — no PII (phone/email excluded)
 exports.getPatientBalance = async (req, res) => {
     try {
         const { patientNumber } = req.params;
 
         const patient = await Patient.findOne({
             where: { patientNumber },
-            attributes: ['id', 'patientNumber', 'firstName', 'lastName', 'balance', 'phone', 'email']
+            attributes: ['id', 'patientNumber', 'firstName', 'lastName', 'balance']
         });
 
         if (!patient) {
@@ -21,21 +23,24 @@ exports.getPatientBalance = async (req, res) => {
 
         res.status(200).json({
             patient: {
-                id: patient.id,
                 patientNumber: patient.patientNumber,
                 name: `${patient.firstName} ${patient.lastName}`,
-                balance: Number(patient.balance),
-                phone: patient.phone,
-                email: patient.email
+                balance: Number(patient.balance)
             }
         });
     } catch (error) {
         console.error('getPatientBalance error:', error);
-        res.status(500).json({ error: 'Internal server error while fetching balance' });
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
+// ── Initiate Online Payment ───────────────────────────────────────────────────
+// Guarded: Only active when PAYMENT_GATEWAY_ENABLED=true in environment
 exports.initiatePayment = async (req, res) => {
+    if (process.env.PAYMENT_GATEWAY_ENABLED !== 'true') {
+        return res.status(503).json({ error: 'Online payment gateway is not enabled.' });
+    }
+
     try {
         const { patientId, amount, paymentMethod, email, phone } = req.body;
 
@@ -48,30 +53,29 @@ exports.initiatePayment = async (req, res) => {
 
         const transactionId = generateTransactionId();
 
-        // 1. Create a pending online transaction in our DB
         const onlineTx = await OnlineTransaction.create({
             transactionId,
             patientId: patient.id,
             amount,
             currency: 'ZMW',
-            gateway: 'mock_gateway', // Replace with 'flutterwave' or 'paystack' in production
+            gateway: process.env.PAYMENT_GATEWAY_NAME || 'flutterwave',
             status: 'pending',
             paymentMethod: paymentMethod || 'mobile_money',
             notes: `Online payment initiated`
         });
 
-        // 2. Here you would normally call the Payment Gateway API (e.g. Flutterwave Standard Checkout)
-        // and get a `checkoutUrl` to redirect the user to.
-        // For now, we simulate success for the frontend portal:
-        
-        const mockCheckoutUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/pay/simulate?tx_ref=${transactionId}&amount=${amount}`;
+        // Build checkout URL — must be configured via environment variable
+        const gatewayCheckoutUrl = process.env.PAYMENT_GATEWAY_CHECKOUT_URL;
+        if (!gatewayCheckoutUrl) {
+            return res.status(500).json({ error: 'Payment gateway checkout URL not configured.' });
+        }
+
+        const checkoutUrl = `${gatewayCheckoutUrl}?tx_ref=${transactionId}&amount=${amount}`;
 
         res.status(200).json({
             message: 'Payment initiated',
             transactionId: onlineTx.transactionId,
-            checkoutUrl: mockCheckoutUrl,
-            // You can pass the public key if generating the form directly on frontend
-            // publicKey: process.env.FLUTTERWAVE_PUBLIC_KEY 
+            checkoutUrl
         });
 
     } catch (error) {
@@ -80,25 +84,21 @@ exports.initiatePayment = async (req, res) => {
     }
 };
 
+// ── Payment Gateway Webhook ───────────────────────────────────────────────────
 exports.handlePaymentWebhook = async (req, res) => {
-    /* 
-      // Security Validation (example for Flutterwave):
-      const secretHash = process.env.FLUTTERWAVE_WEBHOOK_HASH;
-      const signature = req.headers['verif-hash'];
-      if (!signature || (signature !== secretHash)) {
-          return res.status(401).end(); // Unauthorized
-      }
-    */
-    
-    // In production, req.body might be parsed directly or need raw parse. 
-    // We assume JSON body parser is re-applied or it's standard JSON.
-    const payload = req.body;
-    console.log('Received Webhook:', payload);
+    // Signature validation — reject any webhook that does not carry the correct hash
+    const secretHash = process.env.FLUTTERWAVE_WEBHOOK_HASH;
+    const signature = req.headers['verif-hash'];
 
-    // This is a simplified webhook logic assuming payload = { tx_ref, status: "successful", amount }
+    if (!secretHash || !signature || signature !== secretHash) {
+        console.warn('[Webhook] Unauthorized webhook attempt blocked');
+        return res.status(401).end();
+    }
+
+    const payload = req.body;
+
     const tx_ref = payload.txRef || payload.tx_ref;
     const status = payload.status;
-    const amountPaid = payload.amount;
 
     if (!tx_ref) {
         return res.status(400).json({ error: 'Missing transaction reference' });
@@ -122,37 +122,31 @@ exports.handlePaymentWebhook = async (req, res) => {
         if (status === 'successful' || status === 'success') {
             const patient = await Patient.findByPk(onlineTx.patientId);
 
-            // 1. Mark OnlineTransaction as successful
-            await onlineTx.update({ 
-                status: 'successful', 
+            await onlineTx.update({
+                status: 'successful',
                 gatewayReference: payload.transaction_id || payload.id,
                 paidAt: new Date()
             }, { transaction: t });
 
-            // 2. Create the official Payment Receipt in MedFinance
             const receiptNumber = `WEB-${Date.now().toString().slice(-6)}`;
             await Payment.create({
                 receiptNumber,
                 patientId: patient.id,
-                amount: onlineTx.amount, // Or amountPaid from gateway
+                amount: onlineTx.amount,
                 paymentMethod: onlineTx.paymentMethod || 'mobile_money',
                 status: 'completed',
                 notes: `Online Payment via Gateway (Ref: ${tx_ref})`,
-                receivedBy: null // System generated
+                receivedBy: null
             }, { transaction: t });
 
-            // 3. Update Patient Balance
-            // In MedFinance, balance > 0 means the patient owes money. 
-            // So a payment reduces the balance. If they overpay, it goes into credit (negative balance).
-            await patient.decrement('balance', { 
+            await patient.decrement('balance', {
                 by: Number(onlineTx.amount),
-                transaction: t 
+                transaction: t
             });
 
             await t.commit();
             return res.status(200).send('Webhook processed successfully');
         } else {
-            // Mark as failed
             await onlineTx.update({ status: 'failed' }, { transaction: t });
             await t.commit();
             return res.status(200).send('Webhook recorded status update');

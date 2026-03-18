@@ -6,6 +6,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const { syncDatabase, User, SystemLog } = require('./models');
 const { sequelize, testConnection } = require('./config/database');
 const { seedDatabase } = require('./seed');
@@ -29,20 +30,25 @@ if (process.env.CORS_ORIGIN) {
     allowedOrigins.push(process.env.CORS_ORIGIN);
 }
 
+// Security headers
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow serving uploaded images cross-origin
+    contentSecurityPolicy: false // Handled by frontend; API only
+}));
+
 // CORS configuration
+const isDev = process.env.NODE_ENV === 'development';
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps)
-        if (!origin) return callback(null, true);
+        // Allow requests with no origin (Postman, mobile apps in development)
+        if (!origin) return callback(null, isDev ? true : false);
 
         const isVercel = origin.endsWith('.vercel.app');
-        const isAllowed = allowedOrigins.includes(origin) || isVercel || isLocal;
+        const isAllowed = allowedOrigins.includes(origin) || isVercel;
 
-        if (isAllowed || process.env.NODE_ENV === 'development') {
+        if (isAllowed || isDev) {
             callback(null, true);
         } else {
-            console.error('CORS blocked origin:', origin);
-            // Instead of throwing an error which hides the headers, we just don't allow it
             callback(null, false);
         }
     },
@@ -50,15 +56,19 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control'],
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
-    optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+    optionsSuccessStatus: 200
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// Body parsers with size limits to prevent DoS via large payloads
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use('/uploads', express.static('uploads'));
 
-// Request logging middleware
+// Minimal request logging — method + base path only (no query strings or sensitive data)
 app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    if (process.env.NODE_ENV !== 'test') {
+        console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+    }
     next();
 });
 
@@ -120,7 +130,7 @@ app.use('/api/maternity', require('./routes/maternityRoutes'));
 app.use('/api/specialist-clinics', require('./routes/specialistClinicRoutes'));
 app.use('/api/shifts', require('./routes/shifts'));
 app.use('/api/refunds', require('./routes/refunds'));
-app.use('/api/debug', require('./routes/debug'));
+// /api/debug intentionally removed for production security
 app.use('/api/sync', require('./routes/sync'));
 app.use('/api/patient-movements', require('./routes/patientMovements'));
 app.use('/api/visits', require('./routes/visits'));
