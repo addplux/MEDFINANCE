@@ -111,8 +111,15 @@ export async function syncPendingRequests() {
                 failed++;
             }
         } catch (err) {
-            // Network still unavailable
-            console.warn(`[Sync] Network error for item ${item.id}:`, err.message);
+            // Network or parsing error for this specific item
+            console.warn(`[Sync] Error for item ${item.id}:`, err.message);
+            
+            const newRetries = (item.retries || 0) + 1;
+            if (newRetries >= MAX_RETRIES) {
+                await remove(item.id);
+            } else {
+                await updateRetries(item.id, newRetries);
+            }
             failed++;
         }
     }
