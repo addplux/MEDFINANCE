@@ -18,8 +18,29 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api';
  * Returns a summary: { synced, failed, total }
  */
 export async function syncPendingRequests() {
-    const pending = await getAll();
+    let pending = await getAll();
     if (pending.length === 0) return { synced: 0, failed: 0, total: 0 };
+
+    // Self-healing: Discard legacy records with 'localhost' in their URLs when running on live site
+    const isLiveSite = !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1');
+    const filteredPending = [];
+
+    for (const item of pending) {
+        if (isLiveSite && item.url?.includes('localhost:5000')) {
+            console.warn(`[Sync] Discarding legacy localhost URL from production queue: ${item.url}`);
+            await remove(item.id);
+        } else {
+            filteredPending.push(item);
+        }
+    }
+
+    if (filteredPending.length === 0) {
+        window.dispatchEvent(new CustomEvent('medfinance-sync-complete', { detail: { synced: 0, failed: 0, total: 0 } }));
+        return { synced: 0, failed: 0, total: 0 };
+    }
+
+    // Overwrite with filtered set
+    pending = filteredPending;
 
     const token = localStorage.getItem('token');
     const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
