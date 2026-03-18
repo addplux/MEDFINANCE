@@ -15,6 +15,9 @@ const { initCronJobs } = require('./jobs/cronManager');
 
 const app = express();
 
+// Trust proxy for rate limiters to correctly identify client IPs behind Vercel
+app.set('trust proxy', 1);
+
 // Middleware
 const allowedOrigins = [
     'http://localhost:5173',

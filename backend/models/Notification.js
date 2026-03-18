@@ -36,7 +36,7 @@ const Notification = sequelize.define('Notification', {
         defaultValue: false
     },
     metadata: {
-        type: DataTypes.JSON,
+        type: DataTypes.JSONB,
         allowNull: true,
         comment: 'Extra data e.g. { pendingUserId: 5 }'
     }

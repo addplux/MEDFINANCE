@@ -209,7 +209,9 @@ const createPayment = async (req, res) => {
 
         res.status(201).json({ payment: createdPayment, billDetails });
     } catch (error) {
-        await t.rollback();
+        if (t && !t.finished) {
+            await t.rollback();
+        }
         console.error('Create payment error:', error);
         res.status(500).json({
             error: 'Failed to create payment',
