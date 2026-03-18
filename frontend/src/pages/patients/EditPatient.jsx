@@ -50,14 +50,21 @@ const EditPatient = () => {
         const fetchData = async () => {
             try {
                 const { receivablesAPI } = await import('../../services/apiService');
-                const [patientRes, staffRes, servicesRes, schemesRes] = await Promise.all([
+                // Use allSettled so that permission failures on secondary calls
+                // (staff, services, schemes) don't crash the patient data load
+                const [patientRes, staffRes, servicesRes, schemesRes] = await Promise.allSettled([
                     patientAPI.getById(id),
                     setupAPI.users.getAll({ isActive: true }),
                     setupAPI.services.getAll({ isActive: true }),
                     receivablesAPI.schemes.getAll({ status: 'active' })
                 ]);
 
-                const patient = patientRes.data;
+                // Patient data is required — if it failed, abort
+                if (patientRes.status === 'rejected') {
+                    throw patientRes.reason;
+                }
+
+                const patient = patientRes.value.data;
                 setFormData({
                     firstName: patient.firstName || '',
                     lastName: patient.lastName || '',
@@ -84,9 +91,10 @@ const EditPatient = () => {
                     setPhotoPreview(`${import.meta.env.VITE_API_URL.replace('/api', '')}${patient.photoUrl}?token=${localStorage.getItem('token')}`);
                 }
 
-                setStaffMembers(staffRes.data);
-                setServices(servicesRes.data);
-                setSchemes(schemesRes.data || []);
+                // Secondary data — fall back to empty arrays on permission errors
+                if (staffRes.status === 'fulfilled') setStaffMembers(staffRes.value.data || []);
+                if (servicesRes.status === 'fulfilled') setServices(servicesRes.value.data || []);
+                if (schemesRes.status === 'fulfilled') setSchemes(schemesRes.value.data || []);
             } catch (error) {
                 console.error('Failed to load data:', error);
                 alert('Failed to load patient data');
@@ -97,7 +105,7 @@ const EditPatient = () => {
         };
 
         fetchData();
-    }, [id, navigate, activeTab]);
+    }, [id, navigate]);
 
     useEffect(() => {
         if (activeTab === 'history') {
