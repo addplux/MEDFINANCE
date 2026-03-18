@@ -78,8 +78,8 @@ const CreditLimit = () => {
         <div className="space-y-6 animate-fade-in">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-800">Credit Limit Management</h1>
-                    <p className="text-sm text-slate-500 mt-1">Monitor and manage credit exposure for all corporate and insurance schemes</p>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Credit Limit Management</h1>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Monitor and manage credit exposure for all corporate and insurance schemes</p>
                 </div>
             </div>
 
