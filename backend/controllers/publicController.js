@@ -12,8 +12,18 @@ exports.getPatientBalance = async (req, res) => {
     try {
         const { patientNumber } = req.params;
 
+        const { Op } = require('sequelize');
+        const { lastName } = req.query;
+
+        if (!lastName) {
+            return res.status(400).json({ error: 'lastName query parameter is required for verification' });
+        }
+
         const patient = await Patient.findOne({
-            where: { patientNumber },
+            where: { 
+                patientNumber,
+                lastName: { [Op.iLike]: lastName }
+            },
             attributes: ['id', 'patientNumber', 'firstName', 'lastName', 'balance']
         });
 
