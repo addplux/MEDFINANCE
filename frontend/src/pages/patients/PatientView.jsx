@@ -413,6 +413,30 @@ const PatientView = () => {
     const [isManualChargeModalOpen, setIsManualChargeModalOpen] = useState(false);
     const [sendingToDoctor, setSendingToDoctor] = useState(false);
     const [sendToDoctorResult, setSendToDoctorResult] = useState(null);
+    const [showTopupModal, setShowTopupModal] = useState(false);
+    const [topupAmount, setTopupAmount] = useState('');
+    const [topupLoading, setTopupLoading] = useState(false);
+    const [topupError, setTopupError] = useState('');
+
+    const handleTopup = async (e) => {
+        e.preventDefault();
+        if (!topupAmount || isNaN(Number(topupAmount)) || Number(topupAmount) <= 0) {
+            setTopupError('Please enter a valid amount greater than 0.');
+            return;
+        }
+        setTopupLoading(true);
+        setTopupError('');
+        try {
+            await patientAPI.topup(id, Number(topupAmount));
+            setShowTopupModal(false);
+            setTopupAmount('');
+            await loadPatient();
+        } catch (err) {
+            setTopupError(err.response?.data?.error || 'Top-up failed. Please try again.');
+        } finally {
+            setTopupLoading(false);
+        }
+    };
 
     const loadPatient = async () => {
         try {
@@ -626,7 +650,7 @@ const PatientView = () => {
                             <p className="text-red-400 text-xs font-semibold">This prepaid account is overdrawn by ZMW {Math.abs(parseFloat(patient.balance)).toFixed(2)}. Services are automatically restricted.</p>
                         </div>
                         <button 
-                            onClick={() => navigate(`/app/receivables/prepaid?search=${patient.patientNumber}`)}
+                            onClick={() => { setTopupAmount(''); setTopupError(''); setShowTopupModal(true); }}
                             className="btn btn-sm bg-red-600 hover:bg-red-700 text-white border-none px-4"
                         >
                             Process Top-Up
@@ -838,6 +862,96 @@ const PatientView = () => {
                         // For now loadPatient updates balance in header
                     }}
                 />
+            )}
+
+            {/* ── Top-Up Modal ───────────────────────────────────────────────── */}
+            {showTopupModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-bg-secondary border border-border-color rounded-2xl shadow-2xl w-full max-w-md">
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-border-color">
+                            <div>
+                                <h3 className="text-white font-black text-base">Process Top-Up</h3>
+                                <p className="text-text-tertiary text-xs mt-0.5">
+                                    {patient.firstName} {patient.lastName} &mdash; <span className="font-mono">{patient.patientNumber}</span>
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowTopupModal(false)}
+                                className="p-2 hover:bg-white/5 text-white/50 hover:text-white rounded-lg transition-colors"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <form onSubmit={handleTopup} className="p-6 space-y-4">
+                            {/* Current balance */}
+                            <div className="flex items-center justify-between bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
+                                <span className="text-xs font-bold text-red-400 uppercase tracking-widest">Current Balance</span>
+                                <span className="text-sm font-black text-red-400">
+                                    -{Math.abs(parseFloat(patient.balance || 0)).toLocaleString('en-ZM', { minimumFractionDigits: 2 })} ZMW
+                                </span>
+                            </div>
+
+                            {/* Amount input */}
+                            <div>
+                                <label className="block text-xs font-bold text-text-secondary uppercase tracking-widest mb-2">
+                                    Top-Up Amount (ZMW)
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0.01"
+                                    step="0.01"
+                                    placeholder="e.g. 500.00"
+                                    value={topupAmount}
+                                    onChange={e => { setTopupAmount(e.target.value); setTopupError(''); }}
+                                    className="w-full px-4 py-3 bg-bg-primary border border-border-color rounded-xl text-white text-sm focus:outline-none focus:border-primary transition-colors"
+                                    autoFocus
+                                />
+                            </div>
+
+                            {/* Projected new balance */}
+                            {topupAmount && !isNaN(Number(topupAmount)) && Number(topupAmount) > 0 && (
+                                <div className="bg-white/5 rounded-xl px-4 py-3 text-xs text-text-secondary">
+                                    New balance will be:&nbsp;
+                                    <strong className={`${
+                                        (parseFloat(patient.balance || 0) + Number(topupAmount)) >= 0
+                                            ? 'text-emerald-400'
+                                            : 'text-rose-400'
+                                    }`}>
+                                        {(parseFloat(patient.balance || 0) + Number(topupAmount)) >= 0 ? '+' : '-'}
+                                        {Math.abs(parseFloat(patient.balance || 0) + Number(topupAmount)).toLocaleString('en-ZM', { minimumFractionDigits: 2 })} ZMW
+                                    </strong>
+                                </div>
+                            )}
+
+                            {/* Error */}
+                            {topupError && (
+                                <p className="text-red-400 text-xs font-semibold">{topupError}</p>
+                            )}
+
+                            {/* Actions */}
+                            <div className="flex gap-3 pt-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowTopupModal(false)}
+                                    className="btn btn-secondary flex-1"
+                                    disabled={topupLoading}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="btn flex-1 bg-emerald-600 hover:bg-emerald-700 text-white border-none disabled:opacity-60"
+                                    disabled={topupLoading || !topupAmount}
+                                >
+                                    {topupLoading ? 'Processing…' : 'Confirm Top-Up'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             )}
         </div>
     );
