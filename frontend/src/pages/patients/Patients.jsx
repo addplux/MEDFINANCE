@@ -95,7 +95,7 @@ const PatientRow = ({ patient, navigate, handleStatusChange, handleDelete, statu
                 <td className="px-4 py-2">
                     {patient.photoUrl ? (
                         <img
-                            src={`${import.meta.env.VITE_API_URL || ''}${patient.photoUrl}`}
+                            src={`${import.meta.env.VITE_API_URL || ''}${patient.photoUrl}?token=${localStorage.getItem('token')}`}
                             alt={`${patient.firstName}`}
                             className="w-9 h-9 rounded-full object-cover border border-white/10"
                         />
@@ -427,7 +427,7 @@ const Patients = () => {
                                 <div className="flex items-start gap-3">
                                     {patient.photoUrl ? (
                                         <img
-                                            src={`${import.meta.env.VITE_API_URL || ''}${patient.photoUrl}`}
+                                            src={`${import.meta.env.VITE_API_URL || ''}${patient.photoUrl}?token=${localStorage.getItem('token')}`}
                                             alt={patient.firstName}
                                             className="w-12 h-12 rounded-full object-cover border border-gray-200 flex-shrink-0"
                                         />

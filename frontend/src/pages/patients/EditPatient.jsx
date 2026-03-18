@@ -81,7 +81,7 @@ const EditPatient = () => {
                 });
 
                 if (patient.photoUrl) {
-                    setPhotoPreview(`${import.meta.env.VITE_API_URL.replace('/api', '')}${patient.photoUrl}`);
+                    setPhotoPreview(`${import.meta.env.VITE_API_URL.replace('/api', '')}${patient.photoUrl}?token=${localStorage.getItem('token')}`);
                 }
 
                 setStaffMembers(staffRes.data);

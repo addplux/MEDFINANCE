@@ -19,10 +19,15 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
+    // Check both mimetype and file extension to prevent spoofing
+    const allowedExtensions = /jpeg|jpg|png|gif|webp/i;
+    const extname = allowedExtensions.test(path.extname(file.originalname));
+    const mimetype = file.mimetype.startsWith('image/');
+
+    if (mimetype && extname) {
         cb(null, true);
     } else {
-        cb(new Error('Not an image! Please upload an image.'), false);
+        cb(new Error('Invalid file type! Only images (JPEG, PNG, GIF, WEBP) are allowed.'), false);
     }
 };
 

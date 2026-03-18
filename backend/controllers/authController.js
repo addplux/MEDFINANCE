@@ -51,7 +51,7 @@ const login = async (req, res) => {
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
             process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+            { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
         );
 
         res.json({ token, user: user.toSafeObject() });
@@ -70,8 +70,8 @@ const register = async (req, res) => {
             return res.status(400).json({ error: 'First name, last name, email and password are required' });
         }
 
-        if (password.length < 6) {
-            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        if (password.length < 8) {
+            return res.status(400).json({ error: 'Password must be at least 8 characters' });
         }
 
         // Check for duplicate email

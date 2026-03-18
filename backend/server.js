@@ -63,7 +63,27 @@ app.use(cors({
 // Body parsers with size limits to prevent DoS via large payloads
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
-app.use('/uploads', express.static('uploads'));
+// Secure static uploads (requires token via header or query param)
+const jwt = require('jsonwebtoken');
+app.use('/uploads', (req, res, next) => {
+    // Check for token in query string (easy for <img> tags) or Authorization header
+    let token = req.query.token;
+    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+        token = req.headers.authorization.split(' ')[1];
+    }
+    
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized: Access to media requires a token' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+    }
+}, express.static('uploads'));
 
 // Minimal request logging — method + base path only (no query strings or sensitive data)
 app.use((req, res, next) => {

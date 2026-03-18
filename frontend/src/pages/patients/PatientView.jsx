@@ -80,7 +80,7 @@ const FamilyMemberCard = ({ member, navigate, apiBase }) => {
             {/* Avatar */}
             <div className="relative flex-shrink-0">
                 {member.photoUrl ? (
-                    <img src={`${apiBase}${member.photoUrl}`} alt={member.firstName}
+                    <img src={`${apiBase}${member.photoUrl}?token=${localStorage.getItem('token')}`} alt={member.firstName}
                         className="w-10 h-10 rounded-full object-cover border-2 border-white/10" />
                 ) : (
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
@@ -548,7 +548,7 @@ const PatientView = () => {
                     <div className="flex-shrink-0">
                         {patient.photoUrl ? (
                             <img
-                                src={`${apiBase}${patient.photoUrl}`}
+                                src={`${apiBase}${patient.photoUrl}?token=${localStorage.getItem('token')}`}
                                 alt={patient.firstName}
                                 className="w-20 h-20 rounded-xl object-cover border-2 border-white/10 shadow-lg"
                             />
