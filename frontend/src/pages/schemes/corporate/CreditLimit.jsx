@@ -22,7 +22,8 @@ const CreditLimit = () => {
             });
             if (response.ok) {
                 const data = await response.json();
-                setSchemes(data);
+                const corporateSchemes = data.filter(s => s.schemeType !== 'other');
+                setSchemes(corporateSchemes);
             }
         } catch (error) {
             console.error('Failed to fetch schemes:', error);

@@ -26,7 +26,8 @@ const PaymentTerms = () => {
         setLoading(true);
         try {
             const response = await receivablesAPI.schemes.getAll({ status: 'active' });
-            setSchemes(response.data || []);
+            const allSchemes = response.data || [];
+            setSchemes(allSchemes.filter(s => s.schemeType !== 'other'));
         } catch (error) {
             console.error('Failed to fetch schemes:', error);
             addToast('error', 'Failed to load schemes.');

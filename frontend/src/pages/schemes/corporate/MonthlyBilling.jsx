@@ -65,7 +65,9 @@ const MonthlyBilling = () => {
             // Fetch schemes and optionally filter by 'corporate' if needed.
             // For now, grabbing all schemes since this might handle both.
             const response = await receivablesAPI.schemes.getAll();
-            setSchemes(response.data || []);
+            const allSchemes = response.data || [];
+            const corporateSchemes = allSchemes.filter(s => s.schemeType !== 'other');
+            setSchemes(corporateSchemes);
 
             if (response.data && response.data.length > 0) {
                 // Auto-select first scheme if none selected

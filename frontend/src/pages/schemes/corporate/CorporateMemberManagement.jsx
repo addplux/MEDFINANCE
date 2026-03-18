@@ -33,7 +33,8 @@ const CorporateMemberManagement = () => {
     const fetchSchemes = async () => {
         try {
             const response = await receivablesAPI.schemes.getAll({ status: 'active' });
-            setCorporateSchemes(response.data || []);
+            const allSchemes = response.data || [];
+            setCorporateSchemes(allSchemes.filter(s => s.schemeType !== 'other'));
         } catch (error) {
             console.error('Failed to fetch corporate schemes:', error);
             addToast('error', 'Failed to load schemes.');
