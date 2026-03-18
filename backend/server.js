@@ -7,6 +7,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const { generalApiLimiter } = require('./middleware/rateLimiter');
 const { syncDatabase, User, SystemLog } = require('./models');
 const { sequelize, testConnection } = require('./config/database');
 const { seedDatabase } = require('./seed');
@@ -82,7 +83,10 @@ app.get('/', (req, res) => {
     res.status(200).send('MEDFINANCE360 API is running');
 });
 
-// API Routes (will be added in next phases)
+// General API rate limiter — 500 req / 10 min per IP (protects all api/* routes)
+app.use('/api', generalApiLimiter);
+
+// API info route
 app.get('/api', (req, res) => {
     res.json({
         message: 'MEDFINANCE360 API',

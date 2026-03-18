@@ -8,10 +8,11 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { authMiddleware, authorize } = require('../middleware/auth');
+const { loginLimiter, registerLimiter } = require('../middleware/rateLimiter');
 
 // ── Public routes ─────────────────────────────────────────────────────────────
-router.post('/login', authController.login);
-router.post('/register', authController.register);
+router.post('/login', loginLimiter, authController.login);
+router.post('/register', registerLimiter, authController.register);
 router.get('/info', authController.getOrganizationInfo);
 
 // ── Protected routes ──────────────────────────────────────────────────────────
