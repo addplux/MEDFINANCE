@@ -149,7 +149,7 @@ const PaymentTerms = () => {
                                                 name="paymentTermsDays"
                                                 value={formData.paymentTermsDays}
                                                 onChange={handleInputChange}
-                                                className="w-full h-12 pl-4 pr-10 border border-slate-300 rounded-xl focus:ring-2 focus:ring-theme-primary focus:border-theme-primary transition-all appearance-none cursor-pointer"
+                                                className="w-full h-12 pl-4 pr-10 border border-slate-300 rounded-xl focus:ring-2 focus:ring-theme-primary focus:border-theme-primary transition-all appearance-none cursor-pointer bg-white text-slate-900 dark:bg-slate-800 dark:text-white"
                                             >
                                                 {[7, 14, 30, 45, 60, 90].map(days => (
                                                     <option key={days} value={days}>Net {days} Days</option>
@@ -173,7 +173,7 @@ const PaymentTerms = () => {
                                             name="gracePeriodDays"
                                             value={formData.gracePeriodDays}
                                             onChange={handleInputChange}
-                                            className="w-full h-12 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-theme-primary focus:border-theme-primary transition-all"
+                                            className="w-full h-12 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-theme-primary focus:border-theme-primary transition-all bg-white text-slate-900 dark:bg-slate-800 dark:text-white"
                                             min="0"
                                             max="30"
                                         />
@@ -193,7 +193,7 @@ const PaymentTerms = () => {
                                                 name="latePaymentRate"
                                                 value={formData.latePaymentRate}
                                                 onChange={handleInputChange}
-                                                className="w-full h-12 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-theme-primary focus:border-theme-primary transition-all"
+                                                className="w-full h-12 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-theme-primary focus:border-theme-primary transition-all bg-white text-slate-900 dark:bg-slate-800 dark:text-white"
                                                 min="0"
                                             />
                                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span>
@@ -211,7 +211,7 @@ const PaymentTerms = () => {
                                             name="paymentMethod"
                                             value={formData.paymentMethod}
                                             onChange={handleInputChange}
-                                            className="w-full h-12 pl-4 pr-10 border border-slate-300 rounded-xl focus:ring-2 focus:ring-theme-primary focus:border-theme-primary transition-all appearance-none cursor-pointer"
+                                            className="w-full h-12 pl-4 pr-10 border border-slate-300 rounded-xl focus:ring-2 focus:ring-theme-primary focus:border-theme-primary transition-all appearance-none cursor-pointer bg-white text-slate-900 dark:bg-slate-800 dark:text-white"
                                         >
                                             {['Bank Transfer', 'Cheque', 'Mobile Money', 'Cash'].map(method => (
                                                 <option key={method} value={method}>{method}</option>
