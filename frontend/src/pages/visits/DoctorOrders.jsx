@@ -1,12 +1,173 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { visitAPI } from '../../services/apiService';
+import { visitAPI, setupAPI, billingAPI } from '../../services/apiService';
 import { useToast } from '../../context/ToastContext';
 import { 
     Users, Activity, Beaker, Radio, Pill, 
     Stethoscope, Clock, CheckCircle, ArrowRight,
-    ArrowUpRight, AlertCircle, Scissors
+    ArrowUpRight, AlertCircle, Scissors, Search
 } from 'lucide-react';
+
+const VisitCard = ({ visit, handleRoute, processingId, getWaitTime, navigate }) => {
+    const [services, setServices] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showDropdown, setShowDropdown] = useState(false);
+    const { addToast } = useToast();
+
+    useEffect(() => {
+        const loadServices = async () => {
+            try {
+                const res = await setupAPI.services.getAll();
+                setServices(res.data || []);
+            } catch (error) {
+                console.error('Failed to load services:', error);
+            }
+        };
+        loadServices();
+    }, []);
+
+    const filteredServices = services.filter(s => 
+        s.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.serviceCode.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleOrder = async (service) => {
+        try {
+            const pricingTier = visit.patient?.paymentMethod || 'cash';
+            await billingAPI.opd.create({
+                patientId: visit.patientId,
+                serviceId: service.id,
+                quantity: 1,
+                paymentMethod: pricingTier
+            });
+            addToast('success', `${service.serviceName} ordered successfully!`);
+            setShowDropdown(false);
+            setSearchTerm('');
+            
+            // Auto Route
+            if (service.category === 'laboratory') {
+                handleRoute(visit.id, 'waiting_lab', 'Laboratory');
+            } else if (service.category === 'radiology') {
+                handleRoute(visit.id, 'waiting_radiology', 'Radiology');
+            }
+        } catch (error) {
+            console.error('Failed to create order:', error);
+            addToast('error', 'Failed to place order.');
+        }
+    };
+
+    return (
+        <div className="bg-bg-secondary p-8 rounded-[2.5rem] border border-border-color shadow-sm hover:shadow-2xl hover:shadow-black/20 transition-all duration-500 group relative">
+            {/* Patient Info */}
+            <div className="flex items-start justify-between mb-8">
+                <div>
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${visit.priority === 'urgent' ? 'bg-rose-500/10 text-rose-500' : 'bg-blue-500/10 text-blue-500'}`}>
+                            {visit.priority || 'Normal'}
+                        </span>
+                        <span className="text-[9px] font-black text-text-tertiary uppercase tracking-tighter">{getWaitTime(visit.createdAt)} Wait</span>
+                    </div>
+                    <h3 className="text-xl font-black text-text-primary tracking-tight leading-none group-hover:text-emerald-500 transition-colors uppercase">
+                        {visit.patient?.firstName} {visit.patient?.lastName}
+                    </h3>
+                    <p className="text-[10px] font-mono font-bold text-text-tertiary tracking-tighter uppercase mt-1">
+                        {visit.patient?.patientNumber} • {visit.reasonForVisit || 'General Consultation'}
+                    </p>
+                </div>
+                <button 
+                    onClick={() => navigate(`/app/visits/${visit.id}`)}
+                    className="p-3 bg-bg-tertiary text-text-tertiary hover:text-emerald-500 hover:bg-emerald-500/10 rounded-2xl transition-all"
+                >
+                    <ArrowUpRight className="w-5 h-5" />
+                </button>
+            </div>
+
+            {/* Action Grid */}
+            <div className="grid grid-cols-2 gap-3">
+                <button 
+                    disabled={processingId === visit.id}
+                    onClick={() => handleRoute(visit.id, 'waiting_lab', 'Laboratory')}
+                    className="p-4 bg-bg-tertiary/50 border border-border-color rounded-[1.5rem] flex flex-col items-center gap-2 hover:bg-violet-500/10 hover:border-violet-500/30 transition-all group/btn"
+                >
+                    <Beaker className="w-5 h-5 text-text-tertiary group-hover/btn:text-violet-500" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-text-secondary group-hover/btn:text-violet-600">Laboratory</span>
+                </button>
+                
+                <button 
+                    disabled={processingId === visit.id}
+                    onClick={() => handleRoute(visit.id, 'waiting_radiology', 'Radiology')}
+                    className="p-4 bg-bg-tertiary/50 border border-border-color rounded-[1.5rem] flex flex-col items-center gap-2 hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all group/btn"
+                >
+                    <Radio className="w-5 h-5 text-text-tertiary group-hover/btn:text-indigo-500" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-text-secondary group-hover/btn:text-indigo-600">Imaging</span>
+                </button>
+
+                <button 
+                    disabled={processingId === visit.id}
+                    onClick={() => handleRoute(visit.id, 'waiting_theatre', 'Theatre')}
+                    className="p-4 bg-bg-tertiary/50 border border-border-color rounded-[1.5rem] flex flex-col items-center gap-2 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all group/btn"
+                >
+                    <Scissors className="w-5 h-5 text-text-tertiary group-hover/btn:text-rose-500" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-text-secondary group-hover/btn:text-rose-600">Theatre</span>
+                </button>
+
+                <button 
+                    disabled={processingId === visit.id}
+                    onClick={() => handleRoute(visit.id, 'with_doctor', 'Clinical Unit')}
+                    className="p-4 bg-bg-tertiary/50 border border-border-color rounded-[1.5rem] flex flex-col items-center gap-2 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all group/btn"
+                >
+                    <Activity className="w-5 h-5 text-text-tertiary group-hover/btn:text-blue-500" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-text-secondary group-hover/btn:text-blue-600">Ward Order</span>
+                </button>
+
+                {/* Inline Order Select Dropdown Dropdown */}
+                <div className="col-span-2 relative mt-2">
+                    <div className="relative">
+                        <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary" />
+                        <input 
+                            type="text"
+                            placeholder="+ ADD CUSTOM ORDER (E.G. ABC, X-RAY)"
+                            value={searchTerm}
+                            onClick={() => setShowDropdown(true)}
+                            onChange={(e) => { setSearchTerm(e.target.value); setShowDropdown(true); }}
+                            className="w-full pl-10 pr-4 py-3 bg-bg-tertiary text-white rounded-[1.5rem] border border-border-color text-[10px] font-black uppercase tracking-wider placeholder-text-tertiary focus:outline-none focus:ring-1 focus:ring-emerald-500/30 transition-all"
+                        />
+                    </div>
+                    {showDropdown && (searchTerm.length > 0 || services.length > 0) && (
+                        <div className="absolute z-50 bottom-full mb-2 w-full max-h-48 overflow-y-auto bg-bg-tertiary border border-border-color rounded-[1.2rem] shadow-2xl custom-scrollbar divide-y divide-white/5 animate-slide-up">
+                            {filteredServices.length === 0 ? (
+                                <div className="p-3 text-center text-xs text-text-tertiary">No services found</div>
+                            ) : (
+                                filteredServices.slice(0, 8).map(s => (
+                                    <div 
+                                        key={s.id} 
+                                        className="p-3 hover:bg-white/5 cursor-pointer flex justify-between items-center transition-all"
+                                        onClick={() => handleOrder(s)}
+                                    >
+                                        <div>
+                                            <p className="text-xs font-bold text-white leading-none mb-1">{s.serviceName}</p>
+                                            <p className="text-[9px] font-mono text-text-tertiary uppercase">{s.category} • {s.serviceCode}</p>
+                                        </div>
+                                        <ArrowRight className="w-3.5 h-3.5 text-text-tertiary group-hover/item:text-emerald-500" />
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                <button 
+                    disabled={processingId === visit.id}
+                    onClick={() => handleRoute(visit.id, 'ready_for_discharge', 'Pharmacy')}
+                    className="col-span-2 p-4 bg-emerald-500 text-white rounded-[1.5rem] flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-lg shadow-emerald-500/20 active:scale-[0.98] mt-1"
+                >
+                    <Pill className="w-5 h-5" />
+                    <span className="text-[11px] font-black uppercase tracking-[0.2em]">Discharge / Rx</span>
+                </button>
+            </div>
+        </div>
+    );
+};
 
 const DoctorOrders = () => {
     const navigate = useNavigate();
@@ -87,82 +248,14 @@ const DoctorOrders = () => {
                     </div>
                 ) : (
                     visits.map(visit => (
-                        <div 
+                        <VisitCard 
                             key={visit.id} 
-                            className="bg-bg-secondary p-8 rounded-[2.5rem] border border-border-color shadow-sm hover:shadow-2xl hover:shadow-black/20 transition-all duration-500 group"
-                        >
-                            {/* Patient Info */}
-                            <div className="flex items-start justify-between mb-8">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${visit.priority === 'urgent' ? 'bg-rose-500/10 text-rose-500' : 'bg-blue-500/10 text-blue-500'}`}>
-                                            {visit.priority || 'Normal'}
-                                        </span>
-                                        <span className="text-[9px] font-black text-text-tertiary uppercase tracking-tighter">{getWaitTime(visit.createdAt)} Wait</span>
-                                    </div>
-                                    <h3 className="text-xl font-black text-text-primary tracking-tight leading-none group-hover:text-emerald-500 transition-colors uppercase">
-                                        {visit.patient?.firstName} {visit.patient?.lastName}
-                                    </h3>
-                                    <p className="text-[10px] font-mono font-bold text-text-tertiary tracking-tighter uppercase mt-1">
-                                        {visit.patient?.patientNumber} • {visit.reasonForVisit || 'General Consultation'}
-                                    </p>
-                                </div>
-                                <button 
-                                    onClick={() => navigate(`/app/visits/${visit.id}`)}
-                                    className="p-3 bg-bg-tertiary text-text-tertiary hover:text-emerald-500 hover:bg-emerald-500/10 rounded-2xl transition-all"
-                                >
-                                    <ArrowUpRight className="w-5 h-5" />
-                                </button>
-                            </div>
-
-                            {/* Action Grid */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <button 
-                                    disabled={processingId === visit.id}
-                                    onClick={() => handleRoute(visit.id, 'waiting_lab', 'Laboratory')}
-                                    className="p-4 bg-bg-tertiary/50 border border-border-color rounded-[1.5rem] flex flex-col items-center gap-2 hover:bg-violet-500/10 hover:border-violet-500/30 transition-all group/btn"
-                                >
-                                    <Beaker className="w-5 h-5 text-text-tertiary group-hover/btn:text-violet-500" />
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-text-secondary group-hover/btn:text-violet-600">Laboratory</span>
-                                </button>
-                                
-                                <button 
-                                    disabled={processingId === visit.id}
-                                    onClick={() => handleRoute(visit.id, 'waiting_radiology', 'Radiology')}
-                                    className="p-4 bg-bg-tertiary/50 border border-border-color rounded-[1.5rem] flex flex-col items-center gap-2 hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all group/btn"
-                                >
-                                    <Radio className="w-5 h-5 text-text-tertiary group-hover/btn:text-indigo-500" />
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-text-secondary group-hover/btn:text-indigo-600">Imaging</span>
-                                </button>
-
-                                <button 
-                                    disabled={processingId === visit.id}
-                                    onClick={() => handleRoute(visit.id, 'waiting_theatre', 'Theatre')}
-                                    className="p-4 bg-bg-tertiary/50 border border-border-color rounded-[1.5rem] flex flex-col items-center gap-2 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all group/btn"
-                                >
-                                    <Scissors className="w-5 h-5 text-text-tertiary group-hover/btn:text-rose-500" />
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-text-secondary group-hover/btn:text-rose-600">Theatre</span>
-                                </button>
-
-                                <button 
-                                    disabled={processingId === visit.id}
-                                    onClick={() => handleRoute(visit.id, 'with_doctor', 'Clinical Unit')}
-                                    className="p-4 bg-bg-tertiary/50 border border-border-color rounded-[1.5rem] flex flex-col items-center gap-2 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all group/btn"
-                                >
-                                    <Activity className="w-5 h-5 text-text-tertiary group-hover/btn:text-blue-500" />
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-text-secondary group-hover/btn:text-blue-600">Ward Order</span>
-                                </button>
-
-                                <button 
-                                    disabled={processingId === visit.id}
-                                    onClick={() => handleRoute(visit.id, 'ready_for_discharge', 'Pharmacy')}
-                                    className="col-span-2 p-4 bg-emerald-500 text-white rounded-[1.5rem] flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-lg shadow-emerald-500/20 active:scale-[0.98]"
-                                >
-                                    <Pill className="w-5 h-5" />
-                                    <span className="text-[11px] font-black uppercase tracking-[0.2em]">Discharge / Rx</span>
-                                </button>
-                            </div>
-                        </div>
+                            visit={visit} 
+                            handleRoute={handleRoute} 
+                            processingId={processingId} 
+                            getWaitTime={getWaitTime} 
+                            navigate={navigate} 
+                        />
                     ))
                 )}
             </div>
