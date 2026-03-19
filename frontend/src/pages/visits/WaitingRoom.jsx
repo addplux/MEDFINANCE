@@ -188,15 +188,14 @@ const WaitingRoom = () => {
                         </div>
 
                         {/* Content */}
-                        <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-black/10">
-                            {activeVisit.queueStatus === 'pending_triage' ? (
-                                <TriageWidget 
-                                    visitId={activeVisit.id} 
-                                    patientId={activeVisit.patient?.id} 
-                                    queueStatus={activeVisit.queueStatus} 
-                                    onVitalsSaved={() => { setActiveVisit(null); fetchVisits(); }} 
-                                />
-                            ) : (
+                        <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-black/10 space-y-4">
+                            <TriageWidget 
+                                visitId={activeVisit.id} 
+                                patientId={activeVisit.patient?.id} 
+                                queueStatus={activeVisit.queueStatus} 
+                                onVitalsSaved={() => { setActiveVisit(null); fetchVisits(); }} 
+                            />
+                            {activeVisit.queueStatus !== 'pending_triage' && (
                                 <DoctorWorkspace 
                                     visitId={activeVisit.id} 
                                     patientId={activeVisit.patient?.id} 
