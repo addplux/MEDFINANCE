@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { visitAPI } from '../../services/apiService';
 import { 
     Users, Activity, CreditCard, Stethoscope, 
-    TestTube, SquareActivity, Pill, Clock, AlertCircle, ArrowRight, UserPlus, Scissors
+    TestTube, SquareActivity, Pill, Clock, AlertCircle, ArrowRight, UserPlus, Scissors, X
 } from 'lucide-react';
+import TriageWidget from './components/TriageWidget';
+import DoctorWorkspace from './components/DoctorWorkspace';
 
 const QUEUE_STAGES = [
     { id: 'pending_triage', title: 'Triage', icon: Activity, dot: 'bg-orange-500' },
@@ -21,6 +23,7 @@ const WaitingRoom = () => {
     const navigate = useNavigate();
     const [visits, setVisits] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeVisit, setActiveVisit] = useState(null);
     const [lastRefresh, setLastRefresh] = useState(new Date());
 
     useEffect(() => {
@@ -41,8 +44,13 @@ const WaitingRoom = () => {
         }
     };
 
-    const handlePatientClick = (visitId) => {
-        navigate(`/app/visits/${visitId}`);
+    const handlePatientClick = (visit) => {
+        const triggers = ['pending_triage', 'waiting_doctor', 'with_doctor'];
+        if (triggers.includes(visit.queueStatus)) {
+            setActiveVisit(visit);
+        } else {
+            navigate(`/app/visits/${visit.id}`);
+        }
     };
 
     const getWaitTime = (dateString) => {
@@ -117,7 +125,7 @@ const WaitingRoom = () => {
                                     stageVisits.map(visit => (
                                         <div 
                                             key={visit.id} 
-                                            onClick={() => handlePatientClick(visit.id)}
+                                            onClick={() => handlePatientClick(visit)}
                                             className="group relative bg-bg-elevated p-4 rounded-xl shadow-sm hover:shadow-2xl hover:shadow-black/20 border border-border-color transition-all duration-500 cursor-pointer overflow-hidden active:scale-95"
                                         >
                                             {/* Top Section */}
@@ -156,6 +164,40 @@ const WaitingRoom = () => {
                     );
                 })}
             </div>
+
+            {/* Consultation Modal Overlay (Mirroring Doctor's Dashboard) */}
+            {activeVisit && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
+                    <div className="bg-bg-secondary border border-white/5 rounded-[2.5rem] shadow-[0_32px_120px_rgba(0,0,0,0.8)] w-full max-w-6xl flex flex-col overflow-hidden max-h-[85vh] text-white">
+                        {/* Header */}
+                        <div className="px-8 py-5 border-b border-white/5 backdrop-blur-md bg-white/[0.02] flex justify-between items-center">
+                            <div>
+                                <h3 className="font-black text-xl uppercase tracking-tighter text-white">
+                                    {activeVisit.queueStatus === 'pending_triage' ? 'Triage Workspace' : 'Doctor Consultation'}
+                                </h3>
+                                <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">
+                                    {activeVisit.patient?.lastName}, {activeVisit.patient?.firstName} | {activeVisit.patient?.patientNumber}
+                                </p>
+                            </div>
+                            <button 
+                                onClick={() => { setActiveVisit(null); fetchVisits(); }} 
+                                className="p-2.5 hover:bg-white/5 rounded-xl text-white/40 hover:text-white transition-all text-xl font-black"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-black/10">
+                            {activeVisit.queueStatus === 'pending_triage' ? (
+                                <TriageWidget visitId={activeVisit.id} queueStatus={activeVisit.queueStatus} onSaved={() => { setActiveVisit(null); fetchVisits(); }} />
+                            ) : (
+                                <DoctorWorkspace visitId={activeVisit.id} onSaved={() => { setActiveVisit(null); fetchVisits(); }} />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
