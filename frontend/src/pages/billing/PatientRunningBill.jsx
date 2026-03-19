@@ -92,7 +92,7 @@ const PatientRunningBill = () => {
                 notes: paymentModal.type === 'partial' ? 'Partial Deposit / Advance Payment' : 'Final Bill Clearance',
                 // If it's a final clearance, we could optionally pass the list of all bills to mark as paid.
                 // But typically, the current balance and the incoming payment handle the ledger math.
-                paidBills: paymentModal.type === 'final' ? unpaidBills.map(b => ({ type: b.billType, id: b.id })) : []
+                paidBills: paymentModal.type === 'final' ? unpaidBills.map(b => ({ type: b.billType || b.department, id: b.id })) : []
             };
 
             await cashAPI.payments.create(payload);
