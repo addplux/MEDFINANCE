@@ -21,9 +21,7 @@ const DoctorWorkspace = ({ visitId, patientId, paymentMethod, queueStatus, notes
                 console.error('Failed to load services:', err);
             }
         };
-        if (queueStatus === 'with_doctor') {
-            loadServices();
-        }
+        loadServices();
     }, [queueStatus]);
 
     const getPrice = (service) => {
