@@ -307,21 +307,21 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                 )}
             </div>
 
-            {/* Consultation Drawer Overlay */}
+            {/* Consultation Modal Overlay */}
             {activeVisit && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-end">
-                    <div className="w-full max-w-xl bg-bg-primary h-full shadow-2xl animate-fade-in p-6 overflow-y-auto border-l border-border-color flex flex-col gap-4 relative">
-                        <div className="flex items-center justify-between pb-4 border-b border-border-color">
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                    <div className="w-full max-w-3xl bg-bg-secondary rounded-[1.5rem] shadow-2xl border border-white/10 p-6 flex flex-col gap-4 relative max-h-[85vh] overflow-hidden animate-zoom-in">
+                        <div className="flex items-center justify-between pb-4 border-b border-white/10">
                             <div>
                                 <h3 className="text-lg font-black text-white tracking-tight">Active Consultation</h3>
                                 <p className="text-xs text-text-tertiary font-bold uppercase">{activeVisit.patient?.firstName} {activeVisit.patient?.lastName} • {activeVisit.patient?.patientNumber}</p>
                             </div>
-                            <button onClick={() => setActiveVisit(null)} className="p-2 hover:bg-bg-tertiary rounded-full border border-border-color text-text-tertiary hover:text-white transition-all">
+                            <button onClick={() => setActiveVisit(null)} className="p-2 hover:bg-white/5 rounded-full border border-white/10 text-white/40 hover:text-white transition-all">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-1">
                             <TriageWidget visitId={activeVisit.id} patientId={activeVisit.patient?.id} queueStatus={activeVisit.queueStatus} />
                             <DoctorWorkspace 
                                 visitId={activeVisit.id} 
