@@ -112,6 +112,13 @@ const PatientRunningBill = () => {
 
             const res = await cashAPI.payments.create(payload);
             
+            if (res.data?.offline) {
+                alert('Network issue: Payment has been saved offline and will sync once connection is restored.');
+                setPaymentModal({ isOpen: false, type: 'partial', selectedBills: [] });
+                setPaymentAmount('');
+                return;
+            }
+
             alert('Payment processed successfully!');
             setPaymentModal({ isOpen: false, type: 'partial', selectedBills: [] });
             setPaymentAmount('');
@@ -155,6 +162,14 @@ const PatientRunningBill = () => {
                 amount: fee
             };
             const res = await cashAPI.payments.preRegister(payload);
+
+            if (res.data?.offline) {
+                alert('Network issue: Registration has been saved offline and will sync once connection is restored.');
+                setPreRegModalOpen(false);
+                setPreRegForm({ firstName: '', lastName: '', nrc: '', costCategory: 'standard', paymentMethod: 'cash' });
+                return;
+            }
+
             alert('Pre-paid registration created successfully!');
             setPreRegModalOpen(false);
             setPreRegForm({ firstName: '', lastName: '', nrc: '', costCategory: 'standard', paymentMethod: 'cash' });
