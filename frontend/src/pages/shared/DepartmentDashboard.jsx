@@ -194,7 +194,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                     } else if (title === 'OPD' && (v.queueStatus === 'waiting_doctor' || v.queueStatus === 'with_doctor' || filter === 'doctor' || filter === 'all_opd')) {
                                         setActiveVisit(v);
                                     } else {
-                                        v.visitId ? navigate(`/app/visits/${v.visitId}`) : navigate(`/app/patients/${v.patient?.id || v.id}`);
+                                        v.id ? navigate(`/app/visits/${v.id}`) : navigate(`/app/patients/${v.patient?.id || v.id}`);
                                     }
                                 }}
                                 className="group relative glass hover:bg-bg-tertiary p-4 border-border-color hover:border-primary/50 transition-all cursor-pointer rounded-[1.5rem]"
