@@ -5,6 +5,7 @@ import {
     Search, User, DollarSign, ArrowLeft, Receipt, CheckCircle,
     Activity, Clock, CreditCard, Save, Printer, FileText, Shield, AlertCircle
 } from 'lucide-react';
+import PaymentReceiptModal from '../../components/shared/PaymentReceiptModal';
 
 const PatientRunningBill = () => {
     const navigate = useNavigate();
@@ -17,6 +18,11 @@ const PatientRunningBill = () => {
     const [paymentModal, setPaymentModal] = useState({ isOpen: false, type: 'partial', selectedBills: [] });
     const [paymentMethod, setPaymentMethod] = useState('cash');
     const [paymentAmount, setPaymentAmount] = useState('');
+    const [activeTab, setActiveTab] = useState('active_charges'); // 'active_charges' | 'payment_history'
+    const [paymentHistory, setPaymentHistory] = useState([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
+    const [receiptModalOpen, setReceiptModalOpen] = useState(false);
+    const [selectedReceipt, setSelectedReceipt] = useState(null);
 
     // Pre-registration modal states
     const [preRegModalOpen, setPreRegModalOpen] = useState(false);
@@ -38,6 +44,7 @@ const PatientRunningBill = () => {
                 const foundPatient = patientRes.data.data[0];
                 setPatient(foundPatient);
                 await fetchPatientBills(foundPatient.id);
+                await handleFetchHistory(foundPatient.id);
             } else {
                 alert('Patient not found');
             }
@@ -63,10 +70,18 @@ const PatientRunningBill = () => {
             const balRes = await billingAPI.patient.getBalance(patientId);
             const currentBalance = Number(balRes.data?.balance || 0);
             
+            // In the backend, a POSITIVE balance means they OWE money (debt).
+            // A NEGATIVE balance means they have credit/deposits.
+            const depositAmount = currentBalance < 0 ? Math.abs(currentBalance) : 0;
+            const ledgerDebt = currentBalance > 0 ? currentBalance : 0;
+            
+            // The true remaining balance to pay right now is the ledger debt natively, OR if we want to 
+            // recalculate strictly based on active bills minus deposit (though backend calculates it correctly)
+            // It's safest to just trust the backend balance.
             setBalanceInfo({
                 totalPending,
-                deposit: currentBalance > 0 ? currentBalance : 0, // In this system, positive balance usually means credit/deposit
-                balance: totalPending - (currentBalance > 0 ? currentBalance : 0)
+                deposit: depositAmount, 
+                balance: ledgerDebt
             });
 
         } catch (error) {
@@ -95,20 +110,38 @@ const PatientRunningBill = () => {
                 paidBills: paymentModal.type === 'final' ? unpaidBills.map(b => ({ type: b.billType || b.department, id: b.id })) : []
             };
 
-            await cashAPI.payments.create(payload);
+            const res = await cashAPI.payments.create(payload);
             
             alert('Payment processed successfully!');
             setPaymentModal({ isOpen: false, type: 'partial', selectedBills: [] });
             setPaymentAmount('');
             
-            // Refresh bills and balance
+            // Refresh bills, balance, and history
             await fetchPatientBills(patient.id);
+            await handleFetchHistory(patient.id);
+            
+            if (res.data?.payment) {
+                setSelectedReceipt(res.data.payment);
+                setReceiptModalOpen(true);
+            }
 
         } catch (error) {
             console.error('Payment error:', error);
             alert(error.response?.data?.error || 'Failed to process payment');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleFetchHistory = async (patientId) => {
+        try {
+            setHistoryLoading(true);
+            const res = await cashAPI.payments.getAll({ patientId });
+            setPaymentHistory(res.data?.data || []);
+        } catch (error) {
+            console.error('Fetch payment history error:', error);
+        } finally {
+            setHistoryLoading(false);
         }
     };
 
@@ -121,10 +154,15 @@ const PatientRunningBill = () => {
                 ...preRegForm,
                 amount: fee
             };
-            await cashAPI.payments.preRegister(payload);
+            const res = await cashAPI.payments.preRegister(payload);
             alert('Pre-paid registration created successfully!');
             setPreRegModalOpen(false);
             setPreRegForm({ firstName: '', lastName: '', nrc: '', costCategory: 'standard', paymentMethod: 'cash' });
+            
+            if (res.data?.payment) {
+                setSelectedReceipt(res.data.payment);
+                setReceiptModalOpen(true);
+            }
         } catch (error) {
             console.error('Pre-register error:', error);
             alert(error.response?.data?.error || 'Failed to create pre-paid registration');
@@ -195,60 +233,141 @@ const PatientRunningBill = () => {
                     
                     {/* Left Column: Ledger / Running Bills array */}
                     <div className="lg:col-span-2 space-y-6">
-                        <div className="card border-white/5 flex flex-col h-full">
-                            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                                <div className="flex items-center gap-3">
-                                    <FileText className="w-5 h-5 text-blue-400" />
-                                    <h2 className="text-lg font-black text-white uppercase tracking-widest">Active Charges</h2>
-                                </div>
-                                <div className="text-xs font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20">
-                                    {unpaidBills.length} Items Pending
-                                </div>
+                        <div className="card border-white/5 flex flex-col h-full bg-bg-secondary w-full">
+                            <div className="p-0 border-b border-white/5 flex items-center bg-white/[0.02] overflow-x-auto scroller-hide">
+                                <button
+                                    onClick={() => setActiveTab('active_charges')}
+                                    className={`px-8 py-5 flex items-center gap-3 font-black uppercase tracking-widest text-xs transition-all border-b-2 ${
+                                        activeTab === 'active_charges' 
+                                        ? 'border-blue-500 text-blue-400 bg-blue-500/5' 
+                                        : 'border-transparent text-white/50 hover:text-white hover:bg-white/5'
+                                    }`}
+                                >
+                                    <FileText className="w-5 h-5" />
+                                    Active Charges
+                                    {unpaidBills.length > 0 && (
+                                        <span className={`px-2 py-0.5 rounded-md text-[10px] ${activeTab === 'active_charges' ? 'bg-blue-500/20 text-blue-400' : 'bg-white/10 text-white/50'}`}>
+                                            {unpaidBills.length}
+                                        </span>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('payment_history')}
+                                    className={`px-8 py-5 flex items-center gap-3 font-black uppercase tracking-widest text-xs transition-all border-b-2 ${
+                                        activeTab === 'payment_history' 
+                                        ? 'border-emerald-500 text-emerald-400 bg-emerald-500/5' 
+                                        : 'border-transparent text-white/50 hover:text-white hover:bg-white/5'
+                                    }`}
+                                >
+                                    <Clock className="w-5 h-5" />
+                                    Payment History
+                                </button>
                             </div>
 
                             <div className="p-0 overflow-x-auto flex-1">
-                                {loading ? (
-                                    <div className="p-12 text-center text-white/40 space-y-3">
-                                        <Activity className="w-8 h-8 mx-auto animate-pulse text-blue-500/50" />
-                                        <p className="text-xs uppercase tracking-widest font-black">Syncing all departments...</p>
-                                    </div>
-                                ) : unpaidBills.length === 0 ? (
-                                    <div className="p-12 text-center text-white/40 space-y-3 flex flex-col items-center justify-center h-full">
-                                        <CheckCircle className="w-12 h-12 text-emerald-500/30" />
-                                        <p className="text-sm font-medium">No active charges found.</p>
-                                        <p className="text-[10px] uppercase font-black tracking-widest opacity-50">Patient is fully cleared</p>
-                                    </div>
-                                ) : (
-                                    <table className="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr className="border-b border-white/5 bg-white/[0.01]">
-                                                <th className="p-4 text-[10px] font-black uppercase text-white/30 tracking-widest">Date</th>
-                                                <th className="p-4 text-[10px] font-black uppercase text-white/30 tracking-widest">Dept</th>
-                                                <th className="p-4 text-[10px] font-black uppercase text-white/30 tracking-widest">Description</th>
-                                                <th className="p-4 text-[10px] font-black uppercase text-white/30 tracking-widest text-right">Amount</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-white/5">
-                                            {unpaidBills.map((bill, index) => (
-                                                <tr key={`${bill.billType}-${bill.id}-${index}`} className="hover:bg-white/[0.02] transition-colors">
-                                                    <td className="p-4 text-xs text-white/60">
-                                                        {new Date(bill.createdAt || bill.billDate).toLocaleDateString()}
-                                                    </td>
-                                                    <td className="p-4">
-                                                        <span className={`text-[10px] px-2 py-1 rounded-md font-black uppercase tracking-wider border ${getDepartmentColor(bill.department)}`}>
-                                                            {bill.department}
-                                                        </span>
-                                                    </td>
-                                                    <td className="p-4 text-sm text-white font-medium">
-                                                        {bill.description}
-                                                    </td>
-                                                    <td className="p-4 text-sm font-black text-white text-right">
-                                                        {formatCurrency(bill.netAmount || bill.totalAmount)}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                {activeTab === 'active_charges' && (
+                                    <>
+                                        {loading ? (
+                                            <div className="p-12 text-center text-white/40 space-y-3">
+                                                <Activity className="w-8 h-8 mx-auto animate-pulse text-blue-500/50" />
+                                                <p className="text-xs uppercase tracking-widest font-black">Syncing all departments...</p>
+                                            </div>
+                                        ) : unpaidBills.length === 0 ? (
+                                            <div className="p-12 text-center text-white/40 space-y-3 flex flex-col items-center justify-center h-full">
+                                                <CheckCircle className="w-12 h-12 text-emerald-500/30" />
+                                                <p className="text-sm font-medium">No active charges found.</p>
+                                                <p className="text-[10px] uppercase font-black tracking-widest opacity-50">Patient is fully cleared</p>
+                                            </div>
+                                        ) : (
+                                            <table className="w-full text-left border-collapse">
+                                                <thead>
+                                                    <tr className="border-b border-white/5 bg-white/[0.01]">
+                                                        <th className="p-4 text-[10px] font-black uppercase text-white/30 tracking-widest">Date</th>
+                                                        <th className="p-4 text-[10px] font-black uppercase text-white/30 tracking-widest">Dept</th>
+                                                        <th className="p-4 text-[10px] font-black uppercase text-white/30 tracking-widest">Description</th>
+                                                        <th className="p-4 text-[10px] font-black uppercase text-white/30 tracking-widest text-right">Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-white/5">
+                                                    {unpaidBills.map((bill, index) => (
+                                                        <tr key={`${bill.billType}-${bill.id}-${index}`} className="hover:bg-white/[0.02] transition-colors">
+                                                            <td className="p-4 text-xs text-white/60">
+                                                                {new Date(bill.createdAt || bill.billDate).toLocaleDateString()}
+                                                            </td>
+                                                            <td className="p-4">
+                                                                <span className={`text-[10px] px-2 py-1 rounded-md font-black uppercase tracking-wider border ${getDepartmentColor(bill.department)}`}>
+                                                                    {bill.department}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-4 text-sm text-white font-medium">
+                                                                {bill.description}
+                                                            </td>
+                                                            <td className="p-4 text-sm font-black text-white text-right">
+                                                                {formatCurrency(bill.netAmount || bill.totalAmount)}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        )}
+                                    </>
+                                )}
+
+                                {activeTab === 'payment_history' && (
+                                    <>
+                                        {historyLoading ? (
+                                            <div className="p-12 text-center text-white/40 space-y-3">
+                                                <Activity className="w-8 h-8 mx-auto animate-pulse text-emerald-500/50" />
+                                                <p className="text-xs uppercase tracking-widest font-black">Loading history...</p>
+                                            </div>
+                                        ) : paymentHistory.length === 0 ? (
+                                            <div className="p-12 text-center text-white/40 space-y-3 flex flex-col items-center justify-center h-full">
+                                                <Clock className="w-12 h-12 text-white/20" />
+                                                <p className="text-sm font-medium">No payment history found.</p>
+                                            </div>
+                                        ) : (
+                                            <table className="w-full text-left border-collapse">
+                                                <thead>
+                                                    <tr className="border-b border-white/5 bg-white/[0.01]">
+                                                        <th className="p-4 text-[10px] font-black uppercase text-white/30 tracking-widest">Receipt #</th>
+                                                        <th className="p-4 text-[10px] font-black uppercase text-white/30 tracking-widest">Date</th>
+                                                        <th className="p-4 text-[10px] font-black uppercase text-white/30 tracking-widest">Method</th>
+                                                        <th className="p-4 text-[10px] font-black uppercase text-white/30 tracking-widest text-right">Amount</th>
+                                                        <th className="p-4 text-[10px] font-black uppercase text-white/30 tracking-widest text-center">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-white/5">
+                                                    {paymentHistory.map((payment) => (
+                                                        <tr key={payment.id} className="hover:bg-white/[0.02] transition-colors">
+                                                            <td className="p-4 text-sm font-black text-white">
+                                                                {payment.receiptNumber}
+                                                            </td>
+                                                            <td className="p-4 text-xs text-white/60">
+                                                                {new Date(payment.paymentDate || payment.createdAt).toLocaleDateString()}
+                                                            </td>
+                                                            <td className="p-4 text-xs font-black uppercase tracking-wider text-white/40">
+                                                                {payment.paymentMethod?.replace('_', ' ')}
+                                                            </td>
+                                                            <td className="p-4 text-sm font-black text-emerald-400 text-right">
+                                                                {formatCurrency(payment.amount)}
+                                                            </td>
+                                                            <td className="p-4 text-center">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSelectedReceipt(payment);
+                                                                        setReceiptModalOpen(true);
+                                                                    }}
+                                                                    className="btn btn-secondary px-3 py-1 text-[10px] uppercase font-black"
+                                                                >
+                                                                    View Receipt
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -482,6 +601,13 @@ const PatientRunningBill = () => {
                     </div>
                 </div>
             )}
+
+            <PaymentReceiptModal 
+                isOpen={receiptModalOpen}
+                onClose={() => setReceiptModalOpen(false)}
+                receipt={selectedReceipt}
+                patient={patient}
+            />
         </div>
     );
 };

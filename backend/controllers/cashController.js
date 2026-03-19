@@ -13,11 +13,12 @@ const { postPayment } = require('../utils/glPoster');
 // Get all payments
 const getAllPayments = async (req, res) => {
     try {
-        const { page = 1, limit = 20, paymentMethod } = req.query;
+        const { page = 1, limit = 20, paymentMethod, patientId } = req.query;
         const offset = (page - 1) * limit;
 
         const where = {};
         if (paymentMethod) where.paymentMethod = paymentMethod;
+        if (patientId) where.patientId = patientId;
 
         const { count, rows } = await Payment.findAndCountAll({
             where,
