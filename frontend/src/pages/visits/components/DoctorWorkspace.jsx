@@ -149,8 +149,7 @@ const DoctorWorkspace = ({ visitId, patientId, paymentMethod, queueStatus, notes
                         </div>
 
                         {/* Search Results (Compact Dropdown height cap) */}
-                        {searchTerm.length > 1 && (
-                            <div className="max-h-40 overflow-y-auto bg-bg-secondary rounded-xl border border-white/10 custom-scrollbar divide-y divide-white/5">
+                        <div className="max-h-40 overflow-y-auto bg-bg-secondary rounded-xl border border-white/10 custom-scrollbar divide-y divide-white/5">
                                 {filteredServices.length === 0 ? (
                                     <div className="p-3 text-center text-xs text-white/40">No services found</div>
                                 ) : (
@@ -168,7 +167,6 @@ const DoctorWorkspace = ({ visitId, patientId, paymentMethod, queueStatus, notes
                                     ))
                                 )}
                             </div>
-                        )}
 
                         {/* Basket Items Grid/List */}
                         {basket.length > 0 && (
