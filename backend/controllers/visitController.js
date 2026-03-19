@@ -83,11 +83,12 @@ const createVisit = async (req, res) => {
 // Get all active visits
 const getAllVisits = async (req, res) => {
     try {
-        const { status, queueStatus, departmentId, search, visitType } = req.query;
+        const { status, queueStatus, departmentId, assignedDepartment, search, visitType } = req.query;
         const where = {};
         if (status) where.status = status;
         if (queueStatus) where.queueStatus = queueStatus;
         if (departmentId) where.departmentId = departmentId;
+        if (assignedDepartment) where.assignedDepartment = assignedDepartment;
         if (visitType) where.visitType = visitType;
 
         const patientInclude = { model: Patient, as: 'patient' };

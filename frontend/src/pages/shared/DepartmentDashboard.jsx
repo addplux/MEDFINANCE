@@ -50,7 +50,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
             } else {
                 // For OPD: fetch all active visits (no department filter) so queueStatus filtering works across all patients
                 const params = { status: 'active', search: search };
-                if (title !== 'OPD' && departmentId) params.departmentId = departmentId;
+                if (title !== 'OPD') params.assignedDepartment = title;
                 const res = await visitAPI.getAll(params);
                 data = res.data.visits || [];
             }
