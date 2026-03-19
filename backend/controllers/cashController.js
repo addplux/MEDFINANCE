@@ -18,7 +18,7 @@ const getAllPayments = async (req, res) => {
 
         const where = {};
         if (paymentMethod) where.paymentMethod = paymentMethod;
-        if (patientId) where.patientId = patientId;
+        if (patientId) where.patientId = Number(patientId);
 
         const { count, rows } = await Payment.findAndCountAll({
             where,
@@ -58,7 +58,7 @@ const createPayment = async (req, res) => {
 
         // Generate receipt number
         const paymentCount = await Payment.count();
-        const receiptNumber = `RCP${String(paymentCount + 1).padStart(6, '0')}`;
+        const receiptNumber = `RCP${String(paymentCount + 1).padStart(6, '0')}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
 
         const payment = await Payment.create({
             receiptNumber,
