@@ -323,10 +323,12 @@ const updatePatient = async (req, res) => {
 
 // Delete patient
 const deletePatient = async (req, res) => {
+    const t = await sequelize.transaction();
     try {
-        const patient = await Patient.findByPk(req.params.id);
+        const patient = await Patient.findByPk(req.params.id, { transaction: t });
 
         if (!patient) {
+            await t.rollback();
             return res.status(404).json({ error: 'Patient not found' });
         }
 
@@ -338,11 +340,25 @@ const deletePatient = async (req, res) => {
             }
         }
 
-        await patient.destroy();
+        // Delete purely supporting metadata rows created optionally on registration
+        // (If there are bills or payments, the below or patient.destroy() will trigger a FK-fail, safely rolling back)
+        await Visit.destroy({ where: { patientId: patient.id }, transaction: t });
+        await PatientMovement.destroy({ where: { patientId: patient.id }, transaction: t });
+
+        await patient.destroy({ transaction: t });
+        await t.commit();
         res.json({ message: 'Patient deleted successfully' });
     } catch (error) {
+        await t.rollback();
         console.error('Delete patient error:', error);
-        res.status(500).json({ error: 'Failed to delete patient' });
+        
+        if (error.name === 'SequelizeForeignKeyConstraintError') {
+            return res.status(400).json({ 
+                error: 'Cannot delete patient: This profile contains associated billing, laboratory, or pharmacy history records. Please use "Merge Duplicates" instead to consolidate.' 
+            });
+        }
+        
+        res.status(500).json({ error: 'Failed to delete patient', details: error.message });
     }
 };
 

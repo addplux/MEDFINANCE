@@ -242,7 +242,7 @@ const Patients = () => {
             loadPatients();
         } catch (error) {
             console.error('Failed to delete patient:', error);
-            alert('Failed to delete patient');
+            alert(error.response?.data?.error || 'Failed to delete patient');
         }
     };
 
