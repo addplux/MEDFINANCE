@@ -97,7 +97,9 @@ const postPayment = async (payment, t) => {
 
         const entry = await JournalEntry.create({
             entryNumber,
-            entryDate: payment.paymentDate,
+            entryDate: typeof payment.paymentDate === 'string' 
+                ? payment.paymentDate 
+                : new Date(payment.paymentDate).toISOString().split('T')[0],
             description: `Payment Received: ${payment.receiptNumber} (${payment.paymentMethod})`,
             reference: payment.receiptNumber,
             totalDebit: payment.amount,

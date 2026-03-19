@@ -61,10 +61,11 @@ const PatientRunningBill = () => {
             setLoading(true);
             // Get all aggregated unpaid bills across departments
             const billsRes = await billingAPI.patient.getUnpaidBills(patientId);
-            setUnpaidBills(billsRes.data || []);
+            const bills = Array.isArray(billsRes.data) ? billsRes.data : [];
+            setUnpaidBills(bills);
             
             // Calculate totals
-            const totalPending = (billsRes.data || []).reduce((sum, b) => sum + Number(b.netAmount || b.totalAmount || 0), 0);
+            const totalPending = bills.reduce((sum, b) => sum + Number(b.netAmount || b.totalAmount || 0), 0);
             
             // Get current account balance / previous deposits
             const balRes = await billingAPI.patient.getBalance(patientId);
