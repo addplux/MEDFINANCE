@@ -167,7 +167,7 @@ const WaitingRoom = () => {
 
             {/* Consultation Modal Overlay (Mirroring Doctor's Dashboard) */}
             {activeVisit && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-start justify-center p-4 z-50 animate-fade-in overflow-y-auto pt-16">
                     <div className="bg-bg-secondary border border-white/5 rounded-[2.5rem] shadow-[0_32px_120px_rgba(0,0,0,0.8)] w-full max-w-6xl flex flex-col overflow-hidden max-h-[85vh] text-white">
                         {/* Header */}
                         <div className="px-8 py-5 border-b border-white/5 backdrop-blur-md bg-white/[0.02] flex justify-between items-center">
