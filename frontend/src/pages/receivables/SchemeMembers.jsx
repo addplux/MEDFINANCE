@@ -5,6 +5,7 @@ import { receivablesAPI, patientAPI } from '../../services/apiService';
 import api from '../../services/apiClient';
 import { DataGrid } from '@mui/x-data-grid';
 import * as XLSX from 'xlsx';
+import BillingStatementSection from '../patients/components/BillingStatementSection';
 
 const SchemeMembers = ({ schemeId }) => {
     const navigate = useNavigate();
@@ -29,6 +30,7 @@ const SchemeMembers = ({ schemeId }) => {
         nursingCare: '', laboratory: '', radiology: '', dental: '', lodging: '', surgicals: '',
         drRound: '', food: '', physio: '', pharmacy: '', sundries: '', antenatal: ''
     });
+    const [selectedStatementPatient, setSelectedStatementPatient] = useState(null);
     const [showAddMemberModal, setShowAddMemberModal] = useState(false);
     const [addMemberMode, setAddMemberMode] = useState('existing'); // 'existing' or 'new'
     const [patientSearch, setPatientSearch] = useState('');
@@ -418,6 +420,13 @@ const SchemeMembers = ({ schemeId }) => {
                             <FileText className="w-4 h-4" />
                         </button>
                     )}
+                    <button
+                        onClick={() => setSelectedStatementPatient(params.row)}
+                        className="p-1 hover:bg-white/5 text-pink-400 hover:text-pink-300 rounded transition-colors"
+                        title="View Patient Statement"
+                    >
+                        <Activity className="w-4 h-4" />
+                    </button>
                     <button
                         className="p-1 hover:bg-bg-tertiary text-text-tertiary hover:text-text-primary rounded transition-colors"
                         title="Edit Member"
@@ -910,6 +919,27 @@ const SchemeMembers = ({ schemeId }) => {
                                 </button>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Individual Patient Statement Modal Drawer */}
+            {selectedStatementPatient && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 z-50 animate-fade-in text-white shadow-2xl">
+                    <div className="bg-bg-secondary border border-white/5 rounded-[3rem] shadow-[0_32px_120px_rgba(0,0,0,0.8)] w-full max-w-4xl flex flex-col overflow-hidden max-h-[85vh]">
+                        <div className="px-10 py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                            <div>
+                                <h3 className="font-black text-2xl uppercase tracking-tighter">Member Statement</h3>
+                                <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">
+                                    {selectedStatementPatient.lastName}, {selectedStatementPatient.firstName} | {selectedStatementPatient.patientNumber}
+                                </p>
+                            </div>
+                            <button onClick={() => setSelectedStatementPatient(null)} className="p-3 hover:bg-white/5 rounded-2xl text-white/40 hover:text-white transition-all text-xl font-black">&times;</button>
+                        </div>
+
+                        <div className="p-10 overflow-y-auto custom-scrollbar flex-1 bg-black/10">
+                            <BillingStatementSection patientId={selectedStatementPatient.id} />
+                        </div>
                     </div>
                 </div>
             )}

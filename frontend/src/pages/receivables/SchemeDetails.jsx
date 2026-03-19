@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Printer, Calendar, FileText, Download, Users, Shield } from 'lucide-react';
+import { ArrowLeft, Printer, Calendar, FileText, Download, Users, Shield, ChevronDown } from 'lucide-react';
 import api from '../../services/apiClient';
 import SchemeMembers from './SchemeMembers';
 import SchemeInvoices from './SchemeInvoices';
@@ -12,6 +12,7 @@ const SchemeDetails = () => {
     const [bills, setBills] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('statement');
+    const [showServicesDropdown, setShowServicesDropdown] = useState(false);
     const [dateRange, setDateRange] = useState({
         startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0], // First day of current month
         endDate: new Date().toISOString().split('T')[0] // Today
@@ -110,13 +111,44 @@ const SchemeDetails = () => {
                         >
                             Invoices
                         </button>
-                        <button
-                            onClick={() => navigate(`/app/receivables/schemes/${id}/services`)}
-                            className="pb-2 text-[10px] font-black uppercase tracking-widest border-b-2 border-transparent text-white/40 hover:text-white flex items-center gap-1.5 transition-all"
-                        >
-                            <Shield className="w-3 h-3" />
-                            Services & Pricing
-                        </button>
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowServicesDropdown(!showServicesDropdown)}
+                                className="pb-2 text-[10px] font-black uppercase tracking-widest border-b-2 border-transparent text-white/40 hover:text-white flex items-center gap-1.5 transition-all"
+                            >
+                                <Shield className="w-3 h-3" />
+                                Services & Pricing
+                                <ChevronDown className={`w-3 h-3 transition-transform ${showServicesDropdown ? 'rotate-180' : ''}`} />
+                            </button>
+                            
+                            {showServicesDropdown && (
+                                <>
+                                    <div className="fixed inset-0 z-20" onClick={() => setShowServicesDropdown(false)} />
+                                    <div className="absolute right-0 top-full mt-2 bg-bg-secondary border border-white/5 rounded-2xl shadow-2xl z-30 min-w-[200px] overflow-hidden animate-fade-in backdrop-blur-md">
+                                        <button
+                                            onClick={() => {
+                                                setShowServicesDropdown(false);
+                                                navigate(`/app/receivables/schemes/${id}/services`);
+                                            }}
+                                            className="w-full text-left px-5 py-3.5 text-[9px] font-black uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2.5 border-b border-white/5"
+                                        >
+                                            <Shield className="w-3.5 h-3.5 text-primary" />
+                                            Manage Services
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowServicesDropdown(false);
+                                                setActiveTab('members');
+                                            }}
+                                            className="w-full text-left px-5 py-3.5 text-[9px] font-black uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2.5"
+                                        >
+                                            <FileText className="w-3.5 h-3.5 text-pink-400" />
+                                            Patient Statements
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     </div>
 
                     {/* Actions (Only visible in Statement tab) */}
