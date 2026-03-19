@@ -41,8 +41,8 @@ const WaitingRoom = () => {
         }
     };
 
-    const handlePatientClick = (patientId) => {
-        navigate(`/app/patients/${patientId}`);
+    const handlePatientClick = (visitId) => {
+        navigate(`/app/visits/${visitId}`);
     };
 
     const getWaitTime = (dateString) => {
@@ -117,7 +117,7 @@ const WaitingRoom = () => {
                                     stageVisits.map(visit => (
                                         <div 
                                             key={visit.id} 
-                                            onClick={() => handlePatientClick(visit.patientId)}
+                                            onClick={() => handlePatientClick(visit.id)}
                                             className="group relative bg-bg-elevated p-4 rounded-xl shadow-sm hover:shadow-2xl hover:shadow-black/20 border border-border-color transition-all duration-500 cursor-pointer overflow-hidden active:scale-95"
                                         >
                                             {/* Top Section */}
