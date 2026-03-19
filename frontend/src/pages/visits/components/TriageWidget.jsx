@@ -97,7 +97,15 @@ const TriageWidget = ({ visitId, patientId, queueStatus, onVitalsSaved }) => {
         );
     }
 
-    if (queueStatus !== 'pending_triage') return null;
+    if (queueStatus !== 'pending_triage') {
+        return (
+            <div className="card p-6 bg-white/[0.02] border border-white/5 rounded-3xl flex flex-col items-center justify-center text-center min-h-[150px]">
+                <Activity className="w-8 h-8 text-white/10 mb-2 animate-pulse" />
+                <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary">No Triage Recorded</p>
+                <p className="text-[9px] font-bold text-text-tertiary/60 mt-0.5">Vitals have not been saved for this patient visit yet.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="card p-5 border border-orange-200 shadow-[0_0_15px_rgba(251,146,60,0.1)] relative overflow-hidden">

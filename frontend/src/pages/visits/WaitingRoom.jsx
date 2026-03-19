@@ -188,22 +188,26 @@ const WaitingRoom = () => {
                         </div>
 
                         {/* Content */}
-                        <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-black/10 space-y-4">
-                            <TriageWidget 
-                                visitId={activeVisit.id} 
-                                patientId={activeVisit.patient?.id} 
-                                queueStatus={activeVisit.queueStatus} 
-                                onVitalsSaved={() => { setActiveVisit(null); fetchVisits(); }} 
-                            />
-                            {activeVisit.queueStatus !== 'pending_triage' && (
-                                <DoctorWorkspace 
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-8 overflow-y-auto custom-scrollbar flex-1 bg-black/10 items-start">
+                            <div className="flex flex-col gap-4">
+                                <TriageWidget 
                                     visitId={activeVisit.id} 
                                     patientId={activeVisit.patient?.id} 
-                                    paymentMethod={activeVisit.patient?.paymentMethod} 
                                     queueStatus={activeVisit.queueStatus} 
-                                    onSaved={() => { setActiveVisit(null); fetchVisits(); }} 
+                                    onVitalsSaved={() => { setActiveVisit(null); fetchVisits(); }} 
                                 />
-                            )}
+                            </div>
+                            <div className="flex flex-col gap-4">
+                                {activeVisit.queueStatus !== 'pending_triage' && (
+                                    <DoctorWorkspace 
+                                        visitId={activeVisit.id} 
+                                        patientId={activeVisit.patient?.id} 
+                                        paymentMethod={activeVisit.patient?.paymentMethod} 
+                                        queueStatus={activeVisit.queueStatus} 
+                                        onSaved={() => { setActiveVisit(null); fetchVisits(); }} 
+                                    />
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
