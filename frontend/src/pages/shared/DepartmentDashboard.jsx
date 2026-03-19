@@ -5,8 +5,11 @@ import {
     Users, Clock, DollarSign, Activity,
     ChevronRight, Search, RefreshCw, Filter,
     MoreHorizontal, Stethoscope, Beaker, Pill,
-    Clipboard, Radio
+    Clipboard, Radio, X
 } from 'lucide-react';
+
+import TriageWidget from '../visits/components/TriageWidget';
+import DoctorWorkspace from '../visits/components/DoctorWorkspace';
 
 const DEPT_ICONS = {
     'Laboratory': Beaker,
@@ -33,6 +36,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [filter, setFilter] = useState(title === 'OPD' ? 'triage' : 'all'); // Set default to triage for OPD
+    const [activeVisit, setActiveVisit] = useState(null);
 
     const Icon = DEPT_ICONS[title] || Activity;
 
@@ -102,7 +106,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
     const activeFilters = title === 'OPD' ? opdFilters : standardFilters;
 
     return (
-        <div className="flex flex-col h-full space-y-4 animate-fade-in">
+        <div className="flex flex-col h-full space-y-4 animate-fade-in relative">
             {/* Minimalist Header */}
             <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-3">
@@ -187,6 +191,8 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                 onClick={() => {
                                     if (title === 'Pharmacy') {
                                         navigate(`/app/pharmacy/dispense?patientId=${v.patient?.id || v.id}`);
+                                    } else if (title === 'OPD' && (v.queueStatus === 'waiting_doctor' || v.queueStatus === 'with_doctor' || filter === 'doctor' || filter === 'all_opd')) {
+                                        setActiveVisit(v);
                                     } else {
                                         v.visitId ? navigate(`/app/visits/${v.visitId}`) : navigate(`/app/patients/${v.patient?.id || v.id}`);
                                     }
@@ -300,6 +306,35 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                     </div>
                 )}
             </div>
+
+            {/* Consultation Drawer Overlay */}
+            {activeVisit && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-end">
+                    <div className="w-full max-w-xl bg-bg-primary h-full shadow-2xl animate-fade-in p-6 overflow-y-auto border-l border-border-color flex flex-col gap-4 relative">
+                        <div className="flex items-center justify-between pb-4 border-b border-border-color">
+                            <div>
+                                <h3 className="text-lg font-black text-white tracking-tight">Active Consultation</h3>
+                                <p className="text-xs text-text-tertiary font-bold uppercase">{activeVisit.patient?.firstName} {activeVisit.patient?.lastName} • {activeVisit.patient?.patientNumber}</p>
+                            </div>
+                            <button onClick={() => setActiveVisit(null)} className="p-2 hover:bg-bg-tertiary rounded-full border border-border-color text-text-tertiary hover:text-white transition-all">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+                            <TriageWidget visitId={activeVisit.id} patientId={activeVisit.patient?.id} queueStatus={activeVisit.queueStatus} />
+                            <DoctorWorkspace 
+                                visitId={activeVisit.id} 
+                                patientId={activeVisit.patient?.id} 
+                                paymentMethod={activeVisit.patient?.paymentMethod} 
+                                queueStatus={activeVisit.queueStatus} 
+                                notes={activeVisit.notes} 
+                                onStatusChange={() => { loadData(); setActiveVisit(null); }} 
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

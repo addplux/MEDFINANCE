@@ -195,7 +195,6 @@ const VisitDetail = () => {
             {visit.visitType === 'opd' && visit.status === 'active' && (
                 <div className="space-y-4">
                     <TriageWidget visitId={visit.id} patientId={p?.id} queueStatus={visit.queueStatus} onVitalsSaved={load} />
-                    <DoctorWorkspace visitId={visit.id} patientId={p?.id} paymentMethod={p?.paymentMethod} queueStatus={visit.queueStatus} notes={visit.notes} onStatusChange={load} />
                 </div>
             )}
 
