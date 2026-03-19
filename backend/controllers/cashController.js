@@ -178,7 +178,7 @@ const createPayment = async (req, res) => {
 
         // Depending on billType, fetch the granular bill details
         let billDetails = null;
-        if (createdPayment.billType && createdPayment.billId) {
+        if (createdPayment && createdPayment.billType && createdPayment.billId) {
             let model;
             let includeOptions = [];
             switch (createdPayment.billType) {
@@ -239,7 +239,7 @@ const getPaymentReceipt = async (req, res) => {
 
         // Fetch Bill Details
         let billDetails = null;
-        if (payment.billType && payment.billId) {
+        if (payment && payment.billType && payment.billId) {
             let model;
             let includeOptions = [];
             switch (payment.billType) {
