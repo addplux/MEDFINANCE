@@ -20,7 +20,7 @@ const getVitals = async (req, res) => {
         res.json(vitals);
     } catch (error) {
         console.error('Error fetching vitals:', error);
-        res.status(500).json({ error: 'Failed to fetch vitals' });
+        res.status(500).json({ error: 'Failed to fetch vitals', details: error.message });
     }
 };
 
