@@ -16,7 +16,8 @@ const DoctorWorkspace = ({ visitId, patientId, paymentMethod, queueStatus, notes
         const loadServices = async () => {
             try {
                 const res = await setupAPI.services.getAll({ limit: 1000 });
-                setServices(res.data.data.filter(s => s.isActive) || []);
+                const data = res.data?.data || res.data || [];
+                setServices(data.filter(s => s.isActive));
             } catch (err) {
                 console.error('Failed to load services:', err);
             }
