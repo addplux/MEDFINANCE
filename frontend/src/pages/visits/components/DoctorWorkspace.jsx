@@ -150,11 +150,11 @@ const DoctorWorkspace = ({ visitId, patientId, paymentMethod, queueStatus, notes
                         </div>
 
                         {/* Search Results (Compact Dropdown height cap) */}
-                        <div className="max-h-40 overflow-y-auto bg-bg-secondary rounded-xl border border-white/10 custom-scrollbar divide-y divide-white/5">
+                        <div className="max-h-80 overflow-y-auto bg-bg-secondary rounded-xl border border-white/10 custom-scrollbar divide-y divide-white/5">
                                 {filteredServices.length === 0 ? (
                                     <div className="p-3 text-center text-xs text-white/40">No services found</div>
                                 ) : (
-                                    filteredServices.slice(0, 10).map(s => (
+                                    filteredServices.map(s => (
                                         <div key={s.id} className="flex justify-between items-center p-2 hover:bg-white/5 cursor-pointer" onClick={() => addToBasket(s)}>
                                             <div>
                                                 <p className="text-xs font-bold text-white">{s.serviceName}</p>
