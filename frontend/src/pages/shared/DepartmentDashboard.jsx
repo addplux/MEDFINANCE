@@ -106,7 +106,8 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
     const activeFilters = title === 'OPD' ? opdFilters : standardFilters;
 
     return (
-        <div className="flex flex-col h-full space-y-4 animate-fade-in relative">
+        <div className="flex flex-col h-full relative">
+            <div className="flex flex-col h-full space-y-4 animate-fade-in flex-1 overflow-hidden">
             {/* Minimalist Header */}
             <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-3">
@@ -305,6 +306,8 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                         ))}
                     </div>
                 )}
+            </div>
+
             </div>
 
             {/* Consultation Modal Overlay */}
