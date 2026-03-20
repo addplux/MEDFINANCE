@@ -158,7 +158,7 @@ const updateVisit = async (req, res) => {
         const visit = await Visit.findByPk(req.params.id);
         if (!visit) return res.status(404).json({ error: 'Visit not found' });
 
-        const { departmentId, queueStatus, priority, status } = req.body;
+        const { departmentId, assignedDepartment, queueStatus, priority, status, notes } = req.body;
 
         const oldDept = visit.departmentId;
 
@@ -190,6 +190,8 @@ const updateVisit = async (req, res) => {
         if (queueStatus) visit.queueStatus = queueStatus;
         if (priority) visit.priority = priority;
         if (status) visit.status = status;
+        if (assignedDepartment) visit.assignedDepartment = assignedDepartment;
+        if (notes) visit.notes = notes;
 
         await visit.save();
 
