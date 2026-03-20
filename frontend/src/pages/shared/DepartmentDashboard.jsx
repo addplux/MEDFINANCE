@@ -310,7 +310,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
             {/* Consultation Modal Overlay */}
             {activeVisit && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-start justify-center p-4 overflow-y-auto pt-16">
-                    <div className="w-full max-w-6xl bg-bg-secondary rounded-[1.5rem] shadow-2xl border border-white/10 p-6 flex flex-col gap-4 relative animate-zoom-in max-h-[88vh] overflow-hidden">
+                    <div className="w-full max-w-7xl bg-bg-secondary rounded-[1.5rem] shadow-2xl border border-white/10 p-6 flex flex-col gap-4 relative animate-zoom-in max-h-[95vh] overflow-hidden">
                         <div className="flex items-center justify-between pb-4 border-b border-white/10">
                             <div>
                                 <h3 className="text-lg font-black text-white tracking-tight">Active Consultation</h3>
@@ -321,7 +321,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto pr-2 custom-scrollbar flex-1 items-start">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto pr-2 custom-scrollbar flex-1 items-start min-h-0">
                             <div className="flex flex-col gap-4">
                                 <TriageWidget visitId={activeVisit.id} patientId={activeVisit.patient?.id} queueStatus={activeVisit.queueStatus} />
                             </div>
