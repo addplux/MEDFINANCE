@@ -1,4 +1,4 @@
-const { Visit, Patient, Scheme, Vitals, PatientMovement, Department, Admission, Bed, Ward, User, OPDBill, Service, sequelize } = require('../models');
+const { Visit, Patient, Scheme, Vitals, PatientMovement, Department, Admission, Bed, Ward, User, OPDBill, Service, LabTest, LabRequest, LabResult, RadiologyBill, sequelize } = require('../models');
 const { Op } = require('sequelize');
 
 // Create a new outpatient visit
@@ -194,6 +194,67 @@ const updateVisit = async (req, res) => {
         if (notes) visit.notes = notes;
 
         await visit.save();
+
+        // --- AUTOMATION HOOK FOR LAB/RADIOLOGY ---
+        if (['pending_results', 'waiting_lab', 'waiting_radiology'].includes(visit.queueStatus)) {
+            try {
+                const bills = await OPDBill.findAll({
+                    where: { visitId: visit.id },
+                    include: [{ model: Service, as: 'service' }]
+                });
+
+                const labBills = bills.filter(b => b.service?.category === 'laboratory');
+                const radBills = bills.filter(b => b.service?.category === 'radiology');
+
+                if (labBills.length > 0) {
+                    const codes = labBills.map(b => b.service.serviceCode);
+                    const tests = await LabTest.findAll({ where: { code: codes } });
+
+                    if (tests.length > 0) {
+                        const existing = await LabRequest.findOne({ where: { patientId: visit.patientId, status: 'requested' } });
+                        if (!existing) {
+                            const count = await LabRequest.count();
+                            const requestNumber = `LAB${String(count + 1).padStart(6, '0')}`;
+                            const request = await LabRequest.create({
+                                requestNumber,
+                                patientId: visit.patientId,
+                                requestedBy: req.user.id,
+                                status: 'requested',
+                                totalAmount: tests.reduce((sum, t) => sum + parseFloat(t.price || 0), 0),
+                                paymentStatus: bills[0].paymentStatus
+                            });
+
+                            await Promise.all(tests.map(t => LabResult.create({
+                                labRequestId: request.id,
+                                testId: t.id,
+                                resultValue: ''
+                            })));
+                        }
+                    }
+                }
+
+                if (radBills.length > 0) {
+                    await Promise.all(radBills.map(async b => {
+                        const existing = await RadiologyBill.findOne({ where: { patientId: visit.patientId, scanCode: b.service.serviceCode } });
+                        if (!existing) {
+                            const count = await RadiologyBill.count();
+                            const billNumber = `RB${String(count + 1).padStart(6, '0')}`;
+                            await RadiologyBill.create({
+                                billNumber,
+                                patientId: visit.patientId,
+                                scanType: b.service.serviceName,
+                                scanCode: b.service.serviceCode,
+                                amount: b.totalAmount,
+                                netAmount: b.totalAmount, // net amount fallbacks
+                                createdBy: req.user.id
+                            });
+                        }
+                    }));
+                }
+            } catch (autoErr) {
+                console.error('Failed to auto-generate requests:', autoErr);
+            }
+        }
 
         res.json(visit);
     } catch (error) {

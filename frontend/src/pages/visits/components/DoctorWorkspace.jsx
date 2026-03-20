@@ -47,6 +47,7 @@ const DoctorWorkspace = ({ visitId, patientId, paymentMethod, queueStatus, notes
                 await Promise.all(basket.map(item => 
                     billingAPI.opd.create({
                         patientId,
+                        visitId,
                         serviceId: item.id,
                         quantity: 1,
                         paymentMethod: paymentMethod || 'cash',
