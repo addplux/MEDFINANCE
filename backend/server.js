@@ -221,12 +221,17 @@ const startServer = async () => {
 
         // Sync database models
         console.log('⏳ Syncing database models...');
-        try {
-            // Schema is in sync — use alter: false so startup is fast
-            await syncDatabase({ alter: false });
-            console.log('✅ Database synchronized successfully');
-        } catch (syncError) {
-            console.error('⚠️ Database synchronization failed:', syncError);
+        const isPooler = process.env.DATABASE_URL && process.env.DATABASE_URL.includes('pooler');
+        if (process.env.NODE_ENV !== 'production' || !isPooler) {
+            try {
+                // Schema is in sync — use alter: false so startup is fast
+                await syncDatabase({ alter: false });
+                console.log('✅ Database synchronized successfully');
+            } catch (syncError) {
+                console.error('⚠️ Database synchronization failed:', syncError);
+            }
+        } else {
+            console.log('💡 Skipping automatic database synchronization in production (pgBouncer structure)');
         }
 
         // Run one-time migrations (safe, idempotent)
