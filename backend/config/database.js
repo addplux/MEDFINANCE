@@ -7,8 +7,10 @@ require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
 // Support both DATABASE_URL and individual parameters
-const sequelize = (process.env.DATABASE_URL && /^[a-zA-Z]+:\/\//.test(process.env.DATABASE_URL))
-  ? new Sequelize(process.env.DATABASE_URL, {
+const dbUrl = process.env.DATABASE_URL ? process.env.DATABASE_URL.replace(/^['"]|['"]$/g, '').trim() : '';
+
+const sequelize = (dbUrl && /^[a-zA-Z]+:\/\//.test(dbUrl))
+  ? new Sequelize(dbUrl, {
     dialect: 'postgres',
     dialectOptions: {
       ssl: {
