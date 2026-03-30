@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { patientAPI } from '../../services/apiService';
+import { patientAPI, visitAPI } from '../../services/apiService';
 import {
     Users, Plus, Search, Eye, Edit, Trash2, GitMerge, ClipboardList,
     Banknote, Building, CreditCard, Stethoscope, Gift, Siren, RefreshCw,
@@ -62,7 +62,7 @@ const PatientTypeBadge = ({ patient }) => {
 };
 
 // ── Patient Row Component (Expandable) ──────────────────────────────────────
-const PatientRow = ({ patient, navigate, handleStatusChange, handleDelete, statusBtnClass, statusTitle, StatusIcon, isChild }) => {
+const PatientRow = ({ patient, navigate, handleStatusChange, handleDelete, handleSendToTriage, statusBtnClass, statusTitle, StatusIcon, isChild }) => {
     const [expanded, setExpanded] = useState(false);
     const [family, setFamily] = useState([]);
     const [loadingFamily, setLoadingFamily] = useState(false);
@@ -164,6 +164,13 @@ const PatientRow = ({ patient, navigate, handleStatusChange, handleDelete, statu
                         >
                             <Trash2 className="w-4 h-4" />
                         </button>
+                        <button
+                            onClick={() => handleSendToTriage(patient)}
+                            className="p-1.5 hover:bg-emerald-500/10 text-emerald-400 hover:text-emerald-300 rounded-lg transition-colors"
+                            title="Send to Triage"
+                        >
+                            <Siren className="w-4 h-4" />
+                        </button>
                     </div>
                 </td>
             </tr>
@@ -188,6 +195,7 @@ const PatientRow = ({ patient, navigate, handleStatusChange, handleDelete, statu
                                 navigate={navigate}
                                 handleStatusChange={handleStatusChange}
                                 handleDelete={handleDelete}
+                                handleSendToTriage={handleSendToTriage}
                                 statusBtnClass={statusBtnClass}
                                 statusTitle={statusTitle}
                                 StatusIcon={StatusIcon}
@@ -249,6 +257,21 @@ const Patients = () => {
             console.error('Failed to load patients:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSendToTriage = async (patient) => {
+        if (!window.confirm(`Send ${patient.firstName} ${patient.lastName} to Triage?`)) return;
+        try {
+            await visitAPI.create({
+                patientId: patient.id,
+                visitType: 'opd',
+                reasonForVisit: 'General Consultation'
+            });
+            alert('Patient successfully sent to Triage!');
+        } catch (error) {
+            console.error('Failed to send to triage:', error);
+            alert(error.response?.data?.error || 'Failed to send to triage');
         }
     };
 
@@ -451,6 +474,7 @@ const Patients = () => {
                                         navigate={navigate}
                                         handleStatusChange={handleStatusChange}
                                         handleDelete={handleDelete}
+                                        handleSendToTriage={handleSendToTriage}
                                         statusBtnClass={statusBtnClass}
                                         statusTitle={statusTitle}
                                         StatusIcon={StatusIcon}
@@ -502,6 +526,9 @@ const Patients = () => {
                                     </button>
                                     <button onClick={() => navigate(`/app/patients/${patient.id}/edit`)} className="btn btn-sm btn-secondary rounded-full flex-1 justify-center">
                                         <Edit className="w-3.5 h-3.5 mr-1" /> Edit
+                                    </button>
+                                    <button onClick={() => handleSendToTriage(patient)} className="btn btn-sm bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-full flex-1 justify-center">
+                                        <Siren className="w-3.5 h-3.5 mr-1" /> Triage
                                     </button>
                                 </div>
                             </div>
