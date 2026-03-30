@@ -12,7 +12,7 @@ const { sendSuspensionSMS } = require('../utils/smsService');
 // Get all patients
 const getAllPatients = async (req, res) => {
     try {
-        const { page = 1, limit = 20, search, paymentMethod, onlyPrincipals } = req.query;
+        const { page = 1, limit = 20, search, paymentMethod, onlyPrincipals, costCategory, isReferral } = req.query;
         const offset = (page - 1) * limit;
 
         const where = {
@@ -33,6 +33,23 @@ const getAllPatients = async (req, res) => {
 
         if (paymentMethod) {
             where[Op.and].push({ paymentMethod });
+        }
+
+        if (costCategory) {
+            if (costCategory === 'high_cost') {
+                where[Op.and].push({
+                    [Op.or]: [
+                        { costCategory: 'high_cost' },
+                        { costCategory: 'standard' }
+                    ]
+                });
+            } else {
+                where[Op.and].push({ costCategory });
+            }
+        }
+
+        if (isReferral !== undefined && isReferral !== '') {
+            where[Op.and].push({ isReferral: isReferral === 'true' });
         }
 
         if (onlyPrincipals === 'true') {
