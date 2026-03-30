@@ -60,12 +60,16 @@ const getAllPatients = async (req, res) => {
                 [Op.or]: [
                     { memberRank: 'principal' },
                     { memberRank: null },
-                    { memberRank: '' }
+                    { memberRank: '' },
+                    { memberRank: 'individual' },
+                    { memberRank: 'standard' }
                 ]
             });
         }
 
-        // DEBUG: Log the final where clause to help identify filtering issues
+        // DIAGNOSTIC: Log total counts to see if filtering is the cause
+        const totalUnfiltered = await Patient.count();
+        console.log(`[DIAGNOSTIC] Total patients in DB: ${totalUnfiltered}`);
         console.log('[DEBUG] Patients Query Where:', JSON.stringify(where, null, 2));
 
         const { count, rows } = await Patient.findAndCountAll({
