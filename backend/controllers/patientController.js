@@ -37,7 +37,7 @@ const getAllPatients = async (req, res) => {
 
         if (costCategory) {
             if (costCategory === 'high_cost') {
-                // For high_cost view, show high_cost, standard, and anything that isn't explicitly low_cost
+                // EXTREMELY PERMISSIVE: Treat anything that is NOT low_cost as high_cost/standard
                 where[Op.and].push({
                     [Op.or]: [
                         { costCategory: 'high_cost' },
@@ -62,15 +62,22 @@ const getAllPatients = async (req, res) => {
                     { memberRank: null },
                     { memberRank: '' },
                     { memberRank: 'individual' },
-                    { memberRank: 'standard' }
+                    { memberRank: 'standard' },
+                    { memberRank: 'other' }
                 ]
             });
         }
 
-        // DIAGNOSTIC: Log total counts to see if filtering is the cause
-        const totalUnfiltered = await Patient.count();
-        console.log(`[DIAGNOSTIC] Total patients in DB: ${totalUnfiltered}`);
-        console.log('[DEBUG] Patients Query Where:', JSON.stringify(where, null, 2));
+        // --- FINAL DIAGNOSTICS ---
+        const total = await Patient.count();
+        const highCostCount = await Patient.count({ where: { costCategory: 'high_cost' } });
+        const standardCount = await Patient.count({ where: { costCategory: 'standard' } });
+        const lowCostCount = await Patient.count({ where: { costCategory: 'low_cost' } });
+        const nullCategoryCount = await Patient.count({ where: { costCategory: null } });
+        
+        console.log(`[DIAGNOSTIC] Total: ${total}`);
+        console.log(`[DIAGNOSTIC] HC: ${highCostCount}, STD: ${standardCount}, LC: ${lowCostCount}, NULL: ${nullCategoryCount}`);
+        console.log(`[DEBUG] Final Query Where:`, JSON.stringify(where, null, 2));
 
         const { count, rows } = await Patient.findAndCountAll({
             attributes: {
