@@ -37,10 +37,13 @@ const getAllPatients = async (req, res) => {
 
         if (costCategory) {
             if (costCategory === 'high_cost') {
+                // For high_cost view, show high_cost, standard, and anything that isn't explicitly low_cost
                 where[Op.and].push({
                     [Op.or]: [
                         { costCategory: 'high_cost' },
-                        { costCategory: 'standard' }
+                        { costCategory: 'standard' },
+                        { costCategory: { [Op.is]: null } },
+                        { costCategory: { [Op.notIn]: ['low_cost'] } }
                     ]
                 });
             } else {
@@ -56,10 +59,15 @@ const getAllPatients = async (req, res) => {
             where[Op.and].push({
                 [Op.or]: [
                     { memberRank: 'principal' },
-                    { memberRank: null }
+                    { memberRank: null },
+                    { memberRank: '' }
                 ]
             });
         }
+
+        // DEBUG: Log the final where clause to help identify filtering issues
+        console.log('[DEBUG] Patients Query Where:', JSON.stringify(where, null, 2));
+
         const { count, rows } = await Patient.findAndCountAll({
             attributes: {
                 include: [
