@@ -68,17 +68,6 @@ const getAllPatients = async (req, res) => {
             });
         }
 
-        // --- FINAL DIAGNOSTICS ---
-        const total = await Patient.count();
-        const highCostCount = await Patient.count({ where: { costCategory: 'high_cost' } });
-        const standardCount = await Patient.count({ where: { costCategory: 'standard' } });
-        const lowCostCount = await Patient.count({ where: { costCategory: 'low_cost' } });
-        const nullCategoryCount = await Patient.count({ where: { costCategory: null } });
-        
-        console.log(`[DIAGNOSTIC] Total: ${total}`);
-        console.log(`[DIAGNOSTIC] HC: ${highCostCount}, STD: ${standardCount}, LC: ${lowCostCount}, NULL: ${nullCategoryCount}`);
-        console.log(`[DEBUG] Final Query Where:`, JSON.stringify(where, null, 2));
-
         const { count, rows } = await Patient.findAndCountAll({
             attributes: {
                 include: [
