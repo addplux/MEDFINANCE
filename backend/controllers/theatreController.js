@@ -72,6 +72,24 @@ exports.createTheatreBill = async (req, res) => {
         }
 
         const billNumber = await generateBillNumber();
+
+        // Check for age group exemption
+        if (patientId) {
+            const patientRecord = await Patient.findByPk(patientId, { transaction });
+            if (patientRecord) {
+                const isExempted = (patientRecord.ageGroup === 'under_5' || patientRecord.ageGroup === 'above_65' || patientRecord.paymentMethod === 'exempted' || patientRecord.paymentMethod === 'foc');
+                if (isExempted) {
+                    req.body.amount = 0;
+                    req.body.totalAmount = 0;
+                    req.body.netAmount = 0;
+                    req.body.amountPaid = 0;
+                    req.body.paymentStatus = 'paid';
+                } else if (patientRecord.paymentMethod === 'private_prepaid') {
+                    req.body.paymentStatus = 'paid';
+                }
+            }
+        }
+
         const bill = await TheatreBill.create({
             ...req.body,
             billNumber,

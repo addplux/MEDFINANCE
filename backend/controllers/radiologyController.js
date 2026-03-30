@@ -89,18 +89,21 @@ exports.createRequest = async (req, res) => {
         }
 
         const isPrepaid = patientMethod === 'private_prepaid' || patientMethod === 'private prepaid';
+        const isExempted = patientRecord ? (patientRecord.ageGroup === 'under_5' || patientRecord.ageGroup === 'above_65' || patientMethod === 'exempted' || patientMethod === 'foc') : false;
 
-        if (isPrepaid) {
+        let finalAmount = isExempted ? 0 : totalAmount;
+
+        if (isPrepaid && !isExempted) {
             // Check Prepaid Balance
-            if (parseFloat(patientRecord.balance || 0) < totalAmount) {
+            if (parseFloat(patientRecord.balance || 0) < finalAmount) {
                 await transaction.rollback();
                 return res.status(400).json({
-                    error: `Insufficient prepaid balance. Available: K${parseFloat(patientRecord.balance || 0).toFixed(2)}, Required: K${totalAmount.toFixed(2)}`
+                    error: `Insufficient prepaid balance. Available: K${parseFloat(patientRecord.balance || 0).toFixed(2)}, Required: K${finalAmount.toFixed(2)}`
                 });
             }
         }
 
-        const initialPaymentStatus = isPrepaid ? 'paid' : 'unpaid';
+        const initialPaymentStatus = (isPrepaid || isExempted || finalAmount === 0) ? 'paid' : 'unpaid';
 
         const bill = await RadiologyBill.create({
             billNumber,
@@ -109,8 +112,8 @@ exports.createRequest = async (req, res) => {
             scanType: services.map(s => s.serviceName).join(', '),
             priority: priority || 'routine',
             clinicalNotes,
-            amount: totalAmount,
-            netAmount: totalAmount,
+            amount: finalAmount,
+            netAmount: finalAmount,
             createdBy: req.user.id,
             status: 'pending',
             paymentStatus: initialPaymentStatus,

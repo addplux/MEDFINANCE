@@ -31,8 +31,15 @@ const TYPE_BADGE = {
 import { Battery } from 'lucide-react';
 
 const PatientTypeBadge = ({ patient }) => {
-    const type = patient?.paymentMethod || 'cash';
-    const cfg = TYPE_BADGE[type] || { label: type, bg: 'bg-gray-100', text: 'text-gray-700' };
+    let type = patient?.paymentMethod || 'cash';
+    let cfg = TYPE_BADGE[type] || { label: type, bg: 'bg-gray-100', text: 'text-gray-700' };
+
+    if (patient?.costCategory === 'low_cost') {
+        cfg = patient?.isReferral 
+            ? { label: 'Referral', bg: 'bg-emerald-100', text: 'text-emerald-800' }
+            : { label: 'Non-Referral', bg: 'bg-blue-100', text: 'text-blue-800' };
+        type = 'low_cost_base';
+    }
 
     return (
         <div className="flex flex-col gap-1 items-start">
@@ -206,13 +213,15 @@ const Patients = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
+    const [mainCategory, setMainCategory] = useState('high_cost');
+    const [referralFilter, setReferralFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
 
     useEffect(() => {
         loadPatients();
-    }, [currentPage, searchTerm, categoryFilter]);
+    }, [currentPage, searchTerm, categoryFilter, mainCategory, referralFilter]);
 
     const loadPatients = async () => {
         try {
@@ -221,9 +230,17 @@ const Patients = () => {
                 page: currentPage,
                 limit: 15,
                 search: searchTerm || undefined,
-                paymentMethod: categoryFilter || undefined,
-                onlyPrincipals: 'true', // Filter by principal by default
+                onlyPrincipals: 'true',
+                costCategory: mainCategory
             };
+
+            if (mainCategory === 'high_cost' && categoryFilter) {
+                params.paymentMethod = categoryFilter;
+            }
+            if (mainCategory === 'low_cost' && referralFilter !== '') {
+                params.isReferral = referralFilter;
+            }
+
             const response = await patientAPI.getAll(params);
             setPatients(response.data.data);
             setTotalPages(response.data.totalPages);
@@ -314,25 +331,57 @@ const Patients = () => {
                 </div>
             </div>
 
-            {/* Type filter chips */}
+            {/* Main Category Tabs */}
+            <div className="flex border-b border-white/10 mt-6">
+                <button
+                    onClick={() => { setMainCategory('high_cost'); setCategoryFilter(''); setCurrentPage(1); }}
+                    className={`px-6 py-3 text-sm font-black uppercase tracking-widest border-b-2 transition-all ${mainCategory === 'high_cost' ? 'border-blue-500 text-blue-400' : 'border-transparent text-white/40 hover:text-white/80'}`}
+                >
+                    High Cost Patients
+                </button>
+                <button
+                    onClick={() => { setMainCategory('low_cost'); setReferralFilter(''); setCurrentPage(1); }}
+                    className={`px-6 py-3 text-sm font-black uppercase tracking-widest border-b-2 transition-all ${mainCategory === 'low_cost' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-white/40 hover:text-white/80'}`}
+                >
+                    Low Cost Patients
+                </button>
+            </div>
+
+            {/* Sub-Filters */}
             <div className="card p-3 flex flex-col md:flex-row items-center gap-4">
                 <div className="flex items-center gap-2 flex-wrap flex-1">
-                    {PATIENT_TYPES.map(t => (
-                        <button
-                            key={t.value}
-                            onClick={() => {
-                                setCategoryFilter(t.value);
-                                setCurrentPage(1);
-                            }}
-                            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-semibold border transition-colors ${categoryFilter === t.value
-                                ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-600/20'
-                                : 'bg-white/5 text-white/60 border-white/10 hover:border-indigo-400 hover:text-white'
-                                }`}
-                        >
-                            <t.icon className="w-3.5 h-3.5" />
-                            {t.label}
-                        </button>
-                    ))}
+                    {mainCategory === 'high_cost' ? (
+                        [
+                            { value: '', label: 'All', icon: Users },
+                            { value: 'cash', label: 'Cash', icon: Banknote },
+                            { value: 'corporate', label: 'Corporate', icon: Building },
+                            { value: 'private_prepaid', label: 'Prepaid', icon: CreditCard },
+                            { value: 'staff', label: 'Staff', icon: Stethoscope }
+                        ].map(t => (
+                            <button
+                                key={t.value}
+                                onClick={() => { setCategoryFilter(t.value); setCurrentPage(1); }}
+                                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-semibold border transition-colors ${categoryFilter === t.value ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-600/20' : 'bg-white/5 text-white/60 border-white/10 hover:border-indigo-400 hover:text-white'}`}
+                            >
+                                <t.icon className="w-3.5 h-3.5" />
+                                {t.label}
+                            </button>
+                        ))
+                    ) : (
+                        [
+                            { value: '', label: 'All' },
+                            { value: 'true', label: 'With Referral' },
+                            { value: 'false', label: 'Non-Referral' }
+                        ].map(t => (
+                            <button
+                                key={t.value}
+                                onClick={() => { setReferralFilter(t.value); setCurrentPage(1); }}
+                                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-semibold border transition-colors ${referralFilter === t.value ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-600/20' : 'bg-white/5 text-white/60 border-white/10 hover:border-emerald-400 hover:text-white'}`}
+                            >
+                                {t.label}
+                            </button>
+                        ))
+                    )}
                 </div>
 
                 <div className="flex items-center gap-2 w-full md:w-auto">

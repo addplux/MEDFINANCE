@@ -22,7 +22,12 @@ const Patient = sequelize.define('Patient', {
     },
     dateOfBirth: {
         type: DataTypes.DATEONLY,
-        allowNull: false
+        allowNull: true
+    },
+    ageGroup: {
+        type: DataTypes.ENUM('under_5', '5_to_65', 'above_65'),
+        allowNull: false,
+        defaultValue: '5_to_65'
     },
     gender: {
         type: DataTypes.ENUM('male', 'female', 'other'),
@@ -73,6 +78,11 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.ENUM('standard', 'high_cost', 'low_cost'),
         allowNull: false,
         defaultValue: 'standard'
+    },
+    isReferral: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
     },
     staffId: {
         type: DataTypes.INTEGER,

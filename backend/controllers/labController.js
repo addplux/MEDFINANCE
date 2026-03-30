@@ -78,11 +78,13 @@ const createRequest = async (req, res) => {
         }
 
         const tests = await LabTest.findAll({ where: { id: testIds }, transaction: t });
-        const totalAmount = tests.reduce((sum, test) => sum + parseFloat(test.price || 0), 0);
+        
+        const isExempted = (patient.ageGroup === 'under_5' || patient.ageGroup === 'above_65' || patient.paymentMethod === 'exempted' || patient.paymentMethod === 'foc');
+        const totalAmount = isExempted ? 0 : tests.reduce((sum, test) => sum + parseFloat(test.price || 0), 0);
 
         // For prepaid patients: check they have enough balance, active plan, and usage within limits
         const isPrepaid = patient.paymentMethod === 'private_prepaid';
-        if (isPrepaid) {
+        if (isPrepaid && !isExempted) {
             // 1. Check Date Validity
             const now = new Date();
             const today = now.toISOString().split('T')[0];
@@ -140,7 +142,7 @@ const createRequest = async (req, res) => {
             clinicalNotes,
             status: 'requested',
             totalAmount,
-            paymentStatus: isPrepaid ? 'paid' : 'unpaid'
+            paymentStatus: (isPrepaid || isExempted || totalAmount === 0) ? 'paid' : 'unpaid'
         }, { transaction: t });
 
         // Create empty results for each test (to be filled later)
@@ -167,10 +169,10 @@ const createRequest = async (req, res) => {
                     patientId,
                     testName: test.name,
                     testCode: test.code,
-                    amount: test.price,
-                    netAmount: test.price,
+                    amount: isExempted ? 0 : test.price,
+                    netAmount: isExempted ? 0 : test.price,
                     status: 'pending',
-                    paymentStatus: 'unpaid',
+                    paymentStatus: (isExempted || test.price == 0) ? 'paid' : 'unpaid',
                     createdBy: req.user.id
                 }, { transaction: t });
             });

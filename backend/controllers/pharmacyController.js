@@ -169,8 +169,9 @@ const dispenseMedication = async (req, res) => {
 
         const isCashPatient = CASH_METHODS.includes(patient.paymentMethod);
         const isPrepaid = patient.paymentMethod === 'private_prepaid' || patient.paymentMethod === 'private prepaid';
+        const isExempted = (patient.ageGroup === 'under_5' || patient.ageGroup === 'above_65' || patient.paymentMethod === 'exempted' || patient.paymentMethod === 'foc');
 
-        if (isCashPatient) {
+        if (isCashPatient && !isExempted) {
             // For cash patients, we require explicit confirmation that payment has been made.
             // The frontend must pass paymentConfirmed: true after the cashier has processed payment.
             if (!req.body.paymentConfirmed) {
@@ -199,7 +200,7 @@ const dispenseMedication = async (req, res) => {
             if (batch) requestedTotalAmount += (batch.sellingPrice * item.quantity) - (item.discount || 0);
         }
 
-        if (isPrepaid) {
+        if (isPrepaid && !isExempted) {
             if (parseFloat(patient.balance || 0) < requestedTotalAmount) {
                 await t.rollback();
                 return res.status(400).json({
@@ -243,7 +244,8 @@ const dispenseMedication = async (req, res) => {
 
             // 3. Create Bill
             const medication = await Medication.findByPk(medicationId, { transaction: t });
-            const totalAmount = batch.sellingPrice * quantity;
+            const unitPrice = isExempted ? 0 : batch.sellingPrice;
+            const totalAmount = unitPrice * quantity;
             const netAmount = totalAmount - (discount || 0);
 
             // Generate bill number for THIS item (usually grouped, but model is per line item for now)
@@ -263,12 +265,12 @@ const dispenseMedication = async (req, res) => {
                 medication: medication.name, // Legacy field support
                 batchNumber: batch.batchNumber, // Legacy field support
                 quantity,
-                unitPrice: batch.sellingPrice,
+                unitPrice,
                 totalAmount,
                 discount: discount || 0,
                 netAmount,
                 status: 'paid', // Dispensed
-                paymentStatus: isPrepaid ? 'paid' : (isCashPatient ? 'paid' : 'unpaid'),
+                paymentStatus: (isPrepaid || isExempted || netAmount === 0) ? 'paid' : (isCashPatient ? 'paid' : 'unpaid'),
                 createdBy: req.user.id
             }, { transaction: t });
 

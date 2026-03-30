@@ -102,8 +102,14 @@ const createOPDBill = async (req, res) => {
         const netAmount = totalAmount - discountAmount;
 
         const isPrepaid = tier === 'private_prepaid' || tier === 'private prepaid';
+        const isExempted = (patient.ageGroup === 'under_5' || patient.ageGroup === 'above_65' || tier === 'exempted' || tier === 'foc');
 
-        if (isPrepaid) {
+        // Apply age-based exemption
+        if (isExempted) {
+            unitPrice = 0;
+        }
+
+        if (isPrepaid && !isExempted) {
             if (parseFloat(patient.balance || 0) < netAmount) {
                 return res.status(400).json({
                     error: `Insufficient prepaid balance. Available: K${parseFloat(patient.balance || 0).toFixed(2)}, Required: K${netAmount.toFixed(2)}`
@@ -165,8 +171,8 @@ const createOPDBill = async (req, res) => {
             discount: discountAmount,
             netAmount,
             paymentMethod,
-            status: isPrepaid ? 'paid' : 'pending',
-            paymentStatus: isPrepaid ? 'paid' : 'unpaid',
+            status: (isPrepaid || isExempted || netAmount === 0) ? 'paid' : 'pending',
+            paymentStatus: (isPrepaid || isExempted || netAmount === 0) ? 'paid' : 'unpaid',
             notes,
             createdBy: req.user.id
         });

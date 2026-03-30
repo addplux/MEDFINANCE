@@ -108,17 +108,17 @@ const createPatient = async (req, res) => {
     const t = await sequelize.transaction();
     try {
         const {
-            firstName, lastName, dateOfBirth, gender, phone, email, address,
-            paymentMethod, costCategory, staffId, serviceId, registeredService, ward,
+            firstName, lastName, dateOfBirth, ageGroup, gender, phone, email, address,
+            paymentMethod, costCategory, isReferral, staffId, serviceId, registeredService, ward,
             emergencyContact, emergencyPhone, nrc, patientType, schemeId, initialDeposit,
             // Prepaid / membership fields
             balance, prepaidCredit, policyNumber, memberRank, memberSuffix, memberStatus, memberPlan
         } = req.body;
 
         // Validate required fields
-        if (!firstName || !lastName || !dateOfBirth || !gender) {
+        if (!firstName || !lastName || !gender) {
             await t.rollback();
-            return res.status(400).json({ error: 'First name, last name, date of birth, and gender are required' });
+            return res.status(400).json({ error: 'First name, last name, and gender are required' });
         }
 
         // Generate patient number
@@ -131,20 +131,32 @@ const createPatient = async (req, res) => {
             photoUrl = `/uploads/patients/${req.file.filename}`;
         }
 
-        // For private_prepaid members the opening balance is in `balance`
-        const openingBalance = Number(balance || prepaidCredit || 0);
+        // Downpayment rule: High cost + Prepaid Scheme requires K2100 (K100 fee + K2000 balance)
+        const isPrepaidScheme = (costCategory === 'high_cost' && paymentMethod === 'private_prepaid');
+        let openingBalance = 0;
+        let isRegistrationFeePaid = false;
+        
+        if (isPrepaidScheme) {
+            openingBalance = 2000;
+            isRegistrationFeePaid = true;
+        } else {
+            // Standard fallback for others
+            openingBalance = Number(balance || prepaidCredit || 0);
+        }
 
         const patient = await Patient.create({
             patientNumber,
             firstName,
             lastName,
-            dateOfBirth,
+            dateOfBirth: dateOfBirth || '1990-01-01', // Fallback since UI field is removed
+            ageGroup: ageGroup || '5_to_65',
             gender,
             phone,
             email,
             address,
             paymentMethod: paymentMethod || 'cash',
             costCategory: costCategory || 'standard',
+            isReferral: isReferral === true || isReferral === 'true',
             staffId: (paymentMethod === 'staff' && staffId) ? staffId : null,
             serviceId: serviceId || null,
             registeredService: registeredService || null,
@@ -160,13 +172,27 @@ const createPatient = async (req, res) => {
             memberRank: memberRank || null,
             memberSuffix: memberSuffix || null,
             memberStatus: memberStatus || 'active',
-            // Set opening balance directly for prepaid members
+            // Set opening balance
             balance: openingBalance,
             prepaidCredit: openingBalance
         }, { transaction: t });
 
-        // For standard cash patients with an explicit initial deposit — create a Payment record too
-        if (initialDeposit && !isNaN(Number(initialDeposit)) && Number(initialDeposit) > 0 && paymentMethod !== 'private_prepaid') {
+        // Create Payment record for K100 membership fee if Prepaid Scheme
+        if (isPrepaidScheme) {
+            const paymentCount = await Payment.count({ transaction: t });
+            const receiptNumber = req.body.receiptNumber || `RCP${String(paymentCount + 1).padStart(6, '0')}`;
+            
+            await Payment.create({
+                receiptNumber,
+                patientId: patient.id,
+                amount: 100, // Explicitly the K100 non-refundable registration fee
+                paymentMethod: 'cash',
+                paymentDate: new Date(),
+                notes: 'Prepaid Scheme Registration / Membership Fee',
+                receivedBy: req.user?.id || 1
+            }, { transaction: t });
+        } else if (initialDeposit && !isNaN(Number(initialDeposit)) && Number(initialDeposit) > 0 && paymentMethod !== 'private_prepaid') {
+            // For standard cash patients with an explicit initial deposit
             const paymentCount = await Payment.count({ transaction: t });
             const receiptNumber = req.body.receiptNumber || `RCP${String(paymentCount + 1).padStart(6, '0')}`;
             

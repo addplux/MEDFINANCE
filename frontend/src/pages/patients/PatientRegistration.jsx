@@ -14,13 +14,11 @@ const PatientRegistration = () => {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
-        dateOfBirth: '',
+        ageGroup: '5_to_65',
         gender: '',
         phone: '',
-        email: '',
-        address: '',
         paymentMethod: 'cash',
-        costCategory: 'standard', // 'standard' = Low Cost, 'high_cost' = High Cost
+        costCategory: 'high_cost',
         nrc: '',
         emergencyContact: '',
         emergencyPhone: '',
@@ -108,8 +106,10 @@ const PatientRegistration = () => {
     };
 
     const getRequiredFee = () => {
-        if (hasReferral) return 0;
-        return formData.costCategory === 'high_cost' ? 250 : 50;
+        if (formData.costCategory === 'high_cost' && formData.paymentMethod === 'private_prepaid') {
+            return 2100;
+        }
+        return 0;
     };
 
     const handleSubmit = async (e) => {
@@ -139,6 +139,7 @@ const PatientRegistration = () => {
             // Build submission payload
             const payload = {
                 ...formData,
+                isReferral: formData.costCategory === 'low_cost' ? hasReferral : false,
                 initialDeposit: prePaidBanner ? 0 : requiredFee,
                 receiptNumber: prePaidBanner ? 'PRE-PAID' : (requiredFee > 0 ? receiptNumber : ''),
                 registeredService: null // Clear the pre-paid draft marker
@@ -200,82 +201,17 @@ const PatientRegistration = () => {
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left Column: Photo & Core Metadata */}
                 <div className="space-y-6">
-                    <div className="card p-8 flex flex-col items-center border-white/5 bg-gradient-to-b from-white/[0.03] to-transparent">
-                        <div className="relative group">
-                            <div className="w-40 h-40 rounded-3xl bg-gradient-to-tr from-white/10 to-transparent p-[1px] group-hover:from-blue-500/50 transition-all duration-500 shadow-2xl overflow-hidden">
-                                <div className="w-full h-full rounded-[23px] bg-bg-primary flex items-center justify-center overflow-hidden">
-                                    {photoPreview ? (
-                                        <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="text-center space-y-2 opacity-20">
-                                            <Camera className="w-10 h-10 mx-auto" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest">No Photo</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <label className="absolute inset-0 cursor-pointer flex items-center justify-center bg-blue-600/0 hover:bg-blue-600/40 opacity-0 hover:opacity-100 transition-all duration-300 rounded-[23px]">
-                                <span className="text-white text-xs font-black uppercase tracking-widest">Update</span>
-                                <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
-                            </label>
-                            {photoPreview && (
-                                <button
-                                    type="button"
-                                    onClick={() => { setPhotoFile(null); setPhotoPreview(null); }}
-                                    className="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-                                >
-                                    <ArrowLeft className="w-4 h-4 rotate-45" />
-                                </button>
-                            )}
-                        </div>
-                        <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em] mt-6">Identification Image</p>
-                    </div>
-
-                    <div className="card p-6 border-white/5 space-y-4">
-                        <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">Account Type</h3>
-                        <div className="space-y-3">
-                            {['cash', 'private_prepaid'].map(method => (
-
-                                <label
-                                    key={method}
-                                    className={`
-                                        flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all border
-                                        ${formData.paymentMethod === method
-                                            ? 'bg-blue-600/10 border-blue-500/50 text-blue-400'
-                                            : 'bg-white/[0.02] border-white/5 text-white/40 hover:bg-white/[0.04]'}
-                                    `}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-xl ${formData.paymentMethod === method ? 'bg-blue-400/20' : 'bg-white/5'}`}>
-                                            {method === 'cash' ? <CreditCard className="w-4 h-4" /> : method === 'corporate' ? <Briefcase className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
-                                        </div>
-                                        <span className="text-xs font-black uppercase tracking-wider">{method.replace('_', ' ')}</span>
-                                    </div>
-                                    <input
-                                        type="radio"
-                                        name="paymentMethod"
-                                        value={method}
-                                        checked={formData.paymentMethod === method}
-                                        onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
-                                        className="hidden"
-                                    />
-                                    {formData.paymentMethod === method && <CircleCheckBig className="w-4 h-4" />}
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-
                     <div className="card p-6 border-white/5 space-y-4">
                         <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">Cost Category</h3>
                         <div className="flex gap-2">
                             {[
-                                { value: 'standard', label: 'Low Cost' },
-                                { value: 'high_cost', label: 'High Cost' }
+                                { value: 'high_cost', label: 'High Cost' },
+                                { value: 'low_cost', label: 'Low Cost' }
                             ].map(cat => (
                                 <button
                                     key={cat.value}
                                     type="button"
-                                    onClick={() => setFormData({ ...formData, costCategory: cat.value })}
+                                    onClick={() => setFormData({ ...formData, costCategory: cat.value, paymentMethod: 'cash' })}
                                     className={`flex-1 py-3 rounded-xl text-xs font-black uppercase border transition-all ${formData.costCategory === cat.value ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}
                                 >
                                     {cat.label}
@@ -284,24 +220,61 @@ const PatientRegistration = () => {
                         </div>
                     </div>
 
-                    <div className="card p-6 border-white/5 space-y-4">
-                        <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">Referral Status</h3>
-                        <div className="flex gap-2">
-                            {[
-                                { value: false, label: 'Without Referral' },
-                                { value: true, label: 'With Referral' }
-                            ].map(ref => (
-                                <button
-                                    key={String(ref.value)}
-                                    type="button"
-                                    onClick={() => setHasReferral(ref.value)}
-                                    className={`flex-1 py-3 rounded-xl text-xs font-black uppercase border transition-all ${hasReferral === ref.value ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}
-                                >
-                                    {ref.label}
-                                </button>
-                            ))}
+                    {formData.costCategory === 'high_cost' && (
+                        <div className="card p-6 border-white/5 space-y-4 animate-in slide-in-from-top duration-300">
+                            <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">High Cost Types</h3>
+                            <div className="space-y-3">
+                                {['cash', 'private_prepaid', 'corporate', 'staff'].map(method => (
+                                    <label
+                                        key={method}
+                                        className={`
+                                            flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all border
+                                            ${formData.paymentMethod === method
+                                                ? 'bg-blue-600/10 border-blue-500/50 text-blue-400'
+                                                : 'bg-white/[0.02] border-white/5 text-white/40 hover:bg-white/[0.04]'}
+                                        `}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-2 rounded-xl ${formData.paymentMethod === method ? 'bg-blue-400/20' : 'bg-white/5'}`}>
+                                                {method === 'cash' ? <CreditCard className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
+                                            </div>
+                                            <span className="text-xs font-black uppercase tracking-wider">{method.replace('_', ' ')}</span>
+                                        </div>
+                                        <input
+                                            type="radio"
+                                            name="paymentMethod"
+                                            value={method}
+                                            checked={formData.paymentMethod === method}
+                                            onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
+                                            className="hidden"
+                                        />
+                                        {formData.paymentMethod === method && <CircleCheckBig className="w-4 h-4" />}
+                                    </label>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
+
+                    {formData.costCategory === 'low_cost' && (
+                        <div className="card p-6 border-white/5 space-y-4 animate-in slide-in-from-top duration-300">
+                            <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">Referral Status</h3>
+                            <div className="flex gap-2">
+                                {[
+                                    { value: true, label: 'Referral Patient' },
+                                    { value: false, label: 'Non-Referral' }
+                                ].map(ref => (
+                                    <button
+                                        key={String(ref.value)}
+                                        type="button"
+                                        onClick={() => setHasReferral(ref.value)}
+                                        className={`flex-1 py-3 rounded-xl text-xs font-black uppercase border transition-all ${hasReferral === ref.value ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}
+                                    >
+                                        {ref.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {getRequiredFee() > 0 && (
                         <div className="card p-6 border-white/5 space-y-4 bg-blue-600/5 animate-in slide-in-from-top duration-300">
@@ -356,13 +329,16 @@ const PatientRegistration = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">Date of Birth</label>
-                                    <input
-                                        type="date"
-                                        value={formData.dateOfBirth}
-                                        onChange={e => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                                        className="form-input bg-white/[0.02] border-white/10 text-white"
-                                    />
+                                    <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">Age Group *</label>
+                                    <select
+                                        value={formData.ageGroup}
+                                        onChange={e => setFormData({ ...formData, ageGroup: e.target.value })}
+                                        className="form-select bg-white/[0.02] border-white/10 text-white rounded-xl py-3"
+                                    >
+                                        <option value="under_5">Under 5 Years</option>
+                                        <option value="5_to_65">5 to 65 Years</option>
+                                        <option value="above_65">Above 65 Years</option>
+                                    </select>
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">National ID (NRC)</label>
@@ -400,7 +376,7 @@ const PatientRegistration = () => {
                                 <h2 className="text-sm font-black text-white uppercase tracking-widest">Contact details</h2>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 gap-6">
                                 <div className="form-group">
                                     <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">Mobile Number</label>
                                     <input
@@ -409,26 +385,6 @@ const PatientRegistration = () => {
                                         onChange={e => setFormData({ ...formData, phone: e.target.value })}
                                         className="form-input bg-white/[0.02] border-white/10 text-white"
                                         placeholder="+260..."
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">Email Address</label>
-                                    <input
-                                        type="email"
-                                        value={formData.email}
-                                        onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                        className="form-input bg-white/[0.02] border-white/10 text-white"
-                                        placeholder="patient@example.com"
-                                    />
-                                </div>
-                                <div className="form-group md:col-span-2">
-                                    <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">Residential Address</label>
-                                    <textarea
-                                        rows="2"
-                                        value={formData.address}
-                                        onChange={e => setFormData({ ...formData, address: e.target.value })}
-                                        className="form-input bg-white/[0.02] border-white/10 text-white"
-                                        placeholder="Plot number, Street, Area..."
                                     />
                                 </div>
                             </div>
