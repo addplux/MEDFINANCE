@@ -60,9 +60,6 @@ const getAllPatients = async (req, res) => {
                 [Op.or]: [
                     { memberRank: 'principal' },
                     { memberRank: null },
-                    { memberRank: '' },
-                    { memberRank: 'individual' },
-                    { memberRank: 'standard' },
                     { memberRank: 'other' }
                 ]
             });
