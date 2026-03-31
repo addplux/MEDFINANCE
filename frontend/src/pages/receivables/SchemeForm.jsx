@@ -166,6 +166,7 @@ const SchemeForm = () => {
                                         <option value="corporate" className="bg-bg-primary text-text-primary">CORPORATE DIRECT</option>
                                         <option value="government" className="bg-bg-primary text-text-primary">GOVERNMENT / NHIMA</option>
                                         <option value="ngo" className="bg-bg-primary text-text-primary">NGO / NON-PROFIT</option>
+                                        <option value="private" className="bg-bg-primary text-text-primary">PRIVATE / INDIVIDUAL</option>
                                         <option value="other" className="bg-bg-primary text-text-primary">OTHER CLASSIFICATION</option>
                                     </select>
                                 </div>

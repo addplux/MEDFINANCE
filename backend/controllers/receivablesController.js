@@ -914,6 +914,22 @@ const importSchemeMembers = async (req, res) => {
                     surgicals + drRound + food + physio + pharmacy +
                     sundries + antenatal + consultation;
 
+                // [RESTRICTION] For private schemes, only one principal (Suffix 1) allowed
+                if (scheme.schemeType === 'private') {
+                    const isRankPrincipal = member.rank?.toLowerCase() === 'principal';
+                    const isSuffixOne = parseInt(member.suffix) === 1;
+                    if (isRankPrincipal || isSuffixOne) {
+                        const existingPrincipal = await Patient.findOne({ 
+                            where: { schemeId: id, memberRank: 'principal' },
+                            transaction: t
+                        });
+                        // If a principal exists and it's NOT the same person being imported (matched by policyNumber)
+                        if (existingPrincipal && existingPrincipal.policyNumber !== policyNumber) {
+                            throw new Error('Private scheme already has a principal member. Duplicate principals are blocked.');
+                        }
+                    }
+                }
+
                 // Check if patient exists (by Policy Number + Scheme)
                 let patient = await Patient.findOne({
                     where: {
@@ -1420,6 +1436,16 @@ const addSchemeMember = async (req, res) => {
                 return res.status(404).json({ error: 'Patient not found' });
             }
 
+            // [RESTRICTION] For private schemes, only one principal is allowed
+            if (scheme.schemeType === 'private') {
+                const existingPrincipal = await Patient.findOne({ 
+                    where: { schemeId: id, memberRank: 'principal' } 
+                });
+                if (existingPrincipal && existingPrincipal.id !== patient.id) {
+                    return res.status(400).json({ error: 'Private schemes can only have one principal member. Additional members must be spouse, child or other.' });
+                }
+            }
+
             await patient.update({ schemeId: id, paymentMethod });
             return res.json({ message: 'Patient added to scheme successfully', patient });
         } else {
@@ -1428,6 +1454,16 @@ const addSchemeMember = async (req, res) => {
 
             if (!firstName || !lastName || !policyNumber) {
                 return res.status(400).json({ error: 'First name, last name, and policy number are required' });
+            }
+
+            // [RESTRICTION] For private schemes, only one principal is allowed
+            if (scheme.schemeType === 'private' && (memberRank === 'principal' || !memberRank)) {
+                const existingPrincipal = await Patient.findOne({ 
+                    where: { schemeId: id, memberRank: 'principal' } 
+                });
+                if (existingPrincipal) {
+                    return res.status(400).json({ error: 'Private schemes can only have one principal member. Additional members must be spouse, child or other.' });
+                }
             }
 
             let currentPatientCount = await Patient.count();

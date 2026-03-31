@@ -358,7 +358,7 @@ const SchemeDetails = () => {
                         </div>
                     </div>
                 ) : activeTab === 'members' ? (
-                    <SchemeMembers schemeId={id} />
+                    <SchemeMembers schemeId={id} schemeType={scheme?.schemeType} />
                 ) : (
                     <SchemeInvoices schemeId={id} />
                 )}

@@ -7,8 +7,9 @@ import { DataGrid } from '@mui/x-data-grid';
 import * as XLSX from 'xlsx';
 import BillingStatementSection from '../patients/components/BillingStatementSection';
 
-const SchemeMembers = ({ schemeId }) => {
+const SchemeMembers = ({ schemeId, schemeType }) => {
     const navigate = useNavigate();
+    const isPrivate = schemeType === 'private';
     const [members, setMembers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -893,10 +894,13 @@ const SchemeMembers = ({ schemeId }) => {
                                             onChange={(e) => setNewMemberData({ ...newMemberData, rank: e.target.value })}
                                             className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary/20 appearance-none uppercase"
                                         >
-                                            <option value="principal" className="bg-bg-secondary">Principal</option>
+                                            {(!isPrivate || !members.some(m => m.memberRank === 'principal')) && (
+                                                <option value="principal" className="bg-bg-secondary">Principal</option>
+                                            )}
                                             <option value="spouse" className="bg-bg-secondary">Spouse</option>
                                             <option value="child" className="bg-bg-secondary">Child</option>
                                             <option value="dependant" className="bg-bg-secondary">Dependant</option>
+                                            <option value="other" className="bg-bg-secondary">Other</option>
                                         </select>
                                     </div>
                                 </div>

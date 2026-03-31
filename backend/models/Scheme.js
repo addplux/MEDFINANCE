@@ -17,7 +17,7 @@ const Scheme = sequelize.define('Scheme', {
         allowNull: false
     },
     schemeType: {
-        type: DataTypes.ENUM('insurance', 'corporate', 'government', 'ngo', 'other'),
+        type: DataTypes.ENUM('insurance', 'corporate', 'government', 'ngo', 'private', 'other'),
         allowNull: false
     },
     billingCycle: {
