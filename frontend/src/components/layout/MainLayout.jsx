@@ -226,14 +226,6 @@ const MainLayout = ({ children }) => {
             ]
         },
         {
-            id: 'budgets', icon: TrendingUp, label: 'Budget Management',
-            roles: FINANCE,
-            submenu: [
-                { path: '/app/budgets', label: 'Annual Budget' },
-                { path: '/app/budgets/analysis', label: 'Budget vs Actual' }
-            ]
-        },
-        {
             id: 'payroll_medical', icon: Stethoscope, label: 'Payroll Medical',
             roles: FINANCE,
             submenu: [
