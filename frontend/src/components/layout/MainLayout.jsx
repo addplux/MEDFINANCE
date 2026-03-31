@@ -234,14 +234,6 @@ const MainLayout = ({ children }) => {
             ]
         },
         {
-            id: 'funds', icon: DollarSign, label: 'Fund Accounting',
-            roles: FINANCE,
-            submenu: [
-                { path: '/app/funds/donor', label: 'Donor Fund' },
-                { path: '/app/funds/retention', label: 'Retention Fund' }
-            ]
-        },
-        {
             id: 'payroll_medical', icon: Stethoscope, label: 'Payroll Medical',
             roles: FINANCE,
             submenu: [
