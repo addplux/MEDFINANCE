@@ -36,6 +36,7 @@ const WaitingRoom = lazy(() => import('./pages/visits/WaitingRoom'));
 const RecordsDashboard = lazy(() => import('./pages/patients/RecordsDashboard'));
 const PatientRegistration = lazy(() => import('./pages/patients/PatientRegistration'));
 const DoctorOrders = lazy(() => import('./pages/visits/DoctorOrders'));
+const AuthorizationDashboard = lazy(() => import('./pages/authorization/AuthorizationDashboard'));
 
 // Receivables
 
@@ -276,6 +277,9 @@ function App() {
                         <Route path="visits/waiting-room" element={<RoleRoute roles={['administrator', 'superintendent', 'doctor', 'nurse', 'receptionist']}><WaitingRoom /></RoleRoute>} />
                         <Route path="visits/doctor-orders" element={<RoleRoute roles={['administrator', 'superintendent', 'doctor', 'nurse']}><DoctorOrders /></RoleRoute>} />
                         <Route path="visits/:id" element={<RoleRoute roles={['administrator', 'accountant', 'superintendent', 'doctor', 'nurse', 'receptionist']}><VisitDetail /></RoleRoute>} />
+
+                        {/* ── Authorization Queue — doctors + nurses + records clerks ── */}
+                        <Route path="authorization/dashboard" element={<RoleRoute roles={['doctor', 'nurse', 'records_clerk']}><AuthorizationDashboard /></RoleRoute>} />
 
                         {/* ── OPD Billing ─────────────────────────────────────────────── */}
                         <Route path="billing/opd" element={<RoleRoute roles={['cashier', 'accountant']}><OPDBilling /></RoleRoute>} />

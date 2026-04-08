@@ -24,18 +24,27 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.DATEONLY,
         allowNull: true
     },
+    manNumber: { // SmartCare Member / Employee Number
+        type: DataTypes.STRING(30),
+        allowNull: true // required in UI, relaxed at DB for legacy records
+    },
+    referralType: { // bypass = go straight to cashier, referral = needs authorization first
+        type: DataTypes.ENUM('bypass', 'referral'),
+        allowNull: false,
+        defaultValue: 'bypass'
+    },
     ageGroup: {
         type: DataTypes.ENUM('under_5', '5_to_65', 'above_65'),
-        allowNull: false,
+        allowNull: true,
         defaultValue: '5_to_65'
     },
     gender: {
         type: DataTypes.ENUM('male', 'female', 'other'),
-        allowNull: false
+        allowNull: true // SmartCare owns this — optional here
     },
     phone: {
         type: DataTypes.STRING(20),
-        allowNull: true
+        allowNull: true // SmartCare owns contact details
     },
     email: {
         type: DataTypes.STRING(100),
@@ -108,7 +117,7 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.ENUM('principal', 'spouse', 'child', 'dependant', 'other'),
         allowNull: true
     },
-    nrc: { // National Registration Card
+    nrc: { // National Registration Card — primary identifier linking to SmartCare
         type: DataTypes.STRING(20),
         allowNull: true
     },

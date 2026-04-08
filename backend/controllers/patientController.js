@@ -131,16 +131,25 @@ const createPatient = async (req, res) => {
     try {
         const {
             firstName, lastName, dateOfBirth, ageGroup, gender, phone, email, address,
-            paymentMethod, costCategory, isReferral, staffId, serviceId, registeredService, ward,
+            paymentMethod, costCategory, isReferral, referralType, manNumber, staffId,
+            serviceId, registeredService, ward,
             emergencyContact, emergencyPhone, nrc, patientType, schemeId, initialDeposit,
             // Prepaid / membership fields
             balance, prepaidCredit, policyNumber, memberRank, memberSuffix, memberStatus, memberPlan
         } = req.body;
 
-        // Validate required fields
-        if (!firstName || !lastName || !gender) {
+        // Validate required SmartCare link fields
+        if (!firstName || !lastName) {
             await t.rollback();
-            return res.status(400).json({ error: 'First name, last name, and gender are required' });
+            return res.status(400).json({ error: 'First name and last name are required' });
+        }
+        if (!nrc) {
+            await t.rollback();
+            return res.status(400).json({ error: 'NRC is required' });
+        }
+        if (!manNumber) {
+            await t.rollback();
+            return res.status(400).json({ error: 'Man Number is required' });
         }
 
         // Generate patient number
@@ -170,25 +179,27 @@ const createPatient = async (req, res) => {
             patientNumber,
             firstName,
             lastName,
-            dateOfBirth: dateOfBirth || '1990-01-01', // Fallback since UI field is removed
+            dateOfBirth: dateOfBirth || null,
             ageGroup: ageGroup || '5_to_65',
-            gender,
-            phone,
-            email,
-            address,
+            gender: gender || null,
+            phone: phone || null,
+            email: email || null,
+            address: address || null,
+            nrc,
+            manNumber,
+            referralType: referralType || 'bypass',
             paymentMethod: paymentMethod || 'cash',
             costCategory: costCategory || 'standard',
-            isReferral: isReferral === true || isReferral === 'true',
+            isReferral: referralType === 'referral',
             staffId: (paymentMethod === 'staff' && staffId) ? staffId : null,
             serviceId: serviceId || null,
             registeredService: registeredService || null,
             ward: ward || null,
-            emergencyPhone,
-            nrc,
+            emergencyPhone: emergencyPhone || null,
             patientType: patientType || 'opd',
             schemeId: schemeId || null,
             memberPlan: memberPlan || null,
-            photoUrl,
+            photoUrl: null, // SmartCare owns the photo
             // Membership fields
             policyNumber: policyNumber || null,
             memberRank: memberRank || null,
@@ -249,6 +260,12 @@ const createPatient = async (req, res) => {
             const visitCount = await Visit.count({ transaction: t });
             const visitNumber = `VIS${String(visitCount + 1).padStart(6, '0')}`;
 
+            // Determine initial queue status based on referralType
+            const newVisitReferralType = referralType || patient.referralType || 'bypass';
+            const newVisitQueueStatus = newVisitReferralType === 'referral'
+                ? 'pending_authorization'
+                : 'pending_cashier';
+
             visit = await Visit.create({
                 visitNumber,
                 patientId: patient.id,
@@ -258,16 +275,19 @@ const createPatient = async (req, res) => {
                 reasonForVisit: reasonForVisit || 'Initial Consultation / Registration',
                 admissionDate: new Date(),
                 status: 'active',
-                queueStatus: 'pending_triage',
+                queueStatus: newVisitQueueStatus,
                 admittedById: req.user?.id || 1
             }, { transaction: t });
 
             // Log the movement
+            const movementDest = newVisitQueueStatus === 'pending_authorization' ? 'Authorization' : 'Cashier';
             await PatientMovement.create({
                 patientId: patient.id,
-                fromDepartment: 'Reception / Registration',
-                toDepartment: departmentName,
-                notes: 'Automated Check-in on Registration',
+                fromDepartment: 'Records / Registration',
+                toDepartment: movementDest,
+                notes: newVisitQueueStatus === 'pending_authorization'
+                    ? 'Referral patient — sent to Authorization for medical approval'
+                    : 'Bypass patient — sent directly to Cashier',
                 movementDate: new Date(),
                 admittedBy: req.user?.id || 1
             }, { transaction: t });

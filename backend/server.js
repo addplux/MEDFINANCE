@@ -169,6 +169,7 @@ app.use('/api/audit-logs', require('./routes/auditLogs'));
 app.use('/api/scheme-services', require('./routes/schemeServices'));
 app.use('/api/vitals', require('./routes/vitals'));
 app.use('/api/records', require('./routes/recordsRoutes'));
+app.use('/api/authorization', require('./routes/authorizationRoutes'));
 app.use('/api/public', require('./routes/publicRoutes'));
 
 // Error handling middleware
@@ -244,6 +245,9 @@ const startServer = async () => {
 
             const runNotificationEnumMigration = require('./migrations/addNotificationEnums');
             await runNotificationEnumMigration();
+
+            const runSmartCareIntegration = require('./migrations/003_smartcare_integration');
+            await runSmartCareIntegration();
         } catch (migErr) {
             console.error('⚠️ Migration runner error (non-fatal):', migErr.message);
         }

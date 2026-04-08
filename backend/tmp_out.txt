@@ -1,0 +1,20 @@
+﻿Executing (default): SELECT count(*) AS "count" FROM "patients" AS "Patient";
+TOTAL_PATIENTS=114
+Executing (default): SELECT count(*) AS "count" FROM "patients" AS "Patient" WHERE "Patient"."member_rank" IS NULL;
+Executing (default): SELECT count(*) AS "count" FROM "patients" AS "Patient" WHERE "Patient"."member_rank" = 'principal';
+Executing (default): SELECT count(*) AS "count" FROM "patients" AS "Patient" WHERE "Patient"."member_rank" = 'spouse';
+Executing (default): SELECT count(*) AS "count" FROM "patients" AS "Patient" WHERE "Patient"."member_rank" = 'child';
+Executing (default): SELECT count(*) AS "count" FROM "patients" AS "Patient" WHERE "Patient"."member_rank" = 'other';
+Executing (default): SELECT count(*) AS "count" FROM "patients" AS "Patient" WHERE "Patient"."member_rank" = 'dependant';
+RANK_null=10
+RANK_principal=47
+RANK_spouse=11
+RANK_child=35
+RANK_other=0
+RANK_dependant=11
+Executing (default): SELECT count(*) AS "count" FROM "patients" AS "Patient" WHERE (("Patient"."member_rank" = 'principal' OR "Patient"."member_rank" IS NULL OR "Patient"."member_rank" = 'other'));
+ONLY_PRINCIPALS_FILTER_RESULT=57
+Executing (default): SELECT "id", "patient_number" AS "patientNumber", "first_name" AS "firstName", "last_name" AS "lastName", "date_of_birth" AS "dateOfBirth", "age_group" AS "ageGroup", "gender", "phone", "email", "address", "photo_url" AS "photoUrl", "emergency_contact" AS "emergencyContact", "emergency_phone" AS "emergencyPhone", "next_of_kin_relationship" AS "nextOfKinRelationship", "patient_type" AS "patientType", "payment_method" AS "paymentMethod", "cost_category" AS "costCategory", "is_referral" AS "isReferral", "staff_id" AS "staffId", "scheme_id" AS "schemeId", "policy_number" AS "policyNumber", "member_rank" AS "memberRank", "nrc", "member_status" AS "memberStatus", "member_suffix" AS "memberSuffix", "service_id" AS "serviceId", "registered_service" AS "registeredService", "ward", "balance", "prepaid_credit" AS "prepaidCredit", "member_plan" AS "memberPlan", "plan_start_date" AS "planStartDate", "plan_end_date" AS "planEndDate", "total_plan_spend" AS "totalPlanSpend", "nursing_care" AS "nursingCare", "laboratory", "radiology", "dental", "lodging", "surgicals", "dr_round" AS "drRound", "food", "physio", "pharmacy", "sundries", "antenatal", "consultation", "created_at" AS "createdAt", "updated_at" AS "updatedAt" FROM "patients" AS "Patient" ORDER BY "createdAt" DESC LIMIT 3;
+SAMPLE0=favour musonda|rank=null|cost=standard|payment=cash
+SAMPLE1=chiwala banda|rank=null|cost=standard|payment=cash
+SAMPLE2=chiwala mwamba|rank=null|cost=standard|payment=cash
