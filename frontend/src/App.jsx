@@ -23,7 +23,6 @@ import CreateOPDBill from './pages/billing/CreateOPDBill';
 import Patients from './pages/patients/Patients';
 import CreatePatient from './pages/patients/CreatePatient';
 import EditPatient from './pages/patients/EditPatient';
-import MergePatients from './pages/patients/MergePatients';
 import PatientView from './pages/patients/PatientView';
 import PatientVisitHistory from './pages/patients/PatientVisitHistory';
 
@@ -266,7 +265,6 @@ function App() {
                         <Route path="patients" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><Patients /></RoleRoute>} />
                         <Route path="patients/new" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><PatientRegistration /></RoleRoute>} />
                         <Route path="records/dashboard" element={<ProtectedRoute allowedRoles={['records_clerk']}><RecordsDashboard /></ProtectedRoute>} />
-                        <Route path="patients/merge" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><MergePatients /></RoleRoute>} />
                         <Route path="patients/:id" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><PatientView /></RoleRoute>} />
                         <Route path="patients/:id/edit" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><EditPatient /></RoleRoute>} />
                         <Route path="patients/:id/history" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><PatientVisitHistory /></RoleRoute>} />

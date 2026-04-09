@@ -332,13 +332,6 @@ const Patients = () => {
                 </div>
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={() => navigate('/app/patients/merge')}
-                        className="btn btn-secondary"
-                    >
-                        <GitMerge className="w-4 h-4" />
-                        Merge Duplicates
-                    </button>
-                    <button
                         onClick={() => navigate('/app/patients/new')}
                         className="btn btn-primary"
                     >
