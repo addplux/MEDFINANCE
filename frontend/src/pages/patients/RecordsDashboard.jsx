@@ -401,41 +401,49 @@ const RecordsDashboard = () => {
                         </button>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
                         {activities.length === 0 ? (
                             <div className="py-20 text-center space-y-3">
                                 <History className="w-12 h-12 text-white/10 mx-auto" />
                                 <p className="text-white/30 text-sm">No recent records activity found</p>
                             </div>
                         ) : (
-                            activities.map((item) => (
-                                <div key={item.id} className="p-4 bg-white/[0.03] border border-white/5 rounded-2xl group hover:bg-white/[0.05] transition-all">
-                                    <div className="flex items-start gap-4">
-                                        <div className={`p-2.5 rounded-xl flex-shrink-0 transition-transform group-hover:scale-110 ${
-                                            item.type === 'registration' ? 'bg-blue-500/10 text-blue-400' :
-                                            item.type === 'visit' ? 'bg-emerald-500/10 text-emerald-400' :
-                                            'bg-purple-500/10 text-purple-400'
-                                        }`}>
-                                            {item.type === 'registration' ? <UserPlus className="w-5 h-5" /> :
-                                             item.type === 'visit' ? <Stethoscope className="w-5 h-5" /> :
-                                             <Clock className="w-5 h-5" />}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between gap-1 mb-1">
-                                                <p className="font-bold text-white text-[11px] uppercase tracking-tight truncate">{item.title}</p>
+                            <div className="relative">
+                                {/* Vertical Line */}
+                                <div className="absolute left-6 top-2 bottom-2 w-0.5 bg-gradient-to-b from-blue-500/50 via-purple-500/50 to-transparent" />
+
+                                <div className="space-y-8">
+                                    {activities.map((item) => (
+                                        <div key={item.id} className="relative pl-14 group">
+                                            {/* Timeline Node */}
+                                            <div className={`absolute left-0 top-0 p-2.5 rounded-xl z-10 transition-all group-hover:scale-110 shadow-lg ${
+                                                item.type === 'registration' ? 'bg-blue-600 shadow-blue-500/20' :
+                                                item.type === 'visit' ? 'bg-emerald-600 shadow-emerald-500/20' :
+                                                'bg-purple-600 shadow-purple-500/20'
+                                            }`}>
+                                                {item.type === 'registration' ? <UserPlus className="w-4 h-4 text-white" /> :
+                                                 item.type === 'visit' ? <Stethoscope className="w-4 h-4 text-white" /> :
+                                                 <Clock className="w-4 h-4 text-white" />}
                                             </div>
-                                            <p className="text-[10px] text-white/60 leading-relaxed">
-                                                {item.summary}
-                                            </p>
-                                            <div className="flex items-center justify-between mt-2">
-                                                <p className="text-[9px] font-black text-white/30 uppercase tracking-widest">
-                                                    {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+
+                                            {/* Content Area */}
+                                            <div className="flex flex-col">
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <h4 className="text-[11px] font-black text-white hover:text-blue-400 cursor-default transition-colors uppercase tracking-wider">
+                                                        {item.title}
+                                                    </h4>
+                                                    <span className="text-[9px] font-black text-white/20 uppercase bg-white/5 px-2 py-0.5 rounded-full">
+                                                        {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[10px] text-white/50 leading-relaxed font-medium">
+                                                    {item.summary}
                                                 </p>
                                             </div>
                                         </div>
-                                    </div>
+                                    ))}
                                 </div>
-                            ))
+                            </div>
                         )}
                     </div>
                 </div>
