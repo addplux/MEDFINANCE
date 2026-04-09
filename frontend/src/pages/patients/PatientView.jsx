@@ -374,231 +374,108 @@ const PatientView = () => {
                 </div>
             </div>
 
-            {/* Profile card */}
-            <div className="card p-3 print:p-2 print:border-none print:shadow-none">
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 print:gap-4 print:items-center">
-                    {/* Photo */}
+            {/* Identity Profile Section */}
+            <div className="card p-6 overflow-hidden">
+                <div className="flex flex-col md:flex-row gap-8 items-start">
+                    {/* ID Badge Node */}
                     <div className="flex-shrink-0">
-                        {patient.photoUrl ? (
-                            <img
-                                src={`${apiBase}${patient.photoUrl}?token=${localStorage.getItem('token')}`}
-                                alt={patient.firstName}
-                                className="w-20 h-20 rounded-xl object-cover border-2 border-white/10 shadow-lg"
-                            />
-                        ) : (
-                            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg print:shadow-none print:border print:border-gray-200 print:from-gray-100 print:to-gray-100">
-                                <span className="text-white print:text-black text-2xl font-bold">
-                                    {patient.firstName?.[0]}{patient.lastName?.[0]}
-                                </span>
-                            </div>
-                        )}
+                        <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-2xl shadow-blue-500/20">
+                            <User className="w-12 h-12 text-white" />
+                        </div>
                     </div>
 
-                    {/* Identity */}
-                    <div className="flex-1 text-center sm:text-left space-y-2">
-                        <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                            <h2 className="text-2xl font-bold text-text-primary print:text-black">
+                    {/* Metadata */}
+                    <div className="flex-1 space-y-4">
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <h2 className="text-3xl font-black text-text-primary tracking-tight">
                                 {patient.firstName} {patient.lastName}
                             </h2>
-                            <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-bold border ${badge.bg} ${badge.text} ${badge.border}`}>
-                                {badge.label}
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                                patient.referralType === 'referral' 
+                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                                    : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                            }`}>
+                                {patient.referralType || 'bypass'}
                             </span>
                         </div>
-                        <p className="text-gray-500 font-mono text-sm">{patient.patientNumber}</p>
-                        {patientScheme && (
-                            <div className="flex justify-center sm:justify-start">
-                                <span className="inline-flex items-center px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-bold border bg-indigo-50/10 text-indigo-300 border-indigo-400/30">
-                                    {patientScheme.schemeName}
-                                </span>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                            <div>
+                                <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-1">NRC Number</p>
+                                <p className="text-sm font-bold text-text-primary font-mono">{patient.nrc || '—'}</p>
                             </div>
-                        )}
-                        <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2 text-sm text-text-secondary">
-                            <span className="capitalize">{patient.gender}</span>
-                            {age !== null && (
-                                <>
-                                    <span className="text-text-tertiary">•</span>
-                                    <span>{age} years old</span>
-                                </>
-                            )}
-                            {patient.dateOfBirth && (
-                                <>
-                                    <span className="text-text-tertiary">•</span>
-                                    <span>DOB: {new Date(patient.dateOfBirth).toLocaleDateString()}</span>
-                                </>
-                            )}
+                            <div>
+                                <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-1">Man Number</p>
+                                <p className="text-sm font-bold text-text-primary font-mono">{patient.manNumber || '—'}</p>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-1">Patient No.</p>
+                                <p className="text-sm font-bold text-text-primary font-mono">{patient.patientNumber}</p>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-1">Billing Scheme</p>
+                                <p className="text-sm font-bold text-text-primary uppercase">{patient.paymentMethod}</p>
+                            </div>
                         </div>
-                        {patient.nrc && (
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm font-medium">
-                                <CreditCard className="w-3.5 h-3.5" />
-                                NRC: {patient.nrc}
-                            </div>
-                        )}
                     </div>
 
-                    {/* Balance & Visit Summary */}
-                    <div className="flex-shrink-0 flex flex-col sm:flex-row print:flex-row gap-3 min-w-[200px] print:min-w-0">
-                        <div className="bg-bg-secondary rounded-2xl p-4 print:p-2 print:bg-transparent print:border-none border border-border-color text-center shadow-sm print:shadow-none">
-                            <p className="text-[10px] text-text-secondary font-bold uppercase tracking-wider print:text-[8px]">Outstanding Balance</p>
-                            <p className={`text-2xl print:text-sm font-bold mt-2 print:mt-0 ${
-                                patient.paymentMethod === 'private_prepaid' 
-                                    ? (parseFloat(patient.balance || 0) < 0 ? 'text-rose-500' : 'text-emerald-500')
-                                    : (parseFloat(patient.balance || 0) > 0 ? 'text-rose-500' : 'text-emerald-500')
-                            }`}>
-                                {patient.paymentMethod === 'private_prepaid'
-                                    ? (parseFloat(patient.balance || 0) > 0 
-                                        ? `ZMW ${parseFloat(patient.balance || 0).toLocaleString('en-ZM', { minimumFractionDigits: 2 })} (Credit)`
-                                        : parseFloat(patient.balance || 0) < 0 
-                                            ? `-ZMW ${Math.abs(parseFloat(patient.balance || 0)).toLocaleString('en-ZM', { minimumFractionDigits: 2 })} (Debt)`
-                                            : `ZMW 0.00`)
-                                    : (parseFloat(patient.balance || 0) < 0 
-                                        ? `ZMW ${Math.abs(parseFloat(patient.balance || 0)).toLocaleString('en-ZM', { minimumFractionDigits: 2 })} (Credit)`
-                                        : parseFloat(patient.balance || 0) > 0 
-                                            ? `-ZMW ${parseFloat(patient.balance || 0).toLocaleString('en-ZM', { minimumFractionDigits: 2 })} (Debt)`
-                                            : `ZMW 0.00`)
-                                }
-                            </p>
+                    {/* Quick Stats Overlay */}
+                    <div className="flex gap-4">
+                        <div className="bg-white/5 rounded-2xl p-5 border border-white/5 text-center min-w-[140px]">
+                            <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">Hospital Visits</p>
+                            <p className="text-2xl font-black text-white">{patient.totalVisits || 0}</p>
                         </div>
-                        <div
-                            className="bg-primary/5 rounded-2xl p-4 print:p-2 print:bg-transparent print:border-none border border-primary/20 text-center cursor-pointer hover:bg-primary/10 transition-colors shadow-sm print:shadow-none"
-                            onClick={() => navigate(`/app/visits?search=${patient.patientNumber}`)}
-                        >
-                            <p className="text-[10px] text-text-secondary print:text-gray-600 font-bold uppercase tracking-wider print:text-[8px]">Total Hospital Visits</p>
-                            <p className="text-xl print:text-sm font-bold text-primary print:text-black mt-1 print:mt-0">{patient.totalVisits || 0}</p>
+                        <div className={`rounded-2xl p-5 border text-center min-w-[160px] ${
+                            parseFloat(patient.balance || 0) < 0 
+                                ? 'bg-red-500/10 border-red-500/20' 
+                                : 'bg-emerald-500/10 border-emerald-500/20'
+                        }`}>
+                            <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">Account Balance</p>
+                            <p className={`text-xl font-black ${parseFloat(patient.balance || 0) < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                                ZK {Math.abs(parseFloat(patient.balance || 0)).toLocaleString()}
+                            </p>
+                            <p className="text-[8px] font-bold uppercase mt-1 opacity-40">
+                                {parseFloat(patient.balance || 0) < 0 ? 'Outstanding Debt' : 'Available Credit'}
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Details grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 print:grid-cols-2 gap-3 print:gap-2">
-
-                {/* RED ACCOUNT / CREDIT STOP WARNING */}
-                {patient.paymentMethod === 'private_prepaid' && parseFloat(patient.balance || 0) < 0 && (
-                    <div className="md:col-span-2 xl:col-span-3 bg-red-600/10 border-2 border-red-500 rounded-2xl p-4 flex items-center gap-4 animate-pulse">
-                        <div className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center shrink-0">
-                            <AlertCircle className="w-8 h-8 text-white" />
-                        </div>
-                        <div className="flex-1">
-                            <h3 className="text-red-500 font-black uppercase tracking-widest text-sm">Credit Stop — Account in the Red</h3>
-                            <p className="text-red-400 text-xs font-semibold">This prepaid account is overdrawn by ZMW {Math.abs(parseFloat(patient.balance)).toFixed(2)}. Services are automatically restricted.</p>
-                        </div>
-                        <button 
-                            onClick={() => { setTopupAmount(''); setTopupError(''); setShowTopupModal(true); }}
-                            className="btn btn-sm bg-red-600 hover:bg-red-700 text-white border-none px-4"
-                        >
-                            Process Top-Up
-                        </button>
-                    </div>
-                )}
-
-                {/* Contact Info */}
-                <Section title="Contact Information">
-                    <InfoRow icon={Phone} label="Phone" value={patient.phone} />
-                    <InfoRow icon={Mail} label="Email" value={patient.email} />
-                    <InfoRow icon={MapPin} label="Address" value={patient.address} />
-                </Section>
-
-                {/* Next of Kin */}
-                <Section title="Next of Kin">
-                    <InfoRow icon={User} label="Name" value={patient.emergencyContact} />
-                    <InfoRow icon={Phone} label="Phone" value={patient.emergencyPhone} />
-                    <InfoRow
-                        icon={User}
-                        label="Relationship"
-                        value={patient.nextOfKinRelationship}
-                    />
-                    {!patient.emergencyContact && (
-                        <p className="text-xs text-gray-400 italic">No next of kin recorded</p>
-                    )}
-                </Section>
-
-                {/* Classification */}
-                <Section title="Patient Classification">
-                    <InfoRow icon={Shield} label="Billing Type" value={badge.label} />
-                    <InfoRow icon={Shield} label="Patient Type" value={patient.patientType?.toUpperCase()} />
-                    <InfoRow icon={Clipboard} label="Registered Service" value={patient.registeredService} />
-                    <InfoRow icon={Clipboard} label="Cost Category" value={patient.costCategory?.replace('_', ' ')} />
-                    <InfoRow icon={Clipboard} label="Ward" value={patient.ward?.replace(/_/g, ' ')} />
-                    <InfoRow icon={Clipboard} label="Member Status" value={patient.memberStatus} />
-                    <InfoRow icon={Clipboard} label="Member Rank" value={patient.memberRank} />
-                </Section>
-
-
-                {(patient.paymentMethod === 'corporate' || patient.paymentMethod === 'scheme' || patient.policyNumber) && (
-                    <Section title="Scheme / Corporate Details">
-                        <InfoRow icon={Clipboard} label="Scheme Name" value={patientScheme?.schemeName || 'Not Specified'} />
-                        <InfoRow icon={Clipboard} label="Policy Number" value={patient.policyNumber} />
-                        <InfoRow icon={Clipboard} label="Member Rank" value={patient.memberRank} />
-                        <InfoRow icon={Clipboard} label="Member Suffix" value={patient.memberSuffix?.toString()} />
-                    </Section>
-                )}
-
-                {/* Financial Balances */}
-                <Section title="Department Balances">
-                    {[
-                        { label: 'Nursing Care', key: 'nursingCare' },
-                        { label: 'Laboratory', key: 'laboratory' },
-                        { label: 'Radiology', key: 'radiology' },
-                        { label: 'Pharmacy', key: 'pharmacy' },
-                        { label: 'Lodging', key: 'lodging' },
-                        { label: 'Surgicals', key: 'surgicals' },
-                        { label: 'Dr. Round', key: 'drRound' },
-                        { label: 'Food', key: 'food' },
-                        { label: 'Physio', key: 'physio' },
-                        { label: 'Sundries', key: 'sundries' },
-                        { label: 'Antenatal', key: 'antenatal' },
-                    ].filter(f => parseFloat(patient[f.key] || 0) !== 0).map(f => (
-                        <div key={f.key} className="flex justify-between items-center py-1 text-sm border-b border-border-color last:border-0">
-                            <span className="text-text-secondary">{f.label}</span>
-                            <span className="font-semibold text-text-primary">ZMW {parseFloat(patient[f.key]).toFixed(2)}</span>
-                        </div>
-                    ))}
-                    {[
-                        'nursingCare', 'laboratory', 'radiology', 'pharmacy', 'lodging', 'surgicals',
-                        'drRound', 'food', 'physio', 'sundries', 'antenatal'
-                    ].every(k => parseFloat(patient[k] || 0) === 0) && (
-                            <p className="text-xs text-gray-400 italic">No department balances recorded</p>
-                        )}
-                </Section>
-
-                {/* Record Info */}
-                <Section title="Visit Summary">
-                    <div className="flex flex-col gap-3 py-1 print:py-0 print:gap-1">
-                        <div className="flex justify-between items-center text-sm print:text-[11px]">
-                            <span className="text-text-secondary print:text-black">Total Encounters</span>
-                            <span className="font-bold text-text-primary print:text-black">{patient.totalVisits || 0}</span>
-                        </div>
-                        <button
-                            onClick={() => navigate(`/app/visits?search=${patient.patientNumber}`)}
-                            className="w-full py-2.5 px-4 bg-primary/5 text-primary rounded-full text-xs font-bold hover:bg-primary/10 transition-colors flex items-center justify-center gap-2 mt-2"
-                        >
-                            <Clipboard className="w-3.5 h-3.5" />
-                            View Encounter History
-                        </button>
-                    </div>
-                </Section>
-
-                <Section title="Record Information">
-                    <InfoRow icon={Calendar} label="Registered On" value={patient.createdAt ? new Date(patient.createdAt).toLocaleString() : null} />
-                    <InfoRow icon={Calendar} label="Last Updated" value={patient.updatedAt ? new Date(patient.updatedAt).toLocaleString() : null} />
-                </Section>
-
+            {/* SmartCare Note */}
+            <div className="bg-blue-600/5 border border-blue-500/10 rounded-2xl p-4 flex items-center gap-3">
+                <Shield className="w-5 h-5 text-blue-400" />
+                <p className="text-[11px] font-medium text-blue-300">
+                    Detailed demographics (Address, Photo, Contacts) are managed via the linked **SmartCare** record.
+                </p>
             </div>
 
-            {/* ── Financial History Section ───────────────────────────────────── */}
-            <BillingStatementSection 
-                patientId={id} 
-                onRefreshBalance={loadPatient}
-            />
+            {/* RED ACCOUNT / CREDIT STOP WARNING */}
+            {parseFloat(patient.balance || 0) < 0 && (
+                <div className="bg-red-600/10 border-2 border-red-500 rounded-2xl p-5 flex items-center gap-4 animate-pulse">
+                    <div className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center shrink-0">
+                        <AlertCircle className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-red-500 font-black uppercase tracking-widest text-sm">Credit Stop — Account in the Red</h3>
+                        <p className="text-red-400 text-xs font-semibold">Hospital services are restricted until the outstanding balance of ZK {Math.abs(parseFloat(patient.balance)).toFixed(2)} is cleared.</p>
+                    </div>
+                    <button 
+                        onClick={() => { setTopupAmount(''); setTopupError(''); setShowTopupModal(true); }}
+                        className="btn btn-sm bg-red-600 hover:bg-red-700 text-white border-none px-4"
+                    >
+                        Process Payment
+                    </button>
+                    </div>
+            )}
 
-            {/* ── Family Hierarchy Tree — principal-rank patients only ─────────── */}
+            {/* Family Hierarchy Tree — principal-rank patients only ─────────── */}
             {patient.memberRank === 'principal' && patient.policyNumber && (
                 <FamilyTreeSection
                     patientId={id}
                     navigate={navigate}
                     apiBase={apiBase}
                 />
-
             )}
 
 

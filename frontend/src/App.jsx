@@ -21,7 +21,6 @@ import CreateOPDBill from './pages/billing/CreateOPDBill';
 
 // Patients
 import Patients from './pages/patients/Patients';
-import CreatePatient from './pages/patients/CreatePatient';
 import EditPatient from './pages/patients/EditPatient';
 import PatientView from './pages/patients/PatientView';
 import PatientVisitHistory from './pages/patients/PatientVisitHistory';
