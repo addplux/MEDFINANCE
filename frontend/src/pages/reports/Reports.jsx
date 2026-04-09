@@ -53,8 +53,35 @@ const Reports = () => {
         }
     };
 
-    const handleExport = () => {
-        alert('Export functionality will be implemented in Phase 11');
+    const handleExportExcel = async () => {
+        try {
+            setLoading(true);
+            const { startDate, endDate } = dateRange;
+            
+            // We use the direct window.location or a blob fetch to handle the binary download
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/reports/export-patients?startDate=${startDate}&endDate=${endDate}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) throw new Error('Export failed');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Patient_Report_${startDate}_to_${endDate}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (error) {
+            console.error('Excel export error:', error);
+            alert('Failed to export Excel report');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -65,10 +92,16 @@ const Reports = () => {
                     <h1 className="text-3xl font-bold text-white">Reports & Analytics</h1>
                     <p className="text-gray-300 mt-1">Financial reports and business intelligence</p>
                 </div>
-                <button onClick={handleExport} className="btn btn-primary">
-                    <Download className="w-5 h-5" />
-                    Export PDF
-                </button>
+                <div className="flex gap-3">
+                    <button onClick={() => alert('PDF Export coming soon')} className="btn btn-secondary">
+                        <Download className="w-5 h-5" />
+                        Export PDF
+                    </button>
+                    <button onClick={handleExportExcel} disabled={loading} className="btn btn-primary">
+                        <Download className="w-5 h-5" />
+                        {loading ? 'Exporting...' : 'Export Excel'}
+                    </button>
+                </div>
             </div>
 
             {/* Date Range Filter */}

@@ -14,5 +14,6 @@ router.get('/wing-revenue', reportsController.getWingRevenue);
 router.get('/department-revenue', reportsController.getDepartmentRevenue);
 router.get('/cashier-performance', reportsController.getCashierPerformance);
 router.get('/collection-summary', reportsController.getCollectionSummary);
+router.get('/export-patients', reportsController.exportPatients);
 
 module.exports = router;

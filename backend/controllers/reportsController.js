@@ -1,4 +1,5 @@
-const { Payment, OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Department, Budget, User, Patient, sequelize } = require('../models');
+const { Payment, OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Department, Budget, User, Patient, Visit, sequelize } = require('../models');
+const XLSX = require('xlsx');
 
 // Get revenue report
 const getRevenueReport = async (req, res) => {
@@ -474,6 +475,89 @@ const getClaimsAging = async (req, res) => {
     }
 };
 
+// Export Patient Data to Excel (Line List + Aggregates)
+const exportPatients = async (req, res) => {
+    try {
+        const { startDate, endDate } = req.query;
+
+        // 1. Fetch Patients for Line List
+        const patientWhere = {};
+        if (startDate && endDate) {
+            patientWhere.createdAt = {
+                [sequelize.Sequelize.Op.between]: [new Date(startDate), new Date(endDate)]
+            };
+        }
+
+        const patients = await Patient.findAll({
+            where: patientWhere,
+            include: [{ association: 'scheme', attributes: ['name'] }],
+            order: [['createdAt', 'DESC']]
+        });
+
+        const patientData = patients.map(p => ({
+            'Patient #': p.patientNumber,
+            'First Name': p.firstName,
+            'Last Name': p.lastName,
+            'NRC': p.nrc || 'N/A',
+            'Man Number': p.manNumber || 'N/A',
+            'Reg Date': p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'N/A',
+            'Payment Method': p.paymentMethod,
+            'Scheme': p.scheme ? p.scheme.name : 'N/A',
+            'Balance (ZK)': parseFloat(p.balance).toFixed(2)
+        }));
+
+        // 2. Fetch Department Aggregates (from Visits)
+        const visitWhere = {};
+        if (startDate && endDate) {
+            visitWhere.createdAt = {
+                [sequelize.Sequelize.Op.between]: [new Date(startDate), new Date(endDate)]
+            };
+        }
+
+        // Count by Visit Type
+        const byType = await Visit.findAll({
+            attributes: ['visitType', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+            where: visitWhere,
+            group: ['visitType']
+        });
+
+        // Count by Queue Status (acts as department routing)
+        const byQueue = await Visit.findAll({
+            attributes: ['queueStatus', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+            where: visitWhere,
+            group: ['queueStatus']
+        });
+
+        const aggregateData = [
+            { Category: '--- VISIT TYPES ---', Count: '' },
+            ...byType.map(v => ({ Category: v.visitType.toUpperCase(), Count: v.getDataValue('count') })),
+            { Category: '', Count: '' },
+            { Category: '--- DEPARTMENT QUEUES ---', Count: '' },
+            ...byQueue.map(v => ({ Category: v.queueStatus.replace('waiting_', '').replace('pending_', '').toUpperCase(), Count: v.getDataValue('count') }))
+        ];
+
+        // 3. Generate XLSX
+        const wb = XLSX.utils.book_new();
+        
+        const wsPatients = XLSX.utils.json_to_sheet(patientData);
+        XLSX.utils.book_append_sheet(wb, wsPatients, 'Patient Line List');
+
+        const wsAggregates = XLSX.utils.json_to_sheet(aggregateData);
+        XLSX.utils.book_append_sheet(wb, wsAggregates, 'Department Aggregates');
+
+        // Write to buffer
+        const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+        res.setHeader('Content-Disposition', 'attachment; filename="Patient_Report.xlsx"');
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.send(buf);
+
+    } catch (error) {
+        console.error('Export patients error:', error);
+        res.status(500).json({ error: 'Failed to export patient data' });
+    }
+};
+
 module.exports = {
     getRevenueReport,
     getCashflowReport,
@@ -483,5 +567,6 @@ module.exports = {
     getDepartmentRevenue,
     getCashierPerformance,
     getCollectionSummary,
-    getClaimsAging
+    getClaimsAging,
+    exportPatients
 };
