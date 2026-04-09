@@ -264,8 +264,7 @@ function App() {
 
                         {/* ── Patients & Visits — clinical + cashier + records ────────── */}
                         <Route path="patients" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><Patients /></RoleRoute>} />
-                        <Route path="patients/new" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><CreatePatient /></RoleRoute>} />
-                        <Route path="patients/registration" element={<ProtectedRoute allowedRoles={['records_clerk']}><PatientRegistration /></ProtectedRoute>} />
+                        <Route path="patients/new" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><PatientRegistration /></RoleRoute>} />
                         <Route path="records/dashboard" element={<ProtectedRoute allowedRoles={['records_clerk']}><RecordsDashboard /></ProtectedRoute>} />
                         <Route path="patients/merge" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><MergePatients /></RoleRoute>} />
                         <Route path="patients/:id" element={<RoleRoute roles={['doctor', 'nurse', 'cashier', 'records_clerk']}><PatientView /></RoleRoute>} />
