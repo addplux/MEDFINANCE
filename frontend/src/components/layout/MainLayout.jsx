@@ -159,6 +159,8 @@ const MainLayout = ({ children }) => {
             roles: RECORDS_VISIBLE
         },
 
+        { path: '/app/reports', icon: BarChart3, label: 'Reports', roles: ['records_clerk', 'accountant', 'doctor', ...SUPER_ROLES] },
+
         // Active visits — clinical staff only
         {
             path: '/app/visits', icon: ClipboardList, label: 'Encounters',
@@ -233,7 +235,6 @@ const MainLayout = ({ children }) => {
                 { path: '/app/payroll/medical', label: 'Staff Balances' }
             ]
         },
-        { path: '/app/reports', icon: BarChart3, label: 'Reports', roles: [...FINANCE, 'doctor', 'records_clerk'] },
         {
             path: '/app/receivables/ageing', icon: FileCheck, label: 'Debtor Ageing',
             roles: FINANCE
