@@ -558,6 +558,62 @@ const exportPatients = async (req, res) => {
     }
 };
 
+// Get Patient Line List (JSON version for UI)
+const getLineListing = async (req, res) => {
+    try {
+        const { startDate, endDate, limit = 100 } = req.query;
+
+        const where = {};
+        if (startDate && endDate) {
+            where.createdAt = {
+                [sequelize.Sequelize.Op.between]: [new Date(startDate), new Date(endDate)]
+            };
+        }
+
+        const patients = await Patient.findAll({
+            where,
+            include: [{ association: 'scheme', attributes: ['name'] }],
+            order: [['createdAt', 'DESC']],
+            limit: parseInt(limit)
+        });
+
+        // Add visit count summary for each patient in the period
+        const results = await Promise.all(patients.map(async (p) => {
+            const visitCount = await Visit.count({
+                where: {
+                    patientId: p.id,
+                    ...(startDate && endDate ? {
+                        createdAt: { [sequelize.Sequelize.Op.between]: [new Date(startDate), new Date(endDate)] }
+                    } : {})
+                }
+            });
+
+            return {
+                id: p.id,
+                patientNumber: p.patientNumber,
+                firstName: p.firstName,
+                lastName: p.lastName,
+                nrc: p.nrc,
+                manNumber: p.manNumber,
+                referralType: p.referralType,
+                paymentMethod: p.paymentMethod,
+                scheme: p.scheme?.name,
+                balance: p.balance,
+                createdAt: p.createdAt,
+                visitCount
+            };
+        }));
+
+        res.json({
+            count: results.length,
+            data: results
+        });
+    } catch (error) {
+        console.error('Get line listing error:', error);
+        res.status(500).json({ error: 'Failed to get line listing' });
+    }
+};
+
 module.exports = {
     getRevenueReport,
     getCashflowReport,
@@ -568,5 +624,7 @@ module.exports = {
     getCashierPerformance,
     getCollectionSummary,
     getClaimsAging,
-    exportPatients
+    exportPatients,
+    getLineListing
 };
+

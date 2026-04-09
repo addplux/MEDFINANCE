@@ -700,3 +700,85 @@
     scrollbar-color: var(--bg-tertiary) transparent;
   }
 }
+
+/* --- Print Styles --- */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Hide UI noise */
+    .print\:hidden,
+    nav,
+    aside,
+    header,
+    button,
+    .btn,
+    .sidebar,
+    .top-nav,
+    .no-print,
+    .toast,
+    .fixed {
+        display: none !important;
+    }
+
+    /* Reset layouts for print */
+    .main-content,
+    .content-area,
+    main {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        position: static !important;
+    }
+
+    .card {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin-bottom: 2rem !important;
+        page-break-inside: avoid;
+    }
+
+    table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+    }
+
+    th, td {
+        border: 0.5pt solid black !important;
+        color: black !important;
+        padding: 8pt !important;
+    }
+
+    th {
+        background-color: #f3f4f6 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Force visibility of print-only elements */
+    .print\:block {
+        display: block !important;
+    }
+
+    .print\:flex {
+        display: flex !important;
+    }
+
+    /* Font adjustments */
+    h1, h2, h3, h4, p, span, td, th {
+        color: black !important;
+    }
+
+    /* Ensure table rows don't break awkwardly */
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+}

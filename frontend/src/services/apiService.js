@@ -235,6 +235,7 @@ export const reportsAPI = {
     profitability: (params) => api.get('/reports/profitability', { params }),
     billingSummary: (params) => api.get('/reports/billing-summary', { params }),
     debtorAgeing: (params) => api.get('/reports/debtor-ageing', { params }),
+    lineListing: (params) => api.get('/reports/line-list', { params }),
 };
 
 // Setup

@@ -15,5 +15,6 @@ router.get('/department-revenue', reportsController.getDepartmentRevenue);
 router.get('/cashier-performance', reportsController.getCashierPerformance);
 router.get('/collection-summary', reportsController.getCollectionSummary);
 router.get('/export-patients', reportsController.exportPatients);
+router.get('/line-list', reportsController.getLineListing);
 
 module.exports = router;
