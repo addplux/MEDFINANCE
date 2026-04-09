@@ -132,13 +132,12 @@ const createPatient = async (req, res) => {
         const {
             firstName, lastName, dateOfBirth, ageGroup, gender, phone, email, address,
             paymentMethod, costCategory, isReferral, referralType, manNumber, staffId,
-            serviceId, registeredService, ward,
             emergencyContact, emergencyPhone, nrc, patientType, schemeId, initialDeposit,
             // Prepaid / membership fields
             balance, prepaidCredit, policyNumber, memberRank, memberSuffix, memberStatus, memberPlan
         } = req.body;
 
-        // Validate required SmartCare link fields
+        // Validate required external identity link fields
         if (!firstName || !lastName) {
             await t.rollback();
             return res.status(400).json({ error: 'First name and last name are required' });
@@ -199,7 +198,7 @@ const createPatient = async (req, res) => {
             patientType: patientType || 'opd',
             schemeId: schemeId || null,
             memberPlan: memberPlan || null,
-            photoUrl: null, // SmartCare owns the photo
+            photoUrl: null, // External system owns the photo
             // Membership fields
             policyNumber: policyNumber || null,
             memberRank: memberRank || null,

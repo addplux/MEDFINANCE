@@ -1,12 +1,12 @@
 /**
- * Migration: 003_smartcare_integration
+ * Migration: 003_external_ehr_integration
  * Purpose: Adds man_number to patients table and pending_authorization to visit queue status.
  * Safe to run multiple times (idempotent).
  */
 
 const { sequelize } = require('../config/database');
 
-const runSmartCareIntegrationMigration = async () => {
+const runExternalEhrIntegrationMigration = async () => {
     try {
         // 1. Add man_number column if not exists
         await sequelize.query(`
@@ -42,11 +42,11 @@ const runSmartCareIntegrationMigration = async () => {
             ALTER TABLE patients ALTER COLUMN gender DROP NOT NULL;
         `).catch(() => {}); // May already be nullable
 
-        console.log('✅ [Migration 003] SmartCare integration migration complete');
+        console.log('✅ [Migration 003] External identity integration migration complete');
     } catch (err) {
         console.error('❌ [Migration 003] Error:', err.message);
         // Non-fatal — server still starts
     }
 };
 
-module.exports = runSmartCareIntegrationMigration;
+module.exports = runExternalEhrIntegrationMigration;

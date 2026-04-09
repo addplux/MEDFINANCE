@@ -442,11 +442,11 @@ const PatientView = () => {
                 </div>
             </div>
 
-            {/* SmartCare Note */}
+            {/* External Record Link Disclaimer */}
             <div className="bg-blue-600/5 border border-blue-500/10 rounded-2xl p-4 flex items-center gap-3">
                 <Shield className="w-5 h-5 text-blue-400" />
                 <p className="text-[11px] font-medium text-blue-300">
-                    Detailed demographics (Address, Photo, Contacts) are managed via the linked **SmartCare** record.
+                    Detailed demographics (Address, Photo, Contacts) are managed via the linked **External EHR** record.
                 </p>
             </div>
 

@@ -267,7 +267,7 @@ const EditPatient = () => {
                         </div>
                         <div>
                             <h3 className="text-lg font-black text-text-primary uppercase tracking-tight">Identity Details</h3>
-                            <p className="text-[10px] text-text-tertiary font-bold uppercase tracking-widest">Core SmartCare Link Information</p>
+                            <p className="text-[10px] text-text-tertiary font-bold uppercase tracking-widest">Core Identity Link Information</p>
                         </div>
                     </div>
 
@@ -353,7 +353,7 @@ const EditPatient = () => {
                         <div>
                             <h4 className="text-xs font-black text-primary uppercase tracking-widest mb-1">Managed Externally</h4>
                             <p className="text-[11px] text-text-secondary leading-relaxed">
-                                Demographic data such as **Address, Phone, Email, and Photograph** are synchronised with SmartCare. Updates to those fields should be performed in the SmartCare interface to ensure data integrity.
+                                Demographic data such as **Address, Phone, Email, and Photograph** are synchronised with the **National EHR**. Updates to those fields should be performed in the external record interface to ensure data integrity.
                             </p>
                         </div>
                     </div>

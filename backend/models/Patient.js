@@ -24,7 +24,7 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.DATEONLY,
         allowNull: true
     },
-    manNumber: { // SmartCare Member / Employee Number
+    manNumber: { // External EHR Member / Employee Number
         type: DataTypes.STRING(30),
         allowNull: true // required in UI, relaxed at DB for legacy records
     },
@@ -40,11 +40,11 @@ const Patient = sequelize.define('Patient', {
     },
     gender: {
         type: DataTypes.ENUM('male', 'female', 'other'),
-        allowNull: true // SmartCare owns this — optional here
+        allowNull: true // External EHR owns this — optional here
     },
     phone: {
         type: DataTypes.STRING(20),
-        allowNull: true // SmartCare owns contact details
+        allowNull: true // External EHR owns contact details
     },
     email: {
         type: DataTypes.STRING(100),
@@ -117,7 +117,7 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.ENUM('principal', 'spouse', 'child', 'dependant', 'other'),
         allowNull: true
     },
-    nrc: { // National Registration Card — primary identifier linking to SmartCare
+    nrc: { // National Registration Card — primary identifier linking to external registry
         type: DataTypes.STRING(20),
         allowNull: true
     },

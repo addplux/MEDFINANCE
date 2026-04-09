@@ -128,8 +128,8 @@ const PatientRegistration = () => {
                             RECORDS
                         </span>
                     </h1>
-                    <p className="text-sm text-white/40 font-medium mt-0.5">
-                        SmartCare link — enter the 4 required fields only
+                    <p className="text-sm text-white/40 font-medium mt-1">
+                        External System Link — enter the 4 required fields only
                     </p>
                 </div>
             </div>
@@ -190,7 +190,7 @@ const PatientRegistration = () => {
                                     value={formData.manNumber}
                                     onChange={e => handleChange('manNumber', e.target.value)}
                                     className={`form-input bg-white/[0.02] border-white/10 text-white py-3 rounded-xl focus:ring-blue-500/50 ${errors.manNumber ? 'border-red-500/50' : ''}`}
-                                    placeholder="SmartCare member number"
+                                    placeholder="Employee / Member Registration Number"
                                 />
                                 {errors.manNumber && <p className="text-[10px] text-red-400 font-bold uppercase mt-1">{errors.manNumber}</p>}
                             </div>
