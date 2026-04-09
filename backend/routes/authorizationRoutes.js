@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken, checkPermission } = require('../middleware/auth');
+const { authMiddleware, checkPermission } = require('../middleware/auth');
 const {
     getPendingAuthorizations,
     approveAuthorization,
@@ -8,7 +8,7 @@ const {
 } = require('../controllers/authorizationController');
 
 // All routes require authentication
-router.use(authenticateToken);
+router.use(authMiddleware);
 
 // GET  /api/authorization         — list all pending_authorization visits
 router.get('/', getPendingAuthorizations);
