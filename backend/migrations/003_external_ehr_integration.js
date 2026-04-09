@@ -37,7 +37,7 @@ const runExternalEhrIntegrationMigration = async () => {
         `);
         console.log('✅ [Migration 003] pending_authorization added to enum_visits_queue_status');
 
-        // 4. Relax NOT NULL on demographic columns owned by SmartCare
+        // 4. Relax NOT NULL on demographic columns owned by external system
         await sequelize.query(`
             ALTER TABLE patients ALTER COLUMN gender DROP NOT NULL;
         `).catch(() => {}); // May already be nullable

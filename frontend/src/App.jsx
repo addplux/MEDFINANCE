@@ -336,7 +336,7 @@ function App() {
 
                         <Route path="payroll/medical" element={<RoleRoute roles={['accountant']}><PayrollMedical /></RoleRoute>} />
 
-                        <Route path="reports" element={<RoleRoute roles={['accountant', 'doctor']}><Reports /></RoleRoute>} />
+                        <Route path="reports" element={<RoleRoute roles={['accountant', 'doctor', 'records_clerk']}><Reports /></RoleRoute>} />
 
                         {/* ── Cash & Banking — cashier + finance ──────────────────────── */}
                         <Route path="cash/payments" element={<RoleRoute roles={['cashier', 'accountant']}><Payments /></RoleRoute>} />

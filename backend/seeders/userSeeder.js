@@ -93,6 +93,15 @@ const demoUsers = [
         role: 'radiographer',
         department: 'Radiology',
     },
+    {
+        firstName: 'Loveness',
+        lastName: 'Zimba',
+        username: 'l.zimba',
+        email: `l.zimba@${HOSPITAL_DOMAIN}`,
+        password: 'Records@2026',
+        role: 'records_clerk',
+        department: 'Records & Registration',
+    },
 ];
 
 const seedUsers = async () => {

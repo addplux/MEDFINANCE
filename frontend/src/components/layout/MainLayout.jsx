@@ -233,7 +233,7 @@ const MainLayout = ({ children }) => {
                 { path: '/app/payroll/medical', label: 'Staff Balances' }
             ]
         },
-        { path: '/app/reports', icon: BarChart3, label: 'Reports', roles: [...FINANCE, 'doctor'] },
+        { path: '/app/reports', icon: BarChart3, label: 'Reports', roles: [...FINANCE, 'doctor', 'records_clerk'] },
         {
             path: '/app/receivables/ageing', icon: FileCheck, label: 'Debtor Ageing',
             roles: FINANCE

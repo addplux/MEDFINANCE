@@ -7,9 +7,9 @@ import {
 } from 'lucide-react';
 
 /**
- * PatientRegistration — SmartCare Link Mode
+ * PatientRegistration — External Identity Link Mode
  * 
- * Captures only the 4 fields this system needs (SmartCare owns the rest):
+ * Captures only the 4 fields this system needs (External system owns the rest):
  *   1. NRC *
  *   2. Man Number *
  *   3. First Name * + Last Name *

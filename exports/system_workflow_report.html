@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDFINANCE360 - System Workflow & Billing Report</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-light: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 60px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 30px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 40px;
+            border-left: 4px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #334155;
+            margin-top: 25px;
+        }
+
+        p { margin-bottom: 1.5rem; }
+
+        .step-card {
+            background: #f1f5f9;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border-left: 6px solid #cbd5e1;
+            position: relative;
+        }
+
+        .step-number {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            font-size: 48px;
+            font-weight: 800;
+            color: rgba(0,0,0,0.05);
+            line-height: 1;
+        }
+
+        .step-title {
+            font-weight: 800;
+            color: var(--primary-dark);
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .important-box {
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 24px;
+            border-radius: 16px;
+            margin-top: 40px;
+            color: #1e40af;
+            font-weight: 500;
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; padding: 20px; max-width: 100%; }
+            .no-print { display: none; }
+        }
+
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 99px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            transition: all 0.2s;
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn no-print" onclick="window.print()">Export to PDF</button>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">MEDFINANCE360</div>
+            <h1>System Workflow & Billing Report</h1>
+            <p style="color: var(--text-muted); margin-top: 10px;">Official Implementation & Operational Framework</p>
+        </div>
+
+        <p>This report outlines how the MEDFINANCE360 system functions, specifically focusing on the integration with the National EHR and the step-by-step flow of billing from registration to settlement.</p>
+
+        <h2>1. System Philosophy</h2>
+        <p>MEDFINANCE360 acts as the <strong>Financial and Routing Layer</strong> of the hospital. While clinical notes may be stored in the National EHR, MEDFINANCE360 manages:</p>
+        <ul>
+            <li><strong>Identity Linkage</strong>: Capturing NRC and Man Numbers via the External EHR Link.</li>
+            <li><strong>Queue Management</strong>: Moving patients between departments.</li>
+            <li><strong>Revenue Control</strong>: Real-time charge capturing and centralized payment.</li>
+        </ul>
+
+        <h2>2. The Billing Logic</h2>
+        <p>The system uses a <strong>Decentralized Capture / Centralized Settlement</strong> model.</p>
+
+        <h3>2.1 Decentralized Capture</h3>
+        <p>Instead of all billing happening at one desk, charges are "raised" at the point of service. 
+           This ensures no service is provided without a digital record of the cost being generated immediately.</p>
+        <ul>
+            <li>A Lab Technician raises a Lab Bill.</li>
+            <li>A Pharmacist raises a Pharmacy Bill.</li>
+            <li>A Doctor raises an OPD/Consultation Bill.</li>
+        </ul>
+
+        <h3>2.2 Centralized Settlement</h3>
+        <p>All charges generated across the hospital flow into a <strong>single "Pending Cashier Queue."</strong> The patient only visits one window (the Cashier) to pay for everything they received during their visit.</p>
+
+        <h2>3. Step-by-Step Patient Flow</h2>
+
+        <div class="step-card">
+            <span class="step-number">01</span>
+            <span class="step-title">Registration</span>
+            <strong>Records Clerk Action:</strong> Clerk captures only the essential "Identity Link" fields (NRC, Man Number, Names). 
+            The system may automatically raise a non-refundable <strong>Registration Fee</strong>.
+        </div>
+
+        <div class="step-card">
+            <span class="step-number">02</span>
+            <span class="step-title">Authorization</span>
+            <strong>Medical Officer Action:</strong> Reviews the patient's eligibility and "authorizes" them to proceed. Sets queue status to <em>pending_triage</em>.
+        </div>
+
+        <div class="step-card">
+            <span class="step-number">03</span>
+            <span class="step-title">Triage</span>
+            <strong>Nursing Action:</strong> Capture BP, Weight, Temperature, and other Vital Signs. Patient moves to <em>waiting_doctor</em>.
+        </div>
+
+        <div class="step-card">
+            <span class="step-number">04</span>
+            <span class="step-title">Consultation</span>
+            <strong>Doctor Action:</strong> Clinician sees the patient and selects services (Lab, Radiology, Consultation). Selecting a service creates a <strong>Pending Bill</strong> record instantly.
+        </div>
+
+        <div class="step-card">
+            <span class="step-number">05</span>
+            <span class="step-title">Consolidation</span>
+            <strong>Service Point Action:</strong> Lab or Pharmacy add additional specific charges (Reagents, Drugs) to the profile. Total Balance increases in real-time.
+        </div>
+
+        <div class="step-card">
+            <span class="step-number">06</span>
+            <span class="step-title">Payment</span>
+            <strong>Cashier Action:</strong> Pulls up the patient's ID. All pending charges are consolidated. 
+            Patient pays full amount (Cash/Mobile Money) or records a Claim (Scheme/Corporate).
+        </div>
+
+        <div class="step-card">
+            <span class="step-number">07</span>
+            <span class="step-title">Fulfillment</span>
+            <strong>Service Point Release:</strong> Once "Paid" status is detected, Lab results are released or Medications are dispensed.
+        </div>
+
+        <div class="step-card">
+            <span class="step-number">08</span>
+            <span class="step-title">Discharge</span>
+            <strong>Final Action:</strong> Visit is closed (marked <em>discharged</em>). Archives history and clears patient from active queues.
+        </div>
+
+        <h2>4. Reporting & Auditing</h2>
+        <p>Data from this flow is reconciled via the <strong>Reports & Analytics</strong> module:</p>
+        <ul>
+            <li><strong>Line Listing</strong>: A log of exactly who was registered and their registration status.</li>
+            <li><strong>Department Aggregates</strong>: A summary of revenue raised by Lab vs Pharmacy vs Theatre.</li>
+            <li><strong>Cashier Reconciliation</strong>: Total collections verified against the generated bills for audit consistency.</li>
+        </ul>
+
+        <div class="important-box">
+            <strong>System Safeguard:</strong> This flow ensures that the Accounts Department can track exactly where revenue is being generated in real-time and prevents "leakage" by ensuring no patient reaches the final fulfillment stage without the system's digital confirmation.
+        </div>
+
+        <div class="footer">
+            &copy; 2026 MEDFINANCE360 - Internal System Document - confidential
+        </div>
+    </div>
+
+</body>
+</html>

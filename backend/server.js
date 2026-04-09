@@ -246,8 +246,8 @@ const startServer = async () => {
             const runNotificationEnumMigration = require('./migrations/addNotificationEnums');
             await runNotificationEnumMigration();
 
-            const runSmartCareIntegration = require('./migrations/003_smartcare_integration');
-            await runSmartCareIntegration();
+            const runExternalEhrIntegration = require('./migrations/003_external_ehr_integration');
+            await runExternalEhrIntegration();
         } catch (migErr) {
             console.error('⚠️ Migration runner error (non-fatal):', migErr.message);
         }
