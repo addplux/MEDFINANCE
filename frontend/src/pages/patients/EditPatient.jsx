@@ -258,8 +258,6 @@ const EditPatient = () => {
             </div>
 
             {activeTab === 'details' && (
-
-            {activeTab === 'details' && (
                 <form onSubmit={handleSubmit} className="card p-8">
                     <div className="flex items-center gap-4 mb-8 pb-4 border-b border-white/5">
                         <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -375,9 +373,7 @@ const EditPatient = () => {
                         </button>
                     </div>
                 </form>
-            )
-            )
-            }
+            )}
 
             {activeTab === 'history' && (
                 <div className="card p-6">
