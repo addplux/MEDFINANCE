@@ -167,18 +167,18 @@ const Reports = () => {
             <div className="card border-white/5 overflow-hidden">
                 <div className="border-b border-white/5 print:hidden">
                     <div className="flex overflow-x-auto scrollbar-hide">
-                        {tabs.map((tab) => (
+                        {tabs.map(({ icon: Icon, label, id }) => (
                             <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-2.5 px-8 py-5 text-[10px] font-black uppercase tracking-widest transition-all relative whitespace-nowrap group ${activeTab === tab.id
+                                key={id}
+                                onClick={() => setActiveTab(id)}
+                                className={`flex items-center gap-2.5 px-8 py-5 text-[10px] font-black uppercase tracking-widest transition-all relative whitespace-nowrap group ${activeTab === id
                                     ? 'text-white bg-white/[0.02]'
                                     : 'text-white/30 hover:text-white/60 hover:bg-white/[0.01]'
                                     }`}
                             >
-                                <tab.icon className={`w-3.5 h-3.5 transition-colors ${activeTab === tab.id ? 'text-blue-400' : 'text-white/20 group-hover:text-white/40'}`} />
-                                {tab.label}
-                                {activeTab === tab.id && (
+                                <Icon className={`w-3.5 h-3.5 transition-colors ${activeTab === id ? 'text-blue-400' : 'text-white/20 group-hover:text-white/40'}`} />
+                                {label}
+                                {activeTab === id && (
                                     <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-500 shadow-[0_-4px_16px_rgba(59,130,246,0.8)]" />
                                 )}
                             </button>
