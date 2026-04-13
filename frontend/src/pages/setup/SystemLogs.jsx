@@ -107,20 +107,20 @@ const AuditTrail = () => {
                 <select
                     value={actionFilter}
                     onChange={e => { setActionFilter(e.target.value); setPage(1); }}
-                    className="bg-white/5 border border-white/10 text-white/70 rounded-xl px-3 py-2 text-sm focus:outline-none"
+                    className="bg-white/5 border border-white/10 text-white/70 rounded-xl px-3 py-2 text-sm focus:outline-none appearance-none"
                 >
-                    <option value="">All Actions</option>
+                    <option value="" className="bg-slate-900 text-white">All Actions</option>
                     {['CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'APPROVE', 'REJECT'].map(a => (
-                        <option key={a} value={a}>{a}</option>
+                        <option key={a} value={a} className="bg-slate-900 text-white">{a}</option>
                     ))}
                 </select>
                 <select
                     value={tableFilter}
                     onChange={e => { setTableFilter(e.target.value); setPage(1); }}
-                    className="bg-white/5 border border-white/10 text-white/70 rounded-xl px-3 py-2 text-sm focus:outline-none"
+                    className="bg-white/5 border border-white/10 text-white/70 rounded-xl px-3 py-2 text-sm focus:outline-none appearance-none"
                 >
-                    <option value="">All Tables</option>
-                    {tables.map(t => <option key={t} value={t}>{t}</option>)}
+                    <option value="" className="bg-slate-900 text-white">All Tables</option>
+                    {tables.map(t => <option key={t} value={t} className="bg-slate-900 text-white">{t}</option>)}
                 </select>
                 <button onClick={fetchAuditLogs} disabled={loading} className="p-2 hover:bg-white/10 rounded-xl text-white/40 hover:text-white transition-colors">
                     <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -265,11 +265,11 @@ const SystemErrors = () => {
         <div className="space-y-4">
             <div className="card p-4 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex gap-3 items-center">
-                    <select value={filter} onChange={e => setFilter(e.target.value)} className="bg-white/5 border border-white/10 text-white/70 rounded-xl px-3 py-2 text-sm">
-                        <option value="all">All Levels</option>
-                        <option value="error">Errors Only</option>
-                        <option value="warning">Warnings Only</option>
-                        <option value="info">Info Only</option>
+                    <select value={filter} onChange={e => setFilter(e.target.value)} className="bg-white/5 border border-white/10 text-white/70 rounded-xl px-3 py-2 text-sm focus:outline-none appearance-none">
+                        <option value="all" className="bg-slate-900 text-white">All Levels</option>
+                        <option value="error" className="bg-slate-900 text-white">Errors Only</option>
+                        <option value="warning" className="bg-slate-900 text-white">Warnings Only</option>
+                        <option value="info" className="bg-slate-900 text-white">Info Only</option>
                     </select>
                     <input type="text" placeholder="Search logs..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
                         className="bg-white/5 border border-white/10 text-white rounded-xl px-4 py-2 text-sm placeholder:text-white/20 focus:outline-none w-56" />
