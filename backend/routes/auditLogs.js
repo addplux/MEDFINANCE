@@ -5,7 +5,7 @@ const { authMiddleware, authorize } = require('../middleware/auth');
 const { Op } = require('sequelize');
 
 router.use(authMiddleware);
-router.use(authorize('admin', 'superintendent'));
+router.use(authorize('admin', 'superintendent', 'records_clerk'));
 
 // GET /api/audit-logs — paginated, filterable
 router.get('/', async (req, res) => {
