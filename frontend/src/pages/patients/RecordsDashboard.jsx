@@ -359,13 +359,19 @@ const RecordsDashboard = () => {
                     <div className="card p-5 border-white/5">
                         <h3 className="text-xs font-black text-white/30 uppercase tracking-[0.2em] mb-4">Registry Actions</h3>
                         <div className="grid grid-cols-2 gap-3">
-                            <button className="flex flex-col items-center gap-3 p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all group border border-white/5">
+                            <button 
+                                onClick={() => navigate('/app/patients')}
+                                className="flex flex-col items-center gap-3 p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all group border border-white/5"
+                            >
                                 <div className="p-2 bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform">
                                     <FileText className="w-5 h-5 text-blue-400" />
                                 </div>
                                 <span className="text-[10px] font-bold text-white tracking-widest">ARCHIVE</span>
                             </button>
-                            <button className="flex flex-col items-center gap-3 p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all group border border-white/5">
+                            <button 
+                                onClick={() => navigate('/app/setup/audit-logs')}
+                                className="flex flex-col items-center gap-3 p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all group border border-white/5"
+                            >
                                 <div className="p-2 bg-purple-500/10 rounded-xl group-hover:scale-110 transition-transform">
                                     <Clock className="w-5 h-5 text-purple-400" />
                                 </div>

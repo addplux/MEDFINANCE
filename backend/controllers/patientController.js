@@ -133,6 +133,7 @@ const createPatient = async (req, res) => {
             firstName, lastName, dateOfBirth, ageGroup, gender, phone, email, address,
             paymentMethod, costCategory, isReferral, referralType, manNumber, staffId,
             emergencyContact, emergencyPhone, nrc, patientType, schemeId, initialDeposit,
+            serviceId, registeredService, ward,
             // Prepaid / membership fields
             balance, prepaidCredit, policyNumber, memberRank, memberSuffix, memberStatus, memberPlan
         } = req.body;
