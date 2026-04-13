@@ -293,6 +293,17 @@ const createPatient = async (req, res) => {
             }, { transaction: t });
         }
 
+        const logAudit = require('../utils/auditLogger');
+        await logAudit({
+            userId: req.user?.id || 1,
+            action: 'create',
+            tableName: 'patients',
+            recordId: patient.id,
+            changes: { details: `Registered new patient: ${firstName} ${lastName} (${patientNumber})` },
+            req,
+            transaction: t
+        });
+
         await t.commit();
         res.status(201).json({ ...patient.toJSON(), initialVisit: visit });
     } catch (error) {
@@ -414,6 +425,18 @@ const deletePatient = async (req, res) => {
         await PatientMovement.destroy({ where: { patientId: patient.id }, transaction: t });
 
         await patient.destroy({ transaction: t });
+        
+        const logAudit = require('../utils/auditLogger');
+        await logAudit({
+            userId: req.user?.id || 1,
+            action: 'delete',
+            tableName: 'patients',
+            recordId: req.params.id,
+            changes: { details: `Deleted patient: ${patient.firstName} ${patient.lastName} (${patient.patientNumber})` },
+            req,
+            transaction: t
+        });
+
         await t.commit();
         res.json({ message: 'Patient deleted successfully' });
     } catch (error) {
