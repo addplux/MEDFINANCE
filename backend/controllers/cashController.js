@@ -3,7 +3,7 @@
  * Developed: 2026
  */
 
-const { Payment, BankAccount, PettyCash, Patient, User, sequelize, OPDBill, PharmacyBill, LabBill, LabRequest, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill, PayrollDeduction } = require('../models');
+const { Payment, BankAccount, PettyCash, Patient, User, sequelize, OPDBill, PharmacyBill, LabBill, LabRequest, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill, PayrollDeduction, Visit } = require('../models');
 const logAudit = require('../utils/auditLogger');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
 const { postPayment } = require('../utils/glPoster');
@@ -108,10 +108,17 @@ const createPayment = async (req, res) => {
                     case 'TheatreBill': model = TheatreBill; break;
                     case 'Maternity':
                     case 'MaternityBill': model = MaternityBill; break;
-                    case 'Specialist Clinic':
                     case 'Specialist':
                     case 'SpecialistClinicBill': model = SpecialistClinicBill; break;
                 }
+                
+                // --- Handle Registry Fee Payment ---
+                if (b.type === 'RegistryFee' || b.billType === 'RegistryFee') {
+                    const visitId = b.visitId || (b.id && b.id.startsWith('REG-') ? b.id.replace('REG-', '') : b.id);
+                    await Visit.update({ registryFeeStatus: 'paid' }, { where: { id: visitId }, transaction: t });
+                    continue; // Skip the generic update below as it doesn't apply to the Visit model in the same way
+                }
+
                 if (model) {
                     await model.update({ paymentStatus: 'paid' }, { where: { id: b.id }, transaction: t });
 
@@ -121,7 +128,6 @@ const createPayment = async (req, res) => {
                     if ((b.type === 'OPD' || b.type === 'OPDBill') && b.id) {
                         const bill = await OPDBill.findByPk(b.id, { transaction: t });
                         if (bill && bill.visitId) {
-                            const { Visit } = require('../models');
                             const linkedVisit = await Visit.findByPk(bill.visitId, { transaction: t });
                             if (linkedVisit && linkedVisit.queueStatus === 'pending_cashier') {
                                 await linkedVisit.update(

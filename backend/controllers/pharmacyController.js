@@ -161,8 +161,8 @@ const dispenseMedication = async (req, res) => {
             return res.status(404).json({ error: 'Patient not found' });
         }
 
-        // Block dispensing for suspended/closed accounts
-        try { assertPatientActive(patient); } catch (e) {
+        // Block dispensing for suspended/closed accounts or pending registry fees
+        try { await assertPatientActive(patient); } catch (e) {
             await t.rollback();
             return res.status(e.statusCode || 403).json({ error: e.message, code: e.code });
         }

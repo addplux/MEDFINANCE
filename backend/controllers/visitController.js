@@ -14,11 +14,25 @@ const createVisit = async (req, res) => {
             reasonForVisit,
             notes,
             admissionDate,
-            initialVitals
+            initialVitals,
+            registryFee
         } = req.body;
 
-        // All patients default to Triage since registration is free
-        let initialQueueStatus = 'pending_triage';
+        // Fetch patient to check referral type
+        const patient = await Patient.findByPk(patientId);
+        if (!patient) return res.status(404).json({ error: 'Patient not found' });
+
+        const isBypass = patient.referralType === 'bypass';
+        const isReferral = patient.referralType === 'referral';
+
+        // Bypass patients go to cashier first and have a pending registry fee
+        let initialQueueStatus = isBypass ? 'pending_cashier' : 'pending_triage';
+        
+        // If it's a referral, they go to authorization (MO) first as requested in earlier prompts
+        if (isReferral) initialQueueStatus = 'pending_authorization';
+
+        const newRegistryFee = isBypass ? Number(registryFee || 0) : 0;
+        const newRegistryFeeStatus = (isBypass && newRegistryFee > 0) ? 'pending' : 'waived';
 
         // Generate visit number
         const count = await Visit.count();
@@ -37,6 +51,8 @@ const createVisit = async (req, res) => {
             admissionDate: admissionDate || new Date(),
             status: 'active',
             queueStatus: initialQueueStatus,
+            registryFee: newRegistryFee,
+            registryFeeStatus: newRegistryFeeStatus,
             admittedById: req.user.id
         });
 
@@ -358,6 +374,10 @@ const createConsultationVisit = async (req, res) => {
         const count = await Visit.count({ transaction: t });
         const visitNumber = `VIS${String(count + 1).padStart(6, '0')}`;
 
+        const isBypass = patient.referralType === 'bypass';
+        const newRegistryFee = isBypass ? Number(req.body.registryFee || 0) : 0;
+        const newRegistryFeeStatus = (isBypass && newRegistryFee > 0) ? 'pending' : 'waived';
+
         const visit = await Visit.create({
             visitNumber,
             patientId,
@@ -368,6 +388,8 @@ const createConsultationVisit = async (req, res) => {
             admissionDate: new Date(),
             status: 'active',
             queueStatus: initialQueueStatus,
+            registryFee: newRegistryFee,
+            registryFeeStatus: newRegistryFeeStatus,
             admittedById: req.user.id
         }, { transaction: t });
 

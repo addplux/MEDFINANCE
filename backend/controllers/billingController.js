@@ -1,4 +1,4 @@
-const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, Patient, Service, User, sequelize, TheatreBill, MaternityBill, SpecialistClinicBill, LabRequest, LabTest, LabResult, Medication } = require('../models');
+const { OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Payment, Patient, Service, User, sequelize, TheatreBill, MaternityBill, SpecialistClinicBill, LabRequest, LabTest, LabResult, Medication, Visit } = require('../models');
 const { updatePatientBalance } = require('../utils/balanceUpdater');
 const { postChargeToGL } = require('../utils/glPoster');
 const { assertPatientActive } = require('../utils/patientStatusGuard');
@@ -80,8 +80,8 @@ const createOPDBill = async (req, res) => {
             return res.status(404).json({ error: 'Patient not found' });
         }
 
-        // Block billing for suspended/closed accounts
-        try { assertPatientActive(patient); } catch (e) {
+        // Block billing for suspended/closed accounts or pending registry fees
+        try { await assertPatientActive(patient); } catch (e) {
             return res.status(e.statusCode || 403).json({ error: e.message, code: e.code });
         }
 
@@ -475,6 +475,11 @@ const createManualCharge = async (req, res) => {
         const patient = await Patient.findByPk(patientId);
         if (!patient) return res.status(404).json({ error: 'Patient not found' });
 
+        // Block billing for suspended/closed accounts or pending registry fees
+        try { await assertPatientActive(patient); } catch (e) {
+            return res.status(e.statusCode || 403).json({ error: e.message, code: e.code });
+        }
+
         // We use a "Manual Adjustment" placeholder or similar if serviceId is required.
         // Let's look for a service named "Manual Adjustment" or create one if it doesn't exist.
         let service = await Service.findOne({ where: { serviceName: 'Manual Adjustment' } });
@@ -533,6 +538,27 @@ const getUnpaidPatientBills = async (req, res) => {
         }
 
         console.log(`[DEBUG] getUnpaidPatientBills started for patientId: ${patientId}`);
+
+        // Fetch Registry Fee if pending on active visit
+        try {
+            const activeVisit = await Visit.findOne({
+                where: { patientId, status: 'active', registryFeeStatus: 'pending' }
+            });
+            if (activeVisit) {
+                unpaidBills.push({
+                    id: `REG-${activeVisit.id}`,
+                    visitId: activeVisit.id,
+                    totalAmount: activeVisit.registryFee,
+                    netAmount: activeVisit.registryFee,
+                    department: 'Records',
+                    description: 'Registration Fee (Bypass)',
+                    billType: 'RegistryFee',
+                    createdAt: activeVisit.createdAt
+                });
+            }
+        } catch (e) {
+            console.error('[DEBUG] Registry fee fetch error:', e.message);
+        }
 
         // Fetch IPD
         try {

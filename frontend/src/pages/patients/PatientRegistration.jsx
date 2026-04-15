@@ -23,7 +23,8 @@ const PatientRegistration = () => {
         manNumber: '',
         firstName: '',
         lastName: '',
-        referralType: '' // 'bypass' or 'referral'
+        referralType: '', // 'bypass' or 'referral'
+        registryFee: ''
     });
     const [errors, setErrors] = useState({});
     const [existingPatient, setExistingPatient] = useState(null);
@@ -73,6 +74,9 @@ const PatientRegistration = () => {
         if (!formData.firstName.trim()) errs.firstName = 'First name is required';
         if (!formData.lastName.trim()) errs.lastName = 'Last name is required';
         if (!formData.referralType) errs.referralType = 'Please select Bypass or Referral';
+        if (formData.referralType === 'bypass' && (!formData.registryFee || isNaN(formData.registryFee) || Number(formData.registryFee) <= 0)) {
+            errs.registryFee = 'Registration fee is required for bypass patients';
+        }
         return errs;
     };
 
@@ -92,6 +96,7 @@ const PatientRegistration = () => {
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
                 referralType: formData.referralType,
+                registryFee: formData.referralType === 'bypass' ? Number(formData.registryFee) : 0,
                 targetDepartment: null, // auto-routing is done by referralType
                 paymentMethod: 'cash',
                 costCategory: 'standard'
@@ -305,6 +310,32 @@ const PatientRegistration = () => {
                                 </div>
                             </button>
                         </div>
+
+                        {/* Registration Fee for Bypass */}
+                        {isBypass && (
+                            <div className="mt-8 p-6 bg-blue-500/5 border border-blue-500/20 rounded-2xl animate-in fade-in zoom-in duration-300">
+                                <label className="form-label text-[10px] font-black uppercase text-blue-400 tracking-widest flex items-center gap-2 mb-3">
+                                    Registration Fee (Mandatory for Bypass) <span className="text-red-400">*</span>
+                                </label>
+                                <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 font-black text-xs">ZK</span>
+                                    <input
+                                        id="reg-fee"
+                                        type="number"
+                                        value={formData.registryFee}
+                                        onChange={e => handleChange('registryFee', e.target.value)}
+                                        className={`form-input bg-white/[0.02] border-white/10 text-white py-4 pl-12 rounded-xl focus:ring-blue-500/50 text-lg font-black ${errors.registryFee ? 'border-red-500/50' : ''}`}
+                                        placeholder="0.00"
+                                        min="0"
+                                        step="0.01"
+                                    />
+                                </div>
+                                {errors.registryFee && <p className="text-[10px] text-red-400 font-bold uppercase mt-2">{errors.registryFee}</p>}
+                                <p className="text-[9px] text-white/40 mt-3 font-medium uppercase tracking-tight">
+                                    Note: Services will be locked for this patient until this fee is paid to the cashier.
+                                </p>
+                            </div>
+                        )}
                     </section>
 
                 </div>

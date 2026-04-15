@@ -256,12 +256,16 @@ const PaymentForm = () => {
                                     name="amount"
                                     value={formData.amount}
                                     onChange={handleChange}
-                                    className="form-input"
+                                    className={`form-input ${(stateBillsToPay.some(b => b.billType === 'RegistryFee') ? 'bg-white/5 opacity-70 cursor-not-allowed' : '')}`}
                                     min="0"
                                     step="0.01"
                                     placeholder="0.00"
                                     required
+                                    readOnly={stateBillsToPay.some(b => b.billType === 'RegistryFee')}
                                 />
+                                {stateBillsToPay.some(b => b.billType === 'RegistryFee') && (
+                                    <p className="text-[10px] text-amber-400 mt-1 font-black uppercase">Amount Locked: Mandatory Bypass Fee</p>
+                                )}
                             </div>
 
                             {/* Payment Method — auto-set to insurance for scheme members */}

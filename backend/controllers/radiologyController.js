@@ -82,8 +82,8 @@ exports.createRequest = async (req, res) => {
         const patientRecord = await Patient.findByPk(patientId, { transaction });
         const patientMethod = patientRecord ? patientRecord.paymentMethod : 'cash';
 
-        // Block billing for suspended/closed accounts
-        try { assertPatientActive(patientRecord); } catch (e) {
+        // Block billing for suspended/closed accounts or pending registry fees
+        try { await assertPatientActive(patientRecord); } catch (e) {
             await transaction.rollback();
             return res.status(e.statusCode || 403).json({ error: e.message, code: e.code });
         }

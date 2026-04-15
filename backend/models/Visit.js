@@ -59,6 +59,16 @@ const Visit = sequelize.define('Visit', {
         allowNull: false,
         defaultValue: 'pending_triage'
     },
+    registryFee: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0.00
+    },
+    registryFeeStatus: {
+        type: DataTypes.ENUM('pending', 'paid', 'waived'),
+        allowNull: false,
+        defaultValue: 'waived'
+    },
 
     admittedById: {
         type: DataTypes.INTEGER,

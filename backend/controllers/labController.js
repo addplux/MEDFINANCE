@@ -71,8 +71,8 @@ const createRequest = async (req, res) => {
         const patient = await Patient.findByPk(patientId, { transaction: t });
         if (!patient) return res.status(404).json({ error: 'Patient not found' });
 
-        // Block lab requests for suspended/closed accounts
-        try { assertPatientActive(patient); } catch (e) {
+        // Block lab requests for suspended/closed accounts or pending registry fees
+        try { await assertPatientActive(patient); } catch (e) {
             await t.rollback();
             return res.status(e.statusCode || 403).json({ error: e.message, code: e.code });
         }

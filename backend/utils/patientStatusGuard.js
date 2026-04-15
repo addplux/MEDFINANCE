@@ -1,11 +1,14 @@
+const { Visit } = require('../models');
+
 /**
  * patientStatusGuard — throws a structured error if patient account is suspended or closed.
+ * Also blocks services if a "Bypass" patient has a pending registration fee.
  * Use this at the top of every billing "create" function after fetching the patient.
  *
- * @param {object} patient  Sequelize Patient instance or plain object with { memberStatus, firstName, lastName }
+ * @param {object} patient  Sequelize Patient instance or plain object with { id, memberStatus, firstName, lastName }
  * @throws {Error} with a user-friendly message and a .statusCode property
  */
-function assertPatientActive(patient) {
+async function assertPatientActive(patient) {
     if (!patient) return; // caller should handle not-found separately
 
     const status = patient.memberStatus;
@@ -35,6 +38,25 @@ function assertPatientActive(patient) {
         );
         err.statusCode = 403;
         err.code = 'RED_ACCOUNT';
+        throw err;
+    }
+
+    // MANDATORY BYPASS FEE CHECK
+    // If the latest active visit for this patient has a pending registry fee, block services.
+    const activeVisit = await Visit.findOne({
+        where: {
+            patientId: patient.id,
+            status: 'active'
+        },
+        order: [['createdAt', 'DESC']]
+    });
+
+    if (activeVisit && activeVisit.registryFeeStatus === 'pending') {
+        const err = new Error(
+            `SERVICES LOCKED: ${patient.firstName} ${patient.lastName} has a pending registration fee of K${parseFloat(activeVisit.registryFee).toFixed(2)}. Please pay at the cashier to unlock services.`
+        );
+        err.statusCode = 403;
+        err.code = 'REGISTRY_FEE_PENDING';
         throw err;
     }
 }

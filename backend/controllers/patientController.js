@@ -122,7 +122,7 @@ const createPatient = async (req, res) => {
             firstName, lastName, dateOfBirth, ageGroup, gender, phone, email, address,
             paymentMethod, costCategory, isReferral, referralType, manNumber, staffId,
             emergencyContact, emergencyPhone, nrc, patientType, schemeId, initialDeposit,
-            serviceId, registeredService, ward,
+            serviceId, registeredService, ward, registryFee,
             // Prepaid / membership fields
             balance, prepaidCredit, policyNumber, memberRank, memberSuffix, memberStatus, memberPlan
         } = req.body;
@@ -251,6 +251,11 @@ const createPatient = async (req, res) => {
 
             // Determine initial queue status based on referralType
             const newVisitReferralType = referralType || patient.referralType || 'bypass';
+            
+            // Bypass patients have a pending registry fee if specified
+            const newRegistryFee = (newVisitReferralType === 'bypass') ? Number(registryFee || 0) : 0;
+            const newRegistryFeeStatus = (newVisitReferralType === 'bypass' && newRegistryFee > 0) ? 'pending' : 'waived';
+
             const newVisitQueueStatus = newVisitReferralType === 'referral'
                 ? 'pending_authorization'
                 : 'pending_cashier';
@@ -265,6 +270,8 @@ const createPatient = async (req, res) => {
                 admissionDate: new Date(),
                 status: 'active',
                 queueStatus: newVisitQueueStatus,
+                registryFee: newRegistryFee,
+                registryFeeStatus: newRegistryFeeStatus,
                 admittedById: req.user?.id || 1
             }, { transaction: t });
 

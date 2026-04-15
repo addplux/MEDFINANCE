@@ -25,10 +25,10 @@ const generateBillNumber = async () => {
 
 exports.createMaternityBill = async (req, res) => {
     try {
-        // Block billing for suspended/closed accounts
+        // Block billing for suspended/closed accounts or pending registry fees
         if (req.body.patientId) {
             const patient = await Patient.findByPk(req.body.patientId);
-            try { assertPatientActive(patient); } catch (e) {
+            try { await assertPatientActive(patient); } catch (e) {
                 return res.status(e.statusCode || 403).json({ error: e.message, code: e.code });
             }
         }
