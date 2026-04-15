@@ -692,14 +692,15 @@ const getUnpaidPatientBills = async (req, res) => {
 // Get a consolidated queue of all patients with unpaid bills across all departments
 const getPendingQueue = async (req, res) => {
     try {
-        const [opd, pharmacy, lab, radiology, theatre, maternity, specialist] = await Promise.all([
+        const [opd, pharmacy, lab, radiology, theatre, maternity, specialist, registryFees] = await Promise.all([
             OPDBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
             PharmacyBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
             LabRequest.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
             RadiologyBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
             TheatreBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
             MaternityBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
-            SpecialistClinicBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] })
+            SpecialistClinicBill.findAll({ where: { paymentStatus: 'unpaid' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] }),
+            Visit.findAll({ where: { status: 'active', registryFeeStatus: 'pending' }, include: [{ association: 'patient', attributes: ['id', 'firstName', 'lastName', 'patientNumber'] }] })
         ]);
 
         const queueMap = new Map();
@@ -740,6 +741,33 @@ const getPendingQueue = async (req, res) => {
         processRecords(theatre, 'Theatre');
         processRecords(maternity, 'Maternity');
         processRecords(specialist, 'Specialist Clinic');
+        // Map pending registry fees
+        registryFees.forEach(v => {
+            if (!v.patient) return;
+            const pid = v.patient.id;
+            const amount = parseFloat(v.registryFee || 0);
+            
+            if (!queueMap.has(pid)) {
+                queueMap.set(pid, {
+                    id: pid,
+                    patientNumber: v.patient.patientNumber,
+                    firstName: v.patient.firstName,
+                    lastName: v.patient.lastName,
+                    departments: new Set(['Records']),
+                    totalAmount: amount,
+                    itemCount: 1,
+                    lastRequest: v.createdAt
+                });
+            } else {
+                const existing = queueMap.get(pid);
+                existing.departments.add('Records');
+                existing.totalAmount += amount;
+                existing.itemCount += 1;
+                if (new Date(v.createdAt) > new Date(existing.lastRequest)) {
+                    existing.lastRequest = v.createdAt;
+                }
+            }
+        });
 
         // Convert Map to sorted array
         const result = Array.from(queueMap.values()).map(p => ({
