@@ -60,12 +60,15 @@ const createPayment = async (req, res) => {
         const paymentCount = await Payment.count();
         const receiptNumber = `RCP${String(paymentCount + 1).padStart(6, '0')}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
 
+        // Auto-generate reference number if not provided
+        const finalReference = referenceNumber || `REF-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
+
         const payment = await Payment.create({
             receiptNumber,
             patientId,
             amount,
             paymentMethod,
-            referenceNumber,
+            referenceNumber: finalReference,
             paymentDate: paymentDate || new Date(),
             billType,
             billId,

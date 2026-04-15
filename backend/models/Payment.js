@@ -38,7 +38,7 @@ const Payment = sequelize.define('Payment', {
         defaultValue: DataTypes.NOW
     },
     billType: {
-        type: DataTypes.ENUM('opd', 'ipd', 'pharmacy', 'laboratory', 'radiology', 'theatre', 'maternity', 'specialist', 'multiple', 'other'),
+        type: DataTypes.ENUM('opd', 'ipd', 'pharmacy', 'laboratory', 'radiology', 'theatre', 'maternity', 'specialist', 'records', 'multiple', 'other'),
         allowNull: true
     },
     billId: {

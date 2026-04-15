@@ -35,7 +35,7 @@ const PaymentForm = () => {
         patientId: statePatientId,
         amount: prefilledAmount,
         paymentMethod: 'cash',
-        referenceNumber: '',
+        referenceNumber: isEdit ? '' : `REF-${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
         paymentDate: new Date().toISOString().split('T')[0],
         billType: derivedBillType,
         billId: stateBillsToPay.length === 1 ? stateBillsToPay[0].id : null,
