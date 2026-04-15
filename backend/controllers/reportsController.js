@@ -1,4 +1,4 @@
-const { Payment, OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Department, Budget, User, Patient, Visit, sequelize } = require('../models');
+const { Payment, OPDBill, IPDBill, PharmacyBill, LabBill, RadiologyBill, Department, Budget, User, Patient, Visit, Scheme, sequelize } = require('../models');
 const XLSX = require('xlsx');
 
 // Get revenue report
