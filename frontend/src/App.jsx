@@ -76,6 +76,7 @@ import CorporateAccountForm from './pages/receivables/CorporateAccountForm';
 import Schemes from './pages/receivables/Schemes';
 import SchemeForm from './pages/receivables/SchemeForm';
 import SchemeDetails from './pages/receivables/SchemeDetails';
+import SchemeServiceManager from './pages/receivables/SchemeServiceManager';
 import SchemeInvoices from './pages/receivables/SchemeInvoices';
 import InvoiceView from './pages/receivables/InvoiceView';
 import GlobalInvoices from './pages/receivables/GlobalInvoices';
