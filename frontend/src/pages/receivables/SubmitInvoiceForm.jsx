@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { Save, ArrowLeft, Upload, FileText, CheckCircle2 } from 'lucide-react';
+import { Save, ArrowLeft, Upload, FileText, CheckCircle } from 'lucide-react';
 import { receivablesAPI } from '../../services/apiService';
 
 const SubmitInvoiceForm = () => {
@@ -194,7 +194,7 @@ const SubmitInvoiceForm = () => {
                     </div>
                     {formData.schemeId && (
                         <div className="w-full md:w-2/3 flex items-center gap-3 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
-                            <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                            <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
                             <p className="text-xs font-bold text-green-600 uppercase tracking-widest leading-relaxed">
                                 Form customized for <span className="font-black">{selectedScheme?.schemeName}</span> standard reporting parameters.
                             </p>
@@ -468,7 +468,7 @@ const SubmitInvoiceForm = () => {
                                     className="peer w-5 h-5 opacity-0 absolute cursor-pointer z-10" 
                                 />
                                 <div className="w-5 h-5 border-2 border-red-500/50 rounded flex items-center justify-center peer-focus:ring-2 peer-focus:ring-red-500/20 peer-checked:bg-red-500 peer-checked:border-red-500 transition-all">
-                                    <CheckCircle2 className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                                    <CheckCircle className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
                                 </div>
                             </div>
                             <span className="text-sm font-black text-red-500 uppercase tracking-widest mt-0.5">
