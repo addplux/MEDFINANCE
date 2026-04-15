@@ -45,7 +45,10 @@ const Reports = () => {
                     break;
                 case 'line-listing':
                     response = await reportsAPI.lineListing(dateRange);
-                    setLineListing(response?.data?.data || []);
+                    // Backend returns { count, data: [] }, Axios wraps it in response.data
+                    // So the patients array is at response.data.data
+                    const listData = response?.data?.data ?? response?.data ?? [];
+                    setLineListing(Array.isArray(listData) ? listData : []);
                     break;
                 default:
                     break;
