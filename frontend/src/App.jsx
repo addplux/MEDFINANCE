@@ -53,18 +53,6 @@ import CreditLimit from './pages/schemes/corporate/CreditLimit';
 import PaymentTerms from './pages/schemes/corporate/PaymentTerms';
 import MonthlyBilling from './pages/schemes/corporate/MonthlyBilling';
 
-// Payables
-import Suppliers from './pages/payables/Suppliers';
-import SupplierForm from './pages/payables/SupplierForm';
-
-// Ledger
-import ChartOfAccounts from './pages/ledger/ChartOfAccounts';
-import AccountForm from './pages/ledger/AccountForm';
-import JournalEntries from './pages/ledger/JournalEntries';
-import JournalEntryForm from './pages/ledger/JournalEntryForm';
-import TrialBalance from './pages/ledger/TrialBalance';
-
-
 // Funds
 import Funds from './pages/funds/Funds';
 import FundForm from './pages/funds/FundForm';
@@ -318,18 +306,6 @@ function App() {
                         <Route path="receivables/invoices/:id" element={<RoleRoute roles={['cashier', 'accountant']}><InvoiceView /></RoleRoute>} />
                         <Route path="receivables/ledger/:policyNumber" element={<RoleRoute roles={['cashier', 'accountant']}><FamilyLedger /></RoleRoute>} />
                         <Route path="receivables/ageing" element={<RoleRoute roles={['accountant']}><DebtorAgeing /></RoleRoute>} />
-
-                        {/* ── Payables / Ledger / Budgets / Funds — finance only ───────── */}
-                        <Route path="payables/suppliers" element={<RoleRoute roles={['accountant']}><Suppliers /></RoleRoute>} />
-                        <Route path="payables/suppliers/new" element={<RoleRoute roles={['accountant']}><SupplierForm /></RoleRoute>} />
-                        <Route path="payables/suppliers/:id/edit" element={<RoleRoute roles={['accountant']}><SupplierForm /></RoleRoute>} />
-
-                        <Route path="ledger/accounts" element={<RoleRoute roles={['accountant']}><ChartOfAccounts /></RoleRoute>} />
-                        <Route path="ledger/accounts/new" element={<RoleRoute roles={['accountant']}><AccountForm /></RoleRoute>} />
-                        <Route path="ledger/accounts/:id/edit" element={<RoleRoute roles={['accountant']}><AccountForm /></RoleRoute>} />
-                        <Route path="ledger/journal-entries" element={<RoleRoute roles={['accountant']}><JournalEntries /></RoleRoute>} />
-                        <Route path="ledger/journal-entries/new" element={<RoleRoute roles={['accountant']}><JournalEntryForm /></RoleRoute>} />
-                        <Route path="ledger/trial-balance" element={<RoleRoute roles={['accountant']}><TrialBalance /></RoleRoute>} />
 
                         <Route path="budgets" element={<RoleRoute roles={['accountant']}><Budgets /></RoleRoute>} />
                         <Route path="budgets/new" element={<RoleRoute roles={['accountant']}><BudgetForm /></RoleRoute>} />

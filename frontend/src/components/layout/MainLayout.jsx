@@ -224,19 +224,6 @@ const MainLayout = ({ children }) => {
             roles: CASHIER_ROLES
         },
         {
-            path: '/app/payables/suppliers', icon: CreditCard, label: 'Payables',
-            roles: FINANCE
-        },
-        {
-            id: 'ledger', icon: BookOpen, label: 'General Ledger',
-            roles: FINANCE,
-            submenu: [
-                { path: '/app/ledger/accounts', label: 'Chart of Accounts' },
-                { path: '/app/ledger/journal-entries', label: 'Journal Entries' },
-                { path: '/app/ledger/trial-balance', label: 'Trial Balance' }
-            ]
-        },
-        {
             id: 'cash', icon: Wallet, label: 'Cash & Banking',
             roles: CASHIER_ROLES,
             submenu: [
