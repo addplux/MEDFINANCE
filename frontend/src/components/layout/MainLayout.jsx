@@ -192,6 +192,10 @@ const MainLayout = ({ children }) => {
             roles: CASHIER_ROLES
         },
         {
+            path: '/app/receivables/corporate-finance', icon: TrendingUp, label: 'Corporate Finance',
+            roles: CASHIER_ROLES
+        },
+        {
             id: 'private_scheme', icon: DollarSign, label: 'Private Prepaid',
             roles: CASHIER_ROLES,
             submenu: [

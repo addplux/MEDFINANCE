@@ -81,6 +81,7 @@ import SchemeInvoices from './pages/receivables/SchemeInvoices';
 import InvoiceView from './pages/receivables/InvoiceView';
 import GlobalInvoices from './pages/receivables/GlobalInvoices';
 import SubmitInvoiceForm from './pages/receivables/SubmitInvoiceForm';
+import CorporateFinanceSummary from './pages/receivables/CorporateFinanceSummary';
 import FamilyLedger from './pages/receivables/FamilyLedger';
 import DebtorAgeing from './pages/receivables/DebtorAgeing';
 import PrepaidStatementGenerator from './pages/schemes/private/PrepaidStatementGenerator';
@@ -313,6 +314,7 @@ function App() {
                         <Route path="receivables/invoices" element={<RoleRoute roles={['cashier', 'accountant']}><GlobalInvoices /></RoleRoute>} />
                         <Route path="receivables/invoices/rejected" element={<RoleRoute roles={['cashier', 'accountant']}><GlobalInvoices defaultStatus="rejected" /></RoleRoute>} />
                         <Route path="receivables/invoices/submit" element={<RoleRoute roles={['cashier', 'accountant']}><SubmitInvoiceForm /></RoleRoute>} />
+                        <Route path="receivables/corporate-finance" element={<RoleRoute roles={['cashier', 'accountant']}><CorporateFinanceSummary /></RoleRoute>} />
                         <Route path="receivables/invoices/:id" element={<RoleRoute roles={['cashier', 'accountant']}><InvoiceView /></RoleRoute>} />
                         <Route path="receivables/ledger/:policyNumber" element={<RoleRoute roles={['cashier', 'accountant']}><FamilyLedger /></RoleRoute>} />
                         <Route path="receivables/ageing" element={<RoleRoute roles={['accountant']}><DebtorAgeing /></RoleRoute>} />
