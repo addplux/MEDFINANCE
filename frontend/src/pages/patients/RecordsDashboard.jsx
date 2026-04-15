@@ -115,7 +115,7 @@ const RecordsDashboard = () => {
                 </div>
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={() => navigate('/app/patients/registration')}
+                        onClick={() => navigate('/app/patients/new')}
                         className="btn btn-primary bg-blue-600 hover:bg-blue-700 shadow-[0_0_20px_rgba(37,99,235,0.3)] border-none px-6"
                     >
                         <UserPlus className="w-4 h-4 mr-2" />
@@ -270,7 +270,7 @@ const RecordsDashboard = () => {
                                     <p className="text-white/30 text-xs">Start by adding your first patient to the registry</p>
                                 </div>
                                 <button 
-                                    onClick={() => navigate('/app/patients/registration')}
+                                    onClick={() => navigate('/app/patients/new')}
                                     className="btn btn-secondary border-none bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 px-6"
                                 >
                                     Register Patient
