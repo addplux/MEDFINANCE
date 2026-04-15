@@ -131,8 +131,19 @@ const PaymentForm = () => {
         try {
             setLoading(true);
             const paidBills = stateBillsToPay.map(b => ({ type: b.billType || b.department, id: b.id }));
+            // Clean billId if it's a string with a prefix (like 'REG-52')
+            let finalBillId = formData.billId;
+            if (typeof finalBillId === 'string' && finalBillId.includes('-')) {
+                const parts = finalBillId.split('-');
+                const potentialId = parts[parts.length - 1];
+                if (!isNaN(potentialId)) {
+                    finalBillId = parseInt(potentialId);
+                }
+            }
+
             const payload = {
                 ...formData,
+                billId: finalBillId,
                 receivedBy: user?.id,
                 paidBills: paidBills.length > 0 ? paidBills : undefined
             };

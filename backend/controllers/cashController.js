@@ -63,6 +63,20 @@ const createPayment = async (req, res) => {
         // Auto-generate reference number if not provided
         const finalReference = referenceNumber || `REF-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
 
+        // Clean billId for integer conversion (e.g., strip 'REG-' prefix)
+        let cleanedBillId = billId;
+        if (typeof billId === 'string' && billId.includes('-')) {
+            const parts = billId.split('-');
+            const potentialId = parts[parts.length - 1];
+            if (!isNaN(potentialId)) {
+                cleanedBillId = parseInt(potentialId);
+            } else {
+                cleanedBillId = null;
+            }
+        } else if (isNaN(parseInt(billId))) {
+            cleanedBillId = null;
+        }
+
         const payment = await Payment.create({
             receiptNumber,
             patientId,
@@ -71,7 +85,7 @@ const createPayment = async (req, res) => {
             referenceNumber: finalReference,
             paymentDate: paymentDate || new Date(),
             billType,
-            billId,
+            billId: cleanedBillId,
             notes,
             receivedBy: req.user.id
         }, { transaction: t });
