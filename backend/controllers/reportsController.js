@@ -483,7 +483,7 @@ const exportPatients = async (req, res) => {
         // 1. Fetch Patients for Line List
         const patientWhere = {};
         if (startDate && endDate) {
-            patientWhere['$Patient.createdAt$'] = {
+            patientWhere.createdAt = {
                 [sequelize.Sequelize.Op.between]: [new Date(startDate), new Date(endDate)]
             };
         }
@@ -580,7 +580,7 @@ const getLineListing = async (req, res) => {
             const end = new Date(endDate);
             end.setHours(23, 59, 59, 999);
 
-            where['$Patient.createdAt$'] = {
+            where.createdAt = {
                 [sequelize.Sequelize.Op.between]: [start, end]
             };
         }

@@ -14,7 +14,6 @@ async function simulate() {
 
         console.log(`Simulating with: start=${start.toISOString()}, end=${end.toISOString()}`);
 
-        const { Op } = require('sequelize');
         const patients = await Patient.findAll({
             where: {
                 createdAt: {
