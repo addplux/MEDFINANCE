@@ -79,6 +79,14 @@ const TheatreBill = sequelize.define('TheatreBill', {
     notes: {
         type: DataTypes.TEXT,
         allowNull: true
+    },
+    schemeInvoiceId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'scheme_invoices',
+            key: 'id'
+        }
     }
 }, {
     tableName: 'theatre_bills',

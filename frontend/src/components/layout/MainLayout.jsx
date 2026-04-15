@@ -36,7 +36,8 @@ import {
     Layers,
     Terminal,
     Sun,
-    Moon
+    Moon,
+    UploadCloud
 } from 'lucide-react';
 
 const MainLayout = ({ children }) => {
@@ -176,6 +177,18 @@ const MainLayout = ({ children }) => {
         { isHeading: true, label: 'SCHEME MANAGER', roles: CASHIER_ROLES },
         {
             path: '/app/receivables/schemes', icon: Settings, label: 'All Schemes',
+            roles: CASHIER_ROLES
+        },
+        {
+            path: '/app/receivables/invoices', icon: FileText, label: 'Invoices',
+            roles: CASHIER_ROLES
+        },
+        {
+            path: '/app/receivables/invoices/rejected', icon: X, label: 'Rejected Invoice',
+            roles: CASHIER_ROLES
+        },
+        {
+            path: '/app/receivables/invoices/submit', icon: UploadCloud, label: 'Submit Invoices',
             roles: CASHIER_ROLES
         },
         {

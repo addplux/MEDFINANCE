@@ -174,16 +174,18 @@ SchemeInvoice.belongsTo(User, { foreignKey: 'generatedBy', as: 'generator' });
 Scheme.hasMany(SchemeInvoice, { foreignKey: 'schemeId', as: 'invoices' });
 
 // Bill associations with Scheme Invoice
-OPDBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
-PharmacyBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
-LabBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
 RadiologyBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
+IPDBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
+TheatreBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
+MaternityBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
+SpecialistClinicBill.belongsTo(SchemeInvoice, { foreignKey: 'schemeInvoiceId', as: 'schemeInvoice' });
 
 
-SchemeInvoice.hasMany(OPDBill, { foreignKey: 'schemeInvoiceId', as: 'opdBills' });
-SchemeInvoice.hasMany(PharmacyBill, { foreignKey: 'schemeInvoiceId', as: 'pharmacyBills' });
-SchemeInvoice.hasMany(LabBill, { foreignKey: 'schemeInvoiceId', as: 'labBills' });
 SchemeInvoice.hasMany(RadiologyBill, { foreignKey: 'schemeInvoiceId', as: 'radiologyBills' });
+SchemeInvoice.hasMany(IPDBill, { foreignKey: 'schemeInvoiceId', as: 'ipdBills' });
+SchemeInvoice.hasMany(TheatreBill, { foreignKey: 'schemeInvoiceId', as: 'theatreBills' });
+SchemeInvoice.hasMany(MaternityBill, { foreignKey: 'schemeInvoiceId', as: 'maternityBills' });
+SchemeInvoice.hasMany(SpecialistClinicBill, { foreignKey: 'schemeInvoiceId', as: 'specialistClinicBills' });
 
 // Petty Cash relationships
 PettyCash.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });

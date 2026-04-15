@@ -74,6 +74,14 @@ const IPDBill = sequelize.define('IPDBill', {
         type: DataTypes.TEXT,
         allowNull: true
     },
+    schemeInvoiceId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'scheme_invoices',
+            key: 'id'
+        }
+    },
     createdBy: {
         type: DataTypes.INTEGER,
         allowNull: false,

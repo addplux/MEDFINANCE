@@ -96,6 +96,14 @@ const SpecialistClinicBill = sequelize.define('SpecialistClinicBill', {
     notes: {
         type: DataTypes.TEXT,
         allowNull: true
+    },
+    schemeInvoiceId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'scheme_invoices',
+            key: 'id'
+        }
     }
 }, {
     tableName: 'specialist_clinic_bills',

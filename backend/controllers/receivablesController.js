@@ -1495,6 +1495,124 @@ const addSchemeMember = async (req, res) => {
     }
 };
 
+// Get All Scheme Invoices (Global List)
+const getAllInvoices = async (req, res) => {
+    try {
+        const { status, schemeId, page = 1, limit = 20 } = req.query;
+        const offset = (page - 1) * limit;
+
+        const where = {};
+        if (status) where.status = status;
+        if (schemeId) where.schemeId = schemeId;
+
+        const { count, rows } = await SchemeInvoice.findAndCountAll({
+            where,
+            include: [{ model: Scheme, as: 'scheme', attributes: ['schemeName', 'schemeCode'] }],
+            limit: parseInt(limit),
+            offset: parseInt(offset),
+            order: [['createdAt', 'DESC']]
+        });
+
+        res.json({
+            total: count,
+            page: parseInt(page),
+            totalPages: Math.ceil(count / limit),
+            data: rows
+        });
+    } catch (error) {
+        console.error('Get all invoices error:', error);
+        res.status(500).json({ error: 'Failed to fetch global invoices' });
+    }
+};
+
+// Update Invoice Status
+const updateInvoiceStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const invoice = await SchemeInvoice.findByPk(id);
+        if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+
+        await invoice.update({ status });
+        res.json({ message: 'Invoice status updated successfully', invoice });
+    } catch (error) {
+        console.error('Update invoice status error:', error);
+        res.status(500).json({ error: 'Failed to update invoice status' });
+    }
+};
+
+// Export Invoice to WOHMS Professional Format (Excel)
+const exportInvoiceToWOHMS = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const invoice = await SchemeInvoice.findByPk(id, {
+            include: [{ model: Scheme, as: 'scheme' }]
+        });
+
+        if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+
+        // Fetch all bill types linked to this invoice
+        const [opd, pharmacy, lab, radiology, ipd, theatre, maternity, specialist] = await Promise.all([
+            OPDBill.findAll({ where: { schemeInvoiceId: id }, include: [{ model: Patient, as: 'patient' }, { model: Service, as: 'service' }, { model: User, as: 'creator' }] }),
+            PharmacyBill.findAll({ where: { schemeInvoiceId: id }, include: [{ model: Patient, as: 'patient' }, { model: User, as: 'creator' }] }),
+            LabBill.findAll({ where: { schemeInvoiceId: id }, include: [{ model: Patient, as: 'patient' }, { model: User, as: 'creator' }] }),
+            RadiologyBill.findAll({ where: { schemeInvoiceId: id }, include: [{ model: Patient, as: 'patient' }, { model: User, as: 'creator' }] }),
+            IPDBill.findAll({ where: { schemeInvoiceId: id }, include: [{ model: Patient, as: 'patient' }, { model: User, as: 'creator' }] }),
+            TheatreBill.findAll({ where: { schemeInvoiceId: id }, include: [{ model: Patient, as: 'patient' }] }),
+            MaternityBill.findAll({ where: { schemeInvoiceId: id }, include: [{ model: Patient, as: 'patient' }] }),
+            SpecialistClinicBill.findAll({ where: { schemeInvoiceId: id }, include: [{ model: Patient, as: 'patient' }] }),
+        ]);
+
+        const allBills = [...opd, ...pharmacy, ...lab, ...radiology, ...ipd, ...theatre, ...maternity, ...specialist];
+        
+        const exportData = allBills.map(bill => {
+            const patient = bill.patient || {};
+            const creator = bill.creator || {};
+            
+            // Determine treatment date (varies by model)
+            const treatmentDate = bill.billDate || bill.admissionDate || bill.procedureDate || bill.consultationDate || bill.createdAt;
+
+            // Determine Service Type
+            let serviceType = 'General';
+            if (bill.service) serviceType = bill.service.category || bill.service.serviceName;
+            else if (bill.testName) serviceType = 'Laboratory';
+            else if (bill.scanType) serviceType = 'Radiology';
+            else if (bill.deliveryType) serviceType = 'Maternity';
+            else if (bill.procedureType) serviceType = 'Theatre';
+            else if (bill.clinicType) serviceType = `Specialist (${bill.clinicType})`;
+
+            return {
+                'Invoice No': invoice.invoiceNumber,
+                'Invoice Date': new Date(invoice.createdAt).toLocaleDateString(),
+                'Treatment Date': new Date(treatmentDate).toLocaleDateString(),
+                'Man No': patient.policyNumber || patient.patientNumber || 'N/A',
+                'Patient NRC': patient.nrc || 'N/A',
+                'Employee Name': patient.policyNumber ? `${patient.firstName} ${patient.lastName}` : 'N/A', // Assuming member name if policy exists
+                'Patient Name': `${patient.firstName} ${patient.lastName}`,
+                'Service Type': serviceType,
+                'Status': invoice.status.toUpperCase(),
+                'User Name': creator.username || 'System',
+                'Total': parseFloat(bill.netAmount || bill.totalAmount || 0).toFixed(2)
+            };
+        });
+
+        const wb = xlsx.utils.book_new();
+        const ws = xlsx.utils.json_to_sheet(exportData);
+        xlsx.utils.book_append_sheet(wb, ws, "WOHMS Export");
+
+        const buffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=WOHMS_Export_${invoice.invoiceNumber}.xlsx`);
+        res.send(buffer);
+
+    } catch (error) {
+        console.error('Export WOHMS error:', error);
+        res.status(500).json({ error: 'Failed to export invoice in professional format' });
+    }
+};
+
 module.exports = {
     getAllCorporateAccounts,
     createCorporateAccount,
@@ -1513,5 +1631,8 @@ module.exports = {
     updateMemberStatus,
     sendSchemeInvoiceEmail,
     downloadSchemeInvoicePdf,
-    addSchemeMember
+    addSchemeMember,
+    getAllInvoices,
+    updateInvoiceStatus,
+    exportInvoiceToWOHMS
 };

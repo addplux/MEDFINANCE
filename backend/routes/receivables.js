@@ -31,11 +31,14 @@ router.get('/schemes/:id/members', receivablesController.getSchemeMembers);
 router.get('/schemes/ledger/:policyNumber', receivablesController.getFamilyLedger);
 
 // Scheme Invoices
+router.get('/invoices', receivablesController.getAllInvoices); // Global list
 router.post('/schemes/invoices/generate', authorize('admin', 'accountant'), receivablesController.generateMonthlyInvoice);
 router.get('/schemes/:id/invoices', receivablesController.getSchemeInvoices);
-router.get('/schemes/invoices/:id', receivablesController.getSchemeInvoice);
-router.get('/schemes/invoices/:id/pdf', receivablesController.downloadSchemeInvoicePdf);
-router.post('/schemes/invoices/:id/send', authorize('admin', 'accountant'), receivablesController.sendSchemeInvoiceEmail);
+router.get('/invoices/:id', receivablesController.getSchemeInvoice);
+router.put('/invoices/:id/status', authorize('admin', 'accountant'), receivablesController.updateInvoiceStatus);
+router.get('/invoices/:id/pdf', receivablesController.downloadSchemeInvoicePdf);
+router.get('/invoices/:id/wohms', receivablesController.exportInvoiceToWOHMS);
+router.post('/invoices/:id/send', authorize('admin', 'accountant'), receivablesController.sendSchemeInvoiceEmail);
 
 // Bulk Import
 router.post('/schemes/:id/import', authorize('admin', 'accountant'), upload.single('file'), receivablesController.importSchemeMembers);

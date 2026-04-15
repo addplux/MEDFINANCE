@@ -33,7 +33,7 @@ const SchemeInvoice = sequelize.define('SchemeInvoice', {
         allowNull: false
     },
     status: {
-        type: DataTypes.ENUM('draft', 'final', 'sent', 'paid', 'cancelled'),
+        type: DataTypes.ENUM('draft', 'final', 'sent', 'uploaded', 'approved', 'rejected', 'paid', 'cancelled'),
         allowNull: false,
         defaultValue: 'draft'
     },

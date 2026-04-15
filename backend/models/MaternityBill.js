@@ -93,6 +93,14 @@ const MaternityBill = sequelize.define('MaternityBill', {
     notes: {
         type: DataTypes.TEXT,
         allowNull: true
+    },
+    schemeInvoiceId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'scheme_invoices',
+            key: 'id'
+        }
     }
 }, {
     tableName: 'maternity_bills',

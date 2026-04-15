@@ -131,6 +131,10 @@ export const receivablesAPI = {
         }),
         updateMemberStatus: (schemeId, patientId, status) => api.put(`/receivables/schemes/${schemeId}/members/${patientId}/status`, { status }),
         addMember: (schemeId, data) => api.post(`/receivables/schemes/${schemeId}/members/add`, data),
+        // Global Invoices (New)
+        getAllInvoices: (params) => api.get('/receivables/invoices', { params }),
+        updateInvoiceStatus: (id, status) => api.put(`/receivables/invoices/${id}/status`, { status }),
+        exportWOHMS: (id) => api.get(`/receivables/invoices/${id}/wohms`, { responseType: 'blob' }),
     },
 };
 
