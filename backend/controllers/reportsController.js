@@ -491,7 +491,7 @@ const exportPatients = async (req, res) => {
         const patients = await Patient.findAll({
             where: patientWhere,
             include: [{ association: 'scheme', attributes: ['name'] }],
-            order: [['createdAt', 'DESC']]
+            order: [['id', 'DESC']]
         });
 
         const patientData = patients.map(p => ({
@@ -579,7 +579,7 @@ const getLineListing = async (req, res) => {
         const patients = await Patient.findAll({
             where,
             include: [{ association: 'scheme', attributes: ['name'] }],
-            order: [['createdAt', 'DESC']],
+            order: [['id', 'DESC']],
             limit: parseInt(limit)
         });
 
