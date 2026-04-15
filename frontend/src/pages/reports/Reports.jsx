@@ -22,6 +22,8 @@ const Reports = () => {
     ];
 
     useEffect(() => {
+        console.log('[REPORTS] Active Tab:', activeTab);
+        console.log('[REPORTS] Date Range:', dateRange);
         loadReport();
     }, [activeTab, dateRange]);
 
@@ -45,9 +47,11 @@ const Reports = () => {
                     break;
                 case 'line-listing':
                     response = await reportsAPI.lineListing(dateRange);
+                    console.log('[REPORTS] Line Listing Response:', response.data);
                     // Backend returns { count, data: [] }, Axios wraps it in response.data
                     // So the patients array is at response.data.data
                     const listData = response?.data?.data ?? response?.data ?? [];
+                    console.log('[REPORTS] Derived List Data:', listData);
                     setLineListing(Array.isArray(listData) ? listData : []);
                     break;
                 default:
