@@ -9,8 +9,8 @@ router.use(authMiddleware);
 // OPD Bills
 router.get('/opd', billingController.getAllOPDBills);
 router.get('/opd/:id', billingController.getOPDBill);
-router.post('/opd', authorize('admin', 'billing_staff'), billingController.createOPDBill);
-router.put('/opd/:id', authorize('admin', 'billing_staff'), billingController.updateOPDBill);
+router.post('/opd', authorize('admin', 'billing_staff', 'cashier'), billingController.createOPDBill);
+router.put('/opd/:id', authorize('admin', 'billing_staff', 'cashier'), billingController.updateOPDBill);
 router.delete('/opd/:id', authorize('admin'), billingController.deleteOPDBill);
 
 // Patient Financials
