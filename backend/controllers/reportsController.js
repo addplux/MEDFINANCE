@@ -483,27 +483,36 @@ const exportPatients = async (req, res) => {
         // 1. Fetch Patients for Line List
         const patientWhere = {};
         if (startDate && endDate) {
-            patientWhere.createdAt = {
+            patientWhere['$Patient.createdAt$'] = {
                 [sequelize.Sequelize.Op.between]: [new Date(startDate), new Date(endDate)]
             };
         }
 
+        // 1. Fetch Patients for Line List (Flat query to avoid ambiguity)
         const patients = await Patient.findAll({
             where: patientWhere,
-            include: [{ association: 'scheme', attributes: ['name'] }],
             order: [['createdAt', 'DESC']]
         });
 
-        const patientData = patients.map(p => ({
-            'Patient #': p.patientNumber,
-            'First Name': p.firstName,
-            'Last Name': p.lastName,
-            'NRC': p.nrc || 'N/A',
-            'Man Number': p.manNumber || 'N/A',
-            'Reg Date': p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'N/A',
-            'Payment Method': p.paymentMethod,
-            'Scheme': p.scheme ? p.scheme.name : 'N/A',
-            'Balance (ZK)': parseFloat(p.balance).toFixed(2)
+        const patientData = await Promise.all(patients.map(async (p) => {
+            // Fetch scheme
+            let schemeName = 'N/A';
+            if (p.schemeId) {
+                const scheme = await Scheme.findByPk(p.schemeId, { attributes: ['schemeName'] });
+                schemeName = scheme ? scheme.schemeName : 'N/A';
+            }
+
+            return {
+                'Patient #': p.patientNumber,
+                'First Name': p.firstName,
+                'Last Name': p.lastName,
+                'NRC': p.nrc || 'N/A',
+                'Man Number': p.manNumber || 'N/A',
+                'Reg Date': p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'N/A',
+                'Payment Method': p.paymentMethod,
+                'Scheme': schemeName,
+                'Balance (ZK)': parseFloat(p.balance).toFixed(2)
+            };
         }));
 
         // 2. Fetch Department Aggregates (from Visits)
@@ -571,20 +580,30 @@ const getLineListing = async (req, res) => {
             const end = new Date(endDate);
             end.setHours(23, 59, 59, 999);
 
-            where.createdAt = {
+            where['$Patient.createdAt$'] = {
                 [sequelize.Sequelize.Op.between]: [start, end]
             };
         }
 
+        // 1. Fetch patients with flat query (no include to avoid PostgreSQL ambiguity)
         const patients = await Patient.findAll({
             where,
-            include: [{ association: 'scheme', attributes: ['name'] }],
             order: [['createdAt', 'DESC']],
             limit: parseInt(limit)
         });
 
-        // Add visit count summary for each patient in the period
+        console.log(`[REPORTS] Found ${patients.length} patients`);
+
+        // 2. Enrich data (Scheme + Visit Count)
         const results = await Promise.all(patients.map(async (p) => {
+            // Fetch scheme name if exists
+            let schemeName = 'N/A';
+            if (p.schemeId) {
+                const scheme = await Scheme.findByPk(p.schemeId, { attributes: ['schemeName'] });
+                schemeName = scheme ? scheme.schemeName : 'N/A';
+            }
+
+            // Fetch visit count
             const visitCount = await Visit.count({
                 where: {
                     patientId: p.id,
@@ -608,12 +627,14 @@ const getLineListing = async (req, res) => {
                 manNumber: p.manNumber,
                 referralType: p.referralType,
                 paymentMethod: p.paymentMethod,
-                scheme: p.scheme?.name,
+                scheme: schemeName,
                 balance: p.balance,
                 createdAt: p.createdAt,
                 visitCount
             };
         }));
+
+        console.log(`[REPORTS] Returning ${results.length} results`);
 
         res.json({
             count: results.length,
