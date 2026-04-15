@@ -235,11 +235,11 @@ const createPatient = async (req, res) => {
         // AUTOMATED CHECK-IN / VISIT CREATION (OPTIONAL)
         // Only create a visit if a target department is specified
         // ==========================================
-        const { targetDepartment, reasonForVisit } = req.body;
+        const { targetDepartment, reasonForVisit, referralType: inputReferralType } = req.body;
         
         let visit = null;
 
-        if (targetDepartment) {
+        if (targetDepartment || inputReferralType) {
             let departmentName = 'General OPD';
             const { Department } = require('../models');
             const dept = await Department.findByPk(targetDepartment, { transaction: t });
