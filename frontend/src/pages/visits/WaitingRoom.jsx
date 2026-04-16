@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { visitAPI } from '../../services/apiService';
 import { 
     Users, Activity, CreditCard, Stethoscope, 
@@ -21,6 +22,7 @@ const QUEUE_STAGES = [
 
 const WaitingRoom = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [visits, setVisits] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeVisit, setActiveVisit] = useState(null);
@@ -45,6 +47,12 @@ const WaitingRoom = () => {
     };
 
     const handlePatientClick = (visit) => {
+        // Security check: Nurses cannot access the Cashier queue
+        if (user?.role === 'nurse' && visit.queueStatus === 'pending_cashier') {
+            alert('Unauthorised Access: Nurses cannot access the Cashier queue.');
+            return;
+        }
+
         const triggers = ['pending_triage', 'waiting_doctor', 'with_doctor'];
         if (triggers.includes(visit.queueStatus)) {
             setActiveVisit(visit);
