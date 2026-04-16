@@ -119,65 +119,65 @@ const WaitingRoom = () => {
                             </div>
 
                             {/* List Container */}
-                            <div className="flex-1 bg-bg-secondary/50 rounded-2xl p-2 space-y-2 min-h-[400px] border border-border-color/30 group/column transition-all duration-500 hover:bg-bg-secondary/80">
-                                {loading ? (
-                                    <div className="h-32 flex items-center justify-center">
-                                       <div className="w-4 h-4 rounded-full border-2 border-text-tertiary/20 border-t-text-tertiary animate-spin" />
-                                    </div>
-                                ) : stageVisits.length === 0 ? (
-                                    <div className="h-32 flex flex-col items-center justify-center text-center opacity-10 select-none">
-                                        <stage.icon className="w-5 h-5 mb-2" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Idle</span>
-                                    </div>
                                 ) : (
-                                    (() => {
-                                        // Deduplicate visits by patientId to avoid multiple cards for same patient
-                                        const uniqueVisits = [];
-                                        const seenPatients = new Set();
-                                        
-                                        stageVisits.forEach(v => {
-                                            if (!v.patientId || !seenPatients.has(v.patientId)) {
-                                                uniqueVisits.push(v);
-                                                if (v.patientId) seenPatients.add(v.patientId);
-                                            }
-                                        });
+                                    <div className="overflow-hidden border border-border-color/20 rounded-xl bg-bg-secondary/30">
+                                        <table className="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr className="border-b border-border-color/30 bg-black/20">
+                                                    <th className="px-2 py-2 w-5 font-black text-[8px] uppercase tracking-widest text-text-tertiary">!</th>
+                                                    <th className="px-2 py-2 font-black text-[8px] uppercase tracking-widest text-text-tertiary">Patient</th>
+                                                    <th className="px-2 py-2 w-12 text-right font-black text-[8px] uppercase tracking-widest text-text-tertiary">Time</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-white/[0.03]">
+                                                {(() => {
+                                                    const uniqueVisits = [];
+                                                    const seenPatients = new Set();
+                                                    stageVisits.forEach(v => {
+                                                        if (!v.patientId || !seenPatients.has(v.patientId)) {
+                                                            uniqueVisits.push(v);
+                                                            if (v.patientId) seenPatients.add(v.patientId);
+                                                        }
+                                                    });
 
-                                        return uniqueVisits.map(visit => (
-                                            <div 
-                                                key={visit.id} 
-                                                onClick={() => handlePatientClick(visit)}
-                                                className="group relative px-3 py-2.5 border-b border-white/5 hover:bg-white/5 transition-all duration-200 cursor-pointer overflow-hidden active:bg-white/10"
-                                            >
-                                                <div className="flex items-center justify-between gap-3">
-                                                    <div className="flex items-center gap-3 min-w-0">
-                                                        {/* Priority Indicator */}
-                                                        <div className={`w-1 h-3 rounded-full flex-shrink-0 ${visit.priority === 'urgent' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)] animate-pulse' : 'bg-white/10'}`} />
-                                                        
-                                                        <div className="min-w-0">
-                                                            <h4 className="font-bold text-text-primary text-[10px] tracking-tight group-hover:text-blue-400 transition-colors uppercase truncate leading-none mb-1">
-                                                                {visit.patient?.firstName} {visit.patient?.lastName}
-                                                            </h4>
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-[8px] font-mono font-bold text-text-tertiary uppercase tracking-tighter opacity-70">
-                                                                    {visit.patient?.patientNumber}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    return uniqueVisits.map(visit => {
+                                                        const waitTime = getWaitTime(visit.updatedAt);
+                                                        const isLongWait = waitTime.includes('h');
 
-                                                    <div className="flex items-center gap-2 flex-shrink-0">
-                                                        <Clock className={`w-2.5 h-2.5 ${getWaitTime(visit.updatedAt).includes('h') ? 'text-rose-500' : 'text-text-tertiary'}`} />
-                                                        <span className={`text-[9px] font-black uppercase tracking-wider ${getWaitTime(visit.updatedAt).includes('h') ? 'text-rose-600' : 'text-text-secondary'} opacity-80 group-hover:opacity-100`}>
-                                                            {getWaitTime(visit.updatedAt)}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Active Interaction Glow */}
-                                                <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                                            </div>
-                                        ))
-                                    })()
+                                                        return (
+                                                            <tr 
+                                                                key={visit.id} 
+                                                                onClick={() => handlePatientClick(visit)}
+                                                                className="group hover:bg-white/[0.04] transition-colors cursor-pointer active:bg-white/[0.08]"
+                                                            >
+                                                                <td className="px-2 py-2.5">
+                                                                    <div className={`w-1 h-3 rounded-full ${visit.priority === 'urgent' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)] animate-pulse' : 'bg-white/10'}`} />
+                                                                </td>
+                                                                <td className="px-2 py-2.5 min-w-0">
+                                                                    <div className="flex flex-col truncate">
+                                                                        <span className="font-bold text-text-primary text-[10px] uppercase truncate group-hover:text-blue-400 transition-colors">
+                                                                            {visit.patient?.firstName} {visit.patient?.lastName}
+                                                                        </span>
+                                                                        <span className="text-[7px] font-bold font-mono text-text-tertiary uppercase tracking-tighter opacity-50">
+                                                                            {visit.patient?.patientNumber}
+                                                                        </span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-2 py-2.5 text-right">
+                                                                    <div className="flex items-center justify-end gap-1.5">
+                                                                        <Clock className={`w-2 h-2 ${isLongWait ? 'text-rose-500' : 'text-text-tertiary'}`} />
+                                                                        <span className={`text-[9px] font-black uppercase tracking-tighter ${isLongWait ? 'text-rose-600' : 'text-text-secondary'} opacity-80`}>
+                                                                            {waitTime}
+                                                                        </span>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    });
+                                                })()}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 )}
                             </div>
                         </div>
