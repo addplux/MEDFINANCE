@@ -140,6 +140,13 @@ const PatientRow = ({ patient, navigate, handleStatusChange, handleDelete, handl
                 <td className="px-4 py-2 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-1">
                         <button
+                            onClick={() => navigate(`/app/visits/new?patientId=${patient.id}`)}
+                            className="p-1.5 hover:bg-emerald-500/10 text-gray-400 hover:text-emerald-400 rounded-lg transition-colors"
+                            title="New Visit"
+                        >
+                            <Stethoscope className="w-4 h-4" />
+                        </button>
+                        <button
                             onClick={() => navigate(`/app/patients/${patient.id}`)}
                             className="p-1.5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-colors"
                         >

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { patientAPI, receivablesAPI, visitAPI } from '../../services/apiService';
 import { ArrowLeft, Search, Stethoscope, BedDouble, Baby, Siren, CheckCircle } from 'lucide-react';
 
@@ -17,6 +17,8 @@ const DEPARTMENTS = [
 
 const CreateVisit = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const patientIdParam = searchParams.get('patientId');
     const [loading, setLoading] = useState(false);
     const [patientSearch, setPatientSearch] = useState('');
     const [patientResults, setPatientResults] = useState([]);
@@ -33,6 +35,15 @@ const CreateVisit = () => {
         notes: ''
     });
     const [selectedPatient, setSelectedPatient] = useState(null);
+
+    // Auto-select patient from URL parameter
+    useEffect(() => {
+        if (patientIdParam && schemes.length > 0) {
+            patientAPI.getById(patientIdParam).then(res => {
+                if (res.data) selectPatient(res.data);
+            }).catch(err => console.error('Failed to pre-select patient:', err));
+        }
+    }, [patientIdParam, schemes.length]);
 
     const [isFocused, setIsFocused] = useState(false);
 
