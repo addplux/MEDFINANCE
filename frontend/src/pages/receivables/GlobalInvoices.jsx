@@ -118,49 +118,49 @@ const GlobalInvoices = ({ defaultStatus = '' }) => {
             {/* Header Area */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-text-primary tracking-tighter uppercase mb-2 drop-shadow-sm">
+                    <h1 className="text-2xl font-black text-text-primary tracking-tighter uppercase mb-1 drop-shadow-sm">
                         Invoices Dashboard
                     </h1>
-                    <p className="text-text-tertiary text-xs font-black uppercase tracking-[0.3em] ml-1">
+                    <p className="text-text-tertiary text-[10px] font-black uppercase tracking-[0.3em] ml-1">
                         Track submissions and professional exports
                     </p>
                 </div>
             </div>
 
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-bg-secondary/40 backdrop-blur-md rounded-[2.5rem] p-8 border border-border-color shadow-2xl">
-                    <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-4">Total Submissions</p>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-bg-secondary/40 backdrop-blur-md rounded-[1.5rem] p-5 border border-border-color shadow-lg">
+                    <p className="text-[9px] font-black text-text-tertiary uppercase tracking-widest mb-3">Total Submissions</p>
                     <div className="flex items-end justify-between">
-                        <h2 className="text-4xl font-black text-text-primary tracking-tighter tabular-nums">{total}</h2>
-                        <Hash className="w-8 h-8 text-primary opacity-20" />
+                        <h2 className="text-base font-black text-text-primary tracking-tighter tabular-nums">{total}</h2>
+                        <Hash className="w-5 h-5 text-primary opacity-20" />
                     </div>
                 </div>
-                <div className="bg-bg-secondary/40 backdrop-blur-md rounded-[2.5rem] p-8 border border-border-color shadow-2xl">
-                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-4">Approved</p>
+                <div className="bg-bg-secondary/40 backdrop-blur-md rounded-[1.5rem] p-5 border border-border-color shadow-lg">
+                    <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-3">Approved</p>
                     <div className="flex items-end justify-between">
-                        <h2 className="text-4xl font-black text-emerald-500 tracking-tighter tabular-nums">
+                        <h2 className="text-base font-black text-emerald-500 tracking-tighter tabular-nums">
                             {invoices.filter(i => i.status === 'approved').length}
                         </h2>
-                        <CheckCircle className="w-8 h-8 text-emerald-500 opacity-20" />
+                        <CheckCircle className="w-5 h-5 text-emerald-500 opacity-20" />
                     </div>
                 </div>
-                <div className="bg-bg-secondary/40 backdrop-blur-md rounded-[2.5rem] p-8 border border-border-color shadow-2xl">
-                    <p className="text-[10px] font-black text-yellow-500 uppercase tracking-widest mb-4">Pending Review</p>
+                <div className="bg-bg-secondary/40 backdrop-blur-md rounded-[1.5rem] p-5 border border-border-color shadow-lg">
+                    <p className="text-[9px] font-black text-yellow-500 uppercase tracking-widest mb-3">Pending Review</p>
                     <div className="flex items-end justify-between">
-                        <h2 className="text-4xl font-black text-yellow-500 tracking-tighter tabular-nums">
+                        <h2 className="text-base font-black text-yellow-500 tracking-tighter tabular-nums">
                             {invoices.filter(i => ['sent', 'uploaded'].includes(i.status)).length}
                         </h2>
-                        <UploadCloud className="w-8 h-8 text-yellow-500 opacity-20" />
+                        <UploadCloud className="w-5 h-5 text-yellow-500 opacity-20" />
                     </div>
                 </div>
-                <div className="bg-bg-secondary/40 backdrop-blur-md rounded-[2.5rem] p-8 border border-border-color shadow-2xl">
-                    <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-4">Rejected</p>
+                <div className="bg-bg-secondary/40 backdrop-blur-md rounded-[1.5rem] p-5 border border-border-color shadow-lg">
+                    <p className="text-[9px] font-black text-red-500 uppercase tracking-widest mb-3">Rejected</p>
                     <div className="flex items-end justify-between">
-                        <h2 className="text-4xl font-black text-red-500 tracking-tighter tabular-nums">
+                        <h2 className="text-base font-black text-red-500 tracking-tighter tabular-nums">
                             {invoices.filter(i => i.status === 'rejected').length}
                         </h2>
-                        <XCircle className="w-8 h-8 text-red-500 opacity-20" />
+                        <XCircle className="w-5 h-5 text-red-500 opacity-20" />
                     </div>
                 </div>
             </div>
