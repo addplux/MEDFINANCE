@@ -45,7 +45,7 @@ const TheatreBillForm = () => {
 
                 // Auto-select patient from URL param if available
                 if (paramPatientId) {
-                    const p = allPatients.find(pat => pat.id.toString() === paramPatientId.toString());
+                    const p = allPatients.find(pat => pat?.id?.toString() === paramPatientId.toString());
                     if (p) {
                         setSelectedPatientName(`${p.patientNumber ? p.patientNumber + ' — ' : ''}${p.firstName} ${p.lastName}`);
                         setFormData(prev => ({ ...prev, patientId: p.id }));
@@ -79,6 +79,12 @@ const TheatreBillForm = () => {
                 payload.procedureType = payload.customProcedure;
             }
             await theatreAPI.bills.create(payload);
+            
+            // Automatically notify cashier if visitId is available
+            if (formData.visitId) {
+                await visitAPI.update(formData.visitId, { queueStatus: 'pending_cashier' });
+            }
+
             navigate('/app/theatre/dashboard');
         } catch (error) {
             console.error('Error creating theatre bill:', error);

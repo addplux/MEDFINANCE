@@ -118,6 +118,12 @@ const MaternityBillForm = () => {
             };
 
             await maternityAPI.bills.create(payload);
+
+            // Automatically notify cashier if visitId is available
+            if (paramVisitId) {
+                await visitAPI.update(paramVisitId, { queueStatus: 'pending_cashier' });
+            }
+
             navigate('/app/maternity');
         } catch (error) {
             console.error('Failed to create bill:', error);
