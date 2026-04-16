@@ -123,6 +123,8 @@ const createPatient = async (req, res) => {
             paymentMethod, costCategory, isReferral, referralType, manNumber, staffId,
             emergencyContact, emergencyPhone, nrc, patientType, schemeId, initialDeposit,
             serviceId, registeredService, ward, registryFee,
+            // Automated check-in fields
+            targetDepartment, reasonForVisit,
             // Prepaid / membership fields
             balance, prepaidCredit, policyNumber, memberRank, memberSuffix, memberStatus, memberPlan
         } = req.body;
@@ -233,9 +235,9 @@ const createPatient = async (req, res) => {
 
         // ==========================================
         // AUTOMATED CHECK-IN / VISIT CREATION (OPTIONAL)
-        // Only create a visit if a target department is specified
+        // Only create a visit if a target department or referral type is specified
         // ==========================================
-        const { targetDepartment, reasonForVisit, referralType: inputReferralType } = req.body;
+        const inputReferralType = referralType; // Use the value from initial destructuring
         
         let visit = null;
 
