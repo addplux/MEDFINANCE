@@ -146,38 +146,38 @@ const WaitingRoom = () => {
                                             <div 
                                                 key={visit.id} 
                                                 onClick={() => handlePatientClick(visit)}
-                                                className="group relative bg-bg-elevated p-4 rounded-xl shadow-sm hover:shadow-2xl hover:shadow-black/20 border border-border-color transition-all duration-500 cursor-pointer overflow-hidden active:scale-95"
+                                                className="group relative px-3 py-2.5 border-b border-white/5 hover:bg-white/5 transition-all duration-200 cursor-pointer overflow-hidden active:bg-white/10"
                                             >
-                                            {/* Top Section */}
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <h4 className="font-bold text-text-primary text-xs tracking-tight group-hover:text-blue-500 transition-colors uppercase leading-none mb-1">
-                                                        {visit.patient?.firstName} {visit.patient?.lastName}
-                                                    </h4>
-                                                    <p className="text-[9px] font-mono font-bold text-text-tertiary tracking-tighter uppercase">{visit.patient?.patientNumber}</p>
-                                                </div>
-                                                {visit.priority === 'urgent' && (
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]" />
-                                                )}
-                                            </div>
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <div className="flex items-center gap-3 min-w-0">
+                                                        {/* Priority Indicator */}
+                                                        <div className={`w-1 h-3 rounded-full flex-shrink-0 ${visit.priority === 'urgent' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)] animate-pulse' : 'bg-white/10'}`} />
+                                                        
+                                                        <div className="min-w-0">
+                                                            <h4 className="font-bold text-text-primary text-[10px] tracking-tight group-hover:text-blue-400 transition-colors uppercase truncate leading-none mb-1">
+                                                                {visit.patient?.firstName} {visit.patient?.lastName}
+                                                            </h4>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-[8px] font-mono font-bold text-text-tertiary uppercase tracking-tighter opacity-70">
+                                                                    {visit.patient?.patientNumber}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
 
-                                            {/* Bottom Section */}
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                    <Clock className={`w-3 h-3 ${getWaitTime(visit.updatedAt).includes('h') ? 'text-rose-500' : 'text-text-tertiary'}`} />
-                                                    <span className={`text-[10px] font-black uppercase tracking-widest ${getWaitTime(visit.updatedAt).includes('h') ? 'text-rose-600' : 'text-text-secondary'}`}>
-                                                        {getWaitTime(visit.updatedAt)}
-                                                    </span>
+                                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                                        <Clock className={`w-2.5 h-2.5 ${getWaitTime(visit.updatedAt).includes('h') ? 'text-rose-500' : 'text-text-tertiary'}`} />
+                                                        <span className={`text-[9px] font-black uppercase tracking-wider ${getWaitTime(visit.updatedAt).includes('h') ? 'text-rose-600' : 'text-text-secondary'} opacity-80 group-hover:opacity-100`}>
+                                                            {getWaitTime(visit.updatedAt)}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <div className="text-[9px] font-black text-text-tertiary uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-                                                    Open Ref
-                                                </div>
-                                            </div>
 
-                                            {/* Hover Glow */}
-                                            <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                                        </div>
-                                    ))
+                                                {/* Active Interaction Glow */}
+                                                <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                                            </div>
+                                        ))
+                                    })()
                                 )}
                             </div>
                         </div>
