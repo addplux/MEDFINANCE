@@ -347,7 +347,7 @@ function App() {
                         <Route path="opd/dashboard" element={<RoleRoute roles={['doctor', 'nurse', 'cashier']}><DepartmentDashboard title="OPD" departmentId={4} /></RoleRoute>} />
 
                         <Route path="theatre/dashboard" element={<RoleRoute roles={['doctor', 'nurse', 'admin', 'records_clerk']}><DepartmentDashboard title="Theatre" type="theatre" /></RoleRoute>} />
-                        <Route path="theatre/billing" element={<RoleRoute roles={['doctor', 'nurse']}><TheatreBilling /></RoleRoute>} />
+                        <Route path="theatre/billing" element={<RoleRoute roles={['doctor', 'nurse', 'admin', 'records_clerk']}><TheatreBilling /></RoleRoute>} />
                         <Route path="theatre/billing/new" element={<RoleRoute roles={['doctor', 'nurse']}><TheatreBillForm /></RoleRoute>} />
                         <Route path="theatre/billing/:id/edit" element={<RoleRoute roles={['doctor', 'nurse', 'admin', 'records_clerk']}><TheatreBillForm /></RoleRoute>} />
 
