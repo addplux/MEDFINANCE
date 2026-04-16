@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { maternityAPI, patientAPI } from '../../services/apiService';
 import { ArrowLeft, Save, Search, User, Baby, DollarSign, FileText, Calendar, Activity } from 'lucide-react';
 
 const MaternityBillForm = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+
+    const [searchParams] = useSearchParams();
+    const paramPatientId = searchParams.get('patientId');
+    const paramVisitId = searchParams.get('visitId');
 
     // Patient Search State
     const [searchTerm, setSearchTerm] = useState('');
@@ -38,6 +42,24 @@ const MaternityBillForm = () => {
         timeOfBirth: '',
         status: 'healthy'
     });
+
+    // Auto-load patient if ID is in URL
+    useEffect(() => {
+        if (paramPatientId) {
+            const loadPatient = async () => {
+                try {
+                    setSearching(true);
+                    const response = await patientAPI.getById(paramPatientId);
+                    setSelectedPatient(response.data);
+                } catch (error) {
+                    console.error('Failed to load patient from URL:', error);
+                } finally {
+                    setSearching(false);
+                }
+            };
+            loadPatient();
+        }
+    }, [paramPatientId]);
 
     // Debounced Search
     useEffect(() => {

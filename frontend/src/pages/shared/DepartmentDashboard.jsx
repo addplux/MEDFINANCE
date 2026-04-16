@@ -285,8 +285,18 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                 </div>
 
                                 {/* Quick Actions for Theatre/Maternity */}
-                                {(type === 'theatre' || type === 'maternity') && (
-                                    <div className="mt-3 pt-3 border-t border-white/5 flex justify-end">
+                                {(['theatre', 'maternity'].includes(type)) && (
+                                    <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between gap-2">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(`/app/${type}/billing/new?patientId=${v.patient?.id}&visitId=${v.id}`);
+                                            }}
+                                            className="flex-1 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-xs font-black uppercase tracking-widest transition-all border border-primary/20 flex items-center justify-center gap-2"
+                                        >
+                                            <Activity className="w-3 h-3" />
+                                            Start {type === 'theatre' ? 'Surgery' : 'Delivery'}
+                                        </button>
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -296,9 +306,9 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                                         .catch(err => alert('Failed to complete visit.'));
                                                 }
                                             }}
-                                            className="px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 text-green-500 rounded-lg text-xs font-bold transition-colors border border-green-500/20"
+                                            className="px-4 py-2 bg-green-500/5 hover:bg-green-500/10 text-green-500/60 hover:text-green-500 rounded-xl text-[10px] font-bold transition-all border border-green-500/10 hover:border-green-500/30"
                                         >
-                                            Complete {type === 'theatre' ? 'Surgery' : 'Visit'}
+                                            Complete
                                         </button>
                                     </div>
                                 )}

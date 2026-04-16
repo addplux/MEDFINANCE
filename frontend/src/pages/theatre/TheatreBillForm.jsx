@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { theatreAPI, patientAPI, setupAPI } from '../../services/apiService';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { theatreAPI, patientAPI, setupAPI, visitAPI } from '../../services/apiService';
 import { Save, X, User } from 'lucide-react';
 
 const TheatreBillForm = () => {
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
+    const [searchParams] = useSearchParams();
+    const paramPatientId = searchParams.get('patientId');
+    const paramVisitId = searchParams.get('visitId');
+
     const [formData, setFormData] = useState({
-        patientId: '',
+        patientId: paramPatientId || '',
+        visitId: paramVisitId || '',
         procedureType: '',
         surgeonName: '',
         anesthetistName: '',
@@ -24,7 +27,7 @@ const TheatreBillForm = () => {
     const [showPatientList, setShowPatientList] = useState(false);
     const [selectedPatientName, setSelectedPatientName] = useState('');
 
-    React.useEffect(() => {
+    useEffect(() => {
         const loadInitialData = async () => {
             try {
                 const [servicesRes, patientsRes] = await Promise.all([
@@ -35,13 +38,23 @@ const TheatreBillForm = () => {
                 const allServices = servicesRes?.data?.data || servicesRes?.data || [];
                 setServices(allServices.filter(s => s.department === 'Theatre' || s.category === 'theatre'));
 
-                setPatients(patientsRes?.data?.data || patientsRes?.data || []);
+                const allPatients = patientsRes?.data?.data || patientsRes?.data || [];
+                setPatients(allPatients);
+
+                // Auto-select patient from URL param if available
+                if (paramPatientId) {
+                    const p = allPatients.find(pat => pat.id.toString() === paramPatientId.toString());
+                    if (p) {
+                        setSelectedPatientName(`${p.patientNumber ? p.patientNumber + ' — ' : ''}${p.firstName} ${p.lastName}`);
+                        setFormData(prev => ({ ...prev, patientId: p.id }));
+                    }
+                }
             } catch (err) {
                 console.error("Failed to load initial data", err);
             }
         };
         loadInitialData();
-    }, []);
+    }, [paramPatientId]);
 
     const handleServiceSelect = (e) => {
         const serviceName = e.target.value;
