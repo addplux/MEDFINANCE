@@ -4,6 +4,8 @@ import { theatreAPI, patientAPI, setupAPI, visitAPI } from '../../services/apiSe
 import { Save, X, User } from 'lucide-react';
 
 const TheatreBillForm = () => {
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
     const [searchParams] = useSearchParams();
     const paramPatientId = searchParams.get('patientId');
     const paramVisitId = searchParams.get('visitId');
