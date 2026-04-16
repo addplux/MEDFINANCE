@@ -99,90 +99,118 @@ const WaitingRoom = () => {
                 </div>
             </div>
 
-            {/* Kanban View */}
-            <div className="flex-1 overflow-x-auto flex gap-4 pb-8 -mx-4 px-4 snap-x hide-scrollbar">
-                {QUEUE_STAGES.map(stage => {
-                    const stageVisits = visits.filter(v => v.queueStatus === stage.id);
-                    return (
-                        <div key={stage.id} className="w-[280px] flex-shrink-0 flex flex-col gap-3 snap-start">
-                            {/* Column Header */}
-                            <div className="flex items-center justify-between px-1">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-1 h-4 rounded-full ${stage.dot}`} />
-                                    <h3 className="font-black text-text-primary text-[10px] uppercase tracking-[0.15em]">{stage.title}</h3>
-                                </div>
-                                {stageVisits.length > 0 && (
-                                    <span className="text-[10px] font-black text-text-tertiary">
-                                        {stageVisits.length}
-                                    </span>
-                                )}
-                            </div>
+            {/* Master Worklist Table */}
+            <div className="flex-1 bg-bg-secondary/30 rounded-3xl border border-border-color/20 overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="sticky top-0 z-10 bg-black/40 backdrop-blur-md border-b border-white/5">
+                            <tr className="bg-white/[0.02]">
+                                <th className="px-6 py-4 w-10 font-black text-[9px] uppercase tracking-[0.2em] text-text-tertiary">#</th>
+                                <th className="px-6 py-4 font-black text-[9px] uppercase tracking-[0.2em] text-text-tertiary">Patient Identity</th>
+                                <th className="px-6 py-4 font-black text-[9px] uppercase tracking-[0.2em] text-text-tertiary">Identification</th>
+                                <th className="px-6 py-4 font-black text-[9px] uppercase tracking-[0.2em] text-text-tertiary">Category</th>
+                                <th className="px-6 py-4 font-black text-[9px] uppercase tracking-[0.2em] text-text-tertiary">Current Stage</th>
+                                <th className="px-6 py-4 text-right font-black text-[9px] uppercase tracking-[0.2em] text-text-tertiary">Wait Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {QUEUE_STAGES.map(stage => {
+                                const stageVisits = [];
+                                const seenPatients = new Set();
+                                
+                                visits.filter(v => v.queueStatus === stage.id).forEach(v => {
+                                    if (!v.patientId || !seenPatients.has(v.patientId)) {
+                                        stageVisits.push(v);
+                                        if (v.patientId) seenPatients.add(v.patientId);
+                                    }
+                                });
 
-                            {/* List Container */}
-                                ) : (
-                                    <div className="overflow-hidden border border-border-color/20 rounded-xl bg-bg-secondary/30">
-                                        <table className="w-full text-left border-collapse">
-                                            <thead>
-                                                <tr className="border-b border-border-color/30 bg-black/20">
-                                                    <th className="px-2 py-2 w-5 font-black text-[8px] uppercase tracking-widest text-text-tertiary">!</th>
-                                                    <th className="px-2 py-2 font-black text-[8px] uppercase tracking-widest text-text-tertiary">Patient</th>
-                                                    <th className="px-2 py-2 w-12 text-right font-black text-[8px] uppercase tracking-widest text-text-tertiary">Time</th>
+                                return (
+                                    <React.Fragment key={stage.id}>
+                                        {/* Stage Group Header */}
+                                        <tr className="bg-white/[0.01] border-b border-white/5">
+                                            <td colSpan="6" className="px-6 py-3">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-1.5 h-1.5 rounded-full ${stage.dot} shadow-[0_0_10px_rgba(255,255,255,0.1)]`} />
+                                                        <h3 className="font-black text-text-primary text-[11px] uppercase tracking-[0.15em]">{stage.title}</h3>
+                                                        <span className="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-black text-text-tertiary border border-white/5">
+                                                            {stageVisits.length}
+                                                        </span>
+                                                    </div>
+                                                    {stageVisits.length === 0 && (
+                                                        <span className="text-[9px] font-black uppercase text-text-tertiary tracking-widest opacity-20 italic">No active queue</span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        {/* Stage Rows */}
+                                        {stageVisits.map(visit => {
+                                            const waitTime = getWaitTime(visit.updatedAt);
+                                            const isLongWait = waitTime.includes('h');
+
+                                            return (
+                                                <tr 
+                                                    key={visit.id}
+                                                    onClick={() => handlePatientClick(visit)}
+                                                    className="group hover:bg-white/[0.04] transition-all cursor-pointer border-b border-white/[0.02]"
+                                                >
+                                                    <td className="px-6 py-4">
+                                                        <div className={`w-1 h-4 rounded-full ${visit.priority === 'urgent' ? 'bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.4)] animate-pulse' : 'bg-white/10'}`} />
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-white/5 to-white/[0.01] border border-white/10 flex items-center justify-center font-black text-text-secondary text-xs shadow-inner">
+                                                                {visit.patient?.firstName?.[0]}{visit.patient?.lastName?.[0]}
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="font-bold text-text-primary text-sm tracking-tight group-hover:text-blue-400 transition-colors uppercase leading-none mb-1">
+                                                                    {visit.patient?.firstName} {visit.patient?.lastName}
+                                                                </h4>
+                                                                <p className="text-[9px] font-black text-text-tertiary uppercase tracking-widest opacity-60">
+                                                                    Visit: #{(visit.visitNumber || visit.id.toString().slice(-4)).toUpperCase()}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className="text-[10px] font-mono font-bold text-text-tertiary uppercase tracking-tighter opacity-80">
+                                                            {visit.patient?.patientNumber}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all ${
+                                                            visit.patient?.paymentMethod === 'cash' 
+                                                                ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' 
+                                                                : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 shadow-[0_0_10px_rgba(99,102,241,0.1)]'
+                                                        }`}>
+                                                            {visit.patient?.paymentMethod || 'Cash'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <stage.icon className="w-3 h-3 text-text-tertiary opacity-40" />
+                                                            <span className="text-[9px] font-black text-text-secondary uppercase tracking-widest">{stage.title}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="flex items-center justify-end gap-2.5">
+                                                            <Clock className={`w-3 h-3 ${isLongWait ? 'text-rose-500' : 'text-text-tertiary opacity-40'}`} />
+                                                            <span className={`text-[10px] font-black uppercase tracking-widest ${isLongWait ? 'text-rose-600' : 'text-text-secondary'} opacity-80 group-hover:opacity-100`}>
+                                                                {waitTime}
+                                                            </span>
+                                                        </div>
+                                                    </td>
                                                 </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-white/[0.03]">
-                                                {(() => {
-                                                    const uniqueVisits = [];
-                                                    const seenPatients = new Set();
-                                                    stageVisits.forEach(v => {
-                                                        if (!v.patientId || !seenPatients.has(v.patientId)) {
-                                                            uniqueVisits.push(v);
-                                                            if (v.patientId) seenPatients.add(v.patientId);
-                                                        }
-                                                    });
-
-                                                    return uniqueVisits.map(visit => {
-                                                        const waitTime = getWaitTime(visit.updatedAt);
-                                                        const isLongWait = waitTime.includes('h');
-
-                                                        return (
-                                                            <tr 
-                                                                key={visit.id} 
-                                                                onClick={() => handlePatientClick(visit)}
-                                                                className="group hover:bg-white/[0.04] transition-colors cursor-pointer active:bg-white/[0.08]"
-                                                            >
-                                                                <td className="px-2 py-2.5">
-                                                                    <div className={`w-1 h-3 rounded-full ${visit.priority === 'urgent' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)] animate-pulse' : 'bg-white/10'}`} />
-                                                                </td>
-                                                                <td className="px-2 py-2.5 min-w-0">
-                                                                    <div className="flex flex-col truncate">
-                                                                        <span className="font-bold text-text-primary text-[10px] uppercase truncate group-hover:text-blue-400 transition-colors">
-                                                                            {visit.patient?.firstName} {visit.patient?.lastName}
-                                                                        </span>
-                                                                        <span className="text-[7px] font-bold font-mono text-text-tertiary uppercase tracking-tighter opacity-50">
-                                                                            {visit.patient?.patientNumber}
-                                                                        </span>
-                                                                    </div>
-                                                                </td>
-                                                                <td className="px-2 py-2.5 text-right">
-                                                                    <div className="flex items-center justify-end gap-1.5">
-                                                                        <Clock className={`w-2 h-2 ${isLongWait ? 'text-rose-500' : 'text-text-tertiary'}`} />
-                                                                        <span className={`text-[9px] font-black uppercase tracking-tighter ${isLongWait ? 'text-rose-600' : 'text-text-secondary'} opacity-80`}>
-                                                                            {waitTime}
-                                                                        </span>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    });
-                                                })()}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
+                                            );
+                                        })}
+                                    </React.Fragment>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {/* Consultation Modal Overlay (Mirroring Doctor's Dashboard) */}
