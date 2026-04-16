@@ -248,6 +248,9 @@ const startServer = async () => {
 
             const runExternalEhrIntegration = require('./migrations/003_external_ehr_integration');
             await runExternalEhrIntegration();
+
+            const runAddSchemeInvoiceId = require('./migrations/addSchemeInvoiceId');
+            await runAddSchemeInvoiceId();
         } catch (migErr) {
             console.error('⚠️ Migration runner error (non-fatal):', migErr.message);
         }

@@ -24,7 +24,8 @@ const PatientRegistration = () => {
         firstName: '',
         lastName: '',
         referralType: '', // 'bypass' or 'referral'
-        registryFee: ''
+        registryFee: '',
+        patientCategory: 'regular' // 'regular' or 'staff'
     });
     const [errors, setErrors] = useState({});
     const [existingPatient, setExistingPatient] = useState(null);
@@ -98,7 +99,7 @@ const PatientRegistration = () => {
                 referralType: formData.referralType,
                 registryFee: formData.referralType === 'bypass' ? Number(formData.registryFee) : 0,
                 targetDepartment: null, // auto-routing is done by referralType
-                paymentMethod: 'cash',
+                paymentMethod: formData.patientCategory === 'staff' ? 'staff' : 'cash',
                 costCategory: 'standard'
             };
 
@@ -230,6 +231,39 @@ const PatientRegistration = () => {
                                     placeholder="Family name"
                                 />
                                 {errors.lastName && <p className="text-[10px] text-red-400 font-bold uppercase mt-1">{errors.lastName}</p>}
+                            </div>
+
+                            {/* Patient Category */}
+                            <div className="form-group md:col-span-2">
+                                <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest mb-3 block">
+                                    Patient Category <span className="text-red-400">*</span>
+                                </label>
+                                <div className="flex gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleChange('patientCategory', 'regular')}
+                                        className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-[10px] ${
+                                            formData.patientCategory === 'regular'
+                                                ? 'bg-blue-500/10 border-blue-500/50 text-blue-400 shadow-lg shadow-blue-500/10'
+                                                : 'bg-white/[0.02] border-white/10 text-white/40 hover:border-white/20'
+                                        }`}
+                                    >
+                                        <User className="w-4 h-4" />
+                                        Regular (Cash)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleChange('patientCategory', 'staff')}
+                                        className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-[10px] ${
+                                            formData.patientCategory === 'staff'
+                                                ? 'bg-purple-500/10 border-purple-500/50 text-purple-400 shadow-lg shadow-purple-500/10'
+                                                : 'bg-white/[0.02] border-white/10 text-white/40 hover:border-white/20'
+                                        }`}
+                                    >
+                                        <BadgeCheck className="w-4 h-4" />
+                                        Staff Member
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </section>
