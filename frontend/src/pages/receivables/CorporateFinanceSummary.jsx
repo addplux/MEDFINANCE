@@ -80,10 +80,10 @@ const CorporateFinanceSummary = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-4xl font-black text-text-primary tracking-tighter uppercase drop-shadow-sm">
+                    <h1 className="text-2xl font-black text-text-primary tracking-tighter uppercase drop-shadow-sm">
                         Corporate Finance
                     </h1>
-                    <p className="text-text-tertiary text-xs font-black uppercase tracking-[0.3em] mt-1 ml-1">
+                    <p className="text-text-tertiary text-[10px] font-black uppercase tracking-[0.3em] mt-1 ml-1">
                         Per-scheme billing summary & receivables
                     </p>
                 </div>
@@ -107,13 +107,13 @@ const CorporateFinanceSummary = () => {
                     { label: 'Total Paid', value: grandPaid, color: 'text-emerald-500', icon: CheckCircle, bg: 'bg-emerald-500/5 border-emerald-500/20' },
                     { label: 'Total Outstanding', value: grandOutstanding, color: 'text-amber-500', icon: Clock, bg: 'bg-amber-500/5 border-amber-500/20' },
                 ].map(card => (
-                    <div key={card.label} className={`${card.bg} backdrop-blur-md rounded-[2rem] p-7 border shadow-xl`}>
-                        <p className={`text-[10px] font-black uppercase tracking-widest mb-3 ${card.color} opacity-70`}>{card.label}</p>
+                    <div key={card.label} className={`${card.bg} backdrop-blur-md rounded-[1.5rem] p-5 border shadow-lg`}>
+                        <p className={`text-[11px] font-black uppercase tracking-widest mb-2 ${card.color} opacity-70`}>{card.label}</p>
                         <div className="flex items-end justify-between">
-                            <h2 className={`text-3xl font-black tracking-tighter tabular-nums ${card.color}`}>
+                            <h2 className={`text-base font-black tracking-tighter tabular-nums ${card.color}`}>
                                 {loading ? '—' : fmt(card.value)}
                             </h2>
-                            <card.icon className={`w-8 h-8 ${card.color} opacity-20`} />
+                            <card.icon className={`w-5 h-5 ${card.color} opacity-20`} />
                         </div>
                     </div>
                 ))}
@@ -121,9 +121,9 @@ const CorporateFinanceSummary = () => {
 
             {/* Per-Scheme Table */}
             <div className="bg-bg-secondary/40 backdrop-blur-md rounded-[2.5rem] border border-border-color shadow-2xl overflow-hidden">
-                <div className="px-8 py-5 border-b border-border-color bg-bg-tertiary/20 flex items-center gap-3">
-                    <Building2 className="w-5 h-5 text-primary opacity-60" />
-                    <h3 className="text-xs font-black text-text-secondary uppercase tracking-widest">Corporate Scheme Breakdown</h3>
+                <div className="px-8 py-4 border-b border-border-color bg-bg-tertiary/20 flex items-center gap-3">
+                    <Building2 className="w-4 h-4 text-primary opacity-60" />
+                    <h3 className="text-[11px] font-black text-text-secondary uppercase tracking-widest">Corporate Scheme Breakdown</h3>
                     <span className="ml-auto text-[10px] font-black text-text-tertiary opacity-60 uppercase tracking-widest">
                         {filteredSchemes.length} schemes
                     </span>
@@ -140,8 +140,8 @@ const CorporateFinanceSummary = () => {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left border-collapse">
-                            <thead className="text-[10px] text-text-tertiary uppercase font-black tracking-[0.18em] bg-bg-tertiary/40 border-b border-border-color">
+                        <table className="w-full text-base text-left border-collapse">
+                            <thead className="text-xs text-text-tertiary uppercase font-black tracking-[0.18em] bg-bg-tertiary/40 border-b border-border-color">
                                 <tr>
                                     <th className="px-8 py-5">Scheme</th>
                                     <th className="px-6 py-5 text-right">Total Billed</th>
@@ -168,9 +168,9 @@ const CorporateFinanceSummary = () => {
                                                     <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center font-black text-primary text-sm flex-shrink-0">
                                                         {scheme.schemeName?.charAt(0).toUpperCase()}
                                                     </div>
-                                                    <div>
-                                                        <p className="font-black text-text-primary uppercase tracking-widest text-xs">{scheme.schemeName}</p>
-                                                        <p className="text-[10px] text-text-tertiary font-bold mt-0.5">{scheme.schemeType}</p>
+                                                     <div>
+                                                        <p className="font-black text-text-primary uppercase tracking-widest text-sm">{scheme.schemeName}</p>
+                                                        <p className="text-xs text-text-tertiary font-bold mt-0.5">{scheme.schemeType}</p>
                                                     </div>
                                                 </div>
                                             </td>
