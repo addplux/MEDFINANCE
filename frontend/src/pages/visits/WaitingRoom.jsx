@@ -130,12 +130,24 @@ const WaitingRoom = () => {
                                         <span className="text-[10px] font-black uppercase tracking-widest">Idle</span>
                                     </div>
                                 ) : (
-                                    stageVisits.map(visit => (
-                                        <div 
-                                            key={visit.id} 
-                                            onClick={() => handlePatientClick(visit)}
-                                            className="group relative bg-bg-elevated p-4 rounded-xl shadow-sm hover:shadow-2xl hover:shadow-black/20 border border-border-color transition-all duration-500 cursor-pointer overflow-hidden active:scale-95"
-                                        >
+                                    (() => {
+                                        // Deduplicate visits by patientId to avoid multiple cards for same patient
+                                        const uniqueVisits = [];
+                                        const seenPatients = new Set();
+                                        
+                                        stageVisits.forEach(v => {
+                                            if (!v.patientId || !seenPatients.has(v.patientId)) {
+                                                uniqueVisits.push(v);
+                                                if (v.patientId) seenPatients.add(v.patientId);
+                                            }
+                                        });
+
+                                        return uniqueVisits.map(visit => (
+                                            <div 
+                                                key={visit.id} 
+                                                onClick={() => handlePatientClick(visit)}
+                                                className="group relative bg-bg-elevated p-4 rounded-xl shadow-sm hover:shadow-2xl hover:shadow-black/20 border border-border-color transition-all duration-500 cursor-pointer overflow-hidden active:scale-95"
+                                            >
                                             {/* Top Section */}
                                             <div className="flex justify-between items-start mb-4">
                                                 <div>

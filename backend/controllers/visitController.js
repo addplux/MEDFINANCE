@@ -18,6 +18,16 @@ const createVisit = async (req, res) => {
             registryFee
         } = req.body;
 
+        // Ensure only one active visit exists per patient
+        const existingActiveVisit = await Visit.findOne({
+            where: { patientId, status: 'active' },
+            include: [{ model: Patient, as: 'patient' }, { model: Department, as: 'department' }]
+        });
+
+        if (existingActiveVisit) {
+            return res.status(200).json(existingActiveVisit); // Return existing instead of creating duplicate
+        }
+
         // Fetch patient to check referral type
         const patient = await Patient.findByPk(patientId);
         if (!patient) return res.status(404).json({ error: 'Patient not found' });
@@ -356,6 +366,24 @@ const createConsultationVisit = async (req, res) => {
         if (!patientId) {
             await t.rollback();
             return res.status(400).json({ error: 'patientId is required' });
+        }
+
+        // Ensure only one active visit exists per patient
+        const existingActiveVisit = await Visit.findOne({
+            where: { patientId, status: 'active' },
+            transaction: t
+        });
+
+        if (existingActiveVisit) {
+            await t.rollback();
+            const fullVisit = await Visit.findByPk(existingActiveVisit.id, {
+                include: [{ model: Patient, as: 'patient' }, { model: Department, as: 'department' }]
+            });
+            return res.status(200).json({
+                visit: fullVisit,
+                queueStatus: existingActiveVisit.queueStatus,
+                message: 'Active visit already exists. Reusing current visit.'
+            });
         }
 
         const patient = await Patient.findByPk(patientId, { transaction: t });
