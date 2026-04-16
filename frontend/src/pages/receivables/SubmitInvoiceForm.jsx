@@ -52,8 +52,10 @@ const SubmitInvoiceForm = () => {
         const fetchSchemes = async () => {
             try {
                 const response = await receivablesAPI.schemes.getAll();
-                // Filter for corporate schemes
-                const corporateSchemes = response.data.filter(s => s.schemeType === 'Corporate');
+                // Filter for corporate schemes (case-insensitive for database compatibility)
+                const corporateSchemes = (response.data || []).filter(
+                    s => s.schemeType?.toLowerCase() === 'corporate'
+                );
                 setSchemes(corporateSchemes);
             } catch (error) {
                 console.error("Failed to load schemes");

@@ -20,7 +20,7 @@ const CorporateFinanceSummary = () => {
                 // Fetch all schemes
                 const schemesRes = await receivablesAPI.schemes.getAll();
                 const allSchemes = (schemesRes.data || []).filter(
-                    s => s.schemeType === 'Corporate'
+                    s => s.schemeType?.toLowerCase() === 'corporate'
                 );
                 setSchemes(allSchemes);
 
