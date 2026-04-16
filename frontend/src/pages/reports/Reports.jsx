@@ -234,6 +234,71 @@ const Reports = () => {
                                 </div>
                             )}
 
+                            {/* Cash Flow Report */}
+                            {activeTab === 'cashflow' && (
+                                <div className="space-y-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div className="card p-8 bg-emerald-500/5 border-emerald-500/20">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400">
+                                                    <TrendingUp className="w-5 h-5" />
+                                                </div>
+                                                <span className="text-[10px] font-black uppercase text-emerald-400/60 bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/20">Inflow</span>
+                                            </div>
+                                            <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-1">Total Cash Inflow</p>
+                                            <div className="text-4xl font-black text-white tracking-tighter">
+                                                K {parseFloat(reportData?.cashInflows || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                            </div>
+                                            <p className="text-[9px] font-bold text-emerald-400/60 mt-3 uppercase tracking-tighter">Total payments received within period</p>
+                                        </div>
+
+                                        <div className="card p-8 bg-red-500/5 border-red-500/20 opacity-60">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="p-2.5 rounded-xl bg-red-500/20 text-red-400">
+                                                    <TrendingDown className="w-5 h-5" />
+                                                </div>
+                                                <span className="text-[10px] font-black uppercase text-red-400/60 bg-red-400/10 px-2 py-0.5 rounded-full border border-red-400/20">Outflow</span>
+                                            </div>
+                                            <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-1">Total Cash Outflow</p>
+                                            <div className="text-4xl font-black text-white tracking-tighter">
+                                                K {parseFloat(reportData?.cashOutflows || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                            </div>
+                                            <p className="text-[9px] font-bold text-red-400/60 mt-3 uppercase tracking-tighter italic">Expenditure integration pending</p>
+                                        </div>
+
+                                        <div className="card p-8 bg-blue-500/5 border-blue-500/20">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="p-2.5 rounded-xl bg-blue-500/20 text-blue-400">
+                                                    <DollarSign className="w-5 h-5" />
+                                                </div>
+                                                <span className="text-[10px] font-black uppercase text-blue-400/60 bg-blue-400/10 px-2 py-0.5 rounded-full border border-blue-400/20">Net</span>
+                                            </div>
+                                            <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-1">Net Cashflow</p>
+                                            <div className="text-4xl font-black text-white tracking-tighter">
+                                                K {parseFloat(reportData?.netCashflow || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                            </div>
+                                            <p className="text-[9px] font-bold text-blue-400/60 mt-3 uppercase tracking-tighter italic">Liquidity index for period</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="card p-8 bg-white/[0.02] border-white/5 flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-3 rounded-2xl bg-white/5">
+                                                <FileText className="w-6 h-6 text-white/40" />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-black text-white uppercase tracking-wider">Analysis Summary</h4>
+                                                <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Calculated from system-wide transaction logs</p>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-white/40 max-w-sm text-right leading-relaxed italic">
+                                            The current cash flow analysis reflects all point-of-sale collections. 
+                                            Supplier payments and administrative expenditures will be automatically subtracted once the Finance Payables module is reconciled.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Line Listing Tab */}
                             {activeTab === 'line-listing' && (
                                 <div className="space-y-6">
@@ -329,7 +394,7 @@ const Reports = () => {
                             )}
 
                             {/* Other reports placeholder */}
-                            {(activeTab === 'cashflow' || activeTab === 'profitability' || activeTab === 'billing' || activeTab === 'performance') && (
+                            {(activeTab === 'profitability' || activeTab === 'billing' || activeTab === 'performance') && (
                                 <div className="flex flex-col items-center justify-center py-24 text-center">
                                     <div className="p-4 rounded-3xl bg-white/5 border border-white/10 mb-4">
                                         <BarChart3 className="w-8 h-8 text-white/10" />
