@@ -67,6 +67,11 @@ const WaitingRoom = () => {
         return `${Math.floor(diff / 60)}h ${diff % 60}m`;
     };
 
+    const formatName = (name) => {
+        if (!name) return '';
+        return name.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+    };
+
     return (
         <div className="min-h-screen bg-bg-primary p-4 lg:p-6 flex flex-col gap-6 animate-in fade-in duration-1000">
             {/* Header Section */}
@@ -105,12 +110,12 @@ const WaitingRoom = () => {
                     <table className="w-full text-left border-collapse">
                         <thead className="sticky top-0 z-10 bg-black/40 backdrop-blur-md border-b border-white/5">
                             <tr className="bg-white/[0.02]">
-                                <th className="px-6 py-4 w-10 font-black text-[9px] uppercase tracking-[0.2em] text-text-tertiary">#</th>
-                                <th className="px-6 py-4 font-black text-[9px] uppercase tracking-[0.2em] text-text-tertiary">Patient Identity</th>
-                                <th className="px-6 py-4 font-black text-[9px] uppercase tracking-[0.2em] text-text-tertiary">Identification</th>
-                                <th className="px-6 py-4 font-black text-[9px] uppercase tracking-[0.2em] text-text-tertiary">Category</th>
-                                <th className="px-6 py-4 font-black text-[9px] uppercase tracking-[0.2em] text-text-tertiary">Current Stage</th>
-                                <th className="px-6 py-4 text-right font-black text-[9px] uppercase tracking-[0.2em] text-text-tertiary">Wait Time</th>
+                                <th className="px-6 py-4 w-10 font-black text-[8px] uppercase tracking-[0.2em] text-text-tertiary">#</th>
+                                <th className="px-6 py-4 font-black text-[8px] uppercase tracking-[0.2em] text-text-tertiary">Patient Identity</th>
+                                <th className="px-6 py-4 font-black text-[8px] uppercase tracking-[0.2em] text-text-tertiary">Identification</th>
+                                <th className="px-6 py-4 font-black text-[8px] uppercase tracking-[0.2em] text-text-tertiary">Category</th>
+                                <th className="px-6 py-4 font-black text-[8px] uppercase tracking-[0.2em] text-text-tertiary">Current Stage</th>
+                                <th className="px-6 py-4 text-right font-black text-[8px] uppercase tracking-[0.2em] text-text-tertiary">Wait Time</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -129,17 +134,17 @@ const WaitingRoom = () => {
                                     <React.Fragment key={stage.id}>
                                         {/* Stage Group Header */}
                                         <tr className="bg-white/[0.01] border-b border-white/5">
-                                            <td colSpan="6" className="px-6 py-3">
+                                            <td colSpan="6" className="px-6 py-2.5">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-3">
-                                                        <div className={`w-1.5 h-1.5 rounded-full ${stage.dot} shadow-[0_0_10px_rgba(255,255,255,0.1)]`} />
-                                                        <h3 className="font-black text-text-primary text-[11px] uppercase tracking-[0.15em]">{stage.title}</h3>
-                                                        <span className="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-black text-text-tertiary border border-white/5">
+                                                        <div className={`w-1 h-1 rounded-full ${stage.dot} shadow-[0_0_10px_rgba(255,255,255,0.1)]`} />
+                                                        <h3 className="font-black text-slate-900 dark:text-text-primary text-[10px] uppercase tracking-[0.15em]">{stage.title}</h3>
+                                                        <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-[8px] font-black text-slate-500 dark:text-text-tertiary border border-slate-200 dark:border-white/5">
                                                             {stageVisits.length}
                                                         </span>
                                                     </div>
                                                     {stageVisits.length === 0 && (
-                                                        <span className="text-[9px] font-black uppercase text-text-tertiary tracking-widest opacity-20 italic">No active queue</span>
+                                                        <span className="text-[8px] font-black uppercase text-text-tertiary tracking-widest opacity-20 italic">No active queue</span>
                                                     )}
                                                 </div>
                                             </td>
@@ -161,43 +166,43 @@ const WaitingRoom = () => {
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-4">
-                                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-white/5 to-white/[0.01] border border-white/10 flex items-center justify-center font-black text-text-secondary text-xs shadow-inner">
+                                                            <div className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-gradient-to-br dark:from-white/5 dark:to-white/[0.01] border border-slate-200 dark:border-white/10 flex items-center justify-center font-black text-slate-400 dark:text-text-secondary text-[10px] shadow-inner">
                                                                 {visit.patient?.firstName?.[0]}{visit.patient?.lastName?.[0]}
                                                             </div>
                                                             <div>
-                                                                <h4 className="font-bold text-text-primary text-sm tracking-tight group-hover:text-blue-400 transition-colors uppercase leading-none mb-1">
-                                                                    {visit.patient?.firstName} {visit.patient?.lastName}
+                                                                <h4 className="font-bold text-slate-900 dark:text-text-primary text-xs tracking-tight group-hover:text-blue-500 transition-colors leading-none mb-1">
+                                                                    {formatName(visit.patient?.firstName)} {formatName(visit.patient?.lastName)}
                                                                 </h4>
-                                                                <p className="text-[9px] font-black text-text-tertiary uppercase tracking-widest opacity-60">
+                                                                <p className="text-[8px] font-black text-slate-400 dark:text-text-tertiary uppercase tracking-widest opacity-60">
                                                                     Visit: #{(visit.visitNumber || visit.id.toString().slice(-4)).toUpperCase()}
                                                                 </p>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className="text-[10px] font-mono font-bold text-text-tertiary uppercase tracking-tighter opacity-80">
+                                                        <span className="text-[9px] font-mono font-bold text-slate-500 dark:text-text-tertiary uppercase tracking-tighter opacity-80">
                                                             {visit.patient?.patientNumber}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all ${
+                                                        <span className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border transition-all ${
                                                             visit.patient?.paymentMethod === 'cash' 
-                                                                ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' 
-                                                                : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 shadow-[0_0_10px_rgba(99,102,241,0.1)]'
+                                                                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-500 border-amber-500/20' 
+                                                                : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20'
                                                         }`}>
                                                             {visit.patient?.paymentMethod || 'Cash'}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-2">
-                                                            <stage.icon className="w-3 h-3 text-text-tertiary opacity-40" />
-                                                            <span className="text-[9px] font-black text-text-secondary uppercase tracking-widest">{stage.title}</span>
+                                                            <stage.icon className="w-2.5 h-2.5 text-slate-400 dark:text-text-tertiary opacity-40" />
+                                                            <span className="text-[8px] font-black text-slate-600 dark:text-text-secondary uppercase tracking-widest">{stage.title}</span>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 text-right">
                                                         <div className="flex items-center justify-end gap-2.5">
-                                                            <Clock className={`w-3 h-3 ${isLongWait ? 'text-rose-500' : 'text-text-tertiary opacity-40'}`} />
-                                                            <span className={`text-[10px] font-black uppercase tracking-widest ${isLongWait ? 'text-rose-600' : 'text-text-secondary'} opacity-80 group-hover:opacity-100`}>
+                                                            <Clock className={`w-2.5 h-2.5 ${isLongWait ? 'text-rose-500' : 'text-slate-400 dark:text-text-tertiary opacity-40'}`} />
+                                                            <span className={`text-[9px] font-black uppercase tracking-widest ${isLongWait ? 'text-rose-600' : 'text-slate-700 dark:text-text-secondary'} opacity-80 group-hover:opacity-100`}>
                                                                 {waitTime}
                                                             </span>
                                                         </div>
