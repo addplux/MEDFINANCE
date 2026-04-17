@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { patientAPI, receivablesAPI } from '../../../services/apiService';
 import {
     Users, Plus, Search, Battery, RefreshCw, Eye, Edit,
@@ -24,12 +24,20 @@ const emptyForm = {
 
 const MembershipRegistration = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [members, setMembers] = useState([]);
     const [schemes, setSchemes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedScheme, setSelectedScheme] = useState('');
     const [showModal, setShowModal] = useState(false);
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        if (queryParams.get('new') === 'true') {
+            setShowModal(true);
+        }
+    }, [location.search]);
     const [showTopupModal, setShowTopupModal] = useState(false);
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [uploadFile, setUploadFile] = useState(null);

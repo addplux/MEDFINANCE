@@ -199,6 +199,7 @@ const MainLayout = ({ children }) => {
             id: 'private_scheme', icon: DollarSign, label: 'Private Prepaid',
             roles: CASHIER_ROLES,
             submenu: [
+                { path: '/app/schemes/private/members?new=true', label: 'New Prepaid Registration' },
                 { path: '/app/schemes/private/members', label: 'Membership Registration' },
                 { path: '/app/schemes/private/plans', label: 'Plan Selection' },
                 { path: '/app/schemes/private/duration', label: 'Start & End Date' },
