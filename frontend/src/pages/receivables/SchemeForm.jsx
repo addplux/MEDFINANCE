@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft, Save, Shield, Hash, Zap, Mail, Phone, AlignLeft, Info } from 'lucide-react';
 import api from '../../services/apiClient';
 
 const SchemeForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
+    const location = useLocation();
     const isEdit = Boolean(id);
+
+    // Get type from query params (e.g., ?type=corporate)
+    const queryParams = new URLSearchParams(location.search);
+    const defaultType = queryParams.get('type') || 'insurance';
 
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         schemeCode: '',
         schemeName: '',
-        schemeType: 'insurance',
+        schemeType: defaultType,
         discountRate: '',
         contactPerson: '',
         phone: '',

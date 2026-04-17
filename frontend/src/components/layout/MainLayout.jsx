@@ -210,6 +210,7 @@ const MainLayout = ({ children }) => {
             id: 'corporate_scheme', icon: BookOpen, label: 'Corporate Scheme',
             roles: CASHIER_ROLES,
             submenu: [
+                { path: '/app/receivables/schemes/new?type=corporate', label: 'Register New Scheme' },
                 { path: '/app/schemes/corporate/members', label: 'Member Management' },
                 { path: '/app/schemes/corporate/credit', label: 'Credit Limit' },
                 { path: '/app/schemes/corporate/terms', label: 'Payment Terms' },

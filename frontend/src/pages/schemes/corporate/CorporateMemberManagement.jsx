@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Upload, Search, Link as LinkIcon, CheckCircle, XCircle, Users, UserPlus, Filter } from 'lucide-react';
+import { Download, Upload, Search, Link as LinkIcon, CheckCircle, XCircle, Users, UserPlus, Filter, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { receivablesAPI } from '../../../services/apiService';
 import { useToast } from '../../../context/ToastContext';
@@ -118,7 +118,7 @@ const CorporateMemberManagement = () => {
             </div>
 
             {/* Scheme Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 {corporateSchemes.map(scheme => {
                     const isSelected = String(selectedScheme) === String(scheme.id);
                     return (
@@ -137,13 +137,27 @@ const CorporateMemberManagement = () => {
                                 </div>
                                 <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.5)]' : 'bg-text-tertiary/20'}`} />
                             </div>
-                            <h3 className={`font-black text-sm uppercase tracking-tight mb-1 ${isSelected ? 'text-text-primary' : 'text-text-secondary'}`}>
+                            <h3 className={`font-black text-[11px] uppercase tracking-tight mb-1 truncate ${isSelected ? 'text-text-primary' : 'text-text-secondary'}`}>
                                 {scheme.schemeName}
                             </h3>
-                            <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-tighter">{scheme.schemeCode}</p>
+                            <p className="text-[9px] font-bold text-text-tertiary uppercase tracking-tighter truncate">{scheme.schemeCode}</p>
                         </button>
                     );
                 })}
+
+                {/* Create New Scheme Card */}
+                <button
+                    onClick={() => navigate('/app/receivables/schemes/new?type=corporate')}
+                    className="group relative p-5 rounded-[1.5rem] border border-dashed border-border-color hover:border-blue-500/50 bg-transparent hover:bg-blue-500/5 transition-all duration-300 flex flex-col items-center justify-center text-center gap-2"
+                >
+                    <div className="p-2 rounded-xl bg-bg-tertiary text-text-tertiary group-hover:text-blue-500 transition-colors">
+                        <Plus className="w-5 h-5" />
+                    </div>
+                    <div className="space-y-0.5">
+                        <h3 className="font-black text-[10px] uppercase tracking-widest text-text-tertiary group-hover:text-text-primary transition-colors">Launch New</h3>
+                        <p className="text-[8px] font-bold text-text-tertiary/50 uppercase tracking-tighter">Strategic Unit</p>
+                    </div>
+                </button>
             </div>
 
             {/* Main Content */}
