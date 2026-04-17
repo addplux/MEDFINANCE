@@ -16,7 +16,7 @@ router.put('/services/:id', authorize('admin'), setupController.updateService);
 router.delete('/services/:id', authorize('admin'), setupController.deleteService);
 
 // Users
-router.get('/users', authorize('admin'), setupController.getAllUsers);
+router.get('/users', setupController.getAllUsers);
 router.get('/users/:id', authorize('admin'), setupController.getUser);
 router.post('/users', authorize('admin'), setupController.createUser);
 router.put('/users/:id', authorize('admin'), setupController.updateUser);
