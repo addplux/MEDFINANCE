@@ -395,8 +395,16 @@ const createConsultationVisit = async (req, res) => {
         const prepayMethods = ['private prepaid', 'private_prepaid', 'corporate', 'scheme', 'staff'];
         const isPrepaid = prepayMethods.includes(patient.paymentMethod);
 
-        // Determine initial queue status
-        const initialQueueStatus = isPrepaid ? 'waiting_doctor' : 'pending_cashier';
+        // Fetch service to determine category-based routing
+        let initialQueueStatus = isPrepaid ? 'waiting_doctor' : 'pending_cashier';
+        
+        if (serviceId) {
+            const service = await Service.findByPk(serviceId, { transaction: t });
+            if (service) {
+                if (service.category === 'laboratory') initialQueueStatus = 'waiting_lab';
+                else if (service.category === 'radiology') initialQueueStatus = 'waiting_radiology';
+            }
+        }
 
         // Generate visit number
         const count = await Visit.count({ transaction: t });

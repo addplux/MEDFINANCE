@@ -341,7 +341,9 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto pr-2 custom-scrollbar flex-1 items-start min-h-0">
                             <div className="flex flex-col gap-4">
-                                <TriageWidget visitId={activeVisit.id} patientId={activeVisit.patient?.id} />
+                                {title === 'OPD' && (
+                                    <TriageWidget visitId={activeVisit.id} patientId={activeVisit.patient?.id} />
+                                )}
                             </div>
                             <div className="flex flex-col gap-4">
                                 <DoctorWorkspace 

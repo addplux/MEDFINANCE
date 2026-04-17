@@ -7,6 +7,8 @@ import {
     ShieldOff, ShieldCheck, ShieldAlert, ChevronDown, ChevronRight, UserCircle
 } from 'lucide-react';
 
+import CheckInModal from '../../components/shared/CheckInModal';
+
 const PATIENT_TYPES = [
     { value: '', label: 'All', icon: Users },
     { value: 'cash', label: 'Cash', icon: Banknote },
@@ -174,9 +176,9 @@ const PatientRow = ({ patient, navigate, handleStatusChange, handleDelete, handl
                         <button
                             onClick={() => handleSendToTriage(patient)}
                             className="p-1.5 hover:bg-emerald-500/10 text-emerald-400 hover:text-emerald-300 rounded-lg transition-colors"
-                            title="Send to Triage"
+                            title="Patient Check-In"
                         >
-                            <Siren className="w-4 h-4" />
+                            <CircleCheckBig className="w-4 h-4" />
                         </button>
                     </div>
                 </td>
@@ -231,6 +233,7 @@ const Patients = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
+    const [checkInPatient, setCheckInPatient] = useState(null);
 
     useEffect(() => {
         loadPatients();
@@ -261,19 +264,8 @@ const Patients = () => {
         }
     };
 
-    const handleSendToTriage = async (patient) => {
-        if (!window.confirm(`Send ${patient.firstName} ${patient.lastName} to Triage?`)) return;
-        try {
-            await visitAPI.create({
-                patientId: patient.id,
-                visitType: 'opd',
-                reasonForVisit: 'General Consultation'
-            });
-            alert('Patient successfully sent to Triage!');
-        } catch (error) {
-            console.error('Failed to send to triage:', error);
-            alert(error.response?.data?.error || 'Failed to send to triage');
-        }
+    const handleSendToTriage = (patient) => {
+        setCheckInPatient(patient);
     };
 
     const handleDelete = async (id) => {
@@ -484,7 +476,7 @@ const Patients = () => {
                                         <Edit className="w-3.5 h-3.5 mr-1" /> Edit
                                     </button>
                                     <button onClick={() => handleSendToTriage(patient)} className="btn btn-sm bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-full flex-1 justify-center">
-                                        <Siren className="w-3.5 h-3.5 mr-1" /> Triage
+                                        <CircleCheckBig className="w-3.5 h-3.5 mr-1" /> Check-In
                                     </button>
                                 </div>
                             </div>
@@ -517,6 +509,16 @@ const Patients = () => {
                     </div>
                 )}
             </div>
+            {/* Check-In Modal */}
+            {checkInPatient && (
+                <CheckInModal 
+                    patient={checkInPatient}
+                    onClose={() => setCheckInPatient(null)}
+                    onSuccess={() => {
+                        loadPatients();
+                    }}
+                />
+            )}
         </div>
     );
 };

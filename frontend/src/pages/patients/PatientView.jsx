@@ -11,6 +11,7 @@ import NewAdmissionModal from '../../components/admissions/NewAdmissionModal';
 import ManualChargeModal from '../../components/shared/ManualChargeModal';
 import { useToast } from '../../context/ToastContext';
 import BillingStatementSection from './components/BillingStatementSection';
+import CheckInModal from '../../components/shared/CheckInModal';
 
 const TYPE_BADGE = {
     cash: { label: 'Cash', bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
@@ -250,6 +251,7 @@ const PatientView = () => {
     const [topupAmount, setTopupAmount] = useState('');
     const [topupLoading, setTopupLoading] = useState(false);
     const [topupError, setTopupError] = useState('');
+    const [showCheckInModal, setShowCheckInModal] = useState(false);
 
     const handleTopup = async (e) => {
         e.preventDefault();
@@ -488,26 +490,12 @@ const PatientView = () => {
                         <p className="text-sm text-text-secondary mt-1">Manage admissions, or view all OPD, IPD, Lab, and Pharmacy records.</p>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3 flex-wrap justify-end">
-                        {/* Send to Doctor */}
                         <button
-                            disabled={sendingToDoctor}
-                            onClick={async () => {
-                                if (!window.confirm(`Send ${patient.firstName} ${patient.lastName} to the doctor?\n\nThis will create a visit and auto-generate a consultation fee.`)) return;
-                                setSendingToDoctor(true);
-                                setSendToDoctorResult(null);
-                                try {
-                                    const res = await visitAPI.createConsultation({ patientId: patient.id });
-                                    setSendToDoctorResult({ ok: true, msg: res.data.message, visitId: res.data.visit?.id });
-                                } catch (err) {
-                                    setSendToDoctorResult({ ok: false, msg: err.response?.data?.error || 'Failed to send patient to doctor.' });
-                                } finally {
-                                    setSendingToDoctor(false);
-                                }
-                            }}
-                            className="btn bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0 disabled:opacity-60 flex items-center gap-2"
+                            onClick={() => setShowCheckInModal(true)}
+                            className="btn bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0 flex items-center gap-2"
                         >
                             <Stethoscope className="w-4 h-4" />
-                            {sendingToDoctor ? 'Sending…' : 'Send to Doctor'}
+                            Check-In Patient
                         </button>
 
                         <button
@@ -662,6 +650,16 @@ const PatientView = () => {
                         </form>
                     </div>
                 </div>
+            )}
+            {/* Check-In Modal */}
+            {showCheckInModal && (
+                <CheckInModal 
+                    patient={patient}
+                    onClose={() => setShowCheckInModal(false)}
+                    onSuccess={() => {
+                        loadPatient();
+                    }}
+                />
             )}
         </div>
     );

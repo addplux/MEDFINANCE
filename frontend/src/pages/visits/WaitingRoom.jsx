@@ -10,10 +10,9 @@ import TriageWidget from './components/TriageWidget';
 import DoctorWorkspace from './components/DoctorWorkspace';
 
 const QUEUE_STAGES = [
-    { id: 'pending_triage', title: 'Triage', icon: Activity, dot: 'bg-orange-500' },
-    { id: 'pending_cashier', title: 'Cashier', icon: CreditCard, dot: 'bg-amber-500' },
-    { id: 'waiting_doctor', title: 'Consultation', icon: Users, dot: 'bg-blue-500' },
-    { id: 'with_doctor', title: 'Clinical Unit', icon: Stethoscope, dot: 'bg-emerald-500' },
+    { id: 'pending_cashier', title: 'Awaiting Payment', icon: CreditCard, dot: 'bg-amber-500' },
+    { id: 'waiting_doctor', title: 'To See Doctor', icon: Users, dot: 'bg-blue-500' },
+    { id: 'with_doctor', title: 'In Consultation', icon: Stethoscope, dot: 'bg-emerald-500' },
     { id: 'waiting_lab', title: 'Laboratory', icon: TestTube, dot: 'bg-violet-500' },
     { id: 'waiting_radiology', title: 'Imaging', icon: SquareActivity, dot: 'bg-indigo-500' },
     { id: 'waiting_theatre', title: 'Theatre', icon: Scissors, dot: 'bg-rose-500' },
@@ -226,7 +225,7 @@ const WaitingRoom = () => {
                         <div className="px-8 py-5 border-b border-white/5 backdrop-blur-md bg-white/[0.02] flex justify-between items-center">
                             <div>
                                 <h3 className="font-black text-xl uppercase tracking-tighter text-white">
-                                    {activeVisit.queueStatus === 'pending_triage' ? 'Triage Workspace' : 'Doctor Consultation'}
+                                    Patient Workspace
                                 </h3>
                                 <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">
                                     {activeVisit.patient?.lastName}, {activeVisit.patient?.firstName} | {activeVisit.patient?.patientNumber}
