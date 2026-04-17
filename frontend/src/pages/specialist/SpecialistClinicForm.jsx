@@ -2,17 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { specialistClinicAPI, patientAPI } from '../../services/apiService';
 import { ArrowLeft, Save, Search, User, Calendar, DollarSign, FileText } from 'lucide-react';
+import PatientSearchSelect from '../../components/shared/PatientSearchSelect';
 
 const SpecialistClinicForm = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [searching, setSearching] = useState(false);
 
-    // Patient Search State
-    const [searchTerm, setSearchTerm] = useState('');
-    const [patients, setPatients] = useState([]);
     const [selectedPatient, setSelectedPatient] = useState(null);
-    const [showResults, setShowResults] = useState(false);
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -29,34 +26,6 @@ const SpecialistClinicForm = () => {
         followUpDate: ''
     });
 
-    // Debounced Search
-    useEffect(() => {
-        const delayDebounceFn = setTimeout(async () => {
-            if (searchTerm.length > 1) {
-                setSearching(true);
-                try {
-                    const response = await patientAPI.getAll({ search: searchTerm, limit: 10 });
-                    setPatients(response.data);
-                    setShowResults(true);
-                } catch (error) {
-                    console.error('Search failed:', error);
-                } finally {
-                    setSearching(false);
-                }
-            } else {
-                setPatients([]);
-                setShowResults(false);
-            }
-        }, 500);
-
-        return () => clearTimeout(delayDebounceFn);
-    }, [searchTerm]);
-
-    const handlePatientSelect = (patient) => {
-        setSelectedPatient(patient);
-        setSearchTerm('');
-        setShowResults(false);
-    };
 
     const calculateTotal = () => {
         return (
@@ -120,75 +89,11 @@ const SpecialistClinicForm = () => {
                         Patient Details
                     </h2>
 
-                    {!selectedPatient ? (
-                        <div className="relative">
-                            <label className="form-label">Search Patient</label>
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                <input
-                                    type="text"
-                                    className="form-input pl-10"
-                                    placeholder="Search by name or file number..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                                {searching && (
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
-                                        Searching...
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Search Results Dropdown */}
-                            {showResults && patients.length > 0 && (
-                                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                                    {patients.map(patient => (
-                                        <button
-                                            key={patient.id}
-                                            type="button"
-                                            onClick={() => handlePatientSelect(patient)}
-                                            className="w-full text-left p-3 hover:bg-gray-50 border-b last:border-0 flex justify-between items-center"
-                                        >
-                                            <div>
-                                                <p className="font-medium text-gray-900">
-                                                    {patient.firstName} {patient.lastName}
-                                                </p>
-                                                <p className="text-sm text-gray-500">
-                                                    {patient.gender} • {new Date(patient.dateOfBirth).toLocaleDateString()}
-                                                </p>
-                                            </div>
-                                            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                                                {patient.patientNumber}
-                                            </span>
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-4 flex justify-between items-center">
-                            <div>
-                                <h3 className="font-semibold text-indigo-900">
-                                    {selectedPatient.firstName} {selectedPatient.lastName}
-                                </h3>
-                                <p className="text-indigo-700 text-sm mt-1">
-                                    {selectedPatient.patientNumber} • {selectedPatient.gender} • {calculateAge(selectedPatient.dateOfBirth)} years
-                                </p>
-                                <div className="flex gap-2 mt-2">
-                                    <span className="text-xs bg-white text-indigo-600 px-2 py-1 rounded border border-indigo-200">
-                                        {selectedPatient.paymentMethod.toUpperCase()}
-                                    </span>
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setSelectedPatient(null)}
-                                className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
-                            >
-                                Change
-                            </button>
-                        </div>
-                    )}
+                    <PatientSearchSelect
+                        selectedId={selectedPatient?.id}
+                        onSelect={setSelectedPatient}
+                        required
+                    />
                 </div>
 
                 {/* 2. Clinic Info */}

@@ -5,6 +5,7 @@ import {
     Search, ArrowRight, AlertCircle, Clock, CheckCircle,
     Receipt, UserPlus, RefreshCw, Filter, Wallet, Info
 } from 'lucide-react';
+import PatientSearchSelect from '../../components/shared/PatientSearchSelect';
 
 const fmt = (n) => `ZK ${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -21,8 +22,6 @@ const DEPT_COLORS = {
 const PatientLedger = () => {
     const navigate = useNavigate();
     const [pendingQueue, setPendingQueue] = useState([]);
-    const [patients, setPatients] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
     const [selectedPatientId, setSelectedPatientId] = useState('');
     const [unpaidBills, setUnpaidBills] = useState([]);
     const [selectedBills, setSelectedBills] = useState([]);
@@ -30,7 +29,6 @@ const PatientLedger = () => {
     const [queueLoading, setQueueLoading] = useState(true);
 
     useEffect(() => {
-        loadPatients();
         fetchPendingQueue();
     }, []);
 
@@ -47,14 +45,6 @@ const PatientLedger = () => {
         }
     };
 
-    const loadPatients = async () => {
-        try {
-            const response = await patientAPI.getAll();
-            setPatients(response.data.data || response.data || []);
-        } catch (error) {
-            console.error('Failed to load patients:', error);
-        }
-    };
 
     const fetchUnpaidBills = async (patientId) => {
         if (!patientId) return [];
@@ -114,11 +104,6 @@ const PatientLedger = () => {
         .filter(b => selectedBills.includes(b.uid))
         .reduce((sum, b) => sum + Number(b.netAmount || b.totalAmount || 0), 0);
 
-    const filteredPatients = patients.filter(p =>
-        (p.firstName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (p.lastName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (p.patientNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-    );
 
     return (
         <div className="space-y-6 pb-32 animate-fade-in">
@@ -227,34 +212,16 @@ const PatientLedger = () => {
                             <Filter size={14} /> Manual Search
                         </h3>
                         <div className="space-y-4">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Search patient..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-xs outline-none focus:border-accent transition-all text-white placeholder:text-gray-500"
-                                />
-                            </div>
-                            <div className="form-group border border-border bg-surface rounded-xl overflow-hidden px-2">
-                                <select
-                                    value={selectedPatientId}
-                                    onChange={(e) => {
-                                        const id = e.target.value;
-                                        setSelectedPatientId(id);
-                                        if (id) fetchUnpaidBills(id);
-                                    }}
-                                    className="w-full py-3 bg-transparent text-xs text-white outline-none"
-                                >
-                                    <option value="" className="bg-surface text-gray-400 italic">-- Quick Link --</option>
-                                    {filteredPatients.map(p => (
-                                        <option key={p.id} value={p.id} className="bg-surface text-white">
-                                            {p.patientNumber} - {p.firstName} {p.lastName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                            <PatientSearchSelect
+                                selectedId={selectedPatientId}
+                                onSelect={(p) => {
+                                    if (p) handleSelectPatient(p.id);
+                                    else {
+                                        setSelectedPatientId('');
+                                        setUnpaidBills([]);
+                                    }
+                                }}
+                            />
                             <div className="p-4 bg-accent/5 rounded-2xl border border-accent/10 mt-4">
                                 <div className="flex gap-3">
                                     <Info size={15} className="text-accent shrink-0 mt-0.5" />

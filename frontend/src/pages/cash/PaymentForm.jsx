@@ -4,6 +4,7 @@ import { ArrowLeft, Save, Wallet, User, CheckCircle } from 'lucide-react';
 import { cashAPI, patientAPI } from '../../services/apiService';
 import { useAuth } from '../../context/AuthContext';
 import ReceiptModal from '../../components/common/ReceiptModal';
+import PatientSearchSelect from '../../components/shared/PatientSearchSelect';
 
 const PaymentForm = () => {
     const navigate = useNavigate();
@@ -29,7 +30,6 @@ const PaymentForm = () => {
         .toString();
 
     const [loading, setLoading] = useState(false);
-    const [patients, setPatients] = useState([]);
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [formData, setFormData] = useState({
         patientId: statePatientId,
@@ -50,35 +50,22 @@ const PaymentForm = () => {
         if (isEdit) fetchPayment();
     }, [id]);
 
-    // When patients list loads, find the pre-selected patient and auto-fill method
-    useEffect(() => {
-        console.log("PaymentForm: checking patients vs formData", { patientsLoaded: patients.length, patientIdToMatch: formData.patientId });
-        if (!patients.length || !formData.patientId) return;
-        const found = patients.find(p => String(p.id) === String(formData.patientId));
-        if (!found) {
-            console.warn("PaymentForm: Patient ID not found in patients array", formData.patientId);
-            return;
-        }
-        setSelectedPatient(found);
-
-        // Also ensure form data uses the string ID so select box binds correctly
-        setFormData(prev => {
-            const next = { ...prev, patientId: String(found.id) };
-            if (found.schemeId || found.Scheme) {
-                next.paymentMethod = 'insurance';
-            } else if (found.paymentMethod === 'staff') {
-                next.paymentMethod = 'payroll';
-            }
-            return next;
-        });
-    }, [patients, formData.patientId]);
-
-    const loadPatients = async () => {
-        try {
-            const response = await patientAPI.getAll({ limit: 2000 });
-            setPatients(response.data.data || response.data || []);
-        } catch (error) {
-            console.error('Error loading patients:', error);
+    const handlePatientChange = (patient) => {
+        setSelectedPatient(patient);
+        if (patient) {
+            setFormData(prev => {
+                const next = { ...prev, patientId: String(patient.id) };
+                if (patient.schemeId || patient.Scheme) {
+                    next.paymentMethod = 'insurance';
+                } else if (patient.paymentMethod === 'staff') {
+                    next.paymentMethod = 'payroll';
+                } else {
+                    next.paymentMethod = 'cash'; // Default
+                }
+                return next;
+            });
+        } else {
+            setFormData(prev => ({ ...prev, patientId: '' }));
         }
     };
 
@@ -107,18 +94,6 @@ const PaymentForm = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        // When patient changes manually, look up scheme
-        if (name === 'patientId') {
-            const found = patients.find(p => String(p.id) === String(value));
-            setSelectedPatient(found || null);
-            if (found && (found.schemeId || found.Scheme)) {
-                setFormData(prev => ({ ...prev, patientId: value, paymentMethod: 'insurance' }));
-                return;
-            } else if (found && found.paymentMethod === 'staff') {
-                setFormData(prev => ({ ...prev, patientId: value, paymentMethod: 'payroll' }));
-                return;
-            }
-        }
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
@@ -241,22 +216,13 @@ const PaymentForm = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                             {/* Patient */}
-                            <div className="form-group">
+                            <div className="form-group pb-1">
                                 <label className="form-label">Patient <span className="text-error">*</span></label>
-                                <select
-                                    name="patientId"
-                                    value={formData.patientId}
-                                    onChange={handleChange}
-                                    className="form-select"
+                                <PatientSearchSelect
+                                    selectedId={formData.patientId}
+                                    onSelect={handlePatientChange}
                                     required
-                                >
-                                    <option value="">Select Patient</option>
-                                    {patients.map(p => (
-                                        <option key={p.id} value={String(p.id)}>
-                                            {p.patientNumber} — {p.firstName} {p.lastName}
-                                        </option>
-                                    ))}
-                                </select>
+                                />
                             </div>
 
                             {/* Amount */}

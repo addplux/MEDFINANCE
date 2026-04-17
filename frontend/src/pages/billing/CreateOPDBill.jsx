@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { billingAPI, patientAPI, setupAPI } from '../../services/apiService';
 import { ArrowLeft, Save, Plus } from 'lucide-react';
+import PatientSearchSelect from '../../components/shared/PatientSearchSelect';
 
 const CreateOPDBill = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [patients, setPatients] = useState([]);
+    const [selectedPatientObject, setSelectedPatientObject] = useState(null);
     const [services, setServices] = useState([]);
     const [formData, setFormData] = useState({
         patientId: '',
@@ -25,12 +25,8 @@ const CreateOPDBill = () => {
 
     const loadData = async () => {
         try {
-            const [patientsRes, servicesRes] = await Promise.all([
-                patientAPI.getAll({ limit: 1000 }),
-                setupAPI.services.getAll({ isActive: true, limit: 500 })
-            ]);
-            setPatients(patientsRes.data.data || []);
-            setServices(servicesRes.data || []);
+            const servicesRes = await setupAPI.services.getAll({ isActive: true, limit: 1000 });
+            setServices(servicesRes.data.data || servicesRes.data || []);
         } catch (error) {
             console.error('Failed to load data:', error);
         }
@@ -38,7 +34,7 @@ const CreateOPDBill = () => {
 
     const handleServiceChange = (serviceId) => {
         const service = services.find(s => s.id === parseInt(serviceId));
-        const patient = patients.find(p => p.id === parseInt(formData.patientId));
+        const patient = selectedPatientObject;
 
         let price = service?.price || 0;
 
@@ -127,19 +123,14 @@ const CreateOPDBill = () => {
                     {/* Patient Selection */}
                     <div className="form-group">
                         <label className="form-label">Patient *</label>
-                        <select
-                            value={formData.patientId}
-                            onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-                            className={`form-select ${errors.patientId ? 'border-red-500' : ''}`}
+                        <PatientSearchSelect
+                            selectedId={formData.patientId}
+                            onSelect={(p) => {
+                                setSelectedPatientObject(p);
+                                setFormData({ ...formData, patientId: p?.id || '' });
+                            }}
                             required
-                        >
-                            <option value="">Select Patient</option>
-                            {patients.map(patient => (
-                                <option key={patient.id} value={patient.id}>
-                                    {patient.patientNumber} - {patient.firstName} {patient.lastName}
-                                </option>
-                            ))}
-                        </select>
+                        />
                         {errors.patientId && (
                             <p className="text-red-500 text-sm mt-1">{errors.patientId}</p>
                         )}

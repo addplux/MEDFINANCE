@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { pharmacyAPI, patientAPI } from '../../services/apiService';
-import { ShoppingCart, User, Plus, Trash2, Save, Activity } from 'lucide-react';
+import { ShoppingCart, User, Plus, Trash2, Save, Activity, AlertTriangle } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getPaymentStatusBadge } from '../../utils/statusBadges';
+import PatientSearchSelect from '../../components/shared/PatientSearchSelect';
 
 const Dispense = () => {
     const navigate = useNavigate();
@@ -12,9 +13,6 @@ const Dispense = () => {
     const [loading, setLoading] = useState(false);
 
     const [selectedPatient, setSelectedPatient] = useState('');
-    const [selectedPatientName, setSelectedPatientName] = useState('');
-    const [patientSearch, setPatientSearch] = useState('');
-    const [showPatientList, setShowPatientList] = useState(false);
     const [cart, setCart] = useState([]); // [{ medication, batchId, quantity, price, discount }]
 
     // Add Item Form State
@@ -155,64 +153,11 @@ const Dispense = () => {
                     </h2>
 
                     {/* Searchable patient combobox */}
-                    <div className="relative">
-                        {selectedPatient ? (
-                            <div className="flex items-center gap-2 p-3 bg-bg-tertiary rounded-lg border border-border-color">
-                                <User className="w-4 h-4 text-primary" />
-                                <span className="flex-1 font-medium">{selectedPatientName}</span>
-                                <button
-                                    onClick={() => { setSelectedPatient(''); setSelectedPatientName(''); setPatientSearch(''); }}
-                                    className="text-text-secondary hover:text-error transition-colors text-lg leading-none"
-                                >
-                                    ×
-                                </button>
-                            </div>
-                        ) : (
-                            <>
-                                <input
-                                    type="text"
-                                    className="form-input w-full"
-                                    placeholder="Search patient by name or number..."
-                                    value={patientSearch}
-                                    onChange={e => { setPatientSearch(e.target.value); setShowPatientList(true); }}
-                                    onFocus={() => setShowPatientList(true)}
-                                />
-                                {showPatientList && (
-                                    <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-bg-secondary border border-border-color rounded-lg shadow-xl max-h-60 overflow-y-auto">
-                                        {(patients || [])
-                                            .filter(p =>
-                                                !patientSearch ||
-                                                `${p.firstName} ${p.lastName}`.toLowerCase().includes(patientSearch.toLowerCase()) ||
-                                                (p.patientNumber || '').toLowerCase().includes(patientSearch.toLowerCase())
-                                            )
-                                            .slice(0, 20)
-                                            .map(p => (
-                                                <button
-                                                    key={p.id}
-                                                    className="w-full text-left px-4 py-2.5 hover:bg-primary/10 text-sm flex items-center gap-2 transition-colors"
-                                                    onMouseDown={() => {
-                                                        setSelectedPatient(p.id);
-                                                        setSelectedPatientName(`${p.patientNumber ? p.patientNumber + ' — ' : ''}${p.firstName} ${p.lastName}`);
-                                                        setPatientSearch('');
-                                                        setShowPatientList(false);
-                                                    }}
-                                                >
-                                                    <span className="text-xs text-text-secondary w-20 shrink-0">{p.patientNumber}</span>
-                                                    <span className="font-medium">{p.firstName} {p.lastName}</span>
-                                                </button>
-                                            ))}
-                                        {patients.filter(p =>
-                                            !patientSearch ||
-                                            `${p.firstName} ${p.lastName}`.toLowerCase().includes(patientSearch.toLowerCase()) ||
-                                            (p.patientNumber || '').toLowerCase().includes(patientSearch.toLowerCase())
-                                        ).length === 0 && (
-                                                <div className="px-4 py-3 text-sm text-text-secondary">No patients found</div>
-                                            )}
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
+                    <PatientSearchSelect
+                        selectedId={selectedPatient}
+                        onSelect={(p) => setSelectedPatient(p?.id || '')}
+                        required
+                    />
                 </div>
 
                 <div className="card p-6">

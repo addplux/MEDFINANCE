@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { radiologyAPI, patientAPI, setupAPI } from '../../services/apiService';
 import { Save, ArrowLeft, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import PatientSearchSelect from '../../components/shared/PatientSearchSelect';
 
 const RadiologyRequestForm = () => {
     const navigate = useNavigate();
@@ -98,19 +99,11 @@ const RadiologyRequestForm = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className="label">Patient</label>
-                        <select
-                            className="form-select w-full"
-                            value={selectedPatient}
-                            onChange={e => setSelectedPatient(e.target.value)}
+                        <PatientSearchSelect
+                            selectedId={selectedPatient}
+                            onSelect={(p) => setSelectedPatient(p?.id || '')}
                             required
-                        >
-                            <option value="">-- Select Patient --</option>
-                            {(patients || []).map(p => (
-                                <option key={p.id} value={p.id}>
-                                    {p.firstName || ''} {p.lastName || ''} {p.dateOfBirth ? `(${new Date(p.dateOfBirth).getFullYear()})` : ''}
-                                </option>
-                            ))}
-                        </select>
+                        />
                     </div>
                     <div>
                         <label className="label">Priority</label>
