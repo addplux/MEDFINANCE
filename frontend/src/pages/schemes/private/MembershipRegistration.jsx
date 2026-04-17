@@ -10,8 +10,8 @@ const MEMBER_RANKS = ['principal', 'spouse', 'child', 'dependant', 'other'];
 
 const emptyForm = {
     // Patient details
-    firstName: '', lastName: '', dateOfBirth: '', gender: '',
-    phone: '', email: '', nrc: '', address: '',
+    firstName: '', lastName: '', gender: '',
+    phone: '', nrc: '', address: '',
     // Membership details
     schemeId: '', policyNumber: '', memberRank: 'principal',
     balance: '', memberSuffix: '',
@@ -101,8 +101,8 @@ const MembershipRegistration = () => {
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        if (!form.firstName || !form.lastName || !form.dateOfBirth || !form.gender) {
-            showAlert('error', 'First name, last name, date of birth, and gender are required.');
+        if (!form.firstName || !form.lastName || !form.gender) {
+            showAlert('error', 'First name, last name, and gender are required.');
             return;
         }
         if (!form.balance || isNaN(Number(form.balance))) {
@@ -405,10 +405,6 @@ const MembershipRegistration = () => {
                                         <input name="lastName" value={form.lastName} onChange={handleFormChange} className="form-input" required />
                                     </div>
                                     <div>
-                                        <label className="form-label">Date of Birth *</label>
-                                        <input type="date" name="dateOfBirth" value={form.dateOfBirth} onChange={handleFormChange} className="form-input" required />
-                                    </div>
-                                    <div>
                                         <label className="form-label">Gender *</label>
                                         <select name="gender" value={form.gender} onChange={handleFormChange} className="form-select" required>
                                             <option value="">Select…</option>
@@ -424,10 +420,6 @@ const MembershipRegistration = () => {
                                     <div>
                                         <label className="form-label">NRC</label>
                                         <input name="nrc" value={form.nrc} onChange={handleFormChange} className="form-input" placeholder="012345/67/1" />
-                                    </div>
-                                    <div className="col-span-2">
-                                        <label className="form-label">Email</label>
-                                        <input type="email" name="email" value={form.email} onChange={handleFormChange} className="form-input" />
                                     </div>
                                 </div>
                             </div>
