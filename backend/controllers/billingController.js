@@ -790,9 +790,12 @@ const getPharmacyQueue = async (req, res) => {
         const { Visit, Patient, Scheme, PharmacyBill } = require('../models');
         const { Op } = require('sequelize');
 
-        // --- Source 1: ALL active visits ---
+        // --- Source 1: Visits explicitly assigned to Pharmacy ---
         const visits = await Visit.findAll({
-            where: { status: 'active' },
+            where: { 
+                status: 'active',
+                assignedDepartment: 'Pharmacy'
+            },
             include: [
                 {
                     model: Patient,

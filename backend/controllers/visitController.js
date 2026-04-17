@@ -36,7 +36,7 @@ const createVisit = async (req, res) => {
         const isReferral = patient.referralType === 'referral';
 
         // Bypass patients go to cashier first and have a pending registry fee
-        let initialQueueStatus = isBypass ? 'pending_cashier' : 'pending_triage';
+        let initialQueueStatus = isBypass ? 'pending_cashier' : 'waiting_doctor';
         
         // If it's a referral, they go to authorization (MO) first as requested in earlier prompts
         if (isReferral) initialQueueStatus = 'pending_authorization';
@@ -222,7 +222,7 @@ const updateVisit = async (req, res) => {
         await visit.save();
 
         // --- AUTOMATION HOOK FOR LAB/RADIOLOGY ---
-        if (['pending_results', 'waiting_lab', 'waiting_radiology'].includes(visit.queueStatus)) {
+        if (['pending_results', 'waiting_lab', 'waiting_radiology', 'waiting_doctor'].includes(visit.queueStatus)) {
             try {
                 const bills = await OPDBill.findAll({
                     where: { visitId: visit.id },

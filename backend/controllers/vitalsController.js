@@ -48,11 +48,8 @@ const createVitals = async (req, res) => {
         });
 
         // ── Real World OPD Flow ──
-        // Once Triage records vitals, the patient moves from `pending_triage` to `waiting_doctor`
-        await Visit.update(
-            { queueStatus: 'waiting_doctor' },
-            { where: { id: visitId, queueStatus: 'pending_triage' } }
-        );
+        // Status changes are now handled by Doctor's consultation flow or Cashier payment.
+        // Triage is optional and no longer acts as a queue gate.
 
         res.status(201).json(vitals);
     } catch (error) {

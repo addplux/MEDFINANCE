@@ -57,7 +57,7 @@ const Visit = sequelize.define('Visit', {
             'waiting_specialist'
         ),
         allowNull: false,
-        defaultValue: 'pending_triage'
+        defaultValue: 'waiting_doctor'
     },
     registryFee: {
         type: DataTypes.DECIMAL(10, 2),

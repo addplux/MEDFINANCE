@@ -114,7 +114,7 @@ const rejectAuthorization = async (req, res) => {
             return res.status(400).json({ error: 'Visit is not pending authorization' });
         }
 
-        visit.queueStatus = 'pending_triage'; // Return to Records for review
+        visit.queueStatus = 'pending_cashier'; // Return to Records/Cashier for review
         visit.notes = reason ? `Authorization rejected: ${reason}` : 'Authorization rejected by medical officer';
         await visit.save({ transaction: t });
 

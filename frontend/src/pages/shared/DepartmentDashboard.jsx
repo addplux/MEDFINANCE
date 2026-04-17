@@ -36,7 +36,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
     const [visits, setVisits] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [filter, setFilter] = useState(title === 'OPD' ? 'triage' : 'all'); // Set default to triage for OPD
+    const [filter, setFilter] = useState(title === 'OPD' ? 'doctor' : 'all'); // Set default to doctor for OPD
     const [activeVisit, setActiveVisit] = useState(null);
 
     const Icon = DEPT_ICONS[title] || Activity;
@@ -97,7 +97,6 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
 
     const opdFilters = [
         { id: 'all_opd', label: 'ALL OPD', count: visits.length },
-        { id: 'triage', label: 'TRIAGE', count: visits.filter(v => v.queueStatus === 'pending_triage').length },
         { id: 'cashier', label: 'AT CASHIER', count: visits.filter(v => v.queueStatus === 'pending_cashier').length },
         { id: 'doctor', label: 'DOCTOR Q', count: visits.filter(v => v.queueStatus === 'waiting_doctor' || v.queueStatus === 'with_doctor').length },
         { id: 'results', label: 'PENDING RESULTS', count: visits.filter(v => v.queueStatus === 'pending_results').length },
@@ -249,8 +248,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                     {/* Billing Status */}
                                     <div className="flex items-center gap-1.5 flex-wrap flex-1 min-w-0 pr-2">
                                         {/* Status Dot */}
-                                        <div className={`w-1.5 h-1.5 flex-shrink-0 rounded-full ${v.queueStatus === 'pending_triage' ? 'bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.6)] animate-pulse' :
-                                            v.queueStatus === 'pending_cashier' ? 'bg-yellow-400 shadow-[0_0_8px_rgba(234,179,8,0.6)] animate-pulse' :
+                                        <div className={`w-1.5 h-1.5 flex-shrink-0 rounded-full ${v.queueStatus === 'pending_cashier' ? 'bg-yellow-400 shadow-[0_0_8px_rgba(234,179,8,0.6)] animate-pulse' :
                                                 v.queueStatus === 'waiting_doctor' ? 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)] animate-pulse' :
                                                     v.queueStatus === 'with_doctor' ? 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]' :
                                                         v.queueStatus === 'pending_results' ? 'bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]' :
@@ -260,8 +258,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                             }`} />
 
                                         {/* Dynamic Status Text */}
-                                        <span className={`text-[9px] font-black uppercase tracking-widest truncate ${v.queueStatus === 'pending_triage' ? 'text-orange-400' :
-                                            v.queueStatus === 'pending_cashier' ? 'text-yellow-400' :
+                                        <span className={`text-[9px] font-black uppercase tracking-widest truncate ${v.queueStatus === 'pending_cashier' ? 'text-yellow-400' :
                                                 v.queueStatus === 'waiting_doctor' ? 'text-blue-400' :
                                                     v.queueStatus === 'with_doctor' ? 'text-purple-400' :
                                                         v.queueStatus === 'pending_results' ? 'text-yellow-400' :
@@ -270,8 +267,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                                                     'text-white/20'
                                             }`}>
                                             {
-                                                v.queueStatus === 'pending_triage' ? 'AWAITING TRIAGE' :
-                                                    v.queueStatus === 'pending_cashier' ? 'AWAITING PAYMENT' :
+                                                v.queueStatus === 'pending_cashier' ? 'AWAITING PAYMENT' :
                                                         v.queueStatus === 'waiting_doctor' ? 'TO SEE DOCTOR' :
                                                             v.queueStatus === 'with_doctor' ? 'IN CONSULTATION' :
                                                                 v.queueStatus === 'pending_results' ? 'AWAITING LABS/XRAY' :
@@ -345,7 +341,7 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto pr-2 custom-scrollbar flex-1 items-start min-h-0">
                             <div className="flex flex-col gap-4">
-                                <TriageWidget visitId={activeVisit.id} patientId={activeVisit.patient?.id} queueStatus={activeVisit.queueStatus} />
+                                <TriageWidget visitId={activeVisit.id} patientId={activeVisit.patient?.id} />
                             </div>
                             <div className="flex flex-col gap-4">
                                 <DoctorWorkspace 
