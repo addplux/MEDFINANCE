@@ -159,13 +159,14 @@ const SchemeForm = () => {
                                     </div>
                                 </div>
 
-                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em] ml-1">Classification Type</label>
+                                 <div className="space-y-3 md:col-span-2">
+                                    <label className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em] ml-1">Classification Type *</label>
                                     <select
                                         name="schemeType"
                                         value={formData.schemeType}
                                         onChange={handleChange}
                                         className="w-full bg-bg-tertiary border border-border-color rounded-2xl py-4 px-8 text-sm font-bold text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-bg-elevated transition-all appearance-none cursor-pointer"
+                                        required
                                     >
                                         <option value="insurance" className="bg-bg-primary text-text-primary">INSURANCE PROGRAM</option>
                                         <option value="corporate" className="bg-bg-primary text-text-primary">CORPORATE DIRECT</option>
@@ -174,24 +175,6 @@ const SchemeForm = () => {
                                         <option value="private" className="bg-bg-primary text-text-primary">PRIVATE / INDIVIDUAL</option>
                                         <option value="other" className="bg-bg-primary text-text-primary">OTHER CLASSIFICATION</option>
                                     </select>
-                                </div>
-
-                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em] ml-1">Strategic Discount Rate (%)</label>
-                                    <div className="relative group/input">
-                                        <Zap className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary group-focus-within/input:text-primary transition-colors" />
-                                        <input
-                                            type="number"
-                                            name="discountRate"
-                                            value={formData.discountRate}
-                                            onChange={handleChange}
-                                            className="w-full bg-bg-tertiary border border-border-color rounded-2xl py-4 pl-14 pr-8 text-sm font-bold text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-bg-elevated transition-all placeholder:text-text-tertiary"
-                                            placeholder="0.00"
-                                            step="0.01"
-                                            max="100"
-                                            min="0"
-                                        />
-                                    </div>
                                 </div>
                             </div>
                         </div>
