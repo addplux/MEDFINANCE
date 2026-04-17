@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { patientAPI, receivablesAPI } from '../../../services/apiService';
 import {
     Users, Plus, Search, Battery, RefreshCw, Eye, Edit,
-    PlusCircle, X, CheckCircle, AlertCircle, CreditCard, Calendar, Upload
+    PlusCircle, X, CheckCircle, AlertCircle, CreditCard, Calendar, Upload,
+    ChevronDown, ChevronRight
 } from 'lucide-react';
 
 const MEMBER_RANKS = ['principal', 'spouse', 'child', 'dependant', 'other'];
@@ -31,6 +32,7 @@ const MembershipRegistration = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedScheme, setSelectedScheme] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [expandedPrincipals, setExpandedPrincipals] = useState(new Set());
 
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
@@ -68,7 +70,7 @@ const MembershipRegistration = () => {
     const loadMembers = async () => {
         try {
             setLoading(true);
-            const params = { paymentMethod: 'private_prepaid', search: searchTerm || undefined, limit: 50 };
+            const params = { paymentMethod: 'private_prepaid', search: searchTerm || undefined, limit: 100 };
             if (selectedScheme) params.schemeId = selectedScheme;
             const res = await patientAPI.getAll(params);
             setMembers(res.data?.data || []);
@@ -182,10 +184,11 @@ const MembershipRegistration = () => {
         }
     };
 
-    const openTopup = (member) => {
-        setSelectedMember(member);
-        setTopupAmount('');
-        setShowTopupModal(true);
+    const togglePrincipal = (policyNo) => {
+        const next = new Set(expandedPrincipals);
+        if (next.has(policyNo)) next.delete(policyNo);
+        else next.add(policyNo);
+        setExpandedPrincipals(next);
     };
 
     const balanceColor = (bal) => {
@@ -200,6 +203,12 @@ const MembershipRegistration = () => {
         if (n <= 0) return 'bg-red-50 border-red-200';
         if (n < 500) return 'bg-yellow-50 border-yellow-200';
         return 'bg-green-50 border-green-200';
+    };
+
+    const openTopup = (member) => {
+        setSelectedMember(member);
+        setTopupAmount('');
+        setShowTopupModal(true);
     };
 
     return (
@@ -307,10 +316,10 @@ const MembershipRegistration = () => {
                         </thead>
                         <tbody className="divide-y divide-white/10">
                             {loading ? (
-                                <tr><td colSpan="7" className="text-center py-10 text-gray-400 text-sm">Loading…</td></tr>
+                                <tr><td colSpan="8" className="text-center py-10 text-gray-400 text-sm">Loading…</td></tr>
                             ) : members.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7" className="py-16 text-center">
+                                    <td colSpan="8" className="py-16 text-center">
                                         <div className="flex flex-col items-center text-gray-400 gap-2">
                                             <Users className="w-10 h-10" />
                                             <p className="text-sm">No members registered yet.</p>
@@ -320,58 +329,131 @@ const MembershipRegistration = () => {
                                         </div>
                                     </td>
                                 </tr>
-                            ) : members.map(m => (
-                                <tr key={m.id} className="hover:bg-white/5 transition-colors">
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs flex-shrink-0">
-                                                {m.firstName?.[0]}{m.lastName?.[0]}
-                                            </div>
-                                            <div>
-                                                <div className="text-sm font-semibold text-white">{m.firstName} {m.lastName}</div>
-                                                <div className="text-xs text-white/40">{m.patientNumber}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3 text-xs font-mono text-white/60">{m.policyNumber || '—'}</td>
-                                    <td className="px-4 py-3">
-                                        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 capitalize">{m.memberRank || '—'}</span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${m.costCategory === 'high_cost' ? 'bg-purple-100 text-purple-700' :
-                                            m.costCategory === 'low_cost' ? 'bg-emerald-100 text-emerald-700' :
-                                                'bg-gray-100 text-gray-700'
-                                            }`}>
-                                            {m.costCategory ? m.costCategory.replace('_', ' ') : 'Standard'}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-xs text-white/60">{m.phone || '—'}</td>
-                                    <td className="px-4 py-3">
-                                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${m.memberStatus === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                            {m.memberStatus || 'active'}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold ${balanceBg(m.balance)}`}>
-                                            <Battery className={`w-3.5 h-3.5 ${balanceColor(m.balance)}`} />
-                                            <span className={balanceColor(m.balance)}>ZK {Number(m.balance || 0).toLocaleString()}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3 text-right">
-                                        <div className="flex items-center justify-end gap-1">
-                                            <button onClick={() => openTopup(m)} className="p-1.5 hover:bg-green-50 text-gray-400 hover:text-green-600 rounded transition-colors" title="Top Up Balance">
-                                                <PlusCircle className="w-4 h-4" />
-                                            </button>
-                                            <button onClick={() => navigate(`/app/patients/${m.id}`)} className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded transition-colors" title="View Profile">
-                                                <Eye className="w-4 h-4" />
-                                            </button>
-                                            <button onClick={() => navigate(`/app/patients/${m.id}/edit`)} className="p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded transition-colors" title="Edit">
-                                                <Edit className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                            ) : (() => {
+                                const principals = members.filter(m => (m.memberRank || '').toLowerCase() === 'principal');
+                                const orphans = members.filter(m => 
+                                    (m.memberRank || '').toLowerCase() !== 'principal' && 
+                                    !principals.some(p => p.policyNumber === m.policyNumber)
+                                );
+                                const topLevel = [...principals, ...orphans];
+
+                                return topLevel.map(m => {
+                                    const family = members.filter(d => d.policyNumber === m.policyNumber && d.id !== m.id);
+                                    const hasFamily = family.length > 0;
+                                    const isExpanded = expandedPrincipals.has(m.policyNumber);
+
+                                    return (
+                                        <React.Fragment key={m.id}>
+                                            <tr className={`hover:bg-white/5 transition-colors ${isExpanded ? 'bg-white/[0.02]' : ''}`}>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-2">
+                                                        {hasFamily && (
+                                                            <button 
+                                                                onClick={() => togglePrincipal(m.policyNumber)}
+                                                                className="p-1 hover:bg-white/10 rounded-md transition-colors text-white/40 hover:text-white"
+                                                            >
+                                                                {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                                            </button>
+                                                        )}
+                                                        {!hasFamily && <div className="w-6" />}
+                                                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs flex-shrink-0">
+                                                            {m.firstName?.[0]}{m.lastName?.[0]}
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-sm font-semibold text-white">{m.firstName} {m.lastName}</div>
+                                                            <div className="text-xs text-white/40">{m.patientNumber}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 text-xs font-mono text-white/60">{m.policyNumber || '—'}</td>
+                                                <td className="px-4 py-3">
+                                                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 capitalize">{m.memberRank || '—'}</span>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${m.costCategory === 'high_cost' ? 'bg-purple-100 text-purple-700' :
+                                                        m.costCategory === 'low_cost' ? 'bg-emerald-100 text-emerald-700' :
+                                                            'bg-gray-100 text-gray-700'
+                                                        }`}>
+                                                        {m.costCategory ? m.costCategory.replace('_', ' ') : 'Standard'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-xs text-white/60">{m.phone || '—'}</td>
+                                                <td className="px-4 py-3">
+                                                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${m.memberStatus === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                        {m.memberStatus || 'active'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold ${balanceBg(m.balance)}`}>
+                                                        <Battery className={`w-3.5 h-3.5 ${balanceColor(m.balance)}`} />
+                                                        <span className={balanceColor(m.balance)}>ZK {Number(m.balance || 0).toLocaleString()}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 text-right">
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        <button onClick={() => openTopup(m)} className="p-1.5 hover:bg-green-50 text-gray-400 hover:text-green-600 rounded transition-colors" title="Top Up Balance">
+                                                            <PlusCircle className="w-4 h-4" />
+                                                        </button>
+                                                        <button onClick={() => navigate(`/app/patients/${m.id}`)} className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded transition-colors" title="View Profile">
+                                                            <Eye className="w-4 h-4" />
+                                                        </button>
+                                                        <button onClick={() => navigate(`/app/patients/${m.id}/edit`)} className="p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded transition-colors" title="Edit">
+                                                            <Edit className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                            {isExpanded && family.map(d => (
+                                                <tr key={d.id} className="bg-white/[0.01] border-l-2 border-primary/20 hover:bg-white/[0.03] transition-colors">
+                                                    <td className="px-4 py-2 pl-14">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-bold text-[10px] flex-shrink-0 opacity-60">
+                                                                {d.firstName?.[0]}{d.lastName?.[0]}
+                                                            </div>
+                                                            <div>
+                                                                <div className="text-xs font-bold text-white/80">{d.firstName} {d.lastName}</div>
+                                                                <div className="text-[10px] text-white/30">{d.patientNumber}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-2 text-[10px] font-mono text-white/30 italic">FAMILY MEMBER</td>
+                                                    <td className="px-4 py-2">
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/5 text-white/40 capitalize">{d.memberRank || '—'}</span>
+                                                    </td>
+                                                    <td className="px-4 py-2">
+                                                       <span className="text-[10px] text-white/30 uppercase font-black">{d.costCategory?.replace('_', ' ') || 'Standard'}</span>
+                                                    </td>
+                                                    <td className="px-4 py-2 text-[10px] text-white/30">{d.phone || '—'}</td>
+                                                    <td className="px-4 py-2">
+                                                        <span className={`text-[10px] font-bold ${d.memberStatus === 'active' ? 'text-green-500/50' : 'text-red-500/50'}`}>
+                                                            {d.memberStatus || 'active'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-2">
+                                                        <div className="text-[10px] font-bold text-white/30 tracking-tight">
+                                                            ZK {Number(d.balance || 0).toLocaleString()}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-2 text-right">
+                                                        <div className="flex items-center justify-end gap-1 opacity-40 hover:opacity-100 transition-opacity">
+                                                            <button onClick={() => openTopup(d)} className="p-1 hover:bg-green-50 text-gray-400 hover:text-green-400 rounded transition-colors">
+                                                                <PlusCircle className="w-3.5 h-3.5" />
+                                                            </button>
+                                                            <button onClick={() => navigate(`/app/patients/${d.id}`)} className="p-1 hover:bg-blue-50 text-gray-400 hover:text-blue-400 rounded transition-colors">
+                                                                <Eye className="w-3.5 h-3.5" />
+                                                            </button>
+                                                            <button onClick={() => navigate(`/app/patients/${d.id}/edit`)} className="p-1 hover:bg-indigo-50 text-gray-400 hover:text-indigo-400 rounded transition-colors">
+                                                                <Edit className="w-3.5 h-3.5" />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </React.Fragment>
+                                    );
+                                });
+                            })()}
                         </tbody>
                     </table>
                 </div>
