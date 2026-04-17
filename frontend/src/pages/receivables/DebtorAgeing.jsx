@@ -18,12 +18,7 @@ const DebtorAgeing = () => {
             setReportData(response.data || []);
         } catch (error) {
             console.error('Failed to fetch debtor ageing:', error);
-            // Fallback mock data for demo if API fails
-            setReportData([
-                { id: 1, name: 'Copperbelt Energy Corp', type: 'Corporate', current: 5000, days30: 2000, days60: 0, days90: 0, total: 7000 },
-                { id: 2, name: 'Mopani Copper Mines', type: 'Corporate', current: 12000, days30: 5000, days60: 2000, days90: 1000, total: 20000 },
-                { id: 3, name: 'Madison Insurance', type: 'Scheme', current: 1500, days30: 0, days60: 0, days90: 0, total: 1500 },
-            ]);
+            setReportData([]);
         } finally {
             setLoading(false);
         }

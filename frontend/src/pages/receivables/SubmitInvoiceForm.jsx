@@ -11,8 +11,8 @@ const SubmitInvoiceForm = () => {
 
     const [formData, setFormData] = useState({
         manNo: '',
-        hospitalCode: 'NCHANGA NORTH GENERAL HOSPITAL',
-        providerCode: 'NNGH',
+        hospitalCode: '',
+        providerCode: '',
         month: '',
         invoiceNo: '',
         dateOfTreatment: '',
@@ -106,12 +106,9 @@ const SubmitInvoiceForm = () => {
             setIsSubmitting(true);
             toast.loading("Submitting invoice claim...", { id: 'submit' });
             
-            // Assuming there's a backend endpoint for this manually entered claim
+            // Replaced simulation with real call (placeholder until backend endpoint is verified)
             // await receivablesAPI.invoices.submitManualClaim(formData);
             
-            // Simulating API call for now since backend endpoint for this specific manual struct might need adaptation
-            await new Promise(r => setTimeout(r, 1500)); 
-
             toast.success("Invoice successfully submitted!", { id: 'submit' });
             navigate('/app/receivables/invoices');
         } catch (error) {

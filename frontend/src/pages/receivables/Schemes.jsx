@@ -211,15 +211,10 @@ const Schemes = () => {
 
             {/* Visual Insights Pill */}
             <div className="flex flex-wrap gap-4 py-4 px-8 bg-white/5 border border-white/10 rounded-[2.5rem] w-fit backdrop-blur-md">
-                <div className="flex items-center gap-3 pr-8 border-r border-white/10">
+                <div className="flex items-center gap-3">
                     <Zap className="w-4 h-4 text-primary" />
                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70">Total active connections:</span>
                     <span className="text-sm font-black text-white">{schemes.filter(s => s.status === 'active').length}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                    <Info className="w-4 h-4 text-accent" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70">Market Share (Top 3):</span>
-                    <span className="text-sm font-black text-white uppercase tracking-tighter">NHIMA, MADISON, PRUDENTIAL</span>
                 </div>
             </div>
         </div>
