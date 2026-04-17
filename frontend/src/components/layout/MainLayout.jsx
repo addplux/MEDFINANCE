@@ -284,7 +284,7 @@ const MainLayout = ({ children }) => {
             id: 'departments', icon: Building, label: 'Other Clinics',
             roles: CLINICAL,
             submenu: [
-                { path: '/app/maternity/billing', label: 'Labour Ward' },
+                { path: '/app/maternity/dashboard', label: 'Maternity' },
                 { path: '/app/theatre/dashboard', label: 'Theatre' },
                 { path: '/app/physiology/dashboard', label: 'Physiotherapy' },
                 { path: '/app/dental/dashboard', label: 'Dental' },

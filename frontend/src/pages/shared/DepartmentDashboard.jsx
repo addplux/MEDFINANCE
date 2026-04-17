@@ -5,7 +5,7 @@ import {
     Users, Clock, DollarSign, Activity,
     ChevronRight, Search, RefreshCw, Filter,
     MoreHorizontal, Stethoscope, Beaker, Pill,
-    Clipboard, Radio, X
+    Clipboard, Radio, X, Baby
 } from 'lucide-react';
 
 import TriageWidget from '../visits/components/TriageWidget';
@@ -16,7 +16,8 @@ const DEPT_ICONS = {
     'Pharmacy': Pill,
     'Radiology': Radio,
     'OPD': Stethoscope,
-    'Specialist': Clipboard
+    'Specialist': Clipboard,
+    'Maternity': Baby
 };
 
 const PAYMENT_METHOD_STYLES = {
@@ -141,11 +142,12 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                     <button onClick={loadData} className="p-2 bg-bg-secondary hover:bg-bg-tertiary rounded-full transition-all border border-border-color">
                         <RefreshCw className={`w-4 h-4 text-text-secondary ${loading ? 'animate-spin' : ''}`} />
                     </button>
-                    {(['theatre', 'maternity', 'lab', 'radiology'].includes(type)) && (
+                    {(['theatre', 'maternity', 'lab', 'radiology', 'pharmacy'].includes(type)) && (
                         <button
                             onClick={() => {
                                 if (type === 'lab') navigate('/app/lab/request');
                                 else if (type === 'radiology') navigate('/app/radiology/request');
+                                else if (type === 'pharmacy') navigate('/app/pharmacy/dispense');
                                 else navigate(`/app/${type}/billing/new`);
                             }}
                             className="btn btn-primary ml-2 px-4 py-2 text-xs"
@@ -284,32 +286,39 @@ const DepartmentDashboard = ({ title, departmentId, type }) => {
                                     </div>
                                 </div>
 
-                                {/* Quick Actions for Theatre/Maternity */}
-                                {(['theatre', 'maternity'].includes(type)) && (
+                                {/* Quick Actions for Theatre/Maternity/Pharmacy */}
+                                {(['theatre', 'maternity', 'pharmacy'].includes(type)) && (
                                     <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between gap-2">
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                navigate(`/app/${type}/billing/new?patientId=${v.patient?.id}&visitId=${v.id}`);
+                                                if (type === 'pharmacy') {
+                                                    navigate(`/app/pharmacy/dispense?patientId=${v.patient?.id || v.id}`);
+                                                } else {
+                                                    navigate(`/app/${type}/billing/new?patientId=${v.patient?.id}&visitId=${v.id}`);
+                                                }
                                             }}
                                             className="flex-1 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-xs font-black uppercase tracking-widest transition-all border border-primary/20 flex items-center justify-center gap-2"
                                         >
-                                            <Activity className="w-3 h-3" />
-                                            Start {type === 'theatre' ? 'Surgery' : 'Delivery'}
+                                            {type === 'pharmacy' ? <Pill className="w-3 h-3" /> : <Activity className="w-3 h-3" />}
+                                            {type === 'pharmacy' ? 'Dispense Medication' : 
+                                             type === 'theatre' ? 'Start Surgery' : 'Start Delivery'}
                                         </button>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                if (window.confirm(`Are you sure you want to mark this ${type} visit as complete? This will remove the patient from the queue.`)) {
-                                                    visitAPI.update(v.id, { status: 'completed' })
-                                                        .then(() => loadData())
-                                                        .catch(err => alert('Failed to complete visit.'));
-                                                }
-                                            }}
-                                            className="px-4 py-2 bg-green-500/5 hover:bg-green-500/10 text-green-500/60 hover:text-green-500 rounded-xl text-[10px] font-bold transition-all border border-green-500/10 hover:border-green-500/30"
-                                        >
-                                            Complete
-                                        </button>
+                                        {type !== 'pharmacy' && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (window.confirm(`Are you sure you want to mark this ${type} visit as complete? This will remove the patient from the queue.`)) {
+                                                        visitAPI.update(v.id, { status: 'completed' })
+                                                            .then(() => loadData())
+                                                            .catch(err => alert('Failed to complete visit.'));
+                                                    }
+                                                }}
+                                                className="px-4 py-2 bg-green-500/5 hover:bg-green-500/10 text-green-500/60 hover:text-green-500 rounded-xl text-[10px] font-bold transition-all border border-green-500/10 hover:border-green-500/30"
+                                            >
+                                                Complete
+                                            </button>
+                                        )}
                                     </div>
                                 )}
                             </div>

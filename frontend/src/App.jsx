@@ -334,7 +334,7 @@ function App() {
                         <Route path="lab/results/:id" element={<RoleRoute roles={['lab_technician', 'doctor', 'nurse']}><LabResultEntry /></RoleRoute>} />
 
                         {/* ── Pharmacy — pharmacist + clinical ────────────────────────── */}
-                        <Route path="pharmacy/dashboard" element={<RoleRoute roles={['pharmacist', 'doctor', 'nurse']}><DepartmentDashboard title="Pharmacy" departmentId={2} /></RoleRoute>} />
+                        <Route path="pharmacy/dashboard" element={<RoleRoute roles={['pharmacist', 'doctor', 'nurse']}><DepartmentDashboard title="Pharmacy" departmentId={2} type="pharmacy" /></RoleRoute>} />
                         <Route path="pharmacy/inventory" element={<RoleRoute roles={['pharmacist']}><PharmacyInventory /></RoleRoute>} />
                         <Route path="pharmacy/grn" element={<RoleRoute roles={['pharmacist']}><GoodsReceivedNote /></RoleRoute>} />
                         <Route path="pharmacy/dispense" element={<RoleRoute roles={['pharmacist', 'doctor', 'nurse']}><Dispense /></RoleRoute>} />
@@ -351,6 +351,7 @@ function App() {
                         <Route path="theatre/billing/new" element={<RoleRoute roles={['doctor', 'nurse']}><TheatreBillForm /></RoleRoute>} />
                         <Route path="theatre/billing/:id/edit" element={<RoleRoute roles={['doctor', 'nurse', 'admin', 'records_clerk']}><TheatreBillForm /></RoleRoute>} />
 
+                        <Route path="maternity/dashboard" element={<RoleRoute roles={['doctor', 'nurse', 'admin', 'records_clerk']}><DepartmentDashboard title="Maternity" type="maternity" /></RoleRoute>} />
                         <Route path="maternity/billing" element={<RoleRoute roles={['doctor', 'nurse', 'admin', 'records_clerk']}><MaternityBilling /></RoleRoute>} />
                         <Route path="maternity/billing/new" element={<RoleRoute roles={['doctor', 'nurse', 'admin', 'records_clerk']}><MaternityBillForm /></RoleRoute>} />
                         <Route path="maternity/billing/:id/edit" element={<RoleRoute roles={['doctor', 'nurse', 'admin', 'records_clerk']}><MaternityBillForm /></RoleRoute>} />
