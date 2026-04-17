@@ -59,14 +59,22 @@ const VisitDetail = () => {
     const load = async () => {
         try {
             setLoading(true);
-            const [visitRes, movRes, docsRes] = await Promise.all([
+            const [visitRes, movRes, docsRes] = await Promise.allSettled([
                 visitAPI.getById(id),
                 visitAPI.getMovements(id),
                 setupAPI.users.getAll({ isActive: true })
             ]);
-            setVisit(visitRes.data);
-            setMovements(movRes.data || []);
-            setDoctors(docsRes.data?.filter(u => ['doctor', 'specialist', 'medical officer', 'consultant'].some(r => u.role?.name?.toLowerCase().includes(r))) || []);
+            
+            if (visitRes.status === 'rejected') throw new Error('Failed to load visit details');
+
+            setVisit(visitRes.value.data);
+            setMovements(movRes.status === 'fulfilled' ? (movRes.value.data || []) : []);
+            
+            if (docsRes.status === 'fulfilled') {
+                setDoctors(docsRes.value.data?.filter(u => ['doctor', 'specialist', 'medical officer', 'consultant'].some(r => u.role?.name?.toLowerCase().includes(r))) || []);
+            } else {
+                setDoctors([]);
+            }
         } catch (e) {
             setError('Failed to load visit details');
         } finally {
