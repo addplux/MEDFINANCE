@@ -251,6 +251,9 @@ const startServer = async () => {
 
             const runAddSchemeInvoiceId = require('./migrations/addSchemeInvoiceId');
             await runAddSchemeInvoiceId();
+
+            const runAddAssignedDoctorToMovementsMigration = require('./migrations/004_add_assigned_doctor_to_movements');
+            await runAddAssignedDoctorToMovementsMigration();
         } catch (migErr) {
             console.error('⚠️ Migration runner error (non-fatal):', migErr.message);
         }
