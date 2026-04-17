@@ -230,6 +230,7 @@ LabResult.belongsTo(User, { foreignKey: 'verifiedBy', as: 'verifier' });
 Patient.hasMany(PatientMovement, { foreignKey: 'patientId', as: 'movements' });
 PatientMovement.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 PatientMovement.belongsTo(User, { foreignKey: 'admittedBy', as: 'admitter' });
+PatientMovement.belongsTo(User, { foreignKey: 'assignedDoctorId', as: 'assignedDoctor' });
 
 // Visit relationships
 Visit.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });

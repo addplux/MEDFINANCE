@@ -7,7 +7,8 @@ const getPatientMovements = async (req, res) => {
         const movements = await PatientMovement.findAll({
             where: { patientId },
             include: [
-                { model: User, as: 'admitter', attributes: ['id', 'firstName', 'lastName'] }
+                { model: User, as: 'admitter', attributes: ['id', 'firstName', 'lastName'] },
+                { model: User, as: 'assignedDoctor', attributes: ['id', 'firstName', 'lastName'] }
             ],
             order: [['movementDate', 'DESC']]
         });
@@ -21,13 +22,14 @@ const getPatientMovements = async (req, res) => {
 // Log a new movement
 const createMovement = async (req, res) => {
     try {
-        const { patientId, fromDepartment, toDepartment, notes, movementDate } = req.body;
+        const { patientId, fromDepartment, toDepartment, assignedDoctorId, notes, movementDate } = req.body;
         const admittedBy = req.user?.id;
 
         const movement = await PatientMovement.create({
             patientId,
             fromDepartment,
             toDepartment,
+            assignedDoctorId,
             notes,
             movementDate: movementDate || new Date(),
             admittedBy

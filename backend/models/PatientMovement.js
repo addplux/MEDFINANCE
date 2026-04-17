@@ -39,6 +39,14 @@ const PatientMovement = sequelize.define('PatientMovement', {
             model: 'users',
             key: 'id'
         }
+    },
+    assignedDoctorId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'users',
+            key: 'id'
+        }
     }
 }, {
     tableName: 'patient_movements',

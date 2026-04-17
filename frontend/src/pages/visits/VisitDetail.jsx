@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { visitAPI } from '@/services/apiService';
+import { visitAPI, setupAPI } from '@/services/apiService';
 import {
     ArrowLeft, User, RefreshCw, LogOut, Move,
     Stethoscope, BedDouble, Baby, Siren, ClipboardList,
@@ -50,20 +50,23 @@ const VisitDetail = () => {
     const [error, setError] = useState(null);
 
     // New movement form state
-    const [movForm, setMovForm] = useState({ toDepartment: '', notes: '' });
+    const [movForm, setMovForm] = useState({ toDepartment: '', assignedDoctorId: '', notes: '' });
     const [submittingMov, setSubmittingMov] = useState(false);
+    const [doctors, setDoctors] = useState([]);
 
     const apiBase = import.meta.env.VITE_API_URL || '';
 
     const load = async () => {
         try {
             setLoading(true);
-            const [visitRes, movRes] = await Promise.all([
+            const [visitRes, movRes, docsRes] = await Promise.all([
                 visitAPI.getById(id),
-                visitAPI.getMovements(id)
+                visitAPI.getMovements(id),
+                setupAPI.users.getAll({ isActive: true })
             ]);
             setVisit(visitRes.data);
             setMovements(movRes.data || []);
+            setDoctors(docsRes.data?.filter(u => ['doctor', 'specialist', 'medical officer', 'consultant'].some(r => u.role?.name?.toLowerCase().includes(r))) || []);
         } catch (e) {
             setError('Failed to load visit details');
         } finally {
@@ -99,9 +102,10 @@ const VisitDetail = () => {
             await visitAPI.logMovement(visit.patientId, {
                 toDepartment: movForm.toDepartment,
                 fromDepartment: visit.assignedDepartment || movements[movements.length - 1]?.toDepartment || '—',
+                assignedDoctorId: movForm.assignedDoctorId || null,
                 notes: movForm.notes
             });
-            setMovForm({ toDepartment: '', notes: '' });
+            setMovForm({ toDepartment: '', assignedDoctorId: '', notes: '' });
             // Refresh movements
             setMovLoading(true);
             const movRes = await visitAPI.getMovements(id);
@@ -275,6 +279,17 @@ const VisitDetail = () => {
                                 </select>
                             </div>
                             <div className="form-group">
+                                <label className="form-label">Assign Doctor (Optional)</label>
+                                <select
+                                    value={movForm.assignedDoctorId}
+                                    onChange={e => setMovForm(f => ({ ...f, assignedDoctorId: e.target.value }))}
+                                    className="form-select"
+                                >
+                                    <option value="">Select Doctor</option>
+                                    {doctors.map(d => <option key={d.id} value={d.id}>Dr. {d.firstName} {d.lastName}</option>)}
+                                </select>
+                            </div>
+                            <div className="form-group">
                                 <label className="form-label">Notes (optional)</label>
                                 <textarea
                                     value={movForm.notes}
@@ -320,6 +335,11 @@ const VisitDetail = () => {
                                         {m.fromDepartment ? <><span className="text-gray-500">{m.fromDepartment}</span> → </> : ''}
                                         <span className="text-indigo-400">{m.toDepartment}</span>
                                     </p>
+                                    {m.assignedDoctor && (
+                                        <p className="text-xs font-semibold text-green-400 mt-0.5">
+                                            ↳ Assigned to Dr. {m.assignedDoctor.firstName} {m.assignedDoctor.lastName}
+                                        </p>
+                                    )}
                                     {m.notes && <p className="text-xs text-gray-500 mt-0.5 italic">"{m.notes}"</p>}
                                     <p className="text-xs text-gray-400 mt-1">
                                         {m.movementDate ? new Date(m.movementDate).toLocaleString() : ''}
