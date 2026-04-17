@@ -210,118 +210,147 @@ const VisitDetail = () => {
                 </div>
             )}
 
-            {/* Main grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Main layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-                {/* Patient Info */}
-                <div className="card p-5 md:col-span-1">
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-3">Patient</h3>
-                    {p ? (
-                        <div className="space-y-1">
-                            <div className="flex items-center gap-3 mb-3">
-                                {p.photoUrl ? (
-                                    <img src={`${apiBase}${p.photoUrl}?token=${localStorage.getItem('token')}`} alt={p.firstName} className="w-12 h-12 rounded-full object-cover" />
-                                ) : (
-                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                                        {p.firstName?.[0]}{p.lastName?.[0]}
+                {/* Left Column: Combined Patient & Visit Info */}
+                <div className="lg:col-span-2 space-y-5">
+                    <div className="card overflow-hidden">
+                        <div className="p-5 flex flex-col md:flex-row gap-6">
+                            {/* Patient Profile */}
+                            <div className="flex-1 space-y-4">
+                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Patient Details</h3>
+                                {p ? (
+                                    <>
+                                        <div className="flex items-center gap-3 mb-3">
+                                            {p.photoUrl ? (
+                                                <img src={`${apiBase}${p.photoUrl}?token=${localStorage.getItem('token')}`} alt={p.firstName} className="w-12 h-12 rounded-full object-cover shadow-sm" />
+                                            ) : (
+                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-sm">
+                                                    {p.firstName?.[0]}{p.lastName?.[0]}
+                                                </div>
+                                            )}
+                                            <div>
+                                                <p className="font-bold text-white text-lg">{p.firstName} {p.lastName}</p>
+                                                <p className="text-xs font-mono text-gray-400">{p.patientNumber}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <p className="text-[10px] text-gray-500 uppercase tracking-tighter">Phone</p>
+                                                <p className="text-xs font-medium text-gray-200">{p.phone || '—'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-gray-500 uppercase tracking-tighter">Gender</p>
+                                                <p className="text-xs font-medium text-gray-200 capitalize">{p.gender || '—'}</p>
+                                            </div>
+                                            <div className="col-span-2 pt-2 border-t border-white/5 mt-1">
+                                                <div className="flex items-center gap-2">
+                                                    <Shield className="w-3.5 h-3.5 text-indigo-400" />
+                                                    <span className={`text-[10px] font-black px-2 py-0.5 rounded tracking-wider uppercase ${
+                                                        p.paymentMethod === 'prepaid' ? 'bg-purple-500/20 text-purple-300' :
+                                                        p.paymentMethod === 'corporate' ? 'bg-blue-500/20 text-blue-300' :
+                                                        'bg-green-500/20 text-green-300'
+                                                    }`}>
+                                                        {p.paymentMethod || 'CASH'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : <p className="text-sm text-gray-400">No patient data</p>}
+                            </div>
+
+                            {/* Divider line for MD+ */}
+                            <div className="hidden md:block w-px bg-white/5"></div>
+
+                            {/* Visit Details */}
+                            <div className="flex-1 space-y-3">
+                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Current Status</h3>
+                                <div className="space-y-2">
+                                    <InfoRow icon={MapPin} label="Current Location" value={visit.department?.departmentName || visit.assignedDepartment} />
+                                    <InfoRow icon={Shield} label="Payment Scheme" value={visit.scheme?.schemeName || 'None'} />
+                                    <InfoRow icon={Calendar} label="Admitted" value={visit.admissionDate ? new Date(visit.admissionDate).toLocaleString() : '—'} />
+                                    {visit.dischargeDate && (
+                                        <InfoRow icon={Calendar} label="Discharged" value={new Date(visit.dischargeDate).toLocaleString()} />
+                                    )}
+                                </div>
+                                {visit.notes && (
+                                    <div className="mt-2 p-2 bg-gray-800/60 rounded border border-gray-700">
+                                        <p className="text-[10px] text-gray-500 uppercase mb-0.5">Notes</p>
+                                        <p className="text-xs text-gray-300 italic">{visit.notes}</p>
                                     </div>
                                 )}
-                                <div>
-                                    <p className="font-bold text-white">{p.firstName} {p.lastName}</p>
-                                    <p className="text-xs font-mono text-gray-400">{p.patientNumber}</p>
-                                </div>
                             </div>
-                            <InfoRow icon={Phone} label="Phone" value={p.phone} />
-                            <div className="flex items-start gap-2 py-1.5 border-t border-white/5 mt-2 pt-2">
-                                <Shield className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                                <div>
-                                    <p className="text-[10px] text-white/50 uppercase tracking-tighter">Billing Category</p>
-                                    <p className={`text-xs font-black px-2 py-0.5 rounded mt-0.5 inline-block ${p.paymentMethod === 'prepaid' ? 'bg-purple-500/20 text-purple-300' :
-                                        p.paymentMethod === 'corporate' ? 'bg-blue-500/20 text-blue-300' :
-                                            'bg-green-500/20 text-green-300'
-                                        }`}>
-                                        {p.paymentMethod?.toUpperCase()}
-                                    </p>
-                                </div>
-                            </div>
-                            <InfoRow icon={User} label="NRC" value={p.nrc} />
-                            <InfoRow icon={User} label="Gender" value={p.gender} />
                         </div>
-                    ) : <p className="text-sm text-gray-400">No patient data</p>}
-                </div>
-
-                {/* Visit Details */}
-                <div className="card p-5 md:col-span-1">
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-3">Visit Details</h3>
-                    <div className="space-y-1">
-                        <InfoRow icon={MapPin} label="Department" value={visit.department?.departmentName || visit.assignedDepartment} />
-                        <InfoRow icon={Shield} label="Scheme" value={visit.scheme?.schemeName} />
-                        <InfoRow icon={User} label="Admitted By" value={visit.admitter ? `${visit.admitter.firstName} ${visit.admitter.lastName}` : undefined} />
-                        <InfoRow icon={Calendar} label="Admission" value={visit.admissionDate ? new Date(visit.admissionDate).toLocaleString() : undefined} />
-                        {visit.dischargeDate && (
-                            <InfoRow icon={Calendar} label="Discharged" value={new Date(visit.dischargeDate).toLocaleString()} />
-                        )}
                     </div>
-                    {visit.notes && (
-                        <div className="mt-3 p-3 bg-gray-800/60 rounded-lg border border-gray-700">
-                            <p className="text-xs text-gray-500 mb-1">Notes</p>
-                            <p className="text-sm text-gray-300">{visit.notes}</p>
-                        </div>
-                    )}
                 </div>
 
-                {/* Log Movement */}
-                <div className="card p-5 md:col-span-1">
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-3">Log Movement</h3>
-                    {visit.status === 'active' ? (
-                        <form onSubmit={handleLogMovement} className="space-y-3">
-                            <div className="form-group">
-                                <label className="form-label">Transfer To</label>
-                                <select
-                                    value={movForm.toDepartment}
-                                    onChange={e => setMovForm(f => ({ ...f, toDepartment: e.target.value }))}
-                                    className="form-select"
-                                >
-                                    <option value="">Select Department</option>
-                                    {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Assign Doctor (Optional)</label>
-                                <select
-                                    value={movForm.assignedDoctorId}
-                                    onChange={e => setMovForm(f => ({ ...f, assignedDoctorId: e.target.value }))}
-                                    className="form-select"
-                                >
-                                    <option value="">Select Doctor</option>
-                                    {doctors.map(d => <option key={d.id} value={d.id}>Dr. {d.firstName} {d.lastName}</option>)}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Notes (optional)</label>
-                                <textarea
-                                    value={movForm.notes}
-                                    onChange={e => setMovForm(f => ({ ...f, notes: e.target.value }))}
-                                    className="form-textarea"
-                                    rows={2}
-                                    placeholder="Reason for transfer…"
-                                />
-                            </div>
-                            <button type="submit" disabled={submittingMov} className="btn btn-primary w-full">
-                                <Move className="w-4 h-4" />
-                                {submittingMov ? 'Logging…' : 'Log Movement'}
-                            </button>
-                        </form>
-                    ) : (
-                        <p className="text-sm text-gray-400 italic">Visit is {visit.status} — movements cannot be logged.</p>
-                    )}
+                {/* Right Column: Send Patient */}
+                <div className="lg:col-span-1">
+                    <div className="card border border-indigo-500/20 shadow-lg relative overflow-hidden bg-gradient-to-b from-indigo-950/20 to-transparent">
+                        <div className="bg-indigo-900/30 border-b border-indigo-500/20 px-5 py-3.5">
+                            <h3 className="font-bold text-indigo-300 flex items-center gap-2">
+                                <Move className="w-4 h-4 text-indigo-400" /> Send Patient
+                            </h3>
+                        </div>
+                        <div className="p-5">
+                            {visit.status === 'active' ? (
+                                <form onSubmit={handleLogMovement} className="space-y-4">
+                                    <div className="form-group">
+                                        <label className="form-label text-gray-300 font-medium">Destination Department</label>
+                                        <select
+                                            required
+                                            value={movForm.toDepartment}
+                                            onChange={e => setMovForm(f => ({ ...f, toDepartment: e.target.value }))}
+                                            className="form-select bg-gray-900 border-gray-700 hover:border-indigo-500/50 focus:border-indigo-500 transition-colors"
+                                        >
+                                            <option value="">Select Department...</option>
+                                            {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label text-gray-300 font-medium">Assign Doctor <span className="text-gray-500 font-normal">(Optional)</span></label>
+                                        <select
+                                            value={movForm.assignedDoctorId}
+                                            onChange={e => setMovForm(f => ({ ...f, assignedDoctorId: e.target.value }))}
+                                            className="form-select bg-gray-900 border-gray-700 hover:border-indigo-500/50 focus:border-indigo-500 transition-colors"
+                                        >
+                                            <option value="">Any available doctor...</option>
+                                            {doctors.map(d => <option key={d.id} value={d.id}>Dr. {d.firstName} {d.lastName}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label text-gray-300 font-medium">Transfer Notes <span className="text-gray-500 font-normal">(Optional)</span></label>
+                                        <textarea
+                                            value={movForm.notes}
+                                            onChange={e => setMovForm(f => ({ ...f, notes: e.target.value }))}
+                                            className="form-textarea bg-gray-900 border-gray-700 transition-colors placeholder-gray-600"
+                                            rows={2}
+                                            placeholder="Reason for sending..."
+                                        />
+                                    </div>
+                                    <button type="submit" disabled={submittingMov} className="btn btn-primary w-full bg-indigo-600 hover:bg-indigo-500 border-none shadow-md shadow-indigo-900/50 py-2.5">
+                                        <Move className="w-4 h-4 mr-1.5" />
+                                        {submittingMov ? 'Processing...' : 'Send to Department'}
+                                    </button>
+                                </form>
+                            ) : (
+                                <div className="py-6 text-center">
+                                    <AlertCircle className="w-8 h-8 text-yellow-500/50 mx-auto mb-2" />
+                                    <p className="text-sm text-gray-400">Visit is <strong className="text-gray-300 capitalize">{visit.status}</strong>.<br/>Patient cannot be transferred.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 
             {/* Movement Log */}
             <div className="card overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
-                    <h3 className="font-semibold text-white">Patient Movement Log</h3>
+                    <h3 className="font-semibold text-white">Department Transfer History</h3>
                     <span className="text-xs text-gray-400">{movements.length} entries</span>
                 </div>
                 {movLoading ? (
