@@ -101,9 +101,7 @@ const TriageWidget = ({ visitId, patientId, queueStatus, onVitalsSaved }) => {
     }
 
     /* Triage is now optional. Widget shows if no vitals are recorded, regardless of queueStatus */
-    if (!vitals && !loading) {
-        // Continue to rendering the form below
-    } else if (vitals) {
+    return (
         <div className="card p-5 border border-orange-200 shadow-[0_0_15px_rgba(251,146,60,0.1)] relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1 h-full bg-orange-400" />
             <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
