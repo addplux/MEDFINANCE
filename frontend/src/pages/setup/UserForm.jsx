@@ -50,6 +50,7 @@ const UserForm = () => {
             setLoading(true);
             const response = await setupAPI.users.getById(id);
             // Don't set password field when editing
+            const { password, ...userData } = response.data;
             setFormData(prev => ({ 
                 ...prev, 
                 ...userData, 
