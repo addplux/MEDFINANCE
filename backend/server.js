@@ -254,6 +254,9 @@ const startServer = async () => {
 
             const runAddAssignedDoctorToMovementsMigration = require('./migrations/004_add_assigned_doctor_to_movements');
             await runAddAssignedDoctorToMovementsMigration();
+
+            const runUnifiedUserDirectoryMigration = require('./migrations/005_unified_user_directory');
+            await runUnifiedUserDirectoryMigration();
         } catch (migErr) {
             console.error('⚠️ Migration runner error (non-fatal):', migErr.message);
         }
