@@ -10,6 +10,7 @@ const Schemes = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
+    const [showTypeModal, setShowTypeModal] = useState(false);
 
     useEffect(() => {
         fetchSchemes();
@@ -78,7 +79,7 @@ const Schemes = () => {
                 </div>
 
                 <button
-                    onClick={() => navigate('/app/receivables/schemes/new')}
+                    onClick={() => setShowTypeModal(true)}
                     className="flex items-center justify-center gap-3 px-8 py-3.5 bg-gradient-to-r from-primary to-primary/80 hover:scale-105 active:scale-95 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(255,0,204,0.3)] group"
                 >
                     <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
@@ -217,6 +218,81 @@ const Schemes = () => {
                     <span className="text-sm font-black text-white">{schemes.filter(s => s.status === 'active').length}</span>
                 </div>
             </div>
+
+            {/* Scheme Type Selection Modal */}
+            {showTypeModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-bg-primary/80 backdrop-blur-xl animate-fade-in">
+                    <div className="relative w-full max-w-4xl bg-bg-secondary border border-white/10 rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden">
+                        {/* Background Decor */}
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-accent to-primary"></div>
+                        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+                        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-accent/10 rounded-full blur-3xl"></div>
+
+                        <div className="p-12 relative">
+                            <div className="flex justify-between items-center mb-12">
+                                <div>
+                                    <h2 className="text-4xl font-black text-text-primary uppercase tracking-tighter mb-2">Select Scheme Architecture</h2>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-text-tertiary">Choose the billing engine for this new provider connection</p>
+                                </div>
+                                <button 
+                                    onClick={() => setShowTypeModal(false)}
+                                    className="p-4 hover:bg-white/5 rounded-2xl text-text-tertiary hover:text-text-primary transition-all group"
+                                >
+                                    <Plus className="w-6 h-6 rotate-45 group-hover:scale-110 transition-transform" />
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {/* Corporate Option */}
+                                <button 
+                                    onClick={() => {
+                                        setShowTypeModal(false);
+                                        navigate('/app/receivables/schemes/new?type=corporate');
+                                    }}
+                                    className="group text-left p-10 bg-bg-tertiary/40 border border-border-color rounded-[2.5rem] hover:border-primary/50 hover:bg-bg-tertiary transition-all hover:scale-[1.02] active:scale-95"
+                                >
+                                    <div className="w-20 h-20 bg-primary/20 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-[0_0_30px_rgba(255,0,204,0.2)]">
+                                        <Shield className="w-10 h-10 text-primary" />
+                                    </div>
+                                    <h3 className="text-2xl font-black text-text-primary uppercase tracking-tight mb-3">Corporate Scheme</h3>
+                                    <p className="text-xs text-text-tertiary font-bold leading-relaxed mb-8">
+                                        Establish institutional credit lines for insurance companies, NGOs, or direct corporate partners. Uses invoice-based batch billing.
+                                    </p>
+                                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary">
+                                        Launch Blueprint <ArrowUpRight className="w-4 h-4" />
+                                    </div>
+                                </button>
+
+                                {/* Prepaid Option */}
+                                <button 
+                                    onClick={() => {
+                                        setShowTypeModal(false);
+                                        navigate('/app/schemes/private/plans');
+                                    }}
+                                    className="group text-left p-10 bg-bg-tertiary/40 border border-border-color rounded-[2.5rem] hover:border-accent/50 hover:bg-bg-tertiary transition-all hover:scale-[1.02] active:scale-95"
+                                >
+                                    <div className="w-20 h-20 bg-accent/20 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-[0_0_30px_rgba(0,242,255,0.2)]">
+                                        <Zap className="w-10 h-10 text-accent" />
+                                    </div>
+                                    <h3 className="text-2xl font-black text-text-primary uppercase tracking-tight mb-3">Private Prepaid</h3>
+                                    <p className="text-xs text-text-tertiary font-bold leading-relaxed mb-8">
+                                        Wallet-based systems for individuals or family members. Draw from prepaid credit balances with real-time benefit tracking.
+                                    </p>
+                                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-accent">
+                                        Manage Plan Tiers <ArrowUpRight className="w-4 h-4" />
+                                    </div>
+                                </button>
+                            </div>
+
+                            <div className="mt-12 p-6 bg-white/5 border border-white/5 rounded-2xl">
+                                <p className="text-[9px] font-bold text-text-tertiary text-center uppercase tracking-[0.2em]">
+                                    Unsure? Standard external billing (Insurance/Govt) typically requires a <b>Corporate Scheme</b> setup.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
