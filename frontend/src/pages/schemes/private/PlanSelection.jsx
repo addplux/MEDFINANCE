@@ -174,7 +174,7 @@ const PlanSelection = () => {
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             placeholder="Search members, man numbers, plans…"
-                            className="pl-9 pr-4 py-2 text-sm bg-surface border border-border rounded-xl text-text-primary focus:outline-none focus:border-accent w-64"
+                            className="pl-9 pr-4 py-2 text-sm bg-bg-tertiary border border-border-color rounded-xl text-text-primary focus:outline-none focus:border-accent w-72"
                         />
                     </div>
                 </div>
@@ -478,7 +478,7 @@ const PlanSelection = () => {
                                     value={memberSearch}
                                     onChange={e => setMemberSearch(e.target.value)}
                                     placeholder="Search member name or ID…"
-                                    className="w-full pl-9 pr-4 py-2 text-sm bg-surface border border-border rounded-xl text-text-primary focus:outline-none focus:border-accent"
+                                    className="w-full pl-9 pr-4 py-2 text-sm bg-bg-tertiary border border-border-color rounded-xl text-text-primary focus:outline-none focus:border-accent"
                                 />
                             </div>
                         </div>
