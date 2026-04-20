@@ -549,8 +549,6 @@ const PatientRegistration = () => {
                                 </p>
                             </div>
                         )}
-                    </section>
-
                 </div>
 
                 {/* Actions */}

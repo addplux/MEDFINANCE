@@ -315,9 +315,15 @@ const Setup = () => {
                                     <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
                                         <button
                                             onClick={() => navigate(`/app/setup/users/${user.id}/edit`)}
-                                            className="btn btn-sm btn-secondary flex-1 justify-center"
+                                            className="btn btn-sm btn-secondary flex-1 justify-center whitespace-nowrap"
                                         >
                                             <Edit className="w-4 h-4 mr-1" /> Edit
+                                        </button>
+                                        <button
+                                            onClick={() => navigate(`/app/patients/new?staffId=${user.id}&firstName=${user.firstName}&lastName=${user.lastName}&manNumber=${user.manNumber}`)}
+                                            className="btn btn-sm bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20 flex-1 justify-center whitespace-nowrap"
+                                        >
+                                            <Stethoscope className="w-4 h-4 mr-1" /> Register
                                         </button>
                                         <button
                                             onClick={() => handleDelete(user.id)}
