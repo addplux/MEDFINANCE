@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { patientAPI } from '../../services/apiService';
 import {
     ArrowLeft, Save, User, AlertCircle,
-    CircleCheckBig, BadgeCheck, ArrowRightLeft
+    CircleCheckBig, BadgeCheck, ArrowRightLeft, Zap
 } from 'lucide-react';
 
 /**
@@ -99,7 +99,8 @@ const PatientRegistration = () => {
                 referralType: formData.referralType,
                 registryFee: formData.referralType === 'bypass' ? Number(formData.registryFee) : 0,
                 targetDepartment: null, // auto-routing is done by referralType
-                paymentMethod: formData.patientCategory === 'staff' ? 'staff' : 'cash',
+                paymentMethod: formData.patientCategory === 'staff' ? 'staff' : 
+                               formData.patientCategory === 'prepaid' ? 'private_prepaid' : 'cash',
                 costCategory: 'standard'
             };
 
@@ -262,6 +263,18 @@ const PatientRegistration = () => {
                                     >
                                         <BadgeCheck className="w-4 h-4" />
                                         Staff Member
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleChange('patientCategory', 'prepaid')}
+                                        className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-[10px] ${
+                                            formData.patientCategory === 'prepaid'
+                                                ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-lg shadow-emerald-500/10'
+                                                : 'bg-white/[0.02] border-white/10 text-white/40 hover:border-white/20'
+                                        }`}
+                                    >
+                                        <Zap className="w-4 h-4" />
+                                        Private Prepaid
                                     </button>
                                 </div>
                             </div>
