@@ -15,9 +15,11 @@ const UserForm = () => {
         role: 'viewer',
         firstName: '',
         lastName: '',
+        manNumber: '',
         medicalLimitMonthly: '',
         medicalLimitAnnual: '',
-        isActive: true
+        isActive: true,
+        grantLogin: false 
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -48,8 +50,12 @@ const UserForm = () => {
             setLoading(true);
             const response = await setupAPI.users.getById(id);
             // Don't set password field when editing
-            const { password, ...userData } = response.data;
-            setFormData(prev => ({ ...prev, ...userData, password: '' }));
+            setFormData(prev => ({ 
+                ...prev, 
+                ...userData, 
+                password: '', 
+                grantLogin: !!userData.email || !!userData.username 
+            }));
         } catch (err) {
             setError('Failed to fetch user details');
             console.error(err);
@@ -76,10 +82,20 @@ const UserForm = () => {
                 // Remove password if empty in edit mode
                 const dataToSend = { ...formData };
                 if (!dataToSend.password) delete dataToSend.password;
+                if (!dataToSend.grantLogin) {
+                    dataToSend.email = null;
+                    dataToSend.username = null;
+                }
 
                 await setupAPI.users.update(id, dataToSend);
             } else {
-                await setupAPI.users.create(formData);
+                const dataToSend = { ...formData };
+                if (!dataToSend.grantLogin) {
+                    delete dataToSend.username;
+                    delete dataToSend.email;
+                    delete dataToSend.password;
+                }
+                await setupAPI.users.create(dataToSend);
             }
             navigate('/app/setup');
         } catch (err) {
@@ -114,7 +130,7 @@ const UserForm = () => {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
                             <label className="label">First Name</label>
                             <input
@@ -137,91 +153,94 @@ const UserForm = () => {
                                 required
                             />
                         </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="label">Username</label>
-                        <input
-                            type="text"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleChange}
-                            className="form-input"
-                            required
-                        />
-                    </div>
-
-                    <div className="border border-border-color rounded-lg p-4 bg-bg-tertiary/50 space-y-4">
-                        <h3 className="text-sm font-bold text-text-secondary uppercase tracking-wider">Staff Medical Scheme Limits</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                                <label className="text-xs font-semibold text-text-secondary">Monthly Limit (K)</label>
-                                <input
-                                    type="number"
-                                    name="medicalLimitMonthly"
-                                    value={formData.medicalLimitMonthly}
-                                    onChange={handleChange}
-                                    className="form-input"
-                                    placeholder="0.00"
-                                    min="0"
-                                />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-xs font-semibold text-text-secondary">Annual Limit (K)</label>
-                                <input
-                                    type="number"
-                                    name="medicalLimitAnnual"
-                                    value={formData.medicalLimitAnnual}
-                                    onChange={handleChange}
-                                    className="form-input"
-                                    placeholder="0.00"
-                                    min="0"
-                                />
-                            </div>
+                        <div className="space-y-2">
+                            <label className="label">Man Number</label>
+                            <input
+                                type="text"
+                                name="manNumber"
+                                value={formData.manNumber}
+                                onChange={handleChange}
+                                className="form-input bg-bg-tertiary/50"
+                                placeholder={isEditMode ? "" : "Auto-generated"}
+                            />
+                            <p className="text-[10px] text-text-tertiary">Leave blank to auto-generate</p>
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="label">Email</label>
+                    <div className="flex items-center gap-3 p-4 rounded-xl border border-primary/20 bg-primary/5">
                         <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
+                            type="checkbox"
+                            name="grantLogin"
+                            id="grantLogin"
+                            checked={formData.grantLogin}
                             onChange={handleChange}
-                            className="form-input"
-                            required
+                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
                         />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="label">Role</label>
-                        <select
-                            name="role"
-                            value={formData.role}
-                            onChange={handleChange}
-                            className="form-select"
-                            required
-                        >
-                            {roles.map(role => (
-                                <option key={role.id} value={role.id}>{role.label}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="label">
-                            {isEditMode ? 'New Password (leave blank to keep current)' : 'Password'}
+                        <label htmlFor="grantLogin" className="text-sm font-bold text-white uppercase tracking-wider cursor-pointer">
+                            Grant System Login Access
                         </label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            className="form-input"
-                            required={!isEditMode}
-                            minLength="6"
-                        />
                     </div>
+
+                    {formData.grantLogin && (
+                        <div className="space-y-4 animate-fade-in border-l-2 border-primary/30 pl-4 mt-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="label">Username</label>
+                                    <input
+                                        type="text"
+                                        name="username"
+                                        value={formData.username}
+                                        onChange={handleChange}
+                                        className="form-input"
+                                        required={formData.grantLogin}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="label">Email Address</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        className="form-input"
+                                        required={formData.grantLogin}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="label">System Role</label>
+                                    <select
+                                        name="role"
+                                        value={formData.role}
+                                        onChange={handleChange}
+                                        className="form-select"
+                                        required={formData.grantLogin}
+                                    >
+                                        {roles.map(role => (
+                                            <option key={role.id} value={role.id}>{role.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="label">
+                                        {isEditMode ? 'Change Password' : 'Password'}
+                                    </label>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        className="form-input"
+                                        required={!isEditMode && formData.grantLogin}
+                                        minLength="6"
+                                        placeholder={isEditMode ? "Leave blank to keep current" : ""}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="flex items-center gap-2">
                         <input

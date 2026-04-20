@@ -138,11 +138,20 @@ const getService = async (req, res) => {
 // Get all users
 const getAllUsers = async (req, res) => {
     try {
-        const { role, isActive } = req.query;
+        const { role, isActive, search } = req.query;
 
         const where = {};
         if (role) where.role = role;
         if (isActive !== undefined) where.isActive = isActive === 'true';
+
+        if (search) {
+            where[Op.or] = [
+                { firstName: { [Op.iLike]: `%${search}%` } },
+                { lastName: { [Op.iLike]: `%${search}%` } },
+                { manNumber: { [Op.iLike]: `%${search}%` } },
+                { username: { [Op.iLike]: `%${search}%` } }
+            ];
+        }
 
         const users = await User.findAll({
             where,
@@ -160,19 +169,20 @@ const getAllUsers = async (req, res) => {
 // Create user
 const createUser = async (req, res) => {
     try {
-        const { username, email, password, role, firstName, lastName, medicalLimitMonthly, medicalLimitAnnual } = req.body;
+        const { username, email, password, role, firstName, lastName, medicalLimitMonthly, medicalLimitAnnual, manNumber } = req.body;
 
-        if (!username || !email || !password || !role) {
-            return res.status(400).json({ error: 'Username, email, password, and role are required' });
+        if (!firstName || !lastName) {
+            return res.status(400).json({ error: 'First name and last name are required' });
         }
 
         const user = await User.create({
-            username,
-            email,
-            password,
-            role,
+            username: username || null,
+            email: email || null,
+            password: password || null,
+            role: role || 'viewer',
             firstName,
             lastName,
+            manNumber: manNumber || null,
             medicalLimitMonthly: medicalLimitMonthly || 0,
             medicalLimitAnnual: medicalLimitAnnual || 0
         });

@@ -31,6 +31,12 @@ const PatientRegistration = () => {
     const [existingPatient, setExistingPatient] = useState(null);
     const [nrcLookupLoading, setNrcLookupLoading] = useState(false);
 
+    // Unified Staff Directory State
+    const [staffSearch, setStaffSearch] = useState('');
+    const [staffResults, setStaffResults] = useState([]);
+    const [isStaffSearchLoading, setIsStaffSearchLoading] = useState(false);
+    const [selectedStaff, setSelectedStaff] = useState(null);
+
     // NRC auto-lookup — check if patient already exists in system
     useEffect(() => {
         if (!formData.nrc || formData.nrc.length < 5) {
@@ -63,7 +69,56 @@ const PatientRegistration = () => {
         return () => clearTimeout(debounce);
     }, [formData.nrc]);
 
+    // Unified Staff Directory Lookup
+    useEffect(() => {
+        if (!staffSearch || staffSearch.length < 2) {
+            setStaffResults([]);
+            return;
+        }
+        const debounce = setTimeout(async () => {
+            setIsStaffSearchLoading(true);
+            try {
+                const { setupAPI } = await import('../../services/apiService');
+                const res = await setupAPI.users.getAll({ search: staffSearch, isActive: true });
+                setStaffResults(res.data || []);
+            } catch (err) {
+                console.error('Staff lookup error:', err);
+            } finally {
+                setIsStaffSearchLoading(false);
+            }
+        }, 500);
+        return () => clearTimeout(debounce);
+    }, [staffSearch]);
+
+    const handleSelectStaff = (staff) => {
+        setSelectedStaff(staff);
+        setStaffResults([]);
+        setStaffSearch('');
+        setFormData(prev => ({
+            ...prev,
+            firstName: staff.firstName,
+            lastName: staff.lastName,
+            manNumber: staff.manNumber,
+            staffId: staff.id
+        }));
+    };
+
+    const clearStaffSelection = () => {
+        setSelectedStaff(null);
+        setFormData(prev => ({
+            ...prev,
+            firstName: '',
+            lastName: '',
+            manNumber: '',
+            staffId: null
+        }));
+    };
+
     const handleChange = (field, value) => {
+        if (field === 'patientCategory') {
+            setSelectedStaff(null);
+            setFormData(prev => ({ ...prev, firstName: '', lastName: '', manNumber: '', staffId: null }));
+        }
         setFormData(prev => ({ ...prev, [field]: value }));
         if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
     };
@@ -101,7 +156,8 @@ const PatientRegistration = () => {
                 targetDepartment: null, // auto-routing is done by referralType
                 paymentMethod: formData.patientCategory === 'staff' ? 'staff' : 
                                formData.patientCategory === 'prepaid' ? 'private_prepaid' : 'cash',
-                costCategory: 'standard'
+                costCategory: 'standard',
+                staffId: formData.staffId || null
             };
 
             await patientAPI.create(payload);
@@ -186,6 +242,72 @@ const PatientRegistration = () => {
                                 {errors.nrc && <p className="text-[10px] text-red-400 font-bold uppercase mt-1">{errors.nrc}</p>}
                             </div>
 
+                            {/* Staff Directory Lookup (Conditional) */}
+                            {formData.patientCategory === 'staff' && !selectedStaff && (
+                                <div className="form-group md:col-span-2 animate-in zoom-in-95 duration-300">
+                                    <label className="form-label text-[10px] font-black uppercase text-purple-400 tracking-widest flex items-center gap-2 mb-2">
+                                        Search Staff Directory
+                                        {isStaffSearchLoading && <span className="w-3 h-3 border-2 border-purple-400 border-t-transparent rounded-full animate-spin inline-block" />}
+                                    </label>
+                                    <div className="relative group">
+                                        <input
+                                            type="text"
+                                            value={staffSearch}
+                                            onChange={e => setStaffSearch(e.target.value)}
+                                            className="form-input bg-purple-500/5 border-purple-500/20 text-white py-4 rounded-xl focus:ring-purple-500/50 pl-12"
+                                            placeholder="Search by Name or Man Number..."
+                                        />
+                                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400/50 group-focus-within:text-purple-400 transition-colors" />
+                                        
+                                        {staffResults.length > 0 && (
+                                            <div className="absolute z-50 w-full mt-2 bg-[#1a1c2e] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto backdrop-blur-xl">
+                                                {staffResults.map(staff => (
+                                                    <button
+                                                        key={staff.id}
+                                                        type="button"
+                                                        onClick={() => handleSelectStaff(staff)}
+                                                        className="w-full p-4 flex items-center justify-between hover:bg-white/5 border-b border-white/5 last:border-0 transition-colors text-left group"
+                                                    >
+                                                        <div>
+                                                            <p className="text-sm font-bold text-white group-hover:text-purple-400">{staff.firstName} {staff.lastName}</p>
+                                                            <p className="text-[10px] text-white/40 uppercase tracking-widest font-black">Man No: {staff.manNumber}</p>
+                                                        </div>
+                                                        <BadgeCheck className="w-5 h-5 text-purple-500/0 group-hover:text-purple-500 transition-all" />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className="text-[9px] text-purple-400/60 font-medium mt-2 italic px-1">
+                                        Note: All staff must be pre-registered in Staff Management to appear here.
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Selected Staff Badge */}
+                            {selectedStaff && (
+                                <div className="form-group md:col-span-2 animate-in slide-in-from-top-2 duration-300">
+                                    <div className="p-4 rounded-2xl border-2 border-purple-500/30 bg-purple-500/10 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">
+                                                {selectedStaff.firstName[0]}{selectedStaff.lastName[0]}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-black text-white uppercase tracking-tight">Linked Staff: {selectedStaff.firstName} {selectedStaff.lastName}</p>
+                                                <p className="text-[10px] text-purple-400 font-bold uppercase tracking-widest">Employee #: {selectedStaff.manNumber}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={clearStaffSelection}
+                                            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-400 transition-all text-[10px] font-black uppercase tracking-widest border border-white/10 hover:border-red-500/30"
+                                        >
+                                            Change
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Man Number */}
                             <div className="form-group">
                                 <label className="form-label text-[10px] font-black uppercase text-white/40 tracking-widest">
@@ -194,9 +316,10 @@ const PatientRegistration = () => {
                                 <input
                                     id="reg-man-number"
                                     type="text"
+                                    readOnly={!!selectedStaff}
                                     value={formData.manNumber}
                                     onChange={e => handleChange('manNumber', e.target.value)}
-                                    className={`form-input bg-white/[0.02] border-white/10 text-white py-3 rounded-xl focus:ring-blue-500/50 ${errors.manNumber ? 'border-red-500/50' : ''}`}
+                                    className={`form-input bg-white/[0.02] border-white/10 text-white py-3 rounded-xl focus:ring-blue-500/50 ${errors.manNumber ? 'border-red-500/50' : ''} ${selectedStaff ? 'opacity-50 cursor-not-allowed bg-white/5' : ''}`}
                                     placeholder="Employee / Member Registration Number"
                                 />
                                 {errors.manNumber && <p className="text-[10px] text-red-400 font-bold uppercase mt-1">{errors.manNumber}</p>}
@@ -210,9 +333,10 @@ const PatientRegistration = () => {
                                 <input
                                     id="reg-first-name"
                                     type="text"
+                                    readOnly={!!selectedStaff}
                                     value={formData.firstName}
                                     onChange={e => handleChange('firstName', e.target.value)}
-                                    className={`form-input bg-white/[0.02] border-white/10 text-white py-3 rounded-xl focus:ring-blue-500/50 ${errors.firstName ? 'border-red-500/50' : ''}`}
+                                    className={`form-input bg-white/[0.02] border-white/10 text-white py-3 rounded-xl focus:ring-blue-500/50 ${errors.firstName ? 'border-red-500/50' : ''} ${selectedStaff ? 'opacity-50 cursor-not-allowed bg-white/5' : ''}`}
                                     placeholder="Given name"
                                 />
                                 {errors.firstName && <p className="text-[10px] text-red-400 font-bold uppercase mt-1">{errors.firstName}</p>}
@@ -226,9 +350,10 @@ const PatientRegistration = () => {
                                 <input
                                     id="reg-last-name"
                                     type="text"
+                                    readOnly={!!selectedStaff}
                                     value={formData.lastName}
                                     onChange={e => handleChange('lastName', e.target.value)}
-                                    className={`form-input bg-white/[0.02] border-white/10 text-white py-3 rounded-xl focus:ring-blue-500/50 ${errors.lastName ? 'border-red-500/50' : ''}`}
+                                    className={`form-input bg-white/[0.02] border-white/10 text-white py-3 rounded-xl focus:ring-blue-500/50 ${errors.lastName ? 'border-red-500/50' : ''} ${selectedStaff ? 'opacity-50 cursor-not-allowed bg-white/5' : ''}`}
                                     placeholder="Family name"
                                 />
                                 {errors.lastName && <p className="text-[10px] text-red-400 font-bold uppercase mt-1">{errors.lastName}</p>}

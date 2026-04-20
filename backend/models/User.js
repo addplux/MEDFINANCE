@@ -10,12 +10,12 @@ const User = sequelize.define('User', {
     },
     username: {
         type: DataTypes.STRING(50),
-        allowNull: false,
+        allowNull: true,
         unique: true
     },
     email: {
         type: DataTypes.STRING(100),
-        allowNull: false,
+        allowNull: true,
         unique: true,
         validate: {
             isEmail: true
@@ -23,7 +23,7 @@ const User = sequelize.define('User', {
     },
     password: {
         type: DataTypes.STRING(255),
-        allowNull: false
+        allowNull: true
     },
     role: {
         type: DataTypes.ENUM(
@@ -95,12 +95,33 @@ const User = sequelize.define('User', {
     relationshipToStaff: {
         type: DataTypes.ENUM('Self', 'Spouse', 'Child'),
         defaultValue: 'Self'
+    },
+    manNumber: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+        unique: true
     }
 }, {
     tableName: 'users',
     timestamps: true,
     underscored: true,
     hooks: {
+        beforeValidate: async (user) => {
+            // 1. Generate Man Number if missing
+            if (!user.manNumber) {
+                const count = await sequelize.models.User.count();
+                user.manNumber = `STF-${String(count + 1).padStart(4, '0')}`;
+            }
+
+            // 2. Generate Username if missing (for medical-only staff)
+            if (!user.username) {
+                if (user.email) {
+                    user.username = user.email.split('@')[0] + '_' + Math.random().toString(36).slice(-4);
+                } else {
+                    user.username = `staff_${user.manNumber.replace('-', '_')}`;
+                }
+            }
+        },
         beforeCreate: async (user) => {
             if (user.password) {
                 const salt = await bcrypt.genSalt(10);
