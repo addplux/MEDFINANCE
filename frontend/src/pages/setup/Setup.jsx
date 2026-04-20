@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { setupAPI } from '../../services/apiService';
-import { Settings, Plus, Search, Eye, Edit, Trash2 } from 'lucide-react';
+import { Settings, Plus, Search, Eye, Edit, Trash2, Stethoscope, UserPlus } from 'lucide-react';
 import OrganizationProfile from './OrganizationProfile';
 
 const Setup = () => {
@@ -267,8 +267,16 @@ const Setup = () => {
                                                     <button
                                                         onClick={() => navigate(`/app/setup/users/${user.id}/edit`)}
                                                         className="btn btn-sm btn-secondary"
+                                                        title="Edit User"
                                                     >
                                                         <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => navigate(`/app/patients/new?staffId=${user.id}&firstName=${user.firstName}&lastName=${user.lastName}&manNumber=${user.manNumber}`)}
+                                                        className="btn btn-sm bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20"
+                                                        title="Register as Patient"
+                                                    >
+                                                        <Stethoscope className="w-4 h-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(user.id)}

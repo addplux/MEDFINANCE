@@ -89,6 +89,7 @@ const UserForm = () => {
                 }
 
                 await setupAPI.users.update(id, dataToSend);
+                navigate('/app/setup');
             } else {
                 const dataToSend = { ...formData };
                 if (!dataToSend.grantLogin) {
@@ -96,9 +97,15 @@ const UserForm = () => {
                     delete dataToSend.email;
                     delete dataToSend.password;
                 }
-                await setupAPI.users.create(dataToSend);
+                const response = await setupAPI.users.create(dataToSend);
+                const newUser = response.data;
+
+                if (window.confirm(`Staff member saved successfully!\n\nWould you like to register "${newUser.firstName} ${newUser.lastName}" in the Patient Registry (Medical File) now?`)) {
+                    navigate(`/app/patients/new?staffId=${newUser.id}&firstName=${newUser.firstName}&lastName=${newUser.lastName}&manNumber=${newUser.manNumber}`);
+                } else {
+                    navigate('/app/setup');
+                }
             }
-            navigate('/app/setup');
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to save user');
             console.error(err);

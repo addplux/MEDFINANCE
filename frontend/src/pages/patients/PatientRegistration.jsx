@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { patientAPI } from '../../services/apiService';
 import {
     ArrowLeft, Save, User, AlertCircle,
@@ -8,15 +8,10 @@ import {
 
 /**
  * PatientRegistration — External Identity Link Mode
- * 
- * Captures only the 4 fields this system needs (External system owns the rest):
- *   1. NRC *
- *   2. Man Number *
- *   3. First Name * + Last Name *
- *   4. Referral Type * (bypass → straight to Cashier | referral → Authorization first)
  */
 const PatientRegistration = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         nrc: '',
@@ -36,6 +31,32 @@ const PatientRegistration = () => {
     const [staffResults, setStaffResults] = useState([]);
     const [isStaffSearchLoading, setIsStaffSearchLoading] = useState(false);
     const [selectedStaff, setSelectedStaff] = useState(null);
+
+    // Handle URL parameters for staff linkage
+    useEffect(() => {
+        const staffId = searchParams.get('staffId');
+        const firstName = searchParams.get('firstName');
+        const lastName = searchParams.get('lastName');
+        const manNumber = searchParams.get('manNumber');
+
+        if (staffId && firstName && lastName) {
+            setFormData(prev => ({
+                ...prev,
+                patientCategory: 'staff',
+                firstName,
+                lastName,
+                manNumber: manNumber || '',
+                staffId: parseInt(staffId)
+            }));
+            setSelectedStaff({
+                id: parseInt(staffId),
+                firstName,
+                lastName,
+                manNumber
+            });
+            setStaffSearch(`${firstName} ${lastName}`);
+        }
+    }, [searchParams]);
 
     // NRC auto-lookup — check if patient already exists in system
     useEffect(() => {
