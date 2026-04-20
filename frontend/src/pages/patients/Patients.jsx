@@ -4,7 +4,8 @@ import { patientAPI, visitAPI } from '../../services/apiService';
 import {
     Users, Plus, Search, Eye, Edit, Trash2, GitMerge, ClipboardList,
     Banknote, Building, CreditCard, Stethoscope, Gift, Siren, RefreshCw,
-    ShieldOff, ShieldCheck, ShieldAlert, ChevronDown, ChevronRight, UserCircle
+    ShieldOff, ShieldCheck, ShieldAlert, ChevronDown, ChevronRight, UserCircle,
+    CircleCheckBig
 } from 'lucide-react';
 
 import CheckInModal from '../../components/shared/CheckInModal';
