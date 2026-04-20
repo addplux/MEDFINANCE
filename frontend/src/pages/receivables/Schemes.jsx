@@ -221,7 +221,7 @@ const Schemes = () => {
 
             {/* Scheme Type Selection Modal */}
             {showTypeModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-bg-primary/80 backdrop-blur-xl animate-fade-in">
+                <div className="fixed inset-0 z-[100] flex items-start justify-center p-6 pt-12 md:pt-24 bg-bg-primary/80 backdrop-blur-xl animate-fade-in overflow-y-auto">
                     <div className="relative w-full max-w-4xl bg-bg-secondary border border-white/10 rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden">
                         {/* Background Decor */}
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-accent to-primary"></div>
