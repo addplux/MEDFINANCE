@@ -67,20 +67,32 @@ const PlanSelection = () => {
 
     useEffect(() => { loadPlans(); loadMembers(); }, [loadPlans, loadMembers]);
 
-    // Members for a given plan (match by planKey or plan name lowercase)
+    // GLOBAL SEARCH: Filter members by name, man number or patient number
+    const filteredMembers = members.filter(m => {
+        const s = search.toLowerCase();
+        const fullName = `${m.firstName} ${m.lastName}`.toLowerCase();
+        return fullName.includes(s) || 
+               (m.manNumber || '').toLowerCase().includes(s) || 
+               (m.patientNumber || '').toLowerCase().includes(s);
+    });
+
+    // Members for a given plan (uses filtered search results)
     const membersOnPlan = (plan) =>
-        members.filter(m => {
+        filteredMembers.filter(m => {
             const mp = (m.memberPlan || '').toLowerCase();
             return mp === (plan.planKey || '').toLowerCase() || mp === plan.name.toLowerCase();
         });
 
-    // Unassigned members (no plan)
-    const unassigned = members.filter(m => !m.memberPlan || m.memberPlan.trim() === '');
+    // Unassigned members (uses filtered search results)
+    const unassigned = filteredMembers.filter(m => !m.memberPlan || m.memberPlan.trim() === '');
 
     // Filtered view for assign modal
     const filteredForAssign = members.filter(m => {
-        const name = `${m.firstName} ${m.lastName} ${m.patientNumber}`.toLowerCase();
-        return name.includes(memberSearch.toLowerCase());
+        const s = memberSearch.toLowerCase();
+        const name = `${m.firstName} ${m.lastName}`.toLowerCase();
+        return name.includes(s) || 
+               (m.manNumber || '').toLowerCase().includes(s) || 
+               (m.patientNumber || '').toLowerCase().includes(s);
     });
 
     // ── Edit plan handler — persists to DB ────────────────────────────────────
@@ -140,10 +152,12 @@ const PlanSelection = () => {
         await assignMemberToPlan(member, '');
     };
 
-    // ── Filtered plans ─────────────────────────────────────────────────────────
-    const filteredPlans = plans.filter(p =>
-        p.name.toLowerCase().includes(search.toLowerCase())
-    );
+    // ── Filtered plans — show if plan name matches OR if any matching member is inside ──
+    const filteredPlans = plans.filter(p => {
+        const matchesName = p.name.toLowerCase().includes(search.toLowerCase());
+        const matchesMember = membersOnPlan(p).length > 0;
+        return matchesName || matchesMember;
+    });
 
     return (
         <div className="space-y-6 animate-fade-in">
@@ -159,8 +173,8 @@ const PlanSelection = () => {
                         <input
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            placeholder="Search plans…"
-                            className="pl-9 pr-4 py-2 text-sm bg-surface border border-border rounded-xl text-text-primary focus:outline-none focus:border-accent"
+                            placeholder="Search members, man numbers, plans…"
+                            className="pl-9 pr-4 py-2 text-sm bg-surface border border-border rounded-xl text-text-primary focus:outline-none focus:border-accent w-64"
                         />
                     </div>
                 </div>
