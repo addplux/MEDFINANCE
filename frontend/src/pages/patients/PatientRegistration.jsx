@@ -151,7 +151,7 @@ const PatientRegistration = () => {
         if (!formData.firstName.trim()) errs.firstName = 'First name is required';
         if (!formData.lastName.trim()) errs.lastName = 'Last name is required';
         if (!formData.referralType) errs.referralType = 'Please select Bypass or Referral';
-        if (formData.referralType === 'bypass' && (!formData.registryFee || isNaN(formData.registryFee) || Number(formData.registryFee) <= 0)) {
+        if (formData.referralType === 'bypass' && formData.patientCategory !== 'staff' && (!formData.registryFee || isNaN(formData.registryFee) || Number(formData.registryFee) <= 0)) {
             errs.registryFee = 'Registration fee is required for bypass patients';
         }
         return errs;
@@ -173,7 +173,8 @@ const PatientRegistration = () => {
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
                 referralType: formData.referralType,
-                registryFee: formData.referralType === 'bypass' ? Number(formData.registryFee) : 0,
+                registryFee: formData.patientCategory === 'staff' ? 0 : 
+                            (formData.referralType === 'bypass' ? Number(formData.registryFee) : 0),
                 targetDepartment: null, // auto-routing is done by referralType
                 paymentMethod: formData.patientCategory === 'staff' ? 'staff' : 
                                formData.patientCategory === 'prepaid' ? 'private_prepaid' : 'cash',
@@ -458,7 +459,9 @@ const PatientRegistration = () => {
                                             Bypass
                                         </p>
                                         <p className="text-[10px] text-white/30 font-medium leading-relaxed">
-                                            Patient goes directly to Cashier
+                                            {formData.patientCategory === 'staff' 
+                                                ? 'Staff go directly to Triage / Consultation' 
+                                                : 'Patient goes directly to Cashier'}
                                         </p>
                                     </div>
                                     {isBypass && (
@@ -468,7 +471,7 @@ const PatientRegistration = () => {
                                 <div className={`mt-3 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full inline-block ${
                                     isBypass ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-white/20'
                                 }`}>
-                                    Records → Cashier
+                                    {formData.patientCategory === 'staff' ? 'Records → Triage' : 'Records → Cashier'}
                                 </div>
                             </button>
 
@@ -489,7 +492,9 @@ const PatientRegistration = () => {
                                             Referral
                                         </p>
                                         <p className="text-[10px] text-white/30 font-medium leading-relaxed">
-                                            Requires authorization first
+                                            {formData.patientCategory === 'staff' 
+                                                ? 'Requires medical officer approval' 
+                                                : 'Requires authorization first'}
                                         </p>
                                     </div>
                                     {isReferral && (
@@ -499,7 +504,7 @@ const PatientRegistration = () => {
                                 <div className={`mt-3 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full inline-block ${
                                     isReferral ? 'bg-blue-500/20 text-blue-400' : 'bg-white/5 text-white/20'
                                 }`}>
-                                    Records → Authorization → Cashier
+                                    {formData.patientCategory === 'staff' ? 'Records → Approval' : 'Records → Auth → Cashier'}
                                 </div>
                             </button>
                         </div>

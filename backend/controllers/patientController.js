@@ -253,14 +253,21 @@ const createPatient = async (req, res) => {
 
             // Determine initial queue status based on referralType
             const newVisitReferralType = referralType || patient.referralType || 'bypass';
+            const isStaff = patient.paymentMethod === 'staff';
             
-            // Bypass patients have a pending registry fee if specified
-            const newRegistryFee = (newVisitReferralType === 'bypass') ? Number(registryFee || 0) : 0;
+            // Bypass patients have a pending registry fee if specified (Staff are always waived)
+            const newRegistryFee = (newVisitReferralType === 'bypass' && !isStaff) ? Number(registryFee || 0) : 0;
             const newRegistryFeeStatus = (newVisitReferralType === 'bypass' && newRegistryFee > 0) ? 'pending' : 'waived';
 
-            const newVisitQueueStatus = newVisitReferralType === 'referral'
-                ? 'pending_authorization'
-                : 'pending_cashier';
+            let newVisitQueueStatus;
+            if (newVisitReferralType === 'referral') {
+                newVisitQueueStatus = 'pending_authorization';
+            } else if (isStaff) {
+                // Staff bypass the cashier entirely and go straight to triage
+                newVisitQueueStatus = 'pending_triage';
+            } else {
+                newVisitQueueStatus = 'pending_cashier';
+            }
 
             visit = await Visit.create({
                 visitNumber,
