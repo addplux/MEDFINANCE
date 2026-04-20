@@ -43,6 +43,7 @@ const PatientRegistration = () => {
             setFormData(prev => ({
                 ...prev,
                 patientCategory: 'staff',
+                referralType: 'bypass', // Auto-set for staff
                 firstName,
                 lastName,
                 manNumber: manNumber || '',
@@ -138,7 +139,14 @@ const PatientRegistration = () => {
     const handleChange = (field, value) => {
         if (field === 'patientCategory') {
             setSelectedStaff(null);
-            setFormData(prev => ({ ...prev, firstName: '', lastName: '', manNumber: '', staffId: null }));
+            setFormData(prev => ({ 
+                ...prev, 
+                firstName: '', 
+                lastName: '', 
+                manNumber: '', 
+                staffId: null,
+                referralType: value === 'staff' ? 'bypass' : prev.referralType
+            }));
         }
         setFormData(prev => ({ ...prev, [field]: value }));
         if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
@@ -429,7 +437,8 @@ const PatientRegistration = () => {
                     </section>
 
                     {/* ── Referral Type ── */}
-                    <section className="space-y-4">
+                    {formData.patientCategory !== 'staff' && (
+                        <section className="space-y-4">
                         <div className="flex items-center gap-3 pb-2 border-b border-white/5">
                             <ArrowRightLeft className="w-4 h-4 text-purple-400" />
                             <h2 className="text-sm font-black text-white uppercase tracking-widest">
@@ -508,9 +517,11 @@ const PatientRegistration = () => {
                                 </div>
                             </button>
                         </div>
+                    </section>
+                    )}
 
                         {/* Registration Fee for Bypass */}
-                        {isBypass && (
+                        {isBypass && formData.patientCategory !== 'staff' && (
                             <div className="mt-8 p-6 bg-blue-500/5 border border-blue-500/20 rounded-2xl animate-in fade-in zoom-in duration-300">
                                 <label className="form-label text-[10px] font-black uppercase text-blue-400 tracking-widest flex items-center gap-2 mb-3">
                                     Registration Fee (Mandatory for Bypass) <span className="text-red-400">*</span>
