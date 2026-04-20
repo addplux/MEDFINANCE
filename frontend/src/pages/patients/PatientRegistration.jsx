@@ -118,6 +118,8 @@ const PatientRegistration = () => {
         setStaffSearch('');
         setFormData(prev => ({
             ...prev,
+            patientCategory: 'staff',
+            referralType: 'bypass',
             firstName: staff.firstName,
             lastName: staff.lastName,
             manNumber: staff.manNumber,
@@ -141,14 +143,16 @@ const PatientRegistration = () => {
             setSelectedStaff(null);
             setFormData(prev => ({ 
                 ...prev, 
+                patientCategory: value,
                 firstName: '', 
                 lastName: '', 
                 manNumber: '', 
                 staffId: null,
                 referralType: value === 'staff' ? 'bypass' : prev.referralType
             }));
+        } else {
+            setFormData(prev => ({ ...prev, [field]: value }));
         }
-        setFormData(prev => ({ ...prev, [field]: value }));
         if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
     };
 
