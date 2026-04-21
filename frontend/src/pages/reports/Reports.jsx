@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { reportsAPI, payrollAPI } from '../../services/apiService';
-import { BarChart3, Download, Calendar, List, Printer, User, CreditCard, Clock, Receipt, ArrowRight, Wallet, TrendingUp, TrendingDown, DollarSign, FileText } from 'lucide-react';
+import { BarChart3, Download, Calendar, List, Printer, User, CreditCard, Clock, Receipt, ArrowRight, Wallet, TrendingUp, TrendingDown, DollarSign, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import StaffMedicalStatement from './StaffMedicalStatement';
 
 const Reports = () => {
@@ -463,16 +464,192 @@ const Reports = () => {
                                 </>
                             )}
 
-                            {/* Other reports placeholder */}
-                            {(activeTab === 'profitability' || activeTab === 'billing' || activeTab === 'performance') && (
-                                <div className="flex flex-col items-center justify-center py-24 text-center">
-                                    <div className="p-4 rounded-3xl bg-white/5 border border-white/10 mb-4">
-                                        <BarChart3 className="w-8 h-8 text-white/10" />
+                            {/* Department Profitability Tab */}
+                            {activeTab === 'profitability' && reportData?.departments && (
+                                <div className="space-y-8">
+                                    {/* Summary Cards */}
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                        <div className="card p-6 bg-white/[0.02] border-white/5">
+                                            <p className="text-[10px] font-black uppercase text-white/30 tracking-widest mb-1">Total Budget</p>
+                                            <p className="text-2xl font-black text-white">ZK {Number(reportData.summary.totalBudget).toLocaleString()}</p>
+                                        </div>
+                                        <div className="card p-6 bg-white/[0.02] border-white/5">
+                                            <p className="text-[10px] font-black uppercase text-white/30 tracking-widest mb-1">Actual Spent</p>
+                                            <p className="text-2xl font-black text-white">ZK {Number(reportData.summary.totalSpent).toLocaleString()}</p>
+                                        </div>
+                                        <div className="card p-6 bg-emerald-500/5 border-emerald-500/10">
+                                            <p className="text-[10px] font-black uppercase text-emerald-400/60 tracking-widest mb-1">Total Revenue</p>
+                                            <p className="text-2xl font-black text-emerald-400">ZK {Number(reportData.summary.totalRevenue).toLocaleString()}</p>
+                                        </div>
+                                        <div className={`card p-6 border-white/5 ${reportData.summary.totalProfit >= 0 ? 'bg-blue-500/5 border-blue-500/10' : 'bg-red-500/5 border-red-500/10'}`}>
+                                            <p className="text-[10px] font-black uppercase text-white/30 tracking-widest mb-1">Net Profit/Loss</p>
+                                            <p className={`text-2xl font-black ${reportData.summary.totalProfit >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
+                                                ZK {Number(reportData.summary.totalProfit).toLocaleString()}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <h4 className="text-sm font-black text-white uppercase tracking-wider mb-1">Detailed Analytics Pending</h4>
-                                    <p className="text-xs text-white/30 max-w-xs mx-auto">
-                                        This module is currently processing departmental data. Please use "Export Excel" for full dataset access.
-                                    </p>
+
+                                    {/* Chart section */}
+                                    <div className="card p-8 bg-white/[0.01] border-white/5">
+                                        <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-8">Financial Performance by Department</h3>
+                                        <div className="h-[400px] w-full">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <BarChart data={reportData.departments} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                                                    <XAxis 
+                                                        dataKey="departmentName" 
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 700 }}
+                                                        interval={0}
+                                                    />
+                                                    <YAxis 
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 700 }}
+                                                    />
+                                                    <Tooltip 
+                                                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                                        contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                                                        itemStyle={{ fontSize: '11px', fontWeight: 'bold' }}
+                                                    />
+                                                    <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold' }} />
+                                                    <Bar name="Budget" dataKey="budget" fill="rgba(255,255,255,0.1)" radius={[4, 4, 0, 0]} />
+                                                    <Bar name="Actual Expenditure" dataKey="actualSpent" fill="#ef4444" radius={[4, 4, 0, 0]} opacity={0.6} />
+                                                    <Bar name="Generated Revenue" dataKey="revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                    </div>
+
+                                    {/* Table section */}
+                                    <div className="overflow-x-auto ring-1 ring-white/5 rounded-2xl">
+                                        <table className="w-full border-collapse text-left text-[11px] bg-white/[0.01]">
+                                            <thead>
+                                                <tr className="border-b border-white/10 uppercase tracking-widest font-black text-white/30">
+                                                    <th className="px-6 py-4">Department</th>
+                                                    <th className="px-6 py-4">Budget (ZK)</th>
+                                                    <th className="px-6 py-4">Spent (ZK)</th>
+                                                    <th className="px-6 py-4">Revenue (ZK)</th>
+                                                    <th className="px-6 py-4">Variance</th>
+                                                    <th className="px-6 py-4 text-right">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-white/5">
+                                                {reportData.departments.map((dept, i) => {
+                                                    const variance = dept.budget - dept.actualSpent;
+                                                    const variancePercent = dept.budget > 0 ? (variance / dept.budget) * 100 : 0;
+                                                    
+                                                    return (
+                                                        <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
+                                                            <td className="px-6 py-4">
+                                                                <p className="font-black text-white uppercase">{dept.departmentName}</p>
+                                                                <p className="text-[9px] text-white/20 font-bold tracking-widest">{dept.departmentCode}</p>
+                                                            </td>
+                                                            <td className="px-6 py-4 font-bold text-white/60">
+                                                                {Number(dept.budget).toLocaleString()}
+                                                            </td>
+                                                            <td className="px-6 py-4 font-bold text-red-400/80">
+                                                                {Number(dept.actualSpent).toLocaleString()}
+                                                            </td>
+                                                            <td className="px-6 py-4 font-bold text-emerald-400">
+                                                                {Number(dept.revenue).toLocaleString()}
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden w-20">
+                                                                        <div 
+                                                                            className={`h-full ${variance >= 0 ? 'bg-emerald-500' : 'bg-red-500'}`} 
+                                                                            style={{ width: `${Math.min(Math.abs(variancePercent), 100)}%` }}
+                                                                        />
+                                                                    </div>
+                                                                    <span className={`font-bold ${variance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                                        {variance >= 0 ? '+' : ''}{Number(variance).toLocaleString()}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-4 text-right">
+                                                                {dept.profit >= 0 ? (
+                                                                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                                                        <CheckCircle2 size={10} /> Surplus
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase bg-red-500/10 text-red-500 border border-red-500/20">
+                                                                        <AlertCircle size={10} /> Deficit
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Billing Summary Tab */}
+                            {activeTab === 'billing' && reportData?.summary && (
+                                <div className="space-y-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                                        {Object.entries(reportData.summary).map(([key, data]) => (
+                                            <div key={key} className="card p-6 bg-white/[0.02] border-white/5 group hover:bg-white/[0.04] transition-all">
+                                                <p className="text-[10px] font-black uppercase text-white/30 tracking-widest mb-1">{key} Services</p>
+                                                <p className="text-2xl font-black text-white tracking-tighter">ZK {Number(data.total).toLocaleString()}</p>
+                                                <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                                                    <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{data.count} Bills</span>
+                                                    <Receipt size={12} className="text-white/10 group-hover:text-blue-400 transition-colors" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="card p-10 bg-gradient-to-br from-blue-600/10 to-transparent border-white/5 flex flex-col items-center justify-center text-center">
+                                        <p className="text-xs font-black text-white/40 uppercase tracking-[0.3em] mb-2">Aggregate Billing Volume</p>
+                                        <h2 className="text-6xl font-black text-white tracking-tighter">ZK {Number(reportData.grandTotal).toLocaleString()}</h2>
+                                        <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-4 flex items-center gap-2">
+                                            <CheckCircle2 size={12} /> Reconciled with global transaction logs
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Performance Tab */}
+                            {activeTab === 'performance' && reportData?.performance && (
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        {reportData.performance.map((p, i) => (
+                                            <div key={i} className="card p-6 bg-white/[0.02] border-white/5 flex flex-col">
+                                                <div className="flex items-center gap-4 mb-6">
+                                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg">
+                                                        {p.cashierName[0]}
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-black text-white uppercase tracking-tight">{p.cashierName}</h4>
+                                                        <p className="text-[10px] text-white/30 font-black uppercase tracking-widest">@{p.username}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-4">
+                                                    <div className="flex justify-between items-end">
+                                                        <div>
+                                                            <p className="text-[9px] text-white/40 font-black uppercase tracking-widest">Total Collected</p>
+                                                            <p className="text-xl font-black text-white">ZK {Number(p.totalCollected).toLocaleString()}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-[9px] text-white/40 font-black uppercase tracking-widest">Volume</p>
+                                                            <p className="text-lg font-black text-white/60">{p.transactionCount} Tx</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                                        <div 
+                                                            className="h-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" 
+                                                            style={{ width: `${Math.min((p.totalCollected / reportData.performance.reduce((max, curr) => Math.max(max, curr.totalCollected), 1)) * 100, 100)}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>

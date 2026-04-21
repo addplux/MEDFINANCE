@@ -97,11 +97,39 @@ const getCashflowReport = async (req, res) => {
 // Get department profitability
 const getDepartmentProfitability = async (req, res) => {
     try {
-        const { fiscalYear } = req.query;
+        const { startDate, endDate, fiscalYear: qFiscalYear } = req.query;
+        let fiscalYear = qFiscalYear;
+
+        // Infer fiscal year from startDate if not explicitly provided
+        if (!fiscalYear && startDate) {
+            fiscalYear = new Date(startDate).getFullYear();
+        }
 
         if (!fiscalYear) {
-            return res.status(400).json({ error: 'Fiscal year is required' });
+            return res.status(400).json({ error: 'Fiscal year or explicit start date is required' });
         }
+
+        const dateWhere = startDate && endDate ? {
+            paymentDate: {
+                [sequelize.Sequelize.Op.between]: [new Date(startDate), new Date(endDate)]
+            }
+        } : {};
+
+        // Aggregate revenue by billType from Payments
+        const revenueByDepartment = await Payment.findAll({
+            attributes: [
+                'billType',
+                [sequelize.fn('SUM', sequelize.col('amount')), 'total']
+            ],
+            where: dateWhere,
+            group: ['billType']
+        });
+
+        const revMap = {};
+        revenueByDepartment.forEach(entry => {
+            const bt = (entry.billType || 'other').toLowerCase();
+            revMap[bt] = parseFloat(entry.getDataValue('total')) || 0;
+        });
 
         const departments = await Department.findAll({
             where: { status: 'active' }
@@ -115,18 +143,31 @@ const getDepartmentProfitability = async (req, res) => {
                 where: { departmentId: dept.id, fiscalYear }
             });
 
-            // Get revenue (simplified - would need more complex logic in production)
-            // This is a placeholder - actual revenue would come from bills linked to departments
-            const revenue = 0;
+            // Fuzzy match department name to the bill type
+            const dName = dept.departmentName.toLowerCase();
+            let revenue = 0;
+            if (dName.includes('opd') || dName.includes('outpatient')) revenue = revMap['opd'] || 0;
+            else if (dName.includes('ipd') || dName.includes('inpatient')) revenue = revMap['ipd'] || 0;
+            else if (dName.includes('pharmacy')) revenue = revMap['pharmacy'] || 0;
+            else if (dName.includes('lab')) revenue = revMap['laboratory'] || 0;
+            else if (dName.includes('radio')) revenue = revMap['radiology'] || 0;
+            else if (dName.includes('theatre')) revenue = revMap['theatre'] || 0;
+            else if (dName.includes('maternity')) revenue = revMap['maternity'] || 0;
+            else if (dName.includes('specialist')) revenue = revMap['specialist'] || 0;
+            else if (dName.includes('record')) revenue = revMap['records'] || 0;
+            else revenue = revMap['other'] || 0;
+
+            const budgeted = budget ? parseFloat(budget.budgetedAmount) : 0;
+            const spent = budget ? parseFloat(budget.actualAmount) : 0;
 
             profitability.push({
                 departmentId: dept.id,
                 departmentCode: dept.departmentCode,
                 departmentName: dept.departmentName,
-                budget: budget ? parseFloat(budget.budgetAmount) : 0,
-                actualSpent: budget ? parseFloat(budget.actualSpent) : 0,
+                budget: budgeted,
+                actualSpent: spent,
                 revenue,
-                profit: revenue - (budget ? parseFloat(budget.actualSpent) : 0)
+                profit: revenue - spent
             });
         }
 
