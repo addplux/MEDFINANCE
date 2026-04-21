@@ -18,4 +18,7 @@ router.put('/deductions/:id', authMiddleware, authorize('admin', 'accountant', '
 // Batch Update
 router.post('/deductions/batch', authMiddleware, authorize('admin', 'accountant', 'hr'), payrollController.batchUpdateDeductions);
 
+// Staff Medical Statement (Bill Slip)
+router.get('/statement/:staffId', authMiddleware, authorize('admin', 'accountant', 'hr'), payrollController.getStaffMedicalStatement);
+
 module.exports = router;

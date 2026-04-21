@@ -267,7 +267,18 @@ const PaymentForm = () => {
                                     <p className="text-[10px] text-emerald-400 mt-1">✓ Auto-set: patient is a corporate scheme member</p>
                                 )}
                                 {selectedPatient?.paymentMethod === 'staff' && (
-                                    <p className="text-[10px] text-accent mt-1">💡 Suggested: patient is a staff member. Suggest Payroll Deduction.</p>
+                                    <div className="mt-3 p-4 bg-accent/10 border border-accent/20 rounded-xl animate-in slide-in-from-top-2 duration-300">
+                                        <div className="flex items-start gap-3">
+                                            <Info className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+                                            <div>
+                                                <p className="text-xs font-black text-white uppercase tracking-widest mb-1">Staff Billing Policy</p>
+                                                <p className="text-[10px] text-white/60 leading-relaxed">
+                                                    As per hospital policy, staff medical expenses are settled via **Salary Deduction**. 
+                                                    Please ensure <span className="text-accent font-bold">Payroll Deduction</span> is selected. No cash is collected at the desk.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
 

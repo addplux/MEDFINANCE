@@ -271,10 +271,59 @@ const batchUpdateDeductions = async (req, res) => {
     }
 };
 
+// Get Staff Monthly Medical Statement
+const getStaffMedicalStatement = async (req, res) => {
+    try {
+        const { staffId } = req.params;
+        const { period } = req.query; // YYYY-MM
+
+        if (!staffId || !period) {
+            return res.status(400).json({ error: 'Staff ID and period are required' });
+        }
+
+        const deductions = await PayrollDeduction.findAll({
+            where: { 
+                staffId, 
+                period,
+                type: 'Medical Bill'
+            },
+            include: [
+                {
+                    model: User,
+                    as: 'staff',
+                    attributes: ['firstName', 'lastName', 'email', 'manNumber']
+                },
+                {
+                    model: Payment,
+                    as: 'payment',
+                    attributes: ['id', 'receiptNumber', 'amount', 'billType', 'billId', 'paymentDate']
+                }
+            ],
+            order: [['createdAt', 'ASC']]
+        });
+
+        const totalAmount = deductions.reduce((sum, d) => sum + parseFloat(d.amount), 0);
+
+        res.json({
+            staff: deductions.length > 0 ? deductions[0].staff : null,
+            period,
+            deductions,
+            summary: {
+                count: deductions.length,
+                totalAmount
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching staff medical statement:', error);
+        res.status(500).json({ error: 'Failed to fetch staff medical statement' });
+    }
+};
+
 module.exports = {
     getDeductions,
     createDeduction,
     getStaffBalances,
     updateDeductionStatus,
-    batchUpdateDeductions
+    batchUpdateDeductions,
+    getStaffMedicalStatement
 };

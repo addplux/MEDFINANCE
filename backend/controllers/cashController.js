@@ -56,6 +56,21 @@ const createPayment = async (req, res) => {
             return res.status(400).json({ error: 'Patient, amount, and payment method are required' });
         }
 
+        // Infer billType if missing but paidBills are present
+        let finalBillType = billType;
+        if (!finalBillType && req.body.paidBills && req.body.paidBills.length > 0) {
+            const types = req.body.paidBills.map(b => (b.type || '').toLowerCase());
+            if (types.includes('opd') || types.includes('opdbill')) finalBillType = 'opd';
+            else if (types.includes('pharmacy') || types.includes('pharmacybill')) finalBillType = 'pharmacy';
+            else if (types.includes('laboratory') || types.includes('labbill')) finalBillType = 'laboratory';
+            else if (types.includes('radiology') || types.includes('radiologybill')) finalBillType = 'radiology';
+            else if (types.includes('theatre') || types.includes('theatrebill')) finalBillType = 'theatre';
+            else if (types.includes('maternity') || types.includes('maternitybill')) finalBillType = 'maternity';
+            else if (types.includes('specialist') || types.includes('specialistclinicbill')) finalBillType = 'specialist';
+            
+            if (req.body.paidBills.length > 1 && !finalBillType) finalBillType = 'multiple';
+        }
+
         // Generate receipt number
         const paymentCount = await Payment.count();
         const receiptNumber = `RCP${String(paymentCount + 1).padStart(6, '0')}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
@@ -84,7 +99,7 @@ const createPayment = async (req, res) => {
             paymentMethod,
             referenceNumber: finalReference,
             paymentDate: paymentDate || new Date(),
-            billType,
+            billType: finalBillType,
             billId: cleanedBillId,
             notes,
             receivedBy: req.user.id
@@ -500,6 +515,7 @@ const preRegisterPatient = async (req, res) => {
             amount: Number(amount),
             paymentMethod: paymentMethod || 'cash',
             paymentDate: new Date(),
+            billType: 'opd',
             notes: 'Pre-Registration Payment',
             receivedBy: req.user?.id || 1
         }, { transaction: t });

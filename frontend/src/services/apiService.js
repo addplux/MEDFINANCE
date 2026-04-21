@@ -284,7 +284,8 @@ export const payrollAPI = {
     getStaffBalances: () => api.get('/payroll/balances'),
     createDeduction: (data) => api.post('/payroll/deductions', data),
     updateStatus: (id, status) => api.put(`/payroll/deductions/${id}`, { status }),
-    batchUpdate: (data) => api.post('/payroll/deductions/batch', data)
+    batchUpdate: (data) => api.post('/payroll/deductions/batch', data),
+    getStaffStatement: (staffId, params) => api.get(`/payroll/statement/${staffId}`, { params })
 };
 
 // Pharmacy

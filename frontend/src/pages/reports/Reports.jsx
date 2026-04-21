@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { reportsAPI } from '../../services/apiService';
-import { BarChart3, Download, Calendar, List, Printer, User, CreditCard, Clock } from 'lucide-react';
+import { reportsAPI, payrollAPI } from '../../services/apiService';
+import { BarChart3, Download, Calendar, List, Printer, User, CreditCard, Clock, Receipt, ArrowRight, Wallet, TrendingUp, TrendingDown, DollarSign, FileText } from 'lucide-react';
+import StaffMedicalStatement from './StaffMedicalStatement';
 
 const Reports = () => {
     const [activeTab, setActiveTab] = useState('revenue');
@@ -11,6 +12,8 @@ const Reports = () => {
     });
     const [reportData, setReportData] = useState(null);
     const [lineListing, setLineListing] = useState([]);
+    const [staffBalances, setStaffBalances] = useState([]);
+    const [selectedStaffForStatement, setSelectedStaffForStatement] = useState(null);
 
     const tabs = [
         { id: 'revenue', label: 'Revenue Report', icon: BarChart3 },
@@ -18,6 +21,7 @@ const Reports = () => {
         { id: 'cashflow', label: 'Cashflow Analysis', icon: BarChart3 },
         { id: 'profitability', label: 'Department Profitability', icon: BarChart3 },
         { id: 'billing', label: 'Billing Summary', icon: BarChart3 },
+        { id: 'staff-billing', label: 'Staff Medical Bills', icon: Wallet },
         { id: 'performance', label: 'Cashier Performance', icon: BarChart3 }
     ];
 
@@ -49,6 +53,10 @@ const Reports = () => {
                     // So the patients array is at response.data.data
                     const listData = response?.data?.data ?? response?.data ?? [];
                     setLineListing(Array.isArray(listData) ? listData : []);
+                    break;
+                case 'staff-billing':
+                    response = await payrollAPI.getStaffBalances();
+                    setStaffBalances(response.data || []);
                     break;
                 default:
                     break;
@@ -216,7 +224,7 @@ const Reports = () => {
                                     <div className="card p-8 bg-gradient-to-br from-emerald-500/10 to-transparent border-emerald-500/20">
                                         <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-1">OPD Transactions</p>
                                         <div className="text-4xl font-black text-white tracking-tighter">
-                                            {reportData?.byBillType?.find(b => b.billType === 'OPD')?.count || 0}
+                                            {reportData?.byBillType?.find(b => (b.billType || '').toUpperCase() === 'OPD')?.count || 0}
                                         </div>
                                         <p className="text-[10px] font-bold text-emerald-400 mt-2 uppercase">Processed Successfully</p>
                                     </div>
@@ -391,6 +399,68 @@ const Reports = () => {
                                         </table>
                                     </div>
                                 </div>
+                            )}
+
+                            {/* Staff Billing Tab */}
+                            {activeTab === 'staff-billing' && (
+                                <>
+                                    {selectedStaffForStatement ? (
+                                        <StaffMedicalStatement 
+                                            staffId={selectedStaffForStatement.staffId}
+                                            period={new Date().toISOString().slice(0, 7)} // Default to current month
+                                            onBack={() => setSelectedStaffForStatement(null)}
+                                        />
+                                    ) : (
+                                        <div className="space-y-6">
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                                                    Staff Medical Balances (Pending Deduction)
+                                                    <span className="text-[10px] bg-white/5 text-white/40 px-2 py-0.5 rounded-full border border-white/10">{staffBalances.length} Staff Members</span>
+                                                </h3>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                                {staffBalances.map((item) => (
+                                                    <div key={item.staffId} className="card p-6 bg-white/[0.01] hover:bg-white/5 transition-all group border-white/5 cursor-pointer" onClick={() => setSelectedStaffForStatement(item)}>
+                                                        <div className="flex justify-between items-start mb-6">
+                                                            <div className="p-3 rounded-2xl bg-accent/20 text-accent group-hover:scale-110 transition-transform">
+                                                                <User size={24} />
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <p className="text-[10px] font-black uppercase text-accent tracking-widest mb-1">Pending Debt</p>
+                                                                <p className="text-2xl font-black text-white tracking-tighter">ZK {Number(item.totalDebt).toLocaleString()}</p>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="mb-6">
+                                                            <h4 className="text-base font-black text-white uppercase tracking-tight">{item.staff?.firstName} {item.staff?.lastName}</h4>
+                                                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">{item.staff?.role || 'Staff Member'}</p>
+                                                        </div>
+
+                                                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                                                            <div className="flex items-center gap-1.5 text-[10px] font-black text-white/40 uppercase tracking-widest">
+                                                                <Receipt size={14} className="opacity-50" />
+                                                                {item.pendingCount} Bill Items
+                                                            </div>
+                                                            <button 
+                                                                className="text-accent text-[10px] font-black uppercase tracking-widest flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            >
+                                                                Generate slip <ArrowRight size={12} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {staffBalances.length === 0 && (
+                                                    <div className="col-span-full py-20 text-center border-2 border-dashed border-white/5 rounded-3xl">
+                                                        <Wallet className="w-10 h-10 text-white/10 mx-auto mb-4" />
+                                                        <h4 className="text-sm font-black text-white uppercase tracking-widest">No Medical Debts</h4>
+                                                        <p className="text-[10px] text-white/20 uppercase tracking-widest mt-1">All staff medical accounts are currently clear.</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
                             )}
 
                             {/* Other reports placeholder */}

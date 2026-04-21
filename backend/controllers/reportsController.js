@@ -41,11 +41,17 @@ const getRevenueReport = async (req, res) => {
             group: ['billType']
         });
 
+        // Normalize billType to uppercase for frontend
+        const normalizedByBillType = byBillType.map(b => ({
+            ...b.get({ plain: true }),
+            billType: (b.billType || 'OTHER').toUpperCase()
+        }));
+
         res.json({
             period: { startDate, endDate },
             totalRevenue: parseFloat(totalRevenue).toFixed(2),
             byPaymentMethod,
-            byBillType
+            byBillType: normalizedByBillType
         });
     } catch (error) {
         console.error('Get revenue report error:', error);
@@ -276,7 +282,7 @@ const getDepartmentRevenue = async (req, res) => {
         let totalRevenue = 0;
 
         revenueByDepartment.forEach(entry => {
-            const department = entry.billType || 'Other';
+            const department = (entry.billType || 'Other').toUpperCase();
             const amount = parseFloat(entry.getDataValue('total'));
             formattedRevenue[department] = amount.toFixed(2);
             totalRevenue += amount;

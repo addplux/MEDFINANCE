@@ -279,6 +279,7 @@ Bed.belongsTo(Admission, { foreignKey: 'currentAdmissionId', as: 'currentAdmissi
 // Payroll Deduction relationships
 PayrollDeduction.belongsTo(User, { foreignKey: 'staffId', as: 'staff' });
 PayrollDeduction.belongsTo(ChartOfAccounts, { foreignKey: 'accountId', as: 'account' });
+PayrollDeduction.belongsTo(Payment, { foreignKey: 'referenceId', as: 'payment', constraints: false });
 
 // Sync database
 const syncDatabase = async (options = {}) => {
