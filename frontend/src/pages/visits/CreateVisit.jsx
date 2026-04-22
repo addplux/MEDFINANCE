@@ -68,14 +68,37 @@ const CreateVisit = () => {
     useEffect(() => {
         const fetchServices = async () => {
             try {
-                const params = { isActive: true };
-                if (form.assignedDepartment) {
-                    params.department = form.assignedDepartment;
+                if (form.assignedDepartment === 'Pharmacy') {
+                    const res = await pharmacyAPI.inventory.getAll();
+                    const meds = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+                    // Filter for in-stock and transform to service format
+                    const mappedMeds = meds
+                        .filter(m => (m.totalStock || 0) > 0)
+                        .map(m => {
+                            const latestBatch = m.batches?.[0] || {};
+                            const price = latestBatch.sellingPrice || 0;
+                            return {
+                                id: m.id,
+                                isMedication: true, // Flag for handling in submission if needed
+                                serviceName: `${m.name} (${m.totalStock} in stock)`,
+                                price: price,
+                                cashPrice: price,
+                                corporatePrice: price,
+                                schemePrice: price,
+                                staffPrice: price
+                            };
+                        });
+                    setServices(mappedMeds);
                 } else {
-                    params.category = 'opd';
+                    const params = { isActive: true };
+                    if (form.assignedDepartment) {
+                        params.department = form.assignedDepartment;
+                    } else {
+                        params.category = 'opd';
+                    }
+                    const res = await setupAPI.services.getAll(params);
+                    setServices(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
                 }
-                const res = await setupAPI.services.getAll(params);
-                setServices(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
             } catch (err) {
                 console.error('Failed to load services:', err);
             }

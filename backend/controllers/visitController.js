@@ -1,4 +1,4 @@
-const { Visit, Patient, Scheme, Vitals, PatientMovement, Department, Admission, Bed, Ward, User, OPDBill, PharmacyBill, LabBill, Service, LabTest, LabRequest, LabResult, RadiologyBill, sequelize } = require('../models');
+const { Visit, Patient, Scheme, Vitals, PatientMovement, Department, Admission, Bed, Ward, User, OPDBill, PharmacyBill, LabBill, Service, LabTest, LabRequest, LabResult, RadiologyBill, Medication, PharmacyBatch, sequelize } = require('../models');
 const { Op } = require('sequelize');
 
 // Create a new outpatient visit
@@ -70,36 +70,79 @@ const createVisit = async (req, res) => {
         }, { transaction: t });
 
         if (serviceId) {
-            const service = await Service.findByPk(serviceId, { transaction: t });
-            if (service) {
-                let finalPrice = parseFloat(service.cashPrice || service.price || 0);
-                if (patient.paymentMethod === 'corporate') finalPrice = parseFloat(service.corporatePrice || service.price || 0);
-                else if (patient.paymentMethod === 'scheme') finalPrice = parseFloat(service.schemePrice || service.price || 0);
-                else if (patient.paymentMethod === 'staff') finalPrice = parseFloat(service.staffPrice || service.price || 0);
+            // Handle Pharmacy medications specifically if assigned to Pharmacy
+            if (assignedDepartment === 'Pharmacy') {
+                const medication = await Medication.findByPk(serviceId, { transaction: t });
+                if (medication) {
+                    // Find oldest batch with stock
+                    const batch = await PharmacyBatch.findOne({
+                        where: {
+                            medicationId: medication.id,
+                            quantityOnHand: { [Op.gt]: 0 },
+                            expiryDate: { [Op.gt]: new Date() }
+                        },
+                        order: [['expiryDate', 'ASC']],
+                        transaction: t
+                    });
 
-                const countOpd = await OPDBill.count({ transaction: t });
-                const billNum = `OPD${String(countOpd + 1).padStart(6, '0')}`;
+                    if (batch) {
+                        const billCount = await PharmacyBill.count({ transaction: t });
+                        const billNum = `PHARM${String(billCount + 1).padStart(6, '0')}`;
 
-                let billPaymentStatus = 'unpaid';
-                if (patient.paymentMethod !== 'cash' && patient.paymentMethod !== 'private prepaid') {
-                    billPaymentStatus = 'claimed';
+                        let billPaymentStatus = 'unpaid';
+                        if (patient.paymentMethod !== 'cash' && patient.paymentMethod !== 'private prepaid') {
+                            billPaymentStatus = 'claimed';
+                        }
+
+                        await PharmacyBill.create({
+                            billNumber: billNum,
+                            patientId,
+                            visitId: visit.id,
+                            medicationId: medication.id,
+                            batchId: batch.id,
+                            quantity: 1,
+                            unitPrice: parseFloat(batch.sellingPrice || 0),
+                            totalAmount: parseFloat(batch.sellingPrice || 0),
+                            netAmount: parseFloat(batch.sellingPrice || 0),
+                            status: 'pending',
+                            paymentStatus: billPaymentStatus,
+                            notes: `Initial Prescribed: ${medication.name}`,
+                            createdBy: req.user.id
+                        }, { transaction: t });
+                    }
                 }
+            } else {
+                const service = await Service.findByPk(serviceId, { transaction: t });
+                if (service) {
+                    let finalPrice = parseFloat(service.cashPrice || service.price || 0);
+                    if (patient.paymentMethod === 'corporate') finalPrice = parseFloat(service.corporatePrice || service.price || 0);
+                    else if (patient.paymentMethod === 'scheme') finalPrice = parseFloat(service.schemePrice || service.price || 0);
+                    else if (patient.paymentMethod === 'staff') finalPrice = parseFloat(service.staffPrice || service.price || 0);
 
-                await OPDBill.create({
-                    billNumber: billNum,
-                    patientId,
-                    visitId: visit.id,
-                    serviceId: service.id,
-                    quantity: 1,
-                    unitPrice: finalPrice,
-                    totalAmount: finalPrice,
-                    netAmount: finalPrice,
-                    billDate: new Date(),
-                    status: billPaymentStatus === 'claimed' ? 'paid' : 'pending',
-                    paymentStatus: billPaymentStatus,
-                    notes: `Initial Visit Consultation: ${service.serviceName}`,
-                    createdBy: req.user.id
-                }, { transaction: t });
+                    const countOpd = await OPDBill.count({ transaction: t });
+                    const billNum = `OPD${String(countOpd + 1).padStart(6, '0')}`;
+
+                    let billPaymentStatus = 'unpaid';
+                    if (patient.paymentMethod !== 'cash' && patient.paymentMethod !== 'private prepaid') {
+                        billPaymentStatus = 'claimed';
+                    }
+
+                    await OPDBill.create({
+                        billNumber: billNum,
+                        patientId,
+                        visitId: visit.id,
+                        serviceId: service.id,
+                        quantity: 1,
+                        unitPrice: finalPrice,
+                        totalAmount: finalPrice,
+                        netAmount: finalPrice,
+                        billDate: new Date(),
+                        status: billPaymentStatus === 'claimed' ? 'paid' : 'pending',
+                        paymentStatus: billPaymentStatus,
+                        notes: `Initial Visit Consultation: ${service.serviceName}`,
+                        createdBy: req.user.id
+                    }, { transaction: t });
+                }
             }
         }
 
