@@ -1,7 +1,7 @@
 const xlsx = require('xlsx');
 const { CorporateAccount, Scheme, SchemeInvoice, Patient, User, OPDBill, PharmacyBill, LabBill, RadiologyBill, TheatreBill, MaternityBill, SpecialistClinicBill, Service, Payment, sequelize } = require('../models');
 const { Op } = require('sequelize');
-const { postSchemeInvoice } = require('../utils/glPoster');
+const { postSchemeInvoice, postChargeToGL } = require('../utils/glPoster');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const pdfService = require('../services/pdfService'); // Added pdfService import
@@ -1613,6 +1613,196 @@ const exportInvoiceToWOHMS = async (req, res) => {
     }
 };
 
+// Submit Manual Scheme Claim
+const submitManualClaim = async (req, res) => {
+    const t = await sequelize.transaction();
+    try {
+        const {
+            manNo, hospitalCode, providerCode, month, invoiceNo,
+            dateOfTreatment, invoiceDate, employeePhone, employeeName,
+            employeeNrc, employeeDob, employeeEmail, patientName,
+            patientDob, patientGender, patientNrc, relationship,
+            serviceType, schemeId, charges, agreement
+        } = req.body;
+
+        if (!agreement) return res.status(400).json({ error: 'You must agree to the terms' });
+        if (!schemeId || !manNo || !patientName) return res.status(400).json({ error: 'Missing required fields' });
+
+        const scheme = await Scheme.findByPk(schemeId, { transaction: t });
+        if (!scheme) return res.status(404).json({ error: 'Scheme not found' });
+
+        // 1. Find or Create Patient
+        let patient = await Patient.findOne({
+            where: {
+                [Op.or]: [
+                    { policyNumber: manNo },
+                    { nrc: patientNrc || employeeNrc || 'N/A' }
+                ],
+                schemeId
+            },
+            transaction: t
+        });
+
+        if (!patient) {
+            const patientCount = await Patient.count({ transaction: t });
+            patient = await Patient.create({
+                patientNumber: `P${String(patientCount + 1).padStart(6, '0')}`,
+                firstName: patientName.split(' ')[0],
+                lastName: patientName.split(' ').slice(1).join(' ') || 'N/A',
+                dateOfBirth: patientDob || '1900-01-01',
+                gender: (patientGender || 'other').toLowerCase(),
+                phone: employeePhone,
+                email: employeeEmail,
+                nrc: patientNrc || employeeNrc || 'N/A',
+                policyNumber: manNo,
+                schemeId,
+                paymentMethod: scheme.schemeType === 'corporate' ? 'corporate' : 'scheme',
+                memberRank: relationship?.toLowerCase() === 'self' ? 'principal' : 'dependant',
+                memberStatus: 'active'
+            }, { transaction: t });
+        }
+
+        // 2. Prepare Generic Dependencies (Service, Medication)
+        const { Service, Medication } = require('../models');
+        
+        let genericService = await Service.findOne({ where: { serviceName: 'Manual Claim Reference' }, transaction: t });
+        if (!genericService) {
+            genericService = await Service.create({
+                serviceCode: 'GENOPD-CLAIM',
+                serviceName: 'Manual Claim Reference',
+                category: 'opd',
+                department: 'Records',
+                price: 0,
+                cashPrice: 0, corporatePrice: 0, schemePrice: 0, staffPrice: 0,
+                isActive: true
+            }, { transaction: t });
+        }
+
+        let genericMedication = await Medication.findOne({ where: { name: 'Manual Claim Drug' }, transaction: t });
+        if (!genericMedication) {
+            genericMedication = await Medication.create({
+                name: 'Manual Claim Drug',
+                code: 'DRUG-CLAIM',
+                category: 'External',
+                unitOfMeasure: 'unit',
+                reorderLevel: 0,
+                isActive: true
+            }, { transaction: t });
+        }
+
+        // 3. Create Bills for each category
+        const createdBills = [];
+        const billDate = invoiceDate || dateOfTreatment || new Date().toISOString().slice(0, 10);
+        const creatorId = req.user?.id || 1;
+
+        const categories = [
+            { key: 'consultation', label: 'Consultation', model: OPDBill, category: 'opd' },
+            { key: 'nurseCare', label: 'Nursing Care', model: OPDBill, category: 'opd' },
+            { key: 'laboratory', label: 'Laboratory', model: LabBill, category: 'laboratory' },
+            { key: 'pharmacy', label: 'Pharmacy', model: PharmacyBill, category: 'pharmacy' },
+            { key: 'xray', label: 'Radiology', model: RadiologyBill, category: 'radiology' },
+            { key: 'theatre', label: 'Theatre', model: TheatreBill, category: 'theatre' },
+            { key: 'dental', label: 'Dental', model: OPDBill, category: 'opd' },
+            { key: 'eye', label: 'Eye', model: OPDBill, category: 'opd' },
+            { key: 'physio', label: 'Physiotherapy', model: OPDBill, category: 'opd' },
+            { key: 'other', label: 'Other', model: OPDBill, category: 'opd' }
+        ];
+
+        for (const cat of categories) {
+            const amount = parseFloat(charges[cat.key]);
+            if (!amount || amount <= 0) continue;
+
+            const billNumber = `MAN-${invoiceNo || 'INV'}-${cat.key.slice(0, 3).toUpperCase()}-${Date.now().toString().slice(-4)}`;
+            
+            let bill;
+            if (cat.model === OPDBill) {
+                bill = await OPDBill.create({
+                    billNumber,
+                    patientId: patient.id,
+                    serviceId: genericService.id,
+                    quantity: 1,
+                    unitPrice: amount,
+                    totalAmount: amount,
+                    netAmount: amount,
+                    billDate,
+                    status: 'completed',
+                    paymentStatus: 'claimed',
+                    paymentMethod: 'credit',
+                    notes: `Manual Claim: ${cat.label}`,
+                    createdBy: creatorId
+                }, { transaction: t });
+            } else if (cat.model === LabBill) {
+                bill = await LabBill.create({
+                    billNumber,
+                    patientId: patient.id,
+                    testName: `Manual Claim: ${cat.label}`,
+                    amount,
+                    netAmount: amount,
+                    billDate,
+                    status: 'completed',
+                    paymentStatus: 'claimed',
+                    createdBy: creatorId
+                }, { transaction: t });
+            } else if (cat.model === PharmacyBill) {
+                bill = await PharmacyBill.create({
+                    billNumber,
+                    patientId: patient.id,
+                    medicationId: genericMedication.id,
+                    quantity: 1,
+                    unitPrice: amount,
+                    totalAmount: amount,
+                    netAmount: amount,
+                    billDate,
+                    status: 'completed',
+                    paymentStatus: 'claimed',
+                    createdBy: creatorId
+                }, { transaction: t });
+            } else if (cat.model === RadiologyBill) {
+                bill = await RadiologyBill.create({
+                    billNumber,
+                    patientId: patient.id,
+                    scanType: `Manual Claim: ${cat.label}`,
+                    amount,
+                    netAmount: amount,
+                    billDate,
+                    status: 'completed',
+                    paymentStatus: 'claimed',
+                    createdBy: creatorId
+                }, { transaction: t });
+            } else if (cat.model === TheatreBill) {
+                bill = await TheatreBill.create({
+                    billNumber,
+                    patientId: patient.id,
+                    procedureType: `Manual Claim: ${cat.label}`,
+                    surgeonName: 'External Provider',
+                    procedureDate: billDate,
+                    theatreCharges: amount,
+                    totalAmount: amount,
+                    paymentStatus: 'claimed',
+                    notes: `Manual Claim: ${cat.label}`
+                }, { transaction: t });
+            }
+
+            if (bill) {
+                if (!bill.netAmount && bill.totalAmount) bill.netAmount = bill.totalAmount;
+                if (!bill.billNumber) bill.billNumber = billNumber;
+                
+                createdBills.push(bill);
+                // Post to GL
+                await postChargeToGL(bill, '4000', t);
+            }
+        }
+
+        await t.commit();
+        res.status(201).json({ message: 'Manual claim submitted successfully', billsCount: createdBills.length });
+
+    } catch (error) {
+        if (t) await t.rollback();
+        console.error('Submit manual claim error:', error);
+        res.status(500).json({ error: 'Failed to submit manual claim', details: error.message });
+    }
+};
+
 module.exports = {
     getAllCorporateAccounts,
     createCorporateAccount,
@@ -1634,5 +1824,6 @@ module.exports = {
     addSchemeMember,
     getAllInvoices,
     updateInvoiceStatus,
-    exportInvoiceToWOHMS
+    exportInvoiceToWOHMS,
+    submitManualClaim
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { patientAPI, receivablesAPI, visitAPI } from '../../services/apiService';
+import { patientAPI, receivablesAPI, visitAPI, setupAPI } from '../../services/apiService';
 import { ArrowLeft, Search, Stethoscope, BedDouble, Baby, Siren, CheckCircle } from 'lucide-react';
 
 const VISIT_TYPES = [
@@ -24,12 +24,16 @@ const CreateVisit = () => {
     const [patientResults, setPatientResults] = useState([]);
     const [searchingPatient, setSearchingPatient] = useState(false);
     const [schemes, setSchemes] = useState([]);
+    const [services, setServices] = useState([]);
+    const [doctors, setDoctors] = useState([]);
 
     const [form, setForm] = useState({
         patientId: '',
         patientDisplay: '',
         visitType: 'opd',
         assignedDepartment: '',
+        serviceId: '',
+        assignedDoctorId: '',
         schemeId: '',
         admissionDate: new Date().toISOString().slice(0, 16),
         notes: ''
@@ -51,6 +55,16 @@ const CreateVisit = () => {
         receivablesAPI.schemes.getAll().then(r => {
             const list = Array.isArray(r.data) ? r.data : (r.data?.data || []);
             setSchemes(list);
+        }).catch(() => { });
+
+        setupAPI.services.getAll({ category: 'opd' }).then(res => {
+            setServices(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
+        }).catch(() => { });
+
+        setupAPI.users.getAll().then(res => {
+            const allUsers = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : [];
+            const docs = allUsers.filter(u => ['doctor', 'specialist', 'clinician'].includes(u.role?.toLowerCase() || ''));
+            setDoctors(docs);
         }).catch(() => { });
     }, []);
 
@@ -123,14 +137,20 @@ const CreateVisit = () => {
         if (!form.patientId) { alert('Please select a patient'); return; }
         setLoading(true);
         try {
-            const res = await visitAPI.create({
+            const payload = {
                 patientId: form.patientId,
                 visitType: form.visitType,
                 assignedDepartment: form.assignedDepartment,
                 schemeId: form.schemeId ? parseInt(form.schemeId, 10) : undefined,
                 admissionDate: form.admissionDate,
                 notes: form.notes
-            });
+            };
+            if (form.visitType === 'opd') {
+                if (form.serviceId) payload.serviceId = parseInt(form.serviceId, 10);
+                if (form.assignedDoctorId) payload.assignedDoctorId = parseInt(form.assignedDoctorId, 10);
+            }
+
+            const res = await visitAPI.create(payload);
             navigate(`/app/visits/${res.data.id}`);
         } catch (err) {
             const msg = err.response?.data?.error || 'Failed to create visit';
@@ -272,6 +292,44 @@ const CreateVisit = () => {
                                 {schemes.map(s => <option key={s.id} value={s.id}>{s.schemeName}</option>)}
                             </select>
                         </div>
+
+                        {form.visitType === 'opd' && (
+                            <>
+                                <div className="form-group">
+                                    <label className="form-label">Consultation Service</label>
+                                    <select
+                                        value={form.serviceId}
+                                        onChange={e => setForm(f => ({ ...f, serviceId: e.target.value }))}
+                                        className="form-select"
+                                    >
+                                        <option value="">Select Service (optional)</option>
+                                        {services.map(s => {
+                                            const method = selectedPatient?.paymentMethod || 'cash';
+                                            let price = s.cashPrice || s.price || 0;
+                                            if (method === 'corporate') price = s.corporatePrice || s.price || 0;
+                                            if (method === 'scheme') price = s.schemePrice || s.price || 0;
+                                            if (method === 'staff') price = s.staffPrice || s.price || 0;
+                                            return (
+                                                <option key={s.id} value={s.id}>
+                                                    {s.serviceName} {Number(price) > 0 ? `(K${Number(price).toFixed(2)})` : ''}
+                                                </option>
+                                            );
+                                        })}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Assigned Doctor/Clinician</label>
+                                    <select
+                                        value={form.assignedDoctorId}
+                                        onChange={e => setForm(f => ({ ...f, assignedDoctorId: e.target.value }))}
+                                        className="form-select"
+                                    >
+                                        <option value="">Select Doctor (optional)</option>
+                                        {doctors.map(d => <option key={d.id} value={d.id}>Dr. {d.firstName} {d.lastName}</option>)}
+                                    </select>
+                                </div>
+                            </>
+                        )}
 
                         <div className="form-group">
                             <label className="form-label">Admission Date & Time</label>

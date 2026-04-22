@@ -106,14 +106,15 @@ const SubmitInvoiceForm = () => {
             setIsSubmitting(true);
             toast.loading("Submitting invoice claim...", { id: 'submit' });
             
-            // Replaced simulation with real call (placeholder until backend endpoint is verified)
-            // await receivablesAPI.invoices.submitManualClaim(formData);
+            // Call the real backend API
+            await receivablesAPI.schemes.submitManualClaim(formData);
             
             toast.success("Invoice successfully submitted!", { id: 'submit' });
             navigate('/app/receivables/invoices');
         } catch (error) {
             console.error(error);
-            toast.error("Failed to submit invoice.", { id: 'submit' });
+            const errMsg = error.response?.data?.error || "Failed to submit invoice.";
+            toast.error(errMsg, { id: 'submit' });
         } finally {
             setIsSubmitting(false);
         }

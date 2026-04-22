@@ -37,6 +37,11 @@ const Visit = sequelize.define('Visit', {
         type: DataTypes.STRING(100),
         allowNull: true
     },
+    assignedDoctorId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: { model: 'users', key: 'id' }
+    },
     status: {
         type: DataTypes.ENUM('active', 'discharged', 'transferred', 'cancelled'),
         allowNull: false,

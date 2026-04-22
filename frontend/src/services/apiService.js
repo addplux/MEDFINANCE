@@ -135,6 +135,7 @@ export const receivablesAPI = {
         getAllInvoices: (params) => api.get('/receivables/invoices', { params }),
         updateInvoiceStatus: (id, status) => api.put(`/receivables/invoices/${id}/status`, { status }),
         exportWOHMS: (id) => api.get(`/receivables/invoices/${id}/wohms`, { responseType: 'blob' }),
+        submitManualClaim: (data) => api.post('/receivables/invoices/manual-claim', data),
     },
 };
 

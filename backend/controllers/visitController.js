@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 
 // Create a new outpatient visit
 const createVisit = async (req, res) => {
+    const t = await sequelize.transaction();
     try {
         const {
             patientId,
@@ -10,6 +11,8 @@ const createVisit = async (req, res) => {
             schemeId,
             departmentId,
             assignedDepartment,
+            assignedDoctorId,
+            serviceId,
             priority,
             reasonForVisit,
             notes,
@@ -21,31 +24,33 @@ const createVisit = async (req, res) => {
         // Ensure only one active visit exists per patient
         const existingActiveVisit = await Visit.findOne({
             where: { patientId, status: 'active' },
-            include: [{ model: Patient, as: 'patient' }, { model: Department, as: 'department' }]
+            include: [{ model: Patient, as: 'patient' }, { model: Department, as: 'department' }],
+            transaction: t
         });
 
         if (existingActiveVisit) {
+            await t.commit();
             return res.status(200).json(existingActiveVisit); // Return existing instead of creating duplicate
         }
 
         // Fetch patient to check referral type
-        const patient = await Patient.findByPk(patientId);
-        if (!patient) return res.status(404).json({ error: 'Patient not found' });
+        const patient = await Patient.findByPk(patientId, { transaction: t });
+        if (!patient) {
+            await t.rollback();
+            return res.status(404).json({ error: 'Patient not found' });
+        }
 
         const isBypass = patient.referralType === 'bypass';
         const isReferral = patient.referralType === 'referral';
 
-        // Bypass patients go to cashier first and have a pending registry fee
         let initialQueueStatus = isBypass ? 'pending_cashier' : 'waiting_doctor';
-        
-        // If it's a referral, they go to authorization (MO) first as requested in earlier prompts
         if (isReferral) initialQueueStatus = 'pending_authorization';
 
         const newRegistryFee = isBypass ? Number(registryFee || 0) : 0;
         const newRegistryFeeStatus = (isBypass && newRegistryFee > 0) ? 'pending' : 'waived';
 
         // Generate visit number
-        const count = await Visit.count();
+        const count = await Visit.count({ transaction: t });
         const visitNumber = `VIS${String(count + 1).padStart(6, '0')}`;
 
         const visit = await Visit.create({
@@ -55,6 +60,7 @@ const createVisit = async (req, res) => {
             schemeId,
             departmentId,
             assignedDepartment,
+            assignedDoctorId,
             priority,
             reasonForVisit,
             notes,
@@ -64,7 +70,43 @@ const createVisit = async (req, res) => {
             registryFee: newRegistryFee,
             registryFeeStatus: newRegistryFeeStatus,
             admittedById: req.user.id
-        });
+        }, { transaction: t });
+
+        // Generate OPD Bill for the assigned Consultation Service if present
+        if (serviceId) {
+            const service = await Service.findByPk(serviceId, { transaction: t });
+            if (service) {
+                // Determine price based on patient's payment method or scheme fallback
+                let finalPrice = parseFloat(service.cashPrice || service.price || 0);
+                if (patient.paymentMethod === 'corporate') finalPrice = parseFloat(service.corporatePrice || service.price || 0);
+                else if (patient.paymentMethod === 'scheme') finalPrice = parseFloat(service.schemePrice || service.price || 0);
+                else if (patient.paymentMethod === 'staff') finalPrice = parseFloat(service.staffPrice || service.price || 0);
+
+                const countOpd = await OPDBill.count({ transaction: t });
+                const billNum = `OPD${String(countOpd + 1).padStart(6, '0')}`;
+
+                let billPaymentStatus = 'unpaid';
+                if (patient.paymentMethod !== 'cash' && patient.paymentMethod !== 'private prepaid') {
+                    billPaymentStatus = 'claimed';
+                }
+
+                await OPDBill.create({
+                    billNumber: billNum,
+                    patientId,
+                    visitId: visit.id,
+                    serviceId: service.id,
+                    quantity: 1,
+                    unitPrice: finalPrice,
+                    totalAmount: finalPrice,
+                    netAmount: finalPrice,
+                    billDate: new Date(),
+                    status: 'completed',
+                    paymentStatus: billPaymentStatus,
+                    notes: `Initial Visit Consultation: ${service.serviceName}`,
+                    createdBy: req.user.id
+                }, { transaction: t });
+            }
+        }
 
         // If initial vitals provided, create them
         if (initialVitals) {
@@ -73,13 +115,13 @@ const createVisit = async (req, res) => {
                 visitId: visit.id,
                 patientId,
                 recordedBy: req.user.id
-            });
+            }, { transaction: t });
         }
 
         // Create initial movement
         let deptName = assignedDepartment || 'Unknown Department';
         if (departmentId) {
-            const dept = await Department.findByPk(departmentId);
+            const dept = await Department.findByPk(departmentId, { transaction: t });
             if (dept) deptName = dept.departmentName;
         }
 
@@ -90,7 +132,9 @@ const createVisit = async (req, res) => {
             notes: 'Initial Triage/Consultation',
             movementDate: new Date(),
             admittedBy: req.user.id
-        });
+        }, { transaction: t });
+
+        await t.commit();
 
         const fullVisit = await Visit.findByPk(visit.id, {
             include: [
@@ -101,6 +145,9 @@ const createVisit = async (req, res) => {
 
         res.status(201).json(fullVisit);
     } catch (error) {
+        if (typeof t !== 'undefined' && !t.finished) {
+            await t.rollback();
+        }
         console.error('Create visit error:', error);
         res.status(500).json({ error: 'Failed to create visit' });
     }

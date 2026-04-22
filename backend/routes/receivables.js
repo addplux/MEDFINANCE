@@ -32,6 +32,7 @@ router.get('/schemes/ledger/:policyNumber', receivablesController.getFamilyLedge
 
 // Scheme Invoices
 router.get('/invoices', receivablesController.getAllInvoices); // Global list
+router.post('/invoices/manual-claim', authorize('admin', 'accountant'), receivablesController.submitManualClaim);
 router.post('/schemes/invoices/generate', authorize('admin', 'accountant'), receivablesController.generateMonthlyInvoice);
 router.get('/schemes/:id/invoices', receivablesController.getSchemeInvoices);
 router.get('/invoices/:id', receivablesController.getSchemeInvoice);
