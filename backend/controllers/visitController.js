@@ -160,6 +160,37 @@ const createVisit = async (req, res) => {
                         createdBy: req.user.id
                     }, { transaction: t });
                 }
+            } else if (assignedDepartment === 'Radiology') {
+                const service = await Service.findByPk(serviceId, { transaction: t });
+                if (service) {
+                    const radBillCount = await RadiologyBill.count({ transaction: t });
+                    const billNumber = `RAD${String(radBillCount + 1).padStart(6, '0')}`;
+
+                    let billPaymentStatus = 'unpaid';
+                    if (patient.paymentMethod !== 'cash' && patient.paymentMethod !== 'private prepaid') {
+                        billPaymentStatus = 'claimed';
+                    }
+
+                    const isExempted = (patient.ageGroup === 'under_5' || patient.ageGroup === 'above_65' || patient.paymentMethod === 'exempted' || patient.paymentMethod === 'foc');
+                    let finalPrice = isExempted ? 0 : parseFloat(service.cashPrice || service.price || 0);
+                    if (patient.paymentMethod === 'corporate') finalPrice = isExempted ? 0 : parseFloat(service.corporatePrice || service.price || 0);
+                    else if (patient.paymentMethod === 'scheme') finalPrice = isExempted ? 0 : parseFloat(service.schemePrice || service.price || 0);
+                    else if (patient.paymentMethod === 'staff') finalPrice = isExempted ? 0 : parseFloat(service.staffPrice || service.price || 0);
+
+                    await RadiologyBill.create({
+                        billNumber,
+                        patientId,
+                        visitId: visit.id,
+                        scanType: service.serviceName,
+                        scanCode: service.serviceCode || service.code,
+                        amount: finalPrice,
+                        netAmount: finalPrice,
+                        status: 'pending',
+                        paymentStatus: billPaymentStatus,
+                        billDate: new Date(),
+                        createdBy: req.user.id
+                    }, { transaction: t });
+                }
             } else {
                 const service = await Service.findByPk(serviceId, { transaction: t });
                 if (service) {

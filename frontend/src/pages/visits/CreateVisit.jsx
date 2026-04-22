@@ -103,6 +103,20 @@ const CreateVisit = () => {
                         staffPrice: t.price
                     }));
                     setServices(mappedTests);
+                } else if (form.assignedDepartment === 'Radiology') {
+                    const res = await setupAPI.services.getAll({ department: 'Radiology', isActive: true });
+                    const scans = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : [];
+                    const mappedScans = scans.map(s => ({
+                        id: s.id,
+                        isRadiologyScan: true,
+                        serviceName: s.serviceName,
+                        price: s.cashPrice || s.price,
+                        cashPrice: s.cashPrice || s.price,
+                        corporatePrice: s.corporatePrice || s.price,
+                        schemePrice: s.schemePrice || s.price,
+                        staffPrice: s.staffPrice || s.price
+                    }));
+                    setServices(mappedScans);
                 } else {
                     const params = { isActive: true };
                     if (form.assignedDepartment) {
