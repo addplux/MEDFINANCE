@@ -66,10 +66,13 @@ const CreateVisit = () => {
 
     // Load services dynamically based on department
     useEffect(() => {
+        let active = true;
         const fetchServices = async () => {
+            setServices([]); // Clear current list immediately on department change
             try {
                 if (form.assignedDepartment === 'Pharmacy') {
                     const res = await pharmacyAPI.inventory.getAll();
+                    if (!active) return;
                     const meds = Array.isArray(res.data) ? res.data : (res.data?.data || []);
                     // Filter for in-stock and transform to service format
                     const mappedMeds = meds
@@ -91,6 +94,7 @@ const CreateVisit = () => {
                     setServices(mappedMeds);
                 } else if (form.assignedDepartment === 'Laboratory') {
                     const res = await labAPI.tests.getAll();
+                    if (!active) return;
                     const tests = Array.isArray(res.data) ? res.data : (res.data?.data || []);
                     const mappedTests = tests.map(t => ({
                         id: t.id,
@@ -105,6 +109,7 @@ const CreateVisit = () => {
                     setServices(mappedTests);
                 } else if (form.assignedDepartment === 'Radiology') {
                     const res = await setupAPI.services.getAll({ department: 'Radiology', isActive: true });
+                    if (!active) return;
                     const scans = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : [];
                     const mappedScans = scans.map(s => ({
                         id: s.id,
@@ -125,6 +130,7 @@ const CreateVisit = () => {
                         params.category = 'opd';
                     }
                     const res = await setupAPI.services.getAll(params);
+                    if (!active) return;
                     setServices(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
                 }
             } catch (err) {
@@ -132,6 +138,7 @@ const CreateVisit = () => {
             }
         };
         fetchServices();
+        return () => { active = false; };
     }, [form.assignedDepartment]);
 
     // Load recent patients on mount or focus when search is empty
