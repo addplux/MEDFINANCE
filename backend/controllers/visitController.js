@@ -111,6 +111,55 @@ const createVisit = async (req, res) => {
                         }, { transaction: t });
                     }
                 }
+            } else if (assignedDepartment === 'Laboratory') {
+                const test = await LabTest.findByPk(serviceId, { transaction: t });
+                if (test) {
+                    const labReqCount = await LabRequest.count({ transaction: t });
+                    const requestNumber = `LAB${String(labReqCount + 1).padStart(6, '0')}`;
+
+                    let billPaymentStatus = 'unpaid';
+                    if (patient.paymentMethod !== 'cash' && patient.paymentMethod !== 'private prepaid') {
+                        billPaymentStatus = 'claimed';
+                    }
+
+                    const isExempted = (patient.ageGroup === 'under_5' || patient.ageGroup === 'above_65' || patient.paymentMethod === 'exempted' || patient.paymentMethod === 'foc');
+                    const finalPrice = isExempted ? 0 : parseFloat(test.price || 0);
+
+                    // 1. Create Lab Request
+                    const request = await LabRequest.create({
+                        requestNumber,
+                        patientId,
+                        requestedBy: req.user.id,
+                        priority: 'routine',
+                        status: 'requested',
+                        totalAmount: finalPrice,
+                        paymentStatus: (billPaymentStatus === 'claimed' || finalPrice === 0) ? 'paid' : 'unpaid'
+                    }, { transaction: t });
+
+                    // 2. Create Lab Result (placeholder)
+                    await LabResult.create({
+                        labRequestId: request.id,
+                        testId: test.id,
+                        resultValue: '',
+                        isAbnormal: false
+                    }, { transaction: t });
+
+                    // 3. Create Lab Bill
+                    const labBillCount = await LabBill.count({ transaction: t });
+                    const billNumber = `LB${String(labBillCount + 1).padStart(6, '0')}`;
+
+                    await LabBill.create({
+                        billNumber,
+                        patientId,
+                        testName: test.name,
+                        testCode: test.code,
+                        amount: finalPrice,
+                        netAmount: finalPrice,
+                        status: 'pending',
+                        paymentStatus: billPaymentStatus,
+                        createdBy: req.user.id
+                    }, { transaction: t });
+                }
             } else {
                 const service = await Service.findByPk(serviceId, { transaction: t });
                 if (service) {

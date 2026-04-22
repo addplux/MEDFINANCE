@@ -79,7 +79,7 @@ const CreateVisit = () => {
                             const price = latestBatch.sellingPrice || 0;
                             return {
                                 id: m.id,
-                                isMedication: true, // Flag for handling in submission if needed
+                                isMedication: true,
                                 serviceName: `${m.name} (${m.totalStock} in stock)`,
                                 price: price,
                                 cashPrice: price,
@@ -89,6 +89,20 @@ const CreateVisit = () => {
                             };
                         });
                     setServices(mappedMeds);
+                } else if (form.assignedDepartment === 'Laboratory') {
+                    const res = await labAPI.tests.getAll();
+                    const tests = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+                    const mappedTests = tests.map(t => ({
+                        id: t.id,
+                        isLabTest: true,
+                        serviceName: `${t.name} (${t.code})`,
+                        price: t.price,
+                        cashPrice: t.price,
+                        corporatePrice: t.price,
+                        schemePrice: t.price,
+                        staffPrice: t.price
+                    }));
+                    setServices(mappedTests);
                 } else {
                     const params = { isActive: true };
                     if (form.assignedDepartment) {
