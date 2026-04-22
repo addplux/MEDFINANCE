@@ -1725,7 +1725,7 @@ const submitManualClaim = async (req, res) => {
                     totalAmount: amount,
                     netAmount: amount,
                     billDate,
-                    status: 'completed',
+                    status: 'paid',
                     paymentStatus: 'claimed',
                     paymentMethod: 'credit',
                     notes: `Manual Claim: ${cat.label}`,
