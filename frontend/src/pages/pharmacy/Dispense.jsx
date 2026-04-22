@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { pharmacyAPI, patientAPI } from '../../services/apiService';
-import { ShoppingCart, User, Plus, Trash2, Save, Activity, AlertTriangle } from 'lucide-react';
+import { pharmacyAPI, patientAPI, visitAPI } from '../../services/apiService';
+import { ShoppingCart, User, Plus, Trash2, Save, Activity, AlertTriangle, Users, Clock, ArrowRight } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getPaymentStatusBadge } from '../../utils/statusBadges';
 import PatientSearchSelect from '../../components/shared/PatientSearchSelect';
@@ -10,9 +10,11 @@ const Dispense = () => {
     const [searchParams] = useSearchParams();
     const [patients, setPatients] = useState([]);
     const [medications, setMedications] = useState([]);
+    const [pendingQueue, setPendingQueue] = useState([]);
     const [loading, setLoading] = useState(false);
 
     const [selectedPatient, setSelectedPatient] = useState('');
+    const [selectedPatientData, setSelectedPatientData] = useState(null);
     const [cart, setCart] = useState([]); // [{ medication, batchId, quantity, price, discount }]
 
     // Add Item Form State
@@ -23,7 +25,17 @@ const Dispense = () => {
 
     useEffect(() => {
         fetchInitialData();
+        fetchQueue();
     }, []);
+
+    const fetchQueue = async () => {
+        try {
+            const res = await visitAPI.getPharmacyQueue();
+            setPendingQueue(res.data || []);
+        } catch (e) {
+            console.error('Failed to fetch pharmacy queue');
+        }
+    };
 
     useEffect(() => {
         if (selectedMedication) {
@@ -48,13 +60,17 @@ const Dispense = () => {
             if (urlPatientId) {
                 const matched = pts.find(p => p.id == urlPatientId);
                 if (matched) {
-                    setSelectedPatient(matched.id);
-                    setSelectedPatientName(`${matched.patientNumber ? matched.patientNumber + ' — ' : ''}${matched.firstName} ${matched.lastName}`);
+                    handleSelectPatient(matched);
                 }
             }
         } catch (error) {
             console.error('Failed to load data:', error);
         }
+    };
+
+    const handleSelectPatient = (p) => {
+        setSelectedPatient(p?.id || '');
+        setSelectedPatientData(p);
     };
 
     const fetchBatches = async (medId) => {
@@ -105,8 +121,7 @@ const Dispense = () => {
         setCart(newCart);
     };
 
-    const isCashPatient = selectedPatient && patients.find(p => p.id === selectedPatient)?.paymentMethod === 'cash' ||
-        patients.find(p => p.id === selectedPatient)?.paymentMethod === 'private';
+    const isCashPatient = selectedPatientData?.paymentMethod === 'cash' || selectedPatientData?.paymentMethod === 'private';
     const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
     const handleDispense = async () => {
@@ -144,9 +159,53 @@ const Dispense = () => {
     const cartTotal = cart.reduce((sum, item) => sum + item.total, 0);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-100px)]">
-            {/* Left Panel: Selection */}
-            <div className="lg:col-span-2 space-y-6 pr-2">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-100px)] animate-fade-in">
+            {/* Left Panel: Assignment Queue (NEW) */}
+            <div className="lg:col-span-1 space-y-4 h-full flex flex-col">
+                <div className="card p-5 bg-primary/5 border-primary/20 flex flex-col h-full">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-sm font-black text-primary uppercase tracking-widest flex items-center gap-2">
+                            <Users className="w-4 h-4" /> Patient Queue
+                        </h2>
+                        <span className="text-[10px] font-black bg-primary/20 text-primary px-2 py-0.5 rounded-full">{pendingQueue.length}</span>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-hide">
+                        {pendingQueue.map(v => (
+                            <button
+                                key={v.id}
+                                onClick={() => handleSelectPatient(v.patient)}
+                                className={`w-full text-left p-3 rounded-2xl border transition-all hover:scale-[1.02] active:scale-95 ${
+                                    selectedPatient === v.patientId ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' : 'bg-bg-secondary border-border-color hover:border-primary/40'
+                                }`}
+                            >
+                                <div className="flex justify-between items-start mb-1">
+                                    <span className="font-bold text-sm block truncate pr-2">{v.patient?.firstName} {v.patient?.lastName}</span>
+                                    <Clock className="w-3 h-3 opacity-50" />
+                                </div>
+                                <div className={`text-[10px] font-black uppercase tracking-tighter ${selectedPatient === v.patientId ? 'text-white/80' : 'text-text-tertiary'}`}>
+                                    {v.assignedDepartment || v.department?.departmentName || 'General OPD'}
+                                </div>
+                                <div className="mt-2 flex items-center justify-between">
+                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${selectedPatient === v.patientId ? 'bg-white/20' : 'bg-bg-tertiary'}`}>
+                                        {v.patient?.paymentMethod}
+                                    </span>
+                                    <ArrowRight className="w-3 h-3" />
+                                </div>
+                            </button>
+                        ))}
+                        {pendingQueue.length === 0 && (
+                            <div className="text-center py-10 opacity-30">
+                                <Activity className="w-8 h-8 mx-auto mb-2" />
+                                <p className="text-xs font-bold uppercase tracking-widest">Queue Empty</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Middle Panel: Selection */}
+            <div className="lg:col-span-2 space-y-6 pr-2 overflow-y-auto scrollbar-hide">
                 <div className="card p-6 overflow-visible">
                     <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                         <User className="w-5 h-5" /> Select Patient

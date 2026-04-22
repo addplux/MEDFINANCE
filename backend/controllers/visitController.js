@@ -1,4 +1,4 @@
-const { Visit, Patient, Scheme, Vitals, PatientMovement, Department, Admission, Bed, Ward, User, OPDBill, Service, LabTest, LabRequest, LabResult, RadiologyBill, sequelize } = require('../models');
+const { Visit, Patient, Scheme, Vitals, PatientMovement, Department, Admission, Bed, Ward, User, OPDBill, PharmacyBill, LabBill, Service, LabTest, LabRequest, LabResult, RadiologyBill, sequelize } = require('../models');
 const { Op } = require('sequelize');
 
 // Create a new outpatient visit
@@ -21,7 +21,6 @@ const createVisit = async (req, res) => {
             registryFee
         } = req.body;
 
-        // Ensure only one active visit exists per patient
         const existingActiveVisit = await Visit.findOne({
             where: { patientId, status: 'active' },
             include: [{ model: Patient, as: 'patient' }, { model: Department, as: 'department' }],
@@ -30,10 +29,9 @@ const createVisit = async (req, res) => {
 
         if (existingActiveVisit) {
             await t.commit();
-            return res.status(200).json(existingActiveVisit); // Return existing instead of creating duplicate
+            return res.status(200).json(existingActiveVisit);
         }
 
-        // Fetch patient to check referral type
         const patient = await Patient.findByPk(patientId, { transaction: t });
         if (!patient) {
             await t.rollback();
@@ -49,7 +47,6 @@ const createVisit = async (req, res) => {
         const newRegistryFee = isBypass ? Number(registryFee || 0) : 0;
         const newRegistryFeeStatus = (isBypass && newRegistryFee > 0) ? 'pending' : 'waived';
 
-        // Generate visit number
         const count = await Visit.count({ transaction: t });
         const visitNumber = `VIS${String(count + 1).padStart(6, '0')}`;
 
@@ -72,11 +69,9 @@ const createVisit = async (req, res) => {
             admittedById: req.user.id
         }, { transaction: t });
 
-        // Generate OPD Bill for the assigned Consultation Service if present
         if (serviceId) {
             const service = await Service.findByPk(serviceId, { transaction: t });
             if (service) {
-                // Determine price based on patient's payment method or scheme fallback
                 let finalPrice = parseFloat(service.cashPrice || service.price || 0);
                 if (patient.paymentMethod === 'corporate') finalPrice = parseFloat(service.corporatePrice || service.price || 0);
                 else if (patient.paymentMethod === 'scheme') finalPrice = parseFloat(service.schemePrice || service.price || 0);
@@ -108,7 +103,6 @@ const createVisit = async (req, res) => {
             }
         }
 
-        // If initial vitals provided, create them
         if (initialVitals) {
             await Vitals.create({
                 ...initialVitals,
@@ -118,7 +112,6 @@ const createVisit = async (req, res) => {
             }, { transaction: t });
         }
 
-        // Create initial movement
         let deptName = assignedDepartment || 'Unknown Department';
         if (departmentId) {
             const dept = await Department.findByPk(departmentId, { transaction: t });
@@ -153,7 +146,6 @@ const createVisit = async (req, res) => {
     }
 };
 
-// Get all active visits
 const getAllVisits = async (req, res) => {
     try {
         const { status, queueStatus, departmentId, assignedDepartment, search, visitType } = req.query;
@@ -192,13 +184,13 @@ const getAllVisits = async (req, res) => {
     }
 };
 
-// Get single visit details
 const getVisit = async (req, res) => {
     try {
         const visit = await Visit.findByPk(req.params.id, {
             include: [
                 { model: Patient, as: 'patient' },
                 { model: Department, as: 'department' },
+                { model: User, as: 'assignedDoctor' },
                 { model: Vitals, as: 'vitals' }
             ]
         });
@@ -207,16 +199,35 @@ const getVisit = async (req, res) => {
             return res.status(404).json({ error: 'Visit not found' });
         }
 
-        // Fetch admissions for this patient alongside the visit if needed
-        // but not linked directly to the visit to prevent crash
-        const admissions = await Admission.findAll({
+        const [opdBills, pharmacyBills, labBills, radioBills] = await Promise.all([
+            OPDBill.findAll({ where: { visitId: visit.id } }),
+            PharmacyBill.findAll({ where: { visitId: visit.id } }),
+            LabBill.findAll({ where: { visitId: visit.id } }),
+            RadiologyBill.findAll({ where: { visitId: visit.id } })
+        ]);
+
+        const totalToPay = [...opdBills, ...pharmacyBills, ...labBills, ...radioBills]
+            .reduce((sum, b) => sum + parseFloat(b.netAmount || 0), 0);
+        
+        const totalPaid = [...opdBills, ...pharmacyBills, ...labBills, ...radioBills]
+            .filter(b => b.paymentStatus === 'paid' || b.paymentStatus === 'claimed')
+            .reduce((sum, b) => sum + parseFloat(b.netAmount || 0), 0);
+
+        const visitData = visit.toJSON();
+        visitData.admissions = await Admission.findAll({
             where: { patientId: visit.patientId },
             include: [{ model: Bed, as: 'bed', include: [{ model: Ward, as: 'ward' }] }],
             order: [['admissionDate', 'DESC']]
         });
+        
+        visitData.billingSummary = {
+            totalAmount: totalToPay.toFixed(2),
+            paidAmount: totalPaid.toFixed(2),
+            balance: (totalToPay - totalPaid).toFixed(2),
+            status: totalToPay > 0 && totalPaid >= totalToPay ? 'paid' : (totalToPay > 0 ? 'pending' : 'none')
+        };
 
-        const visitData = visit.toJSON();
-        visitData.admissions = admissions; // manually attach
+        visitData.assignedItems = opdBills.map(b => ({ id: b.id, name: b.notes, type: 'Service' }));
 
         res.json(visitData);
     } catch (error) {
@@ -225,18 +236,47 @@ const getVisit = async (req, res) => {
     }
 };
 
-// Update visit info or transfer department
+const getDepartmentQueue = async (req, res) => {
+    try {
+        const { department } = req.query;
+        const where = { 
+            status: 'active',
+            [Op.or]: [
+                { assignedDepartment: department || 'Pharmacy' },
+                { queueStatus: department === 'Theatre' ? 'waiting_theatre' : 'waiting_doctor' }
+            ]
+        };
+
+        if (department === 'Pharmacy') {
+            where[Op.or].push({ queueStatus: 'waiting_lab' });
+            where[Op.or].push({ queueStatus: 'waiting_radiology' });
+            where[Op.or].push({ queueStatus: 'pending_results' });
+        }
+
+        const visits = await Visit.findAll({
+            where,
+            include: [
+                { model: Patient, as: 'patient' },
+                { model: Department, as: 'department' }
+            ],
+            order: [['updatedAt', 'DESC']]
+        });
+        res.json(visits);
+    } catch (error) {
+        console.error('Department queue error:', error);
+        res.status(500).json({ error: 'Failed to fetch queue' });
+    }
+};
+
 const updateVisit = async (req, res) => {
     try {
         const visit = await Visit.findByPk(req.params.id);
         if (!visit) return res.status(404).json({ error: 'Visit not found' });
 
         const { departmentId, assignedDepartment, queueStatus, priority, status, notes } = req.body;
-
         const oldDept = visit.departmentId;
 
         if (departmentId && departmentId !== oldDept) {
-            // Log movement
             let fromDeptName = 'Unknown';
             let toDeptName = 'Unknown';
 
@@ -268,7 +308,6 @@ const updateVisit = async (req, res) => {
 
         await visit.save();
 
-        // --- AUTOMATION HOOK FOR LAB/RADIOLOGY ---
         if (['pending_results', 'waiting_lab', 'waiting_radiology', 'waiting_doctor'].includes(visit.queueStatus)) {
             try {
                 const bills = await OPDBill.findAll({
@@ -318,7 +357,7 @@ const updateVisit = async (req, res) => {
                                 scanType: b.service.serviceName,
                                 scanCode: b.service.serviceCode,
                                 amount: b.totalAmount,
-                                netAmount: b.totalAmount, // net amount fallbacks
+                                netAmount: b.totalAmount,
                                 createdBy: req.user.id
                             });
                         }
@@ -336,16 +375,13 @@ const updateVisit = async (req, res) => {
     }
 };
 
-// Discharge/Close visit
 const dischargeVisit = async (req, res) => {
     try {
         const visit = await Visit.findByPk(req.params.id);
         if (!visit) return res.status(404).json({ error: 'Visit not found' });
-
         visit.status = 'closed';
         visit.dischargeDate = new Date();
         await visit.save();
-
         res.json({ message: 'Visit closed successfully' });
     } catch (error) {
         console.error('Discharge visit error:', error);
@@ -353,25 +389,17 @@ const dischargeVisit = async (req, res) => {
     }
 };
 
-// Record patient movements
 const getVisitMovements = async (req, res) => {
     try {
         const visit = await Visit.findByPk(req.params.id);
         if (!visit) return res.status(404).json({ error: 'Visit not found' });
-
         const endBound = visit.dischargeDate || new Date();
-
         const movements = await PatientMovement.findAll({
             where: {
                 patientId: visit.patientId,
-                movementDate: {
-                    [Op.gte]: visit.admissionDate,
-                    [Op.lte]: endBound
-                }
+                movementDate: { [Op.gte]: visit.admissionDate, [Op.lte]: endBound }
             },
-            include: [
-                { model: User, as: 'admitter', attributes: ['firstName', 'lastName'] }
-            ],
+            include: [{ model: User, as: 'admitter', attributes: ['firstName', 'lastName'] }],
             order: [['movementDate', 'DESC']]
         });
         res.json(movements);
@@ -381,18 +409,14 @@ const getVisitMovements = async (req, res) => {
     }
 };
 
-// Quick status update for dashboards
 const updateQueueStatus = async (req, res) => {
     try {
         const { id } = req.params;
         const { queueStatus } = req.body;
-
         const visit = await Visit.findByPk(id);
         if (!visit) return res.status(404).json({ error: 'Visit not found' });
-
         visit.queueStatus = queueStatus;
         await visit.save();
-
         res.json(visit);
     } catch (error) {
         console.error('Update queue status error:', error);
@@ -400,113 +424,41 @@ const updateQueueStatus = async (req, res) => {
     }
 };
 
-// ── Consultation Quick-Send  (Records → Cashier → Doctor) ─────────────────────
-// Called when a receptionist / nurse clicks "Send to Doctor" on the Patient Profile.
-// Creates the visit + auto-generates a consultation bill.
-//   - Cash patients  → queueStatus = 'pending_cashier'  (wait for cashier to process)
-//   - Prepaid/scheme → queueStatus = 'waiting_doctor'   (fee auto-deducted, skip cashier)
 const createConsultationVisit = async (req, res) => {
     const t = await sequelize.transaction();
     try {
         const { patientId, departmentId, assignedDepartment, reasonForVisit, serviceId } = req.body;
-
         if (!patientId) {
             await t.rollback();
             return res.status(400).json({ error: 'patientId is required' });
         }
-
-        // Ensure only one active visit exists per patient
         const existingActiveVisit = await Visit.findOne({
             where: { patientId, status: 'active' },
             transaction: t
         });
-
         if (existingActiveVisit) {
             await t.rollback();
             const fullVisit = await Visit.findByPk(existingActiveVisit.id, {
                 include: [{ model: Patient, as: 'patient' }, { model: Department, as: 'department' }]
             });
-            return res.status(200).json({
-                visit: fullVisit,
-                queueStatus: existingActiveVisit.queueStatus,
-                message: 'Active visit already exists. Reusing current visit.'
-            });
+            return res.status(200).json({ visit: fullVisit, queueStatus: existingActiveVisit.queueStatus });
         }
-
         const patient = await Patient.findByPk(patientId, { transaction: t });
-        if (!patient) {
-            await t.rollback();
-            return res.status(404).json({ error: 'Patient not found' });
-        }
-
         const prepayMethods = ['private prepaid', 'private_prepaid', 'corporate', 'scheme', 'staff'];
         const isPrepaid = prepayMethods.includes(patient.paymentMethod);
-
-        // Fetch service to determine category-based routing
         let initialQueueStatus = isPrepaid ? 'waiting_doctor' : 'pending_cashier';
-        
-        if (serviceId) {
-            const service = await Service.findByPk(serviceId, { transaction: t });
-            if (service) {
-                if (service.category === 'laboratory') initialQueueStatus = 'waiting_lab';
-                else if (service.category === 'radiology') initialQueueStatus = 'waiting_radiology';
-            }
-        }
-
-        // Generate visit number
         const count = await Visit.count({ transaction: t });
         const visitNumber = `VIS${String(count + 1).padStart(6, '0')}`;
-
-        const isBypass = patient.referralType === 'bypass';
-        const newRegistryFee = isBypass ? Number(req.body.registryFee || 0) : 0;
-        const newRegistryFeeStatus = (isBypass && newRegistryFee > 0) ? 'pending' : 'waived';
-
         const visit = await Visit.create({
-            visitNumber,
-            patientId,
-            visitType: 'opd',
-            departmentId: departmentId || null,
-            assignedDepartment: assignedDepartment || 'OPD',
-            reasonForVisit: reasonForVisit || 'Consultation',
-            admissionDate: new Date(),
-            status: 'active',
-            queueStatus: initialQueueStatus,
-            registryFee: newRegistryFee,
-            registryFeeStatus: newRegistryFeeStatus,
-            admittedById: req.user.id
+            visitNumber, patientId, visitType: 'opd', departmentId, assignedDepartment, reasonForVisit,
+            admissionDate: new Date(), status: 'active', queueStatus: initialQueueStatus, admittedById: req.user.id
         }, { transaction: t });
-
-        // Patient movement log
-        const toDept = isPrepaid ? 'Doctor Queue' : 'Cashier';
-        await PatientMovement.create({
-            patientId,
-            fromDepartment: 'Reception',
-            toDepartment: toDept,
-            notes: isPrepaid ? 'Prepaid/Scheme - Sent directly to Doctor Queue' : 'Cash patient - Sent to Cashier first',
-            movementDate: new Date(),
-            admittedBy: req.user.id
-        }, { transaction: t });
-
         await t.commit();
-
-        const fullVisit = await Visit.findByPk(visit.id, {
-            include: [
-                { model: Patient, as: 'patient' },
-                { model: Department, as: 'department' }
-            ]
-        });
-
-        res.status(201).json({
-            visit: fullVisit,
-            queueStatus: initialQueueStatus,
-            message: isPrepaid
-                ? 'Patient sent directly to Doctor Queue.'
-                : 'Cash patient sent to Cashier for payment processing.'
-        });
+        res.status(201).json({ visit, queueStatus: initialQueueStatus });
     } catch (error) {
         await t.rollback();
         console.error('Create consultation visit error:', error);
-        res.status(500).json({ error: 'Failed to create consultation visit', detail: error.message });
+        res.status(500).json({ error: 'Failed to create consultation visit' });
     }
 };
 
@@ -518,5 +470,6 @@ module.exports = {
     updateVisit,
     dischargeVisit,
     getVisitMovements,
-    updateQueueStatus
+    updateQueueStatus,
+    getDepartmentQueue
 };

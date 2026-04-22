@@ -242,6 +242,7 @@ Vitals.belongsTo(Visit, { foreignKey: 'visitId', as: 'visit' });
 Vitals.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 Vitals.belongsTo(User, { foreignKey: 'recordedById', as: 'recordedBy' });
 Visit.hasMany(Admission, { foreignKey: 'visitId', as: 'admissions' });
+Visit.belongsTo(User, { foreignKey: 'assignedDoctorId', as: 'assignedDoctor' });
 Patient.hasMany(Visit, { foreignKey: 'patientId', as: 'visits' });
 
 // File Request relationships

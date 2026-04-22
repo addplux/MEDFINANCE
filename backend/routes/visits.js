@@ -7,6 +7,7 @@ const visitController = require('../controllers/visitController');
 router.use(authMiddleware);
 
 router.get('/', checkPermission('patients', 'read'), visitController.getAllVisits);
+router.get('/department-queue', checkPermission('patients', 'read'), visitController.getDepartmentQueue);
 router.post('/', checkPermission('patients', 'write'), visitController.createVisit);
 router.post('/consultation', checkPermission('patients', 'write'), visitController.createConsultationVisit);
 router.get('/:id', checkPermission('patients', 'read'), visitController.getVisit);

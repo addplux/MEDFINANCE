@@ -62,6 +62,8 @@ export const visitAPI = {
     discharge: (id) => api.post(`/visits/${id}/discharge`),
     getMovements: (id) => api.get(`/visits/${id}/movements`),
     logMovement: (patientId, data) => api.post('/patient-movements', { patientId, ...data }),
+    getPharmacyQueue: () => api.get('/visits/department-queue?department=Pharmacy'),
+    getDepartmentQueue: (department) => api.get('/visits/department-queue', { params: { department } }),
 };
 
 // Vitals (Triage)

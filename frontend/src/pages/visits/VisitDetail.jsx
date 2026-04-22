@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { visitAPI, setupAPI } from '@/services/apiService';
 import {
     ArrowLeft, User, RefreshCw, LogOut, Send, Activity,
-    AlertCircle, FileText, CheckCircle, Clock, MapPin
+    AlertCircle, FileText, CheckCircle, Clock, MapPin, Receipt,
+    Stethoscope, ClipboardCheck, ArrowRight
 } from 'lucide-react';
 import TriageWidget from './components/TriageWidget';
 
@@ -18,16 +19,11 @@ const VisitDetail = () => {
     const [visit, setVisit] = useState(null);
     const [movements, setMovements] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [movLoading, setMovLoading] = useState(false);
-    const [discharging, setDischarging] = useState(false);
+    const [submittingMov, setSubmittingMov] = useState(false);
     const [error, setError] = useState(null);
 
-    // New movement form state
     const [movForm, setMovForm] = useState({ toDepartment: '', assignedDoctorId: '', notes: '' });
-    const [submittingMov, setSubmittingMov] = useState(false);
     const [doctors, setDoctors] = useState([]);
-
-    const apiBase = import.meta.env.VITE_API_URL || '';
 
     const load = async () => {
         try {
@@ -35,21 +31,20 @@ const VisitDetail = () => {
             const [visitRes, movRes, docsRes] = await Promise.allSettled([
                 visitAPI.getById(id),
                 visitAPI.getMovements(id),
-                setupAPI.users.getAll({ isActive: true })
+                setupAPI.users.getAll()
             ]);
 
             if (visitRes.status === 'rejected') throw new Error('Failed to load visit details');
 
             setVisit(visitRes.value.data);
             setMovements(movRes.status === 'fulfilled' ? (movRes.value.data || []) : []);
-
+            
             if (docsRes.status === 'fulfilled') {
-                setDoctors(docsRes.value.data?.filter(u => ['doctor', 'specialist', 'medical officer', 'consultant'].some(r => u.role?.name?.toLowerCase().includes(r))) || []);
-            } else {
-                setDoctors([]);
+                const allUsers = Array.isArray(docsRes.value.data?.data) ? docsRes.value.data.data : Array.isArray(docsRes.value.data) ? docsRes.value.data : [];
+                setDoctors(allUsers.filter(u => ['doctor', 'specialist', 'clinician'].includes(u.role?.toLowerCase() || '')));
             }
         } catch (e) {
-            setError('Failed to load visit details');
+            setError(e.message);
         } finally {
             setLoading(false);
         }
@@ -57,279 +52,220 @@ const VisitDetail = () => {
 
     useEffect(() => { load(); }, [id]);
 
-    const handleDischarge = async () => {
-        if (visit.billingSummary?.status === 'pending') {
-            alert('Cannot discharge patient: There are unpaid bills that must be cleared first.');
-            return;
-        }
-        if (!window.confirm('Discharge this patient from the visit?')) return;
-        setDischarging(true);
-        try {
-            await visitAPI.discharge(id);
-            load();
-        } catch (err) {
-            alert(err.response?.data?.error || 'Failed to discharge');
-        } finally {
-            setDischarging(false);
-        }
-    };
-
     const handleLogMovement = async (e) => {
-        e.preventDefault();
-        if (!movForm.toDepartment) { alert('Select destination department'); return; }
+        if (e) e.preventDefault();
+        const dest = movForm.toDepartment || 'Consultation Complete';
         setSubmittingMov(true);
         try {
             await visitAPI.logMovement(visit.patientId, {
-                toDepartment: movForm.toDepartment,
-                fromDepartment: visit.assignedDepartment || movements[movements.length - 1]?.toDepartment || '—',
+                toDepartment: dest,
+                fromDepartment: visit.assignedDepartment || 'Admission',
                 assignedDoctorId: movForm.assignedDoctorId || null,
-                notes: movForm.notes
+                notes: movForm.notes || 'Routine routing'
+            });
+            await visitAPI.update(id, { 
+                assignedDepartment: dest,
+                queueStatus: dest === 'Pharmacy' ? 'waiting_doctor' : 'pending_triage'
             });
             setMovForm({ toDepartment: '', assignedDoctorId: '', notes: '' });
-            setMovLoading(true);
-            const movRes = await visitAPI.getMovements(id);
-            setMovements(movRes.data || []);
-            await visitAPI.update(id, { assignedDepartment: movForm.toDepartment });
             load();
         } catch (err) {
-            alert(err.response?.data?.error || 'Failed to send patient');
+            alert('Failed to route patient');
         } finally {
             setSubmittingMov(false);
-            setMovLoading(false);
         }
     };
 
-    if (loading) return (
-        <div className="flex items-center justify-center h-64 text-text-tertiary">
-            <RefreshCw className="w-5 h-5 animate-spin mr-2" /> Loading encounter details...
-        </div>
-    );
-
-    if (error || !visit) return (
-        <div className="flex flex-col items-center justify-center h-64 gap-3">
-            <AlertCircle className="w-10 h-10 text-red-400" />
-            <p className="text-text-secondary">{error || 'Visit not found'}</p>
-            <button onClick={() => navigate('/app/visits')} className="btn btn-secondary">Back to Visits</button>
-        </div>
-    );
+    if (loading) return <div className="p-20 text-center animate-pulse text-text-tertiary">Loading Patient Assignment Board...</div>;
+    if (error || !visit) return <div className="p-20 text-center text-red-500">{error || 'Visit Error'}</div>;
 
     const p = visit.patient;
+    const isPaid = visit.billingSummary?.status === 'paid' || visit.billingSummary?.status === 'none';
 
     return (
-        <div className="max-w-6xl mx-auto space-y-6 pb-20 animate-fade-in">
-            {/* Unified Page Header Component */}
-            <div className="bg-bg-secondary rounded-2xl border border-border-color shadow-sm p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <button onClick={() => navigate('/app/visits')} className="p-2.5 bg-bg-tertiary hover:bg-white/10 rounded-xl transition-colors border border-border-color text-text-secondary">
-                        <ArrowLeft className="w-5 h-5" />
-                    </button>
-                    <div>
-                        <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                            <h1 className="text-2xl font-black text-text-primary tracking-tight">
-                                {p ? `${p.firstName} ${p.lastName}` : 'Unknown Patient'}
+        <div className="max-w-6xl mx-auto space-y-6 pb-20 animate-fade-in px-4 md:px-0">
+            {/* 1. Header & Quick Info */}
+            <div className="bg-bg-secondary rounded-3xl border border-border-color shadow-xl p-6 md:p-8 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+                
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+                    <div className="flex items-center gap-6">
+                        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                            <User className="w-8 h-8" />
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-black text-text-primary tracking-tight leading-none mb-2">
+                                {p?.firstName} {p?.lastName}
                             </h1>
-                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                                {visit.visitType}
-                            </span>
-                            <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest border ${
-                                visit.status === 'active' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-gray-500/10 text-gray-400 border-gray-500/20'
-                            }`}>
-                                {visit.status}
-                            </span>
-                        </div>
-                        <p className="text-sm font-medium text-text-tertiary mt-1 flex items-center gap-3">
-                            <span className="font-mono">{visit.visitNumber}</span>
-                            <span className="w-1 h-1 rounded-full bg-border-color"></span>
-                            <span className="capitalize">{p?.gender || '—'}</span>
-                            <span className="w-1 h-1 rounded-full bg-border-color"></span>
-                            <span>{p?.phone || 'No Phone'}</span>
-                        </p>
-                    </div>
-                </div>
-                
-                <div className="flex flex-wrap items-center gap-2">
-                    {visit.billingSummary?.status === 'pending' ? (
-                        <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold mr-2">
-                            <AlertCircle className="w-4 h-4" /> UNPAID (ZK{visit.billingSummary.totalAmount})
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold mr-2">
-                            <CheckCircle className="w-4 h-4" /> FULLY PAID
-                        </div>
-                    )}
-                    
-                    {p && (
-                        <button onClick={() => navigate(`/app/patients/${p.id}`)} className="btn btn-secondary py-2 border-border-color shadow-sm">
-                            <User className="w-4 h-4" /> View Record
-                        </button>
-                    )}
-                    
-                    {visit.status === 'active' && (
-                        <button
-                            onClick={handleDischarge}
-                            disabled={discharging || visit.billingSummary?.status === 'pending'}
-                            className={`btn py-2 shadow-sm ${visit.billingSummary?.status === 'pending' ? 'bg-bg-tertiary text-text-tertiary cursor-not-allowed border-border-color' : 'bg-orange-600 hover:bg-orange-500 text-white border-orange-500'}`}
-                        >
-                            <LogOut className="w-4 h-4" />
-                            {discharging ? 'Discharging...' : 'Discharge'}
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            {/* Current Status Bar */}
-            <div className="flex items-center gap-8 px-6 py-4 bg-bg-secondary/40 rounded-2xl border border-border-color/50 text-sm overflow-x-auto">
-                <div className="flex items-center gap-2 whitespace-nowrap">
-                    <MapPin className="w-4 h-4 text-text-tertiary" />
-                    <span className="text-text-secondary">Location:</span>
-                    <strong className="text-text-primary uppercase tracking-wide">{visit.department?.departmentName || visit.assignedDepartment || 'Unknown'}</strong>
-                </div>
-                <div className="flex items-center gap-2 whitespace-nowrap">
-                    <Activity className="w-4 h-4 text-text-tertiary" />
-                    <span className="text-text-secondary">Queue Status:</span>
-                    <strong className="text-text-primary capitalize">{visit.queueStatus?.replace('_', ' ') || 'Normal'}</strong>
-                </div>
-                <div className="flex items-center gap-2 whitespace-nowrap">
-                    <Clock className="w-4 h-4 text-text-tertiary" />
-                    <span className="text-text-secondary">Admitted:</span>
-                    <strong className="text-text-primary">{visit.admissionDate ? new Date(visit.admissionDate).toLocaleString() : '—'}</strong>
-                </div>
-            </div>
-
-            {/* Main Action Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                
-                {/* Column 1: Triage & Notes */}
-                <div className="space-y-6">
-                    {visit.visitType === 'opd' && visit.status === 'active' && (
-                        <TriageWidget visitId={visit.id} patientId={p?.id} queueStatus={visit.queueStatus} onVitalsSaved={load} />
-                    )}
-                    
-                    {visit.notes && (
-                        <div className="card p-5 border-border-color shadow-sm">
-                            <h3 className="font-bold text-text-primary mb-3 flex items-center gap-2">
-                                <FileText className="w-4 h-4 text-primary" /> Admission Notes
-                            </h3>
-                            <div className="p-4 bg-bg-tertiary/50 rounded-xl text-sm text-text-secondary italic leading-relaxed border border-border-color/50">
-                                "{visit.notes}"
+                            <div className="flex items-center gap-3 text-sm font-bold text-text-tertiary">
+                                <span className="text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20 uppercase tracking-tighter text-[10px]">{visit.visitNumber}</span>
+                                <span>{p?.gender}</span>
+                                <span className="w-1 h-1 rounded-full bg-border-color" />
+                                <span>{p?.phone || 'No Phone'}</span>
                             </div>
                         </div>
-                    )}
-                </div>
+                    </div>
 
-                {/* Column 2: Send Patient & Movement History */}
-                <div className="space-y-6">
-                    
-                    {/* The Send Patient Widget */}
-                    <div className="card p-6 border-indigo-500/20 bg-gradient-to-br from-indigo-500/5 to-transparent relative overflow-hidden shadow-lg shadow-indigo-900/10">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500" />
-                        
-                        <div className="mb-6">
-                            <h2 className="text-lg font-black text-indigo-400 flex items-center gap-2 uppercase tracking-tight">
-                                <Send className="w-5 h-5 text-indigo-500" /> Send to Another Department
-                            </h2>
-                            <p className="text-xs font-medium text-text-tertiary mt-1">
-                                Transfer this patient to a specific ward, clinic, or diagnostic department.
-                            </p>
+                    <div className="flex flex-wrap gap-3">
+                        <div className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl border font-black text-xs uppercase tracking-widest ${
+                            isPaid ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20 animate-pulse'
+                        }`}>
+                            <Receipt className="w-4 h-4" /> {isPaid ? 'Fully Paid' : `Pending: K${visit.billingSummary.balance}`}
                         </div>
-                        
-                        {visit.status === 'active' ? (
-                            <form onSubmit={handleLogMovement} className="space-y-4">
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Destination Department <span className="text-red-400">*</span></label>
-                                    <select
-                                        required
-                                        value={movForm.toDepartment}
-                                        onChange={e => setMovForm(f => ({ ...f, toDepartment: e.target.value }))}
-                                        className="form-select bg-bg-secondary border-border-color hover:border-indigo-500/50 focus:border-indigo-500 shadow-sm transition-all text-sm py-2.5"
-                                    >
-                                        <option value="">-- Select Destination --</option>
-                                        {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
-                                    </select>
+                        <button onClick={() => navigate('/app/visits')} className="p-3 bg-bg-tertiary hover:bg-white/5 rounded-2xl border border-border-color text-text-secondary transition-all">
+                            <ArrowLeft className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* 2. Routing Ticket & Stepper */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                    
+                    {/* The Routing Ticket Component */}
+                    <div className="bg-bg-secondary rounded-3xl border border-border-color shadow-sm overflow-hidden border-t-4 border-t-primary">
+                        <div className="p-6 md:p-8">
+                            <div className="flex justify-between items-center mb-8">
+                                <h2 className="text-xl font-black text-text-primary uppercase tracking-tight flex items-center gap-3">
+                                    <ClipboardCheck className="w-6 h-6 text-primary" /> Current Assignment Ticket
+                                </h2>
+                                <span className="px-3 py-1 bg-bg-tertiary rounded-lg text-xs font-bold text-text-tertiary border border-border-color">
+                                    Encounter Active
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-tertiary">Destination Department</label>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/20">
+                                            <MapPin className="w-6 h-6" />
+                                        </div>
+                                        <span className="text-2xl font-black text-text-primary tracking-tight uppercase italic">{visit.assignedDepartment || visit.department?.departmentName || 'Not Assigned'}</span>
+                                    </div>
                                 </div>
-                                
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Assign Doctor <span className="text-text-tertiary font-normal">(Optional)</span></label>
-                                    <select
-                                        value={movForm.assignedDoctorId}
-                                        onChange={e => setMovForm(f => ({ ...f, assignedDoctorId: e.target.value }))}
-                                        className="form-select bg-bg-secondary border-border-color hover:border-indigo-500/50 focus:border-indigo-500 shadow-sm transition-all text-sm py-2.5"
-                                    >
-                                        <option value="">-- Any Available Doctor --</option>
-                                        {doctors.map(d => <option key={d.id} value={d.id}>Dr. {d.firstName} {d.lastName}</option>)}
-                                    </select>
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-tertiary">Assigned Clinician</label>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
+                                            <Stethoscope className="w-6 h-6" />
+                                        </div>
+                                        <span className="text-xl font-bold text-text-primary">
+                                            {visit.assignedDoctor ? `Dr. ${visit.assignedDoctor.firstName} ${visit.assignedDoctor.lastName}` : 'Triage / Waiting'}
+                                        </span>
+                                    </div>
                                 </div>
-                                
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Transfer Instructions / Notes</label>
-                                    <textarea
-                                        value={movForm.notes}
-                                        onChange={e => setMovForm(f => ({ ...f, notes: e.target.value }))}
-                                        className="form-textarea bg-bg-secondary border-border-color focus:border-indigo-500 placeholder-text-tertiary text-sm py-2.5"
-                                        rows={2}
-                                        placeholder="Reason for transfer, special handling..."
-                                    />
+                            </div>
+
+                            {/* Workflow Stepper */}
+                            <div className="relative pt-6">
+                                <div className="flex items-center justify-between relative z-10 text-center">
+                                    {[
+                                        { label: 'Registered', icon: CheckCircle, active: true },
+                                        { label: 'Cashier', icon: Receipt, active: isPaid, current: !isPaid },
+                                        { label: 'Process', icon: Activity, active: isPaid && visit.queueStatus !== 'waiting_doctor', current: isPaid },
+                                        { label: 'Complete', icon: ClipboardCheck, active: false }
+                                    ].map((step, idx) => (
+                                        <div key={idx} className="flex flex-col items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+                                                step.active ? 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-500/20' : 
+                                                step.current ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20 animate-pulse' : 
+                                                'bg-bg-tertiary border-border-color text-text-tertiary'
+                                            }`}>
+                                                <step.icon className="w-5 h-5" />
+                                            </div>
+                                            <span className={`text-[10px] font-black uppercase tracking-widest ${step.active || step.current ? 'text-text-primary' : 'text-text-tertiary'}`}>
+                                                {step.label}
+                                            </span>
+                                        </div>
+                                    ))}
                                 </div>
-                                
-                                <button type="submit" disabled={submittingMov} className="w-full btn btn-primary bg-indigo-600 hover:bg-indigo-500 text-white border-none shadow-md shadow-indigo-600/20 py-3 mt-2 text-sm font-bold uppercase tracking-wider">
-                                    <Send className="w-4 h-4 mr-2" />
-                                    {submittingMov ? 'Processing Transfer...' : 'Confirm Transfer'}
+                                <div className="absolute top-[3.2rem] left-8 right-8 h-0.5 bg-border-color -z-0">
+                                    <div className={`h-full bg-green-500 transition-all duration-1000`} style={{ width: isPaid ? '66%' : '15%' }} />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Lock / Processing Actions */}
+                        <div className="bg-bg-tertiary/50 p-6 border-t border-border-color flex flex-col md:flex-row items-center justify-between gap-4">
+                            {!isPaid ? (
+                                <div className="flex items-center gap-3 text-red-400 font-bold text-sm">
+                                    <AlertCircle className="w-5 h-5" /> 
+                                    Patient has pending bills. Redirect to Cashier before processing.
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-3 text-green-400 font-bold text-sm">
+                                    <CheckCircle className="w-5 h-5" /> 
+                                    Payment verified. Department may proceed with service dispensation.
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 w-full md:w-auto">
+                                <button
+                                    onClick={handleLogMovement}
+                                    disabled={!isPaid || submittingMov}
+                                    className={`flex-1 md:flex-initial btn btn-primary flex items-center gap-2 px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-xs ${
+                                        !isPaid ? 'opacity-30 grayscale cursor-not-allowed' : 'shadow-xl shadow-primary/20'
+                                    }`}
+                                >
+                                    {submittingMov ? 'Processing...' : 'Complete & Send'} <ArrowRight className="w-4 h-4" />
                                 </button>
-                            </form>
-                        ) : (
-                            <div className="py-8 text-center bg-bg-tertiary/30 rounded-xl border border-dashed border-border-color">
-                                <AlertCircle className="w-8 h-8 text-text-tertiary opacity-50 mx-auto mb-2" />
-                                <p className="text-sm font-medium text-text-secondary">
-                                    This visit is <strong className="text-text-primary capitalize">{visit.status}</strong>.<br/>Transfers are disabled.
-                                </p>
                             </div>
-                        )}
-                    </div>
-                    
-                    {/* Simplified Movement History */}
-                    <div className="card p-5 border-border-color shadow-sm">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-bold text-text-primary text-sm flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-text-secondary" /> Movement History
-                            </h3>
-                            <span className="text-xs font-black bg-bg-tertiary px-2 py-1 rounded text-text-secondary">{movements.length}</span>
                         </div>
-                        
-                        {movLoading ? (
-                            <div className="py-6 text-center text-text-tertiary text-sm animate-pulse">Loading history...</div>
-                        ) : movements.length === 0 ? (
-                            <div className="py-8 text-center text-text-tertiary text-sm italic">No department transfers recorded yet.</div>
-                        ) : (
-                            <div className="space-y-4">
-                                {movements.map((m, i) => (
-                                    <div key={m.id || i} className="flex gap-3 relative">
-                                        {i !== movements.length - 1 && (
-                                            <div className="absolute top-8 bottom-0 left-3.5 w-px bg-border-color/50 -z-10" />
-                                        )}
-                                        <div className="w-7 h-7 rounded-full bg-bg-tertiary border border-border-color flex items-center justify-center flex-shrink-0 z-10 mt-0.5">
-                                            <Send className="w-3 h-3 text-text-secondary" />
-                                        </div>
-                                        <div className="flex-1 bg-bg-tertiary/20 border border-border-color/30 rounded-xl p-3">
-                                            <p className="text-sm font-semibold text-text-primary">
-                                                {m.fromDepartment ? <span className="text-text-tertiary font-normal">{m.fromDepartment} → </span> : ''}
-                                                <span className="text-indigo-400">{m.toDepartment}</span>
-                                            </p>
-                                            {m.assignedDoctor && (
-                                                <p className="text-xs font-medium text-blue-400 mt-1 flex items-center gap-1">
-                                                    <User className="w-3 h-3" /> Dr. {m.assignedDoctor.firstName} {m.assignedDoctor.lastName}
-                                                </p>
-                                            )}
-                                            {m.notes && <p className="text-xs text-text-secondary mt-1.5 italic">"{m.notes}"</p>}
-                                            <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mt-2 flex justify-between items-center">
-                                                <span>{m.movementDate ? new Date(m.movementDate).toLocaleString() : ''}</span>
-                                                {m.admitter && <span className="opacity-70">By {m.admitter.firstName}</span>}
-                                            </p>
-                                        </div>
+                    </div>
+
+                    {/* Assigned Items / Orders Header */}
+                    <div className="card p-6 border-border-color bg-green-500/5">
+                        <h3 className="text-sm font-black text-text-primary uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <ClipboardCheck className="w-4 h-4 text-green-500" /> Services for this Destination
+                        </h3>
+                        {visit.assignedItems?.length > 0 ? (
+                            <div className="space-y-2">
+                                {visit.assignedItems.map(item => (
+                                    <div key={item.id} className="p-3 bg-bg-secondary rounded-xl border border-border-color flex justify-between items-center">
+                                        <span className="font-bold text-text-secondary">{item.name}</span>
+                                        <span className="text-[10px] font-black px-2 py-0.5 bg-bg-tertiary rounded text-text-tertiary uppercase">{item.type}</span>
                                     </div>
                                 ))}
                             </div>
+                        ) : (
+                            <p className="text-xs text-text-tertiary italic">No specific items yet. Doctor orders will appear here.</p>
                         )}
                     </div>
+                </div>
+
+                <div className="space-y-6">
+                    {/* Send Patient Widget (Mini version) */}
+                    <div className="card p-6 border-border-color bg-bg-secondary">
+                        <h3 className="font-black text-text-primary uppercase tracking-tight mb-6 flex items-center gap-2">
+                            <Send className="w-4 h-4" /> Transfer Dept
+                        </h3>
+                        <form onSubmit={handleLogMovement} className="space-y-4">
+                            <select
+                                value={movForm.toDepartment}
+                                onChange={e => setMovForm(f => ({ ...f, toDepartment: e.target.value }))}
+                                className="form-select text-sm py-3 rounded-xl bg-bg-tertiary border-border-color"
+                            >
+                                <option value="">Select Destination</option>
+                                {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                            </select>
+                            <select
+                                value={movForm.assignedDoctorId}
+                                onChange={e => setMovForm(f => ({ ...f, assignedDoctorId: e.target.value }))}
+                                className="form-select text-sm py-3 rounded-xl bg-bg-tertiary border-border-color"
+                            >
+                                <option value="">Assign Doctor (Optional)</option>
+                                {doctors.map(d => <option key={d.id} value={d.id}>Dr. {d.firstName} {d.lastName}</option>)}
+                            </select>
+                            <button type="submit" disabled={submittingMov} className="w-full btn btn-secondary py-3 rounded-xl font-bold uppercase tracking-widest text-[10px]">
+                                Queue Patient
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Triage / Vitals Mini Block */}
+                    {visit.visitType === 'opd' && <TriageWidget visitId={visit.id} patientId={p?.id} queueStatus={visit.queueStatus} onVitalsSaved={load} />}
                 </div>
             </div>
         </div>
