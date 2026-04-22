@@ -100,7 +100,7 @@ const createVisit = async (req, res) => {
                     totalAmount: finalPrice,
                     netAmount: finalPrice,
                     billDate: new Date(),
-                    status: 'completed',
+                    status: billPaymentStatus === 'claimed' ? 'paid' : 'pending',
                     paymentStatus: billPaymentStatus,
                     notes: `Initial Visit Consultation: ${service.serviceName}`,
                     createdBy: req.user.id
