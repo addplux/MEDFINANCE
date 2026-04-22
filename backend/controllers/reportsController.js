@@ -47,11 +47,26 @@ const getRevenueReport = async (req, res) => {
             billType: (b.billType || 'OTHER').toUpperCase()
         }));
 
+        // Revenue Trend (Daily)
+        const revenueTrend = await Payment.findAll({
+            attributes: [
+                [sequelize.fn('DATE', sequelize.col('payment_date')), 'date'],
+                [sequelize.fn('SUM', sequelize.col('amount')), 'total']
+            ],
+            where,
+            group: [sequelize.fn('DATE', sequelize.col('payment_date'))],
+            order: [[sequelize.fn('DATE', sequelize.col('payment_date')), 'ASC']]
+        });
+
         res.json({
             period: { startDate, endDate },
             totalRevenue: parseFloat(totalRevenue).toFixed(2),
             byPaymentMethod,
-            byBillType: normalizedByBillType
+            byBillType: normalizedByBillType,
+            trend: revenueTrend.map(t => ({
+                date: t.getDataValue('date'),
+                total: parseFloat(t.getDataValue('total'))
+            }))
         });
     } catch (error) {
         console.error('Get revenue report error:', error);
@@ -143,19 +158,42 @@ const getDepartmentProfitability = async (req, res) => {
                 where: { departmentId: dept.id, fiscalYear }
             });
 
-            // Fuzzy match department name to the bill type
+            // Map department names/codes to bill types
+            const deptMapping = {
+                'opd': 'opd',
+                'outpatient': 'opd',
+                'ipd': 'ipd',
+                'inpatient': 'ipd',
+                'pharmacy': 'pharmacy',
+                'lab': 'laboratory',
+                'laboratory': 'laboratory',
+                'radio': 'radiology',
+                'radiology': 'radiology',
+                'theatre': 'theatre',
+                'surgery': 'theatre',
+                'maternity': 'maternity',
+                'specialist': 'specialist',
+                'clinic': 'specialist',
+                'record': 'records',
+                'registry': 'records'
+            };
+
             const dName = dept.departmentName.toLowerCase();
+            const dCode = dept.departmentCode.toLowerCase();
+            
             let revenue = 0;
-            if (dName.includes('opd') || dName.includes('outpatient')) revenue = revMap['opd'] || 0;
-            else if (dName.includes('ipd') || dName.includes('inpatient')) revenue = revMap['ipd'] || 0;
-            else if (dName.includes('pharmacy')) revenue = revMap['pharmacy'] || 0;
-            else if (dName.includes('lab')) revenue = revMap['laboratory'] || 0;
-            else if (dName.includes('radio')) revenue = revMap['radiology'] || 0;
-            else if (dName.includes('theatre')) revenue = revMap['theatre'] || 0;
-            else if (dName.includes('maternity')) revenue = revMap['maternity'] || 0;
-            else if (dName.includes('specialist')) revenue = revMap['specialist'] || 0;
-            else if (dName.includes('record')) revenue = revMap['records'] || 0;
-            else revenue = revMap['other'] || 0;
+            let matched = false;
+
+            // Try matching by code first, then by name
+            for (const [key, billType] of Object.entries(deptMapping)) {
+                if (dCode.includes(key) || dName.includes(key)) {
+                    revenue = revMap[billType] || 0;
+                    matched = true;
+                    break;
+                }
+            }
+
+            if (!matched) revenue = revMap['other'] || 0;
 
             const budgeted = budget ? parseFloat(budget.budgetedAmount) : 0;
             const spent = budget ? parseFloat(budget.actualAmount) : 0;

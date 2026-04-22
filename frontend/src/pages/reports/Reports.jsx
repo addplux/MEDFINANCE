@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { reportsAPI, payrollAPI } from '../../services/apiService';
 import { BarChart3, Download, Calendar, List, Printer, User, CreditCard, Clock, Receipt, ArrowRight, Wallet, TrendingUp, TrendingDown, DollarSign, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, PieChart, Pie, LineChart, Line } from 'recharts';
 import StaffMedicalStatement from './StaffMedicalStatement';
 
 const Reports = () => {
@@ -209,35 +209,126 @@ const Reports = () => {
                         <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                             {/* Revenue Report */}
                             {activeTab === 'revenue' && (
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="card p-8 bg-gradient-to-br from-blue-500/10 to-transparent border-blue-500/20">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="p-2.5 rounded-xl bg-blue-500/20 text-blue-400">
-                                                <BarChart3 className="w-5 h-5" />
+                                <div className="space-y-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div className="card p-8 bg-gradient-to-br from-blue-500/10 to-transparent border-blue-500/20">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="p-2.5 rounded-xl bg-blue-500/20 text-blue-400">
+                                                    <BarChart3 className="w-5 h-5" />
+                                                </div>
+                                                <span className="text-[10px] font-black uppercase text-blue-400/60 bg-blue-400/10 px-2 py-0.5 rounded-full border border-blue-400/20">Active</span>
                                             </div>
-                                            <span className="text-[10px] font-black uppercase text-blue-400/60 bg-blue-400/10 px-2 py-0.5 rounded-full border border-blue-400/20">Active</span>
+                                            <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-1">Total Revenue</p>
+                                            <div className="text-4xl font-black text-white tracking-tighter">
+                                                K {parseFloat(reportData?.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                            </div>
                                         </div>
-                                        <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-1">Total Revenue</p>
-                                        <div className="text-4xl font-black text-white tracking-tighter">
-                                            K {parseFloat(reportData?.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                        <div className="card p-8 bg-gradient-to-br from-emerald-500/10 to-transparent border-emerald-500/20">
+                                            <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-1">OPD Transactions</p>
+                                            <div className="text-4xl font-black text-white tracking-tighter">
+                                                {reportData?.byBillType?.find(b => (b.billType || '').toUpperCase() === 'OPD')?.count || 0}
+                                            </div>
+                                            <p className="text-[10px] font-bold text-emerald-400 mt-2 uppercase">Processed Successfully</p>
+                                        </div>
+                                        <div className="card p-8 bg-gradient-to-br from-purple-500/10 to-transparent border-purple-500/20 text-white">
+                                            <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-1 font-black">Payment Distribution</p>
+                                            <div className="text-4xl font-black tracking-tighter mt-1">
+                                                {reportData?.byPaymentMethod?.length || 0}
+                                            </div>
+                                            <div className="flex gap-1 mt-3">
+                                                {reportData?.byPaymentMethod?.map((m, i) => (
+                                                    <div key={i} className="h-1 bg-purple-500 rounded-full" style={{ width: `${(m.total / reportData.totalRevenue) * 100}%` }} title={m.paymentMethod} />
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="card p-8 bg-gradient-to-br from-emerald-500/10 to-transparent border-emerald-500/20">
-                                        <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-1">OPD Transactions</p>
-                                        <div className="text-4xl font-black text-white tracking-tighter">
-                                            {reportData?.byBillType?.find(b => (b.billType || '').toUpperCase() === 'OPD')?.count || 0}
+
+                                    {/* Revenue Trend Chart */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                        <div className="card p-8 bg-white/[0.01] border-white/5">
+                                            <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-8">Revenue Collection Trend</h3>
+                                            <div className="h-[300px] w-full">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <LineChart data={reportData?.trend || []}>
+                                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                                                        <XAxis 
+                                                            dataKey="date" 
+                                                            axisLine={false}
+                                                            tickLine={false}
+                                                            tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 700 }}
+                                                            tickFormatter={(val) => new Date(val).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                        />
+                                                        <YAxis 
+                                                            axisLine={false}
+                                                            tickLine={false}
+                                                            tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 700 }}
+                                                        />
+                                                        <Tooltip 
+                                                            contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                                                            itemStyle={{ fontSize: '11px', fontWeight: 'bold' }}
+                                                        />
+                                                        <Line type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 4 }} activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }} />
+                                                    </LineChart>
+                                                </ResponsiveContainer>
+                                            </div>
                                         </div>
-                                        <p className="text-[10px] font-bold text-emerald-400 mt-2 uppercase">Processed Successfully</p>
-                                    </div>
-                                    <div className="card p-8 bg-gradient-to-br from-purple-500/10 to-transparent border-purple-500/20 text-white">
-                                        <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-1 font-black">Private/Corporate Ratio</p>
-                                        <div className="text-4xl font-black tracking-tighter mt-1">
-                                            {reportData?.byPaymentMethod?.length || 0}
-                                        </div>
-                                        <div className="flex gap-1 mt-3">
-                                            {reportData?.byPaymentMethod?.map((m, i) => (
-                                                <div key={i} className="h-1 bg-purple-500 rounded-full" style={{ width: `${(m.total / reportData.totalRevenue) * 100}%` }} />
-                                            ))}
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div className="card p-8 bg-white/[0.01] border-white/5">
+                                                <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-4">By Service Type</h3>
+                                                <div className="h-[200px] w-full">
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <PieChart>
+                                                            <Pie
+                                                                data={reportData?.byBillType || []}
+                                                                cx="50%"
+                                                                cy="50%"
+                                                                innerRadius={60}
+                                                                outerRadius={80}
+                                                                paddingAngle={5}
+                                                                dataKey="total"
+                                                                nameKey="billType"
+                                                            >
+                                                                {(reportData?.byBillType || []).map((entry, index) => (
+                                                                    <Cell key={`cell-${index}`} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'][index % 6]} />
+                                                                ))}
+                                                            </Pie>
+                                                            <Tooltip 
+                                                                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                                                                itemStyle={{ fontSize: '10px', fontWeight: 'bold' }}
+                                                            />
+                                                        </PieChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            </div>
+
+                                            <div className="card p-8 bg-white/[0.01] border-white/5">
+                                                <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-4">By Payment Method</h3>
+                                                <div className="h-[200px] w-full">
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <PieChart>
+                                                            <Pie
+                                                                data={reportData?.byPaymentMethod || []}
+                                                                cx="50%"
+                                                                cy="50%"
+                                                                innerRadius={60}
+                                                                outerRadius={80}
+                                                                paddingAngle={5}
+                                                                dataKey="total"
+                                                                nameKey="paymentMethod"
+                                                            >
+                                                                {(reportData?.byPaymentMethod || []).map((entry, index) => (
+                                                                    <Cell key={`cell-${index}`} fill={['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'][index % 5]} />
+                                                                ))}
+                                                            </Pie>
+                                                            <Tooltip 
+                                                                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                                                                itemStyle={{ fontSize: '10px', fontWeight: 'bold' }}
+                                                            />
+                                                        </PieChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -531,6 +622,7 @@ const Reports = () => {
                                                     <th className="px-6 py-4">Budget (ZK)</th>
                                                     <th className="px-6 py-4">Spent (ZK)</th>
                                                     <th className="px-6 py-4">Revenue (ZK)</th>
+                                                    <th className="px-6 py-4">Margin %</th>
                                                     <th className="px-6 py-4">Variance</th>
                                                     <th className="px-6 py-4 text-right">Status</th>
                                                 </tr>
@@ -567,6 +659,11 @@ const Reports = () => {
                                                                         {variance >= 0 ? '+' : ''}{Number(variance).toLocaleString()}
                                                                     </span>
                                                                 </div>
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <span className={`font-black ${dept.revenue >= dept.actualSpent ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                                    {dept.revenue > 0 ? (((dept.revenue - dept.actualSpent) / dept.revenue) * 100).toFixed(1) : '0.0'}%
+                                                                </span>
                                                             </td>
                                                             <td className="px-6 py-4 text-right">
                                                                 {dept.profit >= 0 ? (
