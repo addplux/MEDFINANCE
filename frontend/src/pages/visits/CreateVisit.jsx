@@ -74,12 +74,13 @@ const CreateVisit = () => {
                     const res = await pharmacyAPI.inventory.getAll();
                     if (!active) return;
                     const meds = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+                    console.log('Pharmacy meds response:', meds);
                     // Filter for in-stock and transform to service format
                     const mappedMeds = meds
-                        .filter(m => (m.totalStock || 0) > 0)
+                        .filter(m => (parseFloat(m.totalStock) || 0) > 0)
                         .map(m => {
                             const latestBatch = m.batches?.[0] || {};
-                            const price = latestBatch.sellingPrice || 0;
+                            const price = parseFloat(latestBatch.sellingPrice) || 0;
                             return {
                                 id: m.id,
                                 isMedication: true,
