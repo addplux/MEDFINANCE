@@ -6,11 +6,17 @@ const { Op } = require('sequelize');
 // Get all services
 const getAllServices = async (req, res) => {
     try {
-        const { category, isActive } = req.query;
+        const { category, isActive, department } = req.query;
 
         const where = {};
-        if (category) where.category = category;
+        if (category) where.category = category.toLowerCase();
         if (isActive !== undefined) where.isActive = isActive === 'true';
+        if (department) {
+            where[Op.or] = [
+                { department: { [Op.iLike]: `%${department}%` } },
+                { category: { [Op.iLike]: `%${department}%` } }
+            ];
+        }
 
         const services = await Service.findAll({
             where,

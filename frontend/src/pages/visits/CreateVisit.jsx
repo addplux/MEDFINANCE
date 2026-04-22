@@ -57,16 +57,31 @@ const CreateVisit = () => {
             setSchemes(list);
         }).catch(() => { });
 
-        setupAPI.services.getAll({ category: 'opd' }).then(res => {
-            setServices(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
-        }).catch(() => { });
-
         setupAPI.users.getAll().then(res => {
             const allUsers = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : [];
             const docs = allUsers.filter(u => ['doctor', 'specialist', 'clinician'].includes(u.role?.toLowerCase() || ''));
             setDoctors(docs);
         }).catch(() => { });
     }, []);
+
+    // Load services dynamically based on department
+    useEffect(() => {
+        const fetchServices = async () => {
+            try {
+                const params = { isActive: true };
+                if (form.assignedDepartment) {
+                    params.department = form.assignedDepartment;
+                } else {
+                    params.category = 'opd';
+                }
+                const res = await setupAPI.services.getAll(params);
+                setServices(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
+            } catch (err) {
+                console.error('Failed to load services:', err);
+            }
+        };
+        fetchServices();
+    }, [form.assignedDepartment]);
 
     // Load recent patients on mount or focus when search is empty
     useEffect(() => {
@@ -145,10 +160,8 @@ const CreateVisit = () => {
                 admissionDate: form.admissionDate,
                 notes: form.notes
             };
-            if (form.visitType === 'opd') {
-                if (form.serviceId) payload.serviceId = parseInt(form.serviceId, 10);
-                if (form.assignedDoctorId) payload.assignedDoctorId = parseInt(form.assignedDoctorId, 10);
-            }
+            if (form.serviceId) payload.serviceId = parseInt(form.serviceId, 10);
+            if (form.assignedDoctorId) payload.assignedDoctorId = parseInt(form.assignedDoctorId, 10);
 
             const res = await visitAPI.create(payload);
             navigate(`/app/visits/${res.data.id}`);
@@ -273,7 +286,7 @@ const CreateVisit = () => {
                             <label className="form-label">Assigned Department</label>
                             <select
                                 value={form.assignedDepartment}
-                                onChange={e => setForm(f => ({ ...f, assignedDepartment: e.target.value }))}
+                                onChange={e => setForm(f => ({ ...f, assignedDepartment: e.target.value, serviceId: '' }))}
                                 className="form-select"
                             >
                                 <option value="">Select Department</option>
@@ -281,42 +294,29 @@ const CreateVisit = () => {
                             </select>
                         </div>
 
+
                         <div className="form-group">
-                            <label className="form-label">Link to Scheme (optional)</label>
+                            <label className="form-label">Service</label>
                             <select
-                                value={form.schemeId}
-                                onChange={e => setForm(f => ({ ...f, schemeId: e.target.value }))}
+                                value={form.serviceId}
+                                onChange={e => setForm(f => ({ ...f, serviceId: e.target.value }))}
                                 className="form-select"
                             >
-                                <option value="">No Scheme / Cash</option>
-                                {schemes.map(s => <option key={s.id} value={s.id}>{s.schemeName}</option>)}
+                                <option value="">Select Service (optional)</option>
+                                {services.map(s => {
+                                    const method = selectedPatient?.paymentMethod || 'cash';
+                                    let price = s.cashPrice || s.price || 0;
+                                    if (method === 'corporate') price = s.corporatePrice || s.price || 0;
+                                    if (method === 'scheme') price = s.schemePrice || s.price || 0;
+                                    if (method === 'staff') price = s.staffPrice || s.price || 0;
+                                    return (
+                                        <option key={s.id} value={s.id}>
+                                            {s.serviceName} {Number(price) > 0 ? `(K${Number(price).toFixed(2)})` : ''}
+                                        </option>
+                                    );
+                                })}
                             </select>
                         </div>
-
-                        {form.visitType === 'opd' && (
-                            <>
-                                <div className="form-group">
-                                    <label className="form-label">Consultation Service</label>
-                                    <select
-                                        value={form.serviceId}
-                                        onChange={e => setForm(f => ({ ...f, serviceId: e.target.value }))}
-                                        className="form-select"
-                                    >
-                                        <option value="">Select Service (optional)</option>
-                                        {services.map(s => {
-                                            const method = selectedPatient?.paymentMethod || 'cash';
-                                            let price = s.cashPrice || s.price || 0;
-                                            if (method === 'corporate') price = s.corporatePrice || s.price || 0;
-                                            if (method === 'scheme') price = s.schemePrice || s.price || 0;
-                                            if (method === 'staff') price = s.staffPrice || s.price || 0;
-                                            return (
-                                                <option key={s.id} value={s.id}>
-                                                    {s.serviceName} {Number(price) > 0 ? `(K${Number(price).toFixed(2)})` : ''}
-                                                </option>
-                                            );
-                                        })}
-                                    </select>
-                                </div>
                                 <div className="form-group">
                                     <label className="form-label">Assigned Doctor/Clinician</label>
                                     <select
@@ -328,8 +328,6 @@ const CreateVisit = () => {
                                         {doctors.map(d => <option key={d.id} value={d.id}>Dr. {d.firstName} {d.lastName}</option>)}
                                     </select>
                                 </div>
-                            </>
-                        )}
 
                         <div className="form-group">
                             <label className="form-label">Admission Date & Time</label>
