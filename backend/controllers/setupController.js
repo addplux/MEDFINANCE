@@ -1,4 +1,4 @@
-const { Service, User, Department, Organization } = require('../models');
+const { Service, User, Department, Organization, sequelize } = require('../models');
 const { Op } = require('sequelize');
 
 // ========== Services/Tariffs ==========
@@ -14,7 +14,10 @@ const getAllServices = async (req, res) => {
         if (department) {
             where[Op.or] = [
                 { department: { [Op.iLike]: `%${department}%` } },
-                { category: { [Op.iLike]: `%${department}%` } }
+                sequelize.where(
+                    sequelize.cast(sequelize.col('category'), 'TEXT'),
+                    { [Op.iLike]: `%${department}%` }
+                )
             ];
         }
 
