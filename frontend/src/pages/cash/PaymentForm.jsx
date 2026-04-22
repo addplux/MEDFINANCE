@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ArrowLeft, Save, Wallet, User, CheckCircle } from 'lucide-react';
-import { cashAPI, patientAPI } from '../../services/apiService';
+import { ArrowLeft, Save, Wallet, User, CheckCircle, Info } from 'lucide-react';
+import { cashAPI } from '../../services/apiService';
 import { useAuth } from '../../context/AuthContext';
 import ReceiptModal from '../../components/common/ReceiptModal';
 import PatientSearchSelect from '../../components/shared/PatientSearchSelect';
@@ -46,9 +46,8 @@ const PaymentForm = () => {
     const [receiptData, setReceiptData] = useState(null);
 
     useEffect(() => {
-        loadPatients();
         if (isEdit) fetchPayment();
-    }, [id]);
+    }, [isEdit, id]);
 
     const handlePatientChange = (patient) => {
         setSelectedPatient(patient);
