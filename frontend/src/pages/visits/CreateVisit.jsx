@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { patientAPI, receivablesAPI, visitAPI, setupAPI } from '../../services/apiService';
+import { patientAPI, receivablesAPI, visitAPI, setupAPI, pharmacyAPI, labAPI } from '../../services/apiService';
 import { ArrowLeft, Search, Stethoscope, BedDouble, Baby, Siren, CheckCircle } from 'lucide-react';
 
 const VISIT_TYPES = [
