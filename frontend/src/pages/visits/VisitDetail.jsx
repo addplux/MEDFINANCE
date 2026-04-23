@@ -6,7 +6,6 @@ import {
     AlertCircle, FileText, CheckCircle, Clock, MapPin, Receipt,
     Stethoscope, ClipboardCheck, ArrowRight
 } from 'lucide-react';
-import TriageWidget from './components/TriageWidget';
 
 const DEPARTMENTS = [
     'OPD', 'Male Ward', 'Female Ward', 'Pediatric Ward', 'ICU', 'Theatre',
@@ -263,9 +262,6 @@ const VisitDetail = () => {
                             </button>
                         </form>
                     </div>
-
-                    {/* Triage / Vitals Mini Block */}
-                    {visit.visitType === 'opd' && <TriageWidget visitId={visit.id} patientId={p?.id} queueStatus={visit.queueStatus} onVitalsSaved={load} />}
                 </div>
             </div>
         </div>
