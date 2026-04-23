@@ -11,7 +11,7 @@ const SidebarQueue = ({ onSelect, selectedVisitId }) => {
     const fetchQueue = async () => {
         try {
             setLoading(true);
-            const response = await visitAPI.getDepartmentQueue('Lab');
+            const response = await visitAPI.getDepartmentQueue('Laboratory');
             setQueue(response.data || []);
         } catch (error) {
             console.error('Error fetching lab queue:', error);
