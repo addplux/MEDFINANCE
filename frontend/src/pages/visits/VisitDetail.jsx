@@ -67,7 +67,8 @@ const VisitDetail = () => {
                 queueStatus: dest === 'Pharmacy' ? 'waiting_doctor' : 'pending_triage'
             });
             setMovForm({ toDepartment: '', assignedDoctorId: '', notes: '' });
-            load();
+            // Redirect back to waiting room/encounters queue since patient has been routed
+            navigate('/app/visits');
         } catch (err) {
             alert('Failed to route patient');
         } finally {
@@ -119,29 +120,30 @@ const VisitDetail = () => {
             </div>
 
             {/* 2. Routing Ticket & Stepper */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
-                    
-                    {/* The Routing Ticket Component */}
-                    <div className="bg-bg-secondary rounded-3xl border border-border-color shadow-sm overflow-hidden border-t-4 border-t-primary">
-                        <div className="p-6 md:p-8">
-                            <div className="flex justify-between items-center mb-8">
-                                <h2 className="text-xl font-black text-text-primary uppercase tracking-tight flex items-center gap-3">
-                                    <ClipboardCheck className="w-6 h-6 text-primary" /> Current Assignment Ticket
-                                </h2>
-                                <span className="px-3 py-1 bg-bg-tertiary rounded-lg text-xs font-bold text-text-tertiary border border-border-color">
-                                    Encounter Active
-                                </span>
-                            </div>
+            {visit.assignedDepartment !== 'Consultation Complete' && visit.status !== 'discharged' ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 space-y-6">
+                        
+                        {/* The Routing Ticket Component */}
+                        <div className="bg-bg-secondary rounded-3xl border border-border-color shadow-sm overflow-hidden border-t-4 border-t-primary">
+                            <div className="p-6 md:p-8">
+                                <div className="flex justify-between items-center mb-8">
+                                    <h2 className="text-xl font-black text-text-primary uppercase tracking-tight flex items-center gap-3">
+                                        <ClipboardCheck className="w-6 h-6 text-primary" /> Current Assignment Ticket
+                                    </h2>
+                                    <span className="px-3 py-1 bg-bg-tertiary rounded-lg text-xs font-bold text-text-tertiary border border-border-color">
+                                        Encounter Active
+                                    </span>
+                                </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-tertiary">Destination Department</label>
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/20">
-                                            <MapPin className="w-6 h-6" />
-                                        </div>
-                                        <span className="text-2xl font-black text-text-primary tracking-tight uppercase italic">{visit.assignedDepartment || visit.department?.departmentName || 'Not Assigned'}</span>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                                    <div className="space-y-4">
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-tertiary">Destination Department</label>
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/20">
+                                                <MapPin className="w-6 h-6" />
+                                            </div>
+                                            <span className="text-2xl font-black text-text-primary tracking-tight uppercase italic">{visit.assignedDepartment || visit.department?.departmentName || 'Not Assigned'}</span>
                                     </div>
                                 </div>
                                 <div className="space-y-4">
@@ -264,6 +266,13 @@ const VisitDetail = () => {
                     </div>
                 </div>
             </div>
+            ) : (
+                <div className="bg-green-500/5 border border-green-500/20 rounded-3xl p-12 text-center flex flex-col items-center justify-center">
+                    <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
+                    <h2 className="text-2xl font-black text-text-primary uppercase tracking-tight mb-2">Encounter Complete</h2>
+                    <p className="text-text-tertiary text-sm">The patient has been routed and this assignment is complete.</p>
+                </div>
+            )}
         </div>
     );
 };
