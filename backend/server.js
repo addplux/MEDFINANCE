@@ -260,6 +260,9 @@ const startServer = async () => {
 
             const runAddAssignedDoctorToVisitsMigration = require('./migrations/006_add_assigned_doctor_to_visits');
             await runAddAssignedDoctorToVisitsMigration();
+
+            const runAddVisitIdToBillingTablesMigration = require('./migrations/007_add_visit_id_to_billing_tables');
+            await runAddVisitIdToBillingTablesMigration();
         } catch (migErr) {
             console.error('⚠️ Migration runner error (non-fatal):', migErr.message);
         }

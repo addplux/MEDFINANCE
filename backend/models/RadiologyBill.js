@@ -20,6 +20,14 @@ const RadiologyBill = sequelize.define('RadiologyBill', {
             key: 'id'
         }
     },
+    visitId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'visits',
+            key: 'id'
+        }
+    },
     scanType: {
         type: DataTypes.STRING(100),
         allowNull: false

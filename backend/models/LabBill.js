@@ -20,6 +20,14 @@ const LabBill = sequelize.define('LabBill', {
             key: 'id'
         }
     },
+    visitId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'visits',
+            key: 'id'
+        }
+    },
     testName: {
         type: DataTypes.STRING(100),
         allowNull: false

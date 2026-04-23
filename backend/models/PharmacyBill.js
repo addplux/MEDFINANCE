@@ -20,6 +20,14 @@ const PharmacyBill = sequelize.define('PharmacyBill', {
             key: 'id'
         }
     },
+    visitId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'visits',
+            key: 'id'
+        }
+    },
     medicationId: {
         type: DataTypes.INTEGER,
         allowNull: false,
