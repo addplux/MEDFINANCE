@@ -80,6 +80,11 @@ const Visit = sequelize.define('Visit', {
         allowNull: true,
         references: { model: 'users', key: 'id' }
     },
+    assignedDoctorId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: { model: 'users', key: 'id' }
+    },
     admissionDate: {
         type: DataTypes.DATE,
         allowNull: false,
