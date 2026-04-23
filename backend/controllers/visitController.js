@@ -502,7 +502,7 @@ const dischargeVisit = async (req, res) => {
     try {
         const visit = await Visit.findByPk(req.params.id);
         if (!visit) return res.status(404).json({ error: 'Visit not found' });
-        visit.status = 'closed';
+        visit.status = 'discharged';
         visit.dischargeDate = new Date();
         await visit.save();
         res.json({ message: 'Visit closed successfully' });
